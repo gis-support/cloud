@@ -1,0 +1,35 @@
+version: '3.3'
+services:
+  db:
+    container_name: cloud-db
+    build:
+      context: ./
+      dockerfile: ./docker/db/Dockerfile
+    ports:
+      - "5000:5432"
+    volumes:
+      - ./docker/db/data:/var/lib/postgresql
+    environment:
+      - POSTGRES_DBNAME=cloud,cloud-testing
+      - DEFAULT_COLLATION=pl_PL.UTF-8
+      - DEFAULT_CTYPE=pl_PL.UTF-8
+      - DEFAULT_ENCODING=UTF8
+  api:
+    container_name: cloud-api
+    build:
+      context: ./
+      dockerfile: ./docker/api/Dockerfile
+    command: bash -c "./start.sh"
+    tty: true
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./api:/api
+    environment:
+      - PYTHONUNBUFFERED=0
+    depends_on:
+      - db
+      - redis
+  redis:
+    container_name: cloud-redis
+    image: redis:5.0.6
