@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, make_response
 from functools import wraps
 from app.docs import swagger
-from app.db.general import token_required, list_layers, create_table, table_exists
+from app.db.general import token_required, list_layers, create_table, table_exists, create_mvt_tile
 import jwt
 import uuid
 import gdal
@@ -79,3 +79,15 @@ def layers():
                 cur = current_app._db.cursor()
                 cur.copy_from(tfile, '"{}"'.format(name), null='None', columns=list(map(lambda c: '"{}"'.format(c), columns)))
         return jsonify({"layers": {"name": name, "features": count_features}})
+
+@mod_layers.route('/mvt/<int:z>/<int:x>/<int:y>', methods=['GET'])
+def tiles(z=0, x=0, y=0):
+    name = request.args.get('name')
+    if not name:
+        return jsonify({"error": "invalid layer name"})
+    tile = create_mvt_tile(z, x, y, name)
+    if not tile:
+        return ('', 204)
+    response = make_response(tile)
+    response.headers['Content-Type'] = "application/octet-stream"
+    return response

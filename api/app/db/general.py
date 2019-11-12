@@ -9,6 +9,7 @@ from functools import wraps
 import psycopg2
 import jwt
 import uuid
+import math
 
 database = PostgresqlExtDatabase(
     None,
@@ -18,7 +19,7 @@ database = PostgresqlExtDatabase(
 )
 
 def user_exists(user):
-    cur = current_app._db.execute_sql('SELECT 1 FROM pg_roles WHERE rolname=%s', (user,))
+    cur = current_app._db.execute_sql('SELECT 1 FROM pg_roles WHERE rolname=%s AND rolcanlogin=true', (user,))
     return cur.fetchone() != None
 
 def create_user(user, password):
@@ -30,14 +31,11 @@ def list_layers(user):
     return [row[0] for row in cur.fetchall()]
 
 def table_exists(table):
-    try:
-        current_app._db.execute_sql("SELECT %s::regclass", (table,))
-        return True
-    except:
-        return False
+    cur = current_app._db.execute_sql("SELECT relname FROM pg_class WHERE relkind in ('r', 'v', 't', 'm', 'f', 'p') AND relname = %s", (table,))
+    return cur.fetchone() != None
 
 def create_table(name, fields, user):
-    table_string = "CREATE TABLE {} ("
+    table_string = "CREATE TABLE {} (id serial, "
     table_columns_names = [Identifier(name)]
     table_columns_types = []
     for idx, field in enumerate(fields):
@@ -51,6 +49,23 @@ def create_table(name, fields, user):
     current_app._db.execute_sql(SQL(table_string).format(*table_columns_names), [*table_columns_types])
     current_app._db.execute_sql(SQL('GRANT ALL PRIVILEGES ON TABLE {} TO {};').format(Identifier(name), Identifier(user)))
 
+def tile_ul(x, y, z):
+    n = 2.0 ** z
+    lon_deg = x / n * 360.0 - 180.0
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
+    lat_deg = math.degrees(lat_rad)
+    return  lon_deg,lat_deg
+
+def create_mvt_tile(z, x, y, name):
+    xmin,ymin = tile_ul(x, y, z)
+    xmax,ymax = tile_ul(x+1, y+1, z)
+    cur = current_app._db.cursor()
+    query = SQL('''SELECT ST_AsMVT(tile) FROM (SELECT id,
+        ST_AsMVTGeom(geometry,ST_Makebox2d(ST_SetSrid(ST_MakePoint(%s,%s),4326),
+        ST_SetSrid(ST_MakePoint(%s,%s),4326)),4096,8,true) AS geom FROM {}) AS tile''').format(Identifier(name))
+    cur.execute(query,(xmin ,ymin, xmax, ymax))
+    tile = cur.fetchone()[0]
+    return tile.tobytes()
 
 def authenticate_user(user, password):
     try:
