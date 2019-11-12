@@ -1,1 +1,3 @@
 ./docker/db/data/*
+*.pyc
+**/__pycache__

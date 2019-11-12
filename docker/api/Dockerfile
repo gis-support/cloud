@@ -9,3 +9,5 @@ ENV C_INCLUDE_PATH=/usr/include/gdal
 RUN pip install pipenv GDAL==2.4.2
 COPY ./docker/api/start.sh ./
 RUN chmod +x ./start.sh
+COPY ./docker/api/tests.sh /usr/bin/tests
+RUN chmod +x /usr/bin/tests

@@ -14,13 +14,13 @@ def register():
     if user_exists(payload['user']):
         return jsonify({"error": "user exists"}), 409
     create_user(payload['user'], payload['password'])
-    return jsonify({"register": "user created"})
+    return jsonify({"register": "user created"}), 201
 
 @mod_auth.route('/login', methods=['POST'])
 @swagger(__file__, 'docs.login.post.yml')
 def login():
     payload = request.get_json(force=True)
     if not authenticate_user(payload['user'], payload['password']):
-        return jsonify({"login": "invalid credentials"}), 403
+        return jsonify({"error": "invalid credentials"}), 403
     token = create_token(payload['user'])
     return jsonify({"token": token})

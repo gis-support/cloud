@@ -4,7 +4,7 @@
 from flask import Blueprint, jsonify, request, current_app, make_response
 from functools import wraps
 from app.docs import swagger
-from app.db.general import token_required, list_layers, create_table, table_exists, create_mvt_tile
+from app.db.general import token_required, list_layers, create_table, table_exists, remove_table, create_mvt_tile, check_permission
 import jwt
 import uuid
 import gdal
@@ -24,15 +24,24 @@ FIELD_TYPES = {
     "Date": "timestamp"
 }
 
-@mod_layers.route('/layers', methods=['GET', 'POST'])
+@mod_layers.route('/layers', methods=['GET', 'POST', 'DELETE'])
 @swagger(__file__, 'docs.layers.get.yml')
 @token_required
 def layers():
     if request.method == 'GET':
         layers = list_layers(request.user)
         return jsonify({"layers": layers})
+    elif request.method == 'DELETE':
+        name = request.args.get("name")
+        error, code = check_permission(name)
+        if error:
+            return jsonify({"error": error}), code
+        remove_table(name)
+        return jsonify({"layers": "{} removed".format(name)})
     else:
-        file = request.files['file']
+        file = request.files.get("file")
+        if not file:
+            return jsonify({"error": "file is required"}), 401
         name = request.form.get("name")
         if not name:
             return jsonify({"error": "name is required"}), 401
@@ -78,7 +87,7 @@ def layers():
                 tfile.seek(0)
                 cur = current_app._db.cursor()
                 cur.copy_from(tfile, '"{}"'.format(name), null='None', columns=list(map(lambda c: '"{}"'.format(c), columns)))
-        return jsonify({"layers": {"name": name, "features": count_features}})
+        return jsonify({"layers": {"name": name, "features": count_features}}), 201
 
 @mod_layers.route('/mvt/<int:z>/<int:x>/<int:y>', methods=['GET'])
 def tiles(z=0, x=0, y=0):

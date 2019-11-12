@@ -10,6 +10,7 @@ import psycopg2
 import jwt
 import uuid
 import math
+import json
 
 database = PostgresqlExtDatabase(
     None,
@@ -48,6 +49,36 @@ def create_table(name, fields, user):
             table_string += ")"
     current_app._db.execute_sql(SQL(table_string).format(*table_columns_names), [*table_columns_types])
     current_app._db.execute_sql(SQL('GRANT ALL PRIVILEGES ON TABLE {} TO {};').format(Identifier(name), Identifier(user)))
+
+def remove_table(name):
+    current_app._db.execute_sql(SQL("DROP TABLE {} CASCADE").format(Identifier(name)))
+
+def check_permission(name):
+    if not name:
+        return "name is required", 401
+    if not table_exists(name):
+        return "table not exists", 401
+    if name not in list_layers(request.user):
+        return "access denied", 403
+    return None, None
+
+def geojson(name):
+    cur = current_app._db.execute_sql(SQL("""
+        SELECT json_build_object(
+            'type', 'FeatureCollection',
+            'features', json_agg(ST_AsGeoJSON(t.*)::json)
+        )
+        FROM (SELECT * from {}) as t;""").format(Identifier(name)))
+    return cur.fetchone()[0]
+
+def geojson_single(name, fid):
+    cur = current_app._db.execute_sql(SQL("""
+        SELECT ST_AsGeoJSON(t.*)
+        FROM (SELECT * from {} WHERE id=%s) as t;""").format(Identifier(name)), (fid,))
+    g = cur.fetchone()
+    if not g:
+        return {"error": "invalid id"}, 401
+    return json.loads(g[0]), 200
 
 def tile_ul(x, y, z):
     n = 2.0 ** z

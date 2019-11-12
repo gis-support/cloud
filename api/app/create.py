@@ -9,6 +9,7 @@ from app.docs import create_swagger
 from app.db import create_db
 from app.blueprints.auth.routings import mod_auth
 from app.blueprints.layers.routings import mod_layers
+from app.blueprints.features.routings import mod_features
 try:
     from app.local_config import *
 except:
@@ -23,6 +24,7 @@ def create_app(config='development'):
     app._redis = FlaskRedis(app)
     app.register_blueprint(mod_auth, url_prefix='/api')
     app.register_blueprint(mod_layers, url_prefix='/api')
+    app.register_blueprint(mod_features, url_prefix='/api')
     return app
 
 def load_config(config):
