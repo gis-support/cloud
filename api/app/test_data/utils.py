@@ -40,3 +40,12 @@ class BaseTest:
         assert r.json['layers']['features'] == 1
         assert r.json['layers']['name'] == 'wojewodztwa'
         return r.json['layers']['id']
+    
+    def add_feature_to_layer(self, client, token, lid):
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token), data=open(path), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['features'] == 2
+        assert r.json['layers']['name'] == 'wojewodztwa'
+        return r.json['layers']['id']

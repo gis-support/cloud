@@ -1,0 +1,48 @@
+{
+    "type": "Feature",
+    "properties": {
+        "JPT_SJR_KO": null,
+        "JPT_KOD_JE": null,
+        "JPT_NAZWA_": null,
+        "JPT_ORGAN_": null,
+        "JPT_JOR_ID": null,
+        "WERSJA_OD": null,
+        "WERSJA_DO": null,
+        "WAZNY_OD": null,
+        "WAZNY_DO": null,
+        "JPT_KOD__1": null,
+        "JPT_NAZWA1": null,
+        "JPT_ORGAN1": null,
+        "JPT_WAZNA_": null,
+        "ID_BUFORA_": null,
+        "ID_BUFORA1": null,
+        "ID_TECHNIC": null,
+        "IIP_PRZEST": null,
+        "IIP_IDENTY": null,
+        "IIP_WERSJA": null,
+        "JPT_KJ_IIP": null,
+        "JPT_KJ_I_1": null,
+        "JPT_KJ_I_2": null,
+        "JPT_OPIS": null,
+        "JPT_SPS_KO": null,
+        "ID_BUFOR_1": null,
+        "JPT_ID": null,
+        "JPT_KJ_I_3": null,
+        "Shape_Leng": null,
+        "Shape_Area": null
+    },
+    "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+            [
+                [
+                    [ 16.714467009000032, 53.299132461000056 ],
+                    [ 16.714468294000028, 53.299198229000069 ],
+                    [ 16.71441483600006, 53.299335514000063 ],
+                    [ 16.714284810000038, 53.299433906000047 ],
+                    [ 16.714467009000032, 53.299132461000056 ]
+                ]
+            ]
+        ]
+    }
+}

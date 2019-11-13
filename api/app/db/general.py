@@ -3,7 +3,7 @@
 
 from flask import current_app, request, jsonify
 from playhouse.postgres_ext import PostgresqlExtDatabase
-from psycopg2.sql import SQL, Identifier, Composed, Literal
+from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from functools import wraps
 import psycopg2
@@ -71,6 +71,35 @@ def create_table(name, fields, user):
 
 def remove_table(name):
     current_app._db.execute_sql(SQL("DROP TABLE {} CASCADE").format(Identifier(name)))
+
+def list_table_columns(name):
+    cur = current_app._db.execute_sql(SQL("SELECT * FROM {} LIMIT 0").format(Identifier(name)))
+    return [d[0] for d in cur.description if d[0] not in ['id', 'geometry']]
+
+def add_feature_to_layer(name, columns, values):
+    query_string = SQL("INSERT INTO {} ({}) values ({})").format(
+        Identifier(name),
+        SQL(', ').join(map(lambda c: Identifier(c), columns)),
+        SQL(', ').join(Placeholder() * len(columns))
+    )
+    current_app._db.execute_sql(query_string, *[values])
+    cur = current_app._db.execute_sql(SQL("SELECT count(*) FROM {}").format(Identifier(name)))
+    return cur.fetchone()[0]
+
+def edit_feature(name, fid, columns, values):
+    query_string = SQL("UPDATE {} SET {} WHERE id=%s").format(
+        Identifier(name),
+        SQL(', ').join(map(lambda c: SQL("{} = %s").format(Identifier(c)), columns))
+    )
+    current_app._db.execute_sql(query_string, *[values + [fid]])
+    cur = current_app._db.execute_sql(SQL("SELECT count(*) FROM {}").format(Identifier(name)))
+    return cur.fetchone()[0]
+
+def delete_feature(name, fid):
+    query_string = SQL("DELETE FROM {} WHERE id=%s;").format(Identifier(name))
+    current_app._db.execute_sql(query_string, (fid,))
+    cur = current_app._db.execute_sql(SQL("SELECT count(*) FROM {}").format(Identifier(name)))
+    return cur.fetchone()[0]
 
 def geojson(name):
     cur = current_app._db.execute_sql(SQL("""

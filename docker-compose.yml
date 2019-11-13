@@ -8,7 +8,7 @@ services:
     ports:
       - "5000:5432"
     volumes:
-      - ./docker/db/data:/var/lib/postgresql
+      - ./docker/db/postgres_data:/var/lib/postgresql
     environment:
       - POSTGRES_DBNAME=cloud,cloud-testing
       - DEFAULT_COLLATION=pl_PL.UTF-8
@@ -33,3 +33,5 @@ services:
   redis:
     container_name: cloud-redis
     image: redis:5.0.6
+    volumes:
+      - ./docker/db/redis_data:/data

@@ -19,7 +19,6 @@ def app():
     yield app
     # Teardown
     users_to_delete = app._redis.lrange('user_list', 0, -1)
-    cur = app._db.execute_sql("SELECT rolname FROM pg_roles WHERE rolcanlogin=true")
     for user in users_to_delete:
         app._db.execute_sql(SQL("REASSIGN OWNED BY {user} TO postgres;DROP OWNED BY {user};DROP USER {user};").format(user=Identifier(user.decode('utf-8'))))
     app._redis.delete('user_list')

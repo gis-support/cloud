@@ -1,2 +1,3 @@
 api/app/local_config.py
-docker/db/data/*
+docker/db/postgres_data/*
+docker/db/redis_data/*

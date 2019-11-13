@@ -55,3 +55,29 @@ class TestFeatures(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['type'] == 'Feature'
+    
+    def test_features_post_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        self.add_feature_to_layer(client, token, lid)
+    
+    def test_features_put_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        fid = 1
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token), data=open(path), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['layers']['features'] == 1
+        assert r.json['layers']['name'] == 'wojewodztwa'
+    
+    def test_features_delete_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        fid = 1
+        r = client.delete('/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['layers']['features'] == 0
+        assert r.json['layers']['name'] == 'wojewodztwa'

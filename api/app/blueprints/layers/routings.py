@@ -4,13 +4,14 @@
 from flask import Blueprint, jsonify, request, current_app, make_response
 from functools import wraps
 from app.docs import swagger
-from app.db.general import token_required, list_layers, create_table, table_exists, remove_table, create_mvt_tile, geojson, geojson_single, hashed, unhashed, permission_required
+from app.db.general import token_required, list_layers, create_table, table_exists, remove_table, create_mvt_tile, geojson, geojson_single, hashed, unhashed, permission_required, list_table_columns, add_feature_to_layer, edit_feature, delete_feature
 import jwt
 import uuid
 import gdal
 import tempfile
 import os.path as op
 import binascii
+from shapely.geometry import shape
 from osgeo import osr
 from osgeo import ogr
 
@@ -31,7 +32,7 @@ def layers():
     if request.method == 'GET':
         layers = list_layers(request.user)
         return jsonify({"layers": layers})
-    else:
+    elif request.method == 'POST':
         file = request.files.get("file")
         if not file:
             return jsonify({"error": "file is required"}), 401
@@ -91,24 +92,51 @@ def layers_id(lid):
     remove_table(layer_name)
     return jsonify({"layers": "{} removed".format(layer_name)})
 
-@mod_layers.route('/layers/<lid>/features', methods=['GET'])
+@mod_layers.route('/layers/<lid>/features', methods=['GET', 'POST'])
 @swagger(__file__, 'docs.features.get.yml')
 @token_required
 @permission_required
 def features(lid):
+    layer_name = unhashed(lid)
     if request.method == 'GET':
-        layer_name = unhashed(lid)
         return jsonify(geojson(layer_name))
+    elif request.method == 'POST':
+        data = request.get_json(force=True)
+        layer_columns = list_table_columns(layer_name)
+        geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
+        columns = []
+        values = []
+        for k, v in data['properties'].items():
+            if k in layer_columns:
+                columns.append(k)
+                values.append(v)
+        count_features = add_feature_to_layer(layer_name, columns, values)
+        return jsonify({"layers": {"name": layer_name, "features": count_features, "id": lid}}), 201
 
-@mod_layers.route('/layers/<lid>/features/<int:fid>', methods=['GET'])
+@mod_layers.route('/layers/<lid>/features/<int:fid>', methods=['GET', 'PUT', 'DELETE'])
 @swagger(__file__, 'docs.features.get.yml')
 @token_required
 @permission_required
 def features_id(lid, fid):
+    layer_name = unhashed(lid)
     if request.method == 'GET':
-        layer_name = unhashed(lid)
         msg, code = geojson_single(layer_name, fid)
         return jsonify(msg), code
+    elif request.method == 'PUT':
+        data = request.get_json(force=True)
+        layer_columns = list_table_columns(layer_name)
+        geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
+        columns = []
+        values = []
+        for k, v in data['properties'].items():
+            if k in layer_columns:
+                columns.append(k)
+                values.append(v)
+        count_features = edit_feature(layer_name, fid, columns, values)
+        return jsonify({"layers": {"name": layer_name, "features": count_features, "id": lid}}), 200
+    elif request.method == 'DELETE':
+        count_features = delete_feature(layer_name, fid)
+        return jsonify({"layers": {"name": layer_name, "features": count_features, "id": lid}}), 200
 
 @mod_layers.route('/mvt/<int:z>/<int:x>/<int:y>', methods=['GET'])
 def tiles(z=0, x=0, y=0):
