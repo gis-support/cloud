@@ -39,3 +39,4 @@ class BaseTest:
         assert r.json
         assert r.json['layers']['features'] == 1
         assert r.json['layers']['name'] == 'wojewodztwa'
+        return r.json['layers']['id']

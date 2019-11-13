@@ -13,22 +13,16 @@ SYSTEM_TABLES = [
     'raster_overviews'
 ]
 
-SYSTEM_USERS = [
-    'postgres',
-    'replicator'
-]
-
 @pytest.fixture()
 def app():
     app = create_app('testing')
     yield app
     # Teardown
-    if app.config['DBUSER'] not in SYSTEM_USERS:
-        SYSTEM_USERS.append(app.config['DBUSER'])
-    cur = app._db.execute_sql("SELECT rolname FROM pg_roles WHERE rolcanlogin=true;")
-    users_to_delete = [row[0] for row in cur.fetchall() if row[0] not in SYSTEM_USERS]
+    users_to_delete = app._redis.lrange('user_list', 0, -1)
+    cur = app._db.execute_sql("SELECT rolname FROM pg_roles WHERE rolcanlogin=true")
     for user in users_to_delete:
-        app._db.execute_sql(SQL("REASSIGN OWNED BY {user} TO postgres;DROP OWNED BY {user};DROP USER {user};").format(user=Identifier(user)))
+        app._db.execute_sql(SQL("REASSIGN OWNED BY {user} TO postgres;DROP OWNED BY {user};DROP USER {user};").format(user=Identifier(user.decode('utf-8'))))
+    app._redis.delete('user_list')
     cur = app._db.execute_sql("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
     tables_to_delete = [row[0] for row in cur.fetchall() if row[0] not in SYSTEM_TABLES]
     for table in tables_to_delete:

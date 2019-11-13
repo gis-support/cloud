@@ -26,10 +26,29 @@ def user_exists(user):
 def create_user(user, password):
     current_app._db.execute_sql(SQL("CREATE USER {} WITH ENCRYPTED PASSWORD %s").format(Identifier(user)), (password,))
     current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(Identifier(current_app.config['DBNAME']), Identifier(user)))
+    if current_app.config['TESTING']:
+        current_app._redis.lpush('user_list', user)
+    
+def hashed(name):
+    try:
+        lid = current_app._hashids.encode(int(name.encode('utf-8').hex(), 16))
+        return lid
+    except:
+        return False
+
+def unhashed(lid):
+    try:
+        name = bytes.fromhex(hex(current_app._hashids.decode(lid)[0])[2:]).decode('utf-8')
+        return name
+    except:
+        return False
 
 def list_layers(user):
     cur = current_app._db.execute_sql("SELECT DISTINCT table_name FROM information_schema.role_table_grants where grantee = %s", (user,))
-    return [row[0] for row in cur.fetchall()]
+    return [{
+        "name": row[0],
+        "id": hashed(row[0])
+    } for row in cur.fetchall()]
 
 def table_exists(table):
     cur = current_app._db.execute_sql("SELECT relname FROM pg_class WHERE relkind in ('r', 'v', 't', 'm', 'f', 'p') AND relname = %s", (table,))
@@ -52,15 +71,6 @@ def create_table(name, fields, user):
 
 def remove_table(name):
     current_app._db.execute_sql(SQL("DROP TABLE {} CASCADE").format(Identifier(name)))
-
-def check_permission(name):
-    if not name:
-        return "name is required", 401
-    if not table_exists(name):
-        return "table not exists", 401
-    if name not in list_layers(request.user):
-        return "access denied", 403
-    return None, None
 
 def geojson(name):
     cur = current_app._db.execute_sql(SQL("""
@@ -117,6 +127,22 @@ def create_token(user):
     token = jwt.encode({"user": user, "uuid": random_uuid}, current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
     current_app._redis.set(random_uuid, user, ex=600)
     return token
+
+def permission_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        lid = kws.get('lid')
+        if not lid:
+            return jsonify({"error":"layer id is required"}), 401
+        name = unhashed(lid)
+        if not name:
+            return jsonify({"error":"layer id is invalid"}), 401
+        if not table_exists(name):
+            return jsonify({"error":"layer not exists"}), 401
+        if name not in [layer['name'] for layer in list_layers(request.user)]:
+            return jsonify({"error":"access denied"}), 403
+        return f(*args, **kws)
+    return decorated_function
 
 def token_required(f):
     @wraps(f)

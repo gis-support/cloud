@@ -19,7 +19,8 @@ class TestAuth(BaseTest):
         assert r.json['error'] == 'user exists'
     
     def test_login_correct(self, client):
-        self.get_token(client)
+        token = self.get_token(client)
+        assert len(token) > 0
     
     def test_login_invalid(self, client):
         self.register(client)
