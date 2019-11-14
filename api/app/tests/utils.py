@@ -31,7 +31,7 @@ class BaseTest:
     def add_geojson_prg(self, client, token):
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct.geojson')
         file_request = {
-            'file': (BytesIO(open(path, 'rb').read()), 'correct.geojson'),
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct.geojson'),
             'name': 'wojewodztwa'
         }
         r = client.post('/api/layers?token={}'.format(token), data=file_request, follow_redirects=True, content_type='multipart/form-data')

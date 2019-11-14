@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from app.test_data.utils import BaseTest
+from app.tests.utils import BaseTest
 import json
 import pytest
 

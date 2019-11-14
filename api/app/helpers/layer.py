@@ -17,9 +17,9 @@ class Layer(Cloud):
             self.lid = options['lid']
             # Nazwa warstwy
             self.name = self.unhash_name(self.lid)
-        self.exists()
-    # Sprawdzenie czy warstwa istnieje
-    def exists(self):
+        self.validate()
+    # Sprawdzenie czy warstwa istnieje + uprawnienia
+    def validate(self):
         cursor = self.execute("SELECT relname FROM pg_class WHERE relkind in ('r', 'v', 't', 'm', 'f', 'p') AND relname = %s", (self.name,))
         if cursor.fetchone() == None:
             raise ValueError("layer not exists")

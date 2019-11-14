@@ -24,7 +24,12 @@ FIELD_TYPES = {
     "Integer": "integer",
     "Real": "real",
     "DateTime": "timestamp",
-    "Date": "timestamp"
+    "Date": "timestamp",
+    "Integer64": "integer"
+}
+
+MAIN_FILE = {
+    ""
 }
 
 @mod_layers.route('/layers', methods=['GET', 'POST'])
@@ -35,20 +40,44 @@ def layers(cloud):
     if request.method == 'GET':
         return jsonify({"layers": cloud.get_layers()})
     elif request.method == 'POST':
-        file = request.files.get("file")
-        if not file:
+        files = [request.files[f] for f in request.files]
+        if not files:
             return jsonify({"error": "file is required"}), 401
         name = request.form.get("name")
         if not name:
             return jsonify({"error": "name is required"}), 401
         if cloud.layer_exists(name):
             return jsonify({"error": "table already exists"}), 401
-        file_path = op.join(tempfile.mkdtemp(), file.filename)
-        file.save(file_path)
-        source = ogr.Open(file_path, 0)
+        temp_path = tempfile.mkdtemp()
+        file_paths = []
+        for f in files:
+            file_path = op.join(temp_path, f.filename)
+            f.save(file_path)
+            file_paths.append(file_path)
+        if len(file_paths) == 1:
+            source = ogr.Open(file_paths[0], 0)
+        else:
+            for path in file_paths:
+                try:
+                    source = ogr.Open(path, 0)
+                    if source:
+                        break
+                except:
+                    continue
+            else:
+                return jsonify({"error": "file is invalid"}), 401
         layer = source.GetLayer()
-        if layer.GetSpatialRef().GetAuthorityCode(None) != "4326":
-            return jsonify({"error": "epsg not 4326"}), 409
+        try:
+            epsg = layer.GetSpatialRef().GetAuthorityCode(None)
+        except:
+            epsg = request.form.get("epsg", "4326")
+        transform = None
+        if epsg != "4326":
+            inSpatialRef = osr.SpatialReference()
+            inSpatialRef.ImportFromEPSG(int(epsg))
+            outSpatialRef = osr.SpatialReference()
+            outSpatialRef.ImportFromEPSG(4326)
+            transform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
         ldefn = layer.GetLayerDefn()
         test_geom_type_feature = layer.GetNextFeature()
         layer.ResetReading()
@@ -70,15 +99,21 @@ def layers(cloud):
                 count_features = 0
                 for feature in layer:
                     the_geom = feature.GetGeometryRef()
+                    if transform:
+                        the_geom.Transform(transform)
                     feature_string = ''
-                    for idx, column  in enumerate(columns):
-                        # Pierwszy wiersz to geometria
-                        if idx == 0:
-                            feature_string += 'SRID=4326;%s\t' % feature.GetGeometryRef().ExportToWkt()
-                        elif idx + 1 != len(columns):
-                            feature_string += '%s\t' % feature.GetField(column)
-                        else:
-                            feature_string += '%s\n' % feature.GetField(column)
+                    if len(columns) == 1:
+                        # W przypadku braku atrybutów
+                        feature_string += 'SRID=4326;%s\n' % feature.GetGeometryRef().ExportToWkt()
+                    else:
+                        for idx, column  in enumerate(columns):
+                            # Pierwszy wiersz to geometria
+                            if idx == 0:
+                                feature_string += 'SRID=4326;%s\t' % feature.GetGeometryRef().ExportToWkt()
+                            elif idx + 1 != len(columns):
+                                feature_string += '%s\t' % feature.GetField(column)
+                            else:
+                                feature_string += '%s\n' % feature.GetField(column)
                     count_features += 1
                     tfile.write(feature_string)
                 tfile.seek(0)
