@@ -33,7 +33,23 @@ class TestLayers(BaseTest):
         r = client.delete('/api/layers/{}?token={}'.format(lid, token))
         assert r.status_code == 200
         assert r.json
-        assert r.json['layers'] == 'wojewodztwa removed'
+        assert r.json['layers'] == 'wojewodztwa deleted'
+    
+    def test_layers_delete_invalid_id(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        r = client.delete('/api/layers/1?token={}'.format(token))
+        assert r.status_code == 401
+        assert r.json
+        assert r.json['error'] == 'invalid layer id'
+    
+    def test_layers_delete_layer_not_exists(self, client):
+        token = self.get_token(client)
+        r = client.delete('/api/layers/vJoqBpbA8go4nogNZ?token={}'.format(token))
+        assert r.status_code == 401
+        assert r.json
+        assert r.json['error'] == 'layer not exists'
+    
 
 @pytest.mark.features
 class TestFeatures(BaseTest):

@@ -6,6 +6,8 @@ from playhouse.postgres_ext import PostgresqlExtDatabase
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from functools import wraps
+from app.helpers.cloud import Cloud
+from app.helpers.layer import Layer
 import psycopg2
 import jwt
 import uuid
@@ -28,96 +30,6 @@ def create_user(user, password):
     current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(Identifier(current_app.config['DBNAME']), Identifier(user)))
     if current_app.config['TESTING']:
         current_app._redis.lpush('user_list', user)
-    
-def hashed(name):
-    try:
-        lid = current_app._hashids.encode(int(name.encode('utf-8').hex(), 16))
-        return lid
-    except:
-        return False
-
-def unhashed(lid):
-    try:
-        name = bytes.fromhex(hex(current_app._hashids.decode(lid)[0])[2:]).decode('utf-8')
-        return name
-    except:
-        return False
-
-def list_layers(user):
-    cur = current_app._db.execute_sql("SELECT DISTINCT table_name FROM information_schema.role_table_grants where grantee = %s", (user,))
-    return [{
-        "name": row[0],
-        "id": hashed(row[0])
-    } for row in cur.fetchall()]
-
-def table_exists(table):
-    cur = current_app._db.execute_sql("SELECT relname FROM pg_class WHERE relkind in ('r', 'v', 't', 'm', 'f', 'p') AND relname = %s", (table,))
-    return cur.fetchone() != None
-
-def create_table(name, fields, user):
-    table_string = "CREATE TABLE {} (id serial, "
-    table_columns_names = [Identifier(name)]
-    table_columns_types = []
-    for idx, field in enumerate(fields):
-        table_string += "{} %s"
-        table_columns_names.append(Identifier(field["name"]))
-        table_columns_types.append(AsIs(field["type"])) #sql injcection proof, bo typy są zadeklarowane
-        if idx + 1 != len(fields):
-            table_string += ","
-        else:
-            table_string += ")"
-    current_app._db.execute_sql(SQL(table_string).format(*table_columns_names), [*table_columns_types])
-    current_app._db.execute_sql(SQL('GRANT ALL PRIVILEGES ON TABLE {} TO {};').format(Identifier(name), Identifier(user)))
-
-def remove_table(name):
-    current_app._db.execute_sql(SQL("DROP TABLE {} CASCADE").format(Identifier(name)))
-
-def list_table_columns(name):
-    cur = current_app._db.execute_sql(SQL("SELECT * FROM {} LIMIT 0").format(Identifier(name)))
-    return [d[0] for d in cur.description if d[0] not in ['id', 'geometry']]
-
-def add_feature_to_layer(name, columns, values):
-    query_string = SQL("INSERT INTO {} ({}) values ({})").format(
-        Identifier(name),
-        SQL(', ').join(map(lambda c: Identifier(c), columns)),
-        SQL(', ').join(Placeholder() * len(columns))
-    )
-    current_app._db.execute_sql(query_string, *[values])
-    cur = current_app._db.execute_sql(SQL("SELECT count(*) FROM {}").format(Identifier(name)))
-    return cur.fetchone()[0]
-
-def edit_feature(name, fid, columns, values):
-    query_string = SQL("UPDATE {} SET {} WHERE id=%s").format(
-        Identifier(name),
-        SQL(', ').join(map(lambda c: SQL("{} = %s").format(Identifier(c)), columns))
-    )
-    current_app._db.execute_sql(query_string, *[values + [fid]])
-    cur = current_app._db.execute_sql(SQL("SELECT count(*) FROM {}").format(Identifier(name)))
-    return cur.fetchone()[0]
-
-def delete_feature(name, fid):
-    query_string = SQL("DELETE FROM {} WHERE id=%s;").format(Identifier(name))
-    current_app._db.execute_sql(query_string, (fid,))
-    cur = current_app._db.execute_sql(SQL("SELECT count(*) FROM {}").format(Identifier(name)))
-    return cur.fetchone()[0]
-
-def geojson(name):
-    cur = current_app._db.execute_sql(SQL("""
-        SELECT json_build_object(
-            'type', 'FeatureCollection',
-            'features', json_agg(ST_AsGeoJSON(t.*)::json)
-        )
-        FROM (SELECT * from {}) as t;""").format(Identifier(name)))
-    return cur.fetchone()[0]
-
-def geojson_single(name, fid):
-    cur = current_app._db.execute_sql(SQL("""
-        SELECT ST_AsGeoJSON(t.*)
-        FROM (SELECT * from {} WHERE id=%s) as t;""").format(Identifier(name)), (fid,))
-    g = cur.fetchone()
-    if not g:
-        return {"error": "invalid id"}, 401
-    return json.loads(g[0]), 200
 
 def tile_ul(x, y, z):
     n = 2.0 ** z
@@ -157,22 +69,6 @@ def create_token(user):
     current_app._redis.set(random_uuid, user, ex=600)
     return token
 
-def permission_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kws):
-        lid = kws.get('lid')
-        if not lid:
-            return jsonify({"error":"layer id is required"}), 401
-        name = unhashed(lid)
-        if not name:
-            return jsonify({"error":"layer id is invalid"}), 401
-        if not table_exists(name):
-            return jsonify({"error":"layer not exists"}), 401
-        if name not in [layer['name'] for layer in list_layers(request.user)]:
-            return jsonify({"error":"access denied"}), 403
-        return f(*args, **kws)
-    return decorated_function
-
 def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kws):
@@ -196,5 +92,26 @@ def token_required(f):
         # Wydłużenie tokena o kolejne 10min
         current_app._redis.set(random_uuid, user, ex=600)
         request.user = user
+        return f(*args, **kws)
+    return decorated_function
+
+def cloud_decorator(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        cloud = Cloud({"app": current_app, "user": request.user})
+        return f(cloud, *args, **kws)
+    return decorated_function
+
+
+def layer_decorator(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        try:
+            layer = Layer({"app": current_app, "user": request.user, "lid": kws.get('lid')})
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 401
+        except PermissionError as e:
+            return jsonify({"error": str(e)}), 403
+        kws['layer'] = layer
         return f(*args, **kws)
     return decorated_function
