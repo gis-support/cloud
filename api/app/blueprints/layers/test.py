@@ -91,7 +91,7 @@ class TestLayers(BaseTest):
         assert r.json
         assert r.json['error'] == 'file is invalid'
     
-    def test_layers_post_shapefile_invalid_file(self, client):
+    def test_layers_post_shapefile_without_prj(self, client):
         token = self.get_token(client)
         path = os.path.join(TEST_DATA_DIR, 'layers')
         file_request = {
