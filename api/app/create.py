@@ -15,6 +15,7 @@ try:
 except:
     from app.default_config import *
 
+
 def create_app(config='development'):
     app = Flask(__name__.split('.')[0])
     app._cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -26,6 +27,7 @@ def create_app(config='development'):
     app.register_blueprint(mod_auth, url_prefix='/api')
     app.register_blueprint(mod_layers, url_prefix='/api')
     return app
+
 
 def load_config(config):
     if config == 'production':

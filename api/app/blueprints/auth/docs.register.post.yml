@@ -1,29 +1,41 @@
-Files
+Register
 ---
-summary: Get files
+tags:
+  - Auth
+summary: Register new user
 produces:
-- application/json
+  - application/json
 parameters:
-  - name: token
-    in: query
-    description: Token
-    required: false
-    type: string
-responses:
-  200:
-    description: Files
+  - in: body
+    name: body
+    required: true
     schema:
       type: object
       properties:
-        files:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name
-  401:
-    description: Token is invalid / has expired
-  403:
-    description: Token required
+        user:
+          type: string
+          description: User login
+          example: "test"
+          required: true
+        password:
+          type: string
+          description: User password
+          example: "test"
+          required: true
+responses:
+  201:
+    description: Confirmation
+    schema:
+      type: object
+      properties:
+        register:
+          type: string
+          example: "user created"
+  409:
+    description: User exists
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "user exists"

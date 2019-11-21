@@ -2,22 +2,19 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, jsonify, request, current_app, make_response
-from functools import wraps
-from app.docs import swagger
+from flasgger import swag_from
+from app.docs import path_by
 from app.db.general import token_required, cloud_decorator, create_mvt_tile, layer_decorator
 from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
-import jwt
-import uuid
-import gdal
-import tempfile
-import os.path as op
-import binascii
 from shapely.geometry import shape
 from osgeo import osr
 from osgeo import ogr
+import tempfile
+import os.path as op
 
 mod_layers = Blueprint("layers", __name__)
+
 
 FIELD_TYPES = {
     "String": "varchar",
@@ -28,12 +25,10 @@ FIELD_TYPES = {
     "Integer64": "integer"
 }
 
-MAIN_FILE = {
-    ""
-}
 
 @mod_layers.route('/layers', methods=['GET', 'POST'])
-@swagger(__file__, 'docs.layers.get.yml')
+@swag_from(path_by(__file__, 'docs.layers.post.yml'), methods=['POST'])
+@swag_from(path_by(__file__, 'docs.layers.get.yml'), methods=['GET'])
 @token_required
 @cloud_decorator
 def layers(cloud):
@@ -47,7 +42,7 @@ def layers(cloud):
         if not name:
             return jsonify({"error": "name is required"}), 401
         if cloud.layer_exists(name):
-            return jsonify({"error": "table already exists"}), 401
+            return jsonify({"error": "layer already exists"}), 401
         temp_path = tempfile.mkdtemp()
         file_paths = []
         for f in files:
@@ -77,7 +72,8 @@ def layers(cloud):
             inSpatialRef.ImportFromEPSG(int(epsg))
             outSpatialRef = osr.SpatialReference()
             outSpatialRef.ImportFromEPSG(4326)
-            transform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+            transform = osr.CoordinateTransformation(
+                inSpatialRef, outSpatialRef)
         ldefn = layer.GetLayerDefn()
         test_geom_type_feature = layer.GetNextFeature()
         layer.ResetReading()
@@ -106,39 +102,39 @@ def layers(cloud):
                         # W przypadku braku atrybutów
                         feature_string += 'SRID=4326;%s\n' % feature.GetGeometryRef().ExportToWkt()
                     else:
-                        for idx, column  in enumerate(columns):
+                        for idx, column in enumerate(columns):
                             # Pierwszy wiersz to geometria
                             if idx == 0:
                                 feature_string += 'SRID=4326;%s\t' % feature.GetGeometryRef().ExportToWkt()
                             elif idx + 1 != len(columns):
-                                feature_string += '%s\t' % feature.GetField(column)
+                                feature_string += '%s\t' % feature.GetField(
+                                    column)
                             else:
-                                feature_string += '%s\n' % feature.GetField(column)
+                                feature_string += '%s\n' % feature.GetField(
+                                    column)
                     count_features += 1
                     tfile.write(feature_string)
                 tfile.seek(0)
                 cur = current_app._db.cursor()
-                cur.copy_from(tfile, '"{}"'.format(name), null='None', columns=list(map(lambda c: '"{}"'.format(c), columns)))
+                cur.copy_from(tfile, '"{}"'.format(name), null='None', columns=list(
+                    map(lambda c: '"{}"'.format(c), columns)))
         layer = Layer({"app": current_app, "user": request.user, "name": name})
         return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
 
-@mod_layers.route('/layers/<lid>', methods=['DELETE'])
-@swagger(__file__, 'docs.layers.id.delete.yml')
+
+@mod_layers.route('/layers/<lid>', methods=['GET', 'POST', 'DELETE'])
+@swag_from(path_by(__file__, 'docs.layers.id.post.yml'), methods=['POST'])
+@swag_from(path_by(__file__, 'docs.layers.id.get.yml'), methods=['GET'])
+@swag_from(path_by(__file__, 'docs.layers.id.delete.yml'), methods=['DELETE'])
 @token_required
 @layer_decorator
 def layers_id(layer, lid):
     layer = Layer({"app": current_app, "user": request.user, "lid": lid})
-    layer.delete()
-    return jsonify({"layers": "{} deleted".format(layer.name)})
-
-@mod_layers.route('/layers/<lid>/features', methods=['GET', 'POST'])
-@swagger(__file__, 'docs.features.get.yml')
-@token_required
-@layer_decorator
-def features(layer, lid):
-    layer = Layer({"app": current_app, "user": request.user, "lid": lid})
     if request.method == 'GET':
         return jsonify(layer.as_geojson())
+    elif request.method == 'DELETE':
+        layer.delete()
+        return jsonify({"layers": "{} deleted".format(layer.name)})
     elif request.method == 'POST':
         data = request.get_json(force=True)
         geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
@@ -151,8 +147,11 @@ def features(layer, lid):
         layer.add_feature(columns, values)
         return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
 
+
 @mod_layers.route('/layers/<lid>/features/<int:fid>', methods=['GET', 'PUT', 'DELETE'])
-@swagger(__file__, 'docs.features.get.yml')
+@swag_from(path_by(__file__, 'docs.features.id.get.yml'), methods=['GET'])
+@swag_from(path_by(__file__, 'docs.features.id.put.yml'), methods=['PUT'])
+@swag_from(path_by(__file__, 'docs.features.id.delete.yml'), methods=['DELETE'])
 @token_required
 @layer_decorator
 def features_id(layer, lid, fid):
@@ -173,6 +172,7 @@ def features_id(layer, lid, fid):
     elif request.method == 'DELETE':
         layer.delete_feature(fid)
         return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 200
+
 
 @mod_layers.route('/mvt/<int:z>/<int:x>/<int:y>', methods=['GET'])
 def tiles(z=0, x=0, y=0):

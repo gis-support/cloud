@@ -17,37 +17,45 @@ import json
 database = PostgresqlExtDatabase(
     None,
     register_hstore=False,
-    autorollback = True,
-    field_types={'geometry':'geometry'}
+    autorollback=True,
+    field_types={'geometry': 'geometry'}
 )
 
+
 def user_exists(user):
-    cur = current_app._db.execute_sql('SELECT 1 FROM pg_roles WHERE rolname=%s AND rolcanlogin=true', (user,))
+    cur = current_app._db.execute_sql(
+        'SELECT 1 FROM pg_roles WHERE rolname=%s AND rolcanlogin=true', (user,))
     return cur.fetchone() != None
 
+
 def create_user(user, password):
-    current_app._db.execute_sql(SQL("CREATE USER {} WITH ENCRYPTED PASSWORD %s").format(Identifier(user)), (password,))
-    current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(Identifier(current_app.config['DBNAME']), Identifier(user)))
+    current_app._db.execute_sql(SQL("CREATE USER {} WITH ENCRYPTED PASSWORD %s").format(
+        Identifier(user)), (password,))
+    current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(
+        Identifier(current_app.config['DBNAME']), Identifier(user)))
     if current_app.config['TESTING']:
         current_app._redis.lpush('user_list', user)
+
 
 def tile_ul(x, y, z):
     n = 2.0 ** z
     lon_deg = x / n * 360.0 - 180.0
     lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
     lat_deg = math.degrees(lat_rad)
-    return  lon_deg,lat_deg
+    return lon_deg, lat_deg
+
 
 def create_mvt_tile(z, x, y, name):
-    xmin,ymin = tile_ul(x, y, z)
-    xmax,ymax = tile_ul(x+1, y+1, z)
+    xmin, ymin = tile_ul(x, y, z)
+    xmax, ymax = tile_ul(x+1, y+1, z)
     cur = current_app._db.cursor()
     query = SQL('''SELECT ST_AsMVT(tile) FROM (SELECT id,
         ST_AsMVTGeom(geometry,ST_Makebox2d(ST_SetSrid(ST_MakePoint(%s,%s),4326),
         ST_SetSrid(ST_MakePoint(%s,%s),4326)),4096,8,true) AS geom FROM {}) AS tile''').format(Identifier(name))
-    cur.execute(query,(xmin ,ymin, xmax, ymax))
+    cur.execute(query, (xmin, ymin, xmax, ymax))
     tile = cur.fetchone()[0]
     return tile.tobytes()
+
 
 def authenticate_user(user, password):
     try:
@@ -63,11 +71,14 @@ def authenticate_user(user, password):
     except Exception as e:
         return False
 
+
 def create_token(user):
     random_uuid = str(uuid.uuid4())
-    token = jwt.encode({"user": user, "uuid": random_uuid}, current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+    token = jwt.encode({"user": user, "uuid": random_uuid},
+                       current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
     current_app._redis.set(random_uuid, user, ex=600)
     return token
+
 
 def token_required(f):
     @wraps(f)
@@ -75,10 +86,11 @@ def token_required(f):
         token = request.args.get('token')
         # W przypadku braku tokena
         if not token:
-            return jsonify({"error": "login required"}), 403
+            return jsonify({"error": "token required"}), 403
         # W przypadku niepoprawnego tokena
         try:
-            user_data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_data = jwt.decode(
+                token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
         except:
             return jsonify({"error": "invalid token"}), 403
         random_uuid = user_data.get('uuid')
@@ -95,6 +107,7 @@ def token_required(f):
         return f(*args, **kws)
     return decorated_function
 
+
 def cloud_decorator(f):
     @wraps(f)
     def decorated_function(*args, **kws):
@@ -107,7 +120,8 @@ def layer_decorator(f):
     @wraps(f)
     def decorated_function(*args, **kws):
         try:
-            layer = Layer({"app": current_app, "user": request.user, "lid": kws.get('lid')})
+            layer = Layer(
+                {"app": current_app, "user": request.user, "lid": kws.get('lid')})
         except ValueError as e:
             return jsonify({"error": str(e)}), 401
         except PermissionError as e:

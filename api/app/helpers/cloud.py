@@ -4,6 +4,7 @@
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 
+
 class Cloud:
     def __init__(self, options):
         # Nazwa użytkownika
@@ -17,18 +18,22 @@ class Cloud:
         # Kontekst Redisa
         self.redis = self.app._redis
     # Zahaszowanie nazwy warstwy
+
     def hash_name(self, name):
         return self.hashids.encode(int(name.encode('utf-8').hex(), 16))
     # Odhaszowanie nazwy warstwy
+
     def unhash_name(self, lid):
         try:
             return bytes.fromhex(hex(self.hashids.decode(lid)[0])[2:]).decode('utf-8')
         except:
             raise ValueError("invalid layer id")
     # Wykonywanie zapytań, zwraca kursor
+
     def execute(self, *args, **kwargs):
         return self.db.execute_sql(*args, **kwargs)
     # Lista warstw
+
     def get_layers(self):
         cursor = self.execute("""
             SELECT DISTINCT table_name FROM information_schema.role_table_grants WHERE grantee = %s
@@ -38,12 +43,14 @@ class Cloud:
             "id": self.hash_name(row[0])
         } for row in cursor.fetchall()]
     # Czy warstwa istnieje
+
     def layer_exists(self, layer):
         cursor = self.execute("""
             SELECT relname FROM pg_class WHERE relkind in ('r', 'v', 't', 'm', 'f', 'p') AND relname = %s
         """, (layer,))
         return cursor.fetchone() != None
     # Tworzenie warstwy
+
     def create_layer(self, name, fields):
         columns = ["id"] + [f["name"] for f in fields]
         types = [AsIs(f) for f in ["serial"] + [f["type"] for f in fields]]

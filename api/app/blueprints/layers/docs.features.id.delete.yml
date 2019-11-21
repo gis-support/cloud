@@ -1,31 +1,24 @@
-Add layer
+Feature
 ---
 tags:
-  - Layers
-summary: Add layer
+  - Features
+summary: Delete feature by ID
 produces:
   - application/json
 parameters:
-  - name: file
-    in: formData
-    description: Layer file
-    required: true
-    type: file
-  - name: name
-    in: formData
-    description: Layer name
-    example: "test"
+  - name: id
+    in: path
+    description: Layer ID
     required: true
     type: string
-  - name: epsg
-    in: formData
-    description: EPSG number, 4326 default
-    example: "4326"
-    required: false
+  - name: token
+    in: query
+    description: Token
+    required: true
     type: string
 responses:
-  201:
-    description: Confirmation
+  200:
+    description: GeoJSON
     schema:
       type: object
       properties:
@@ -41,14 +34,6 @@ responses:
             features:
               type: integer
               description: Number of features
-  401:
-    description: File is (required/invalid) / Name is required / Layer already exists
-    schema:
-      type: object
-      properties:
-        error:
-          type: string
-          example: "file is required"
   403:
     description: Token required
     schema:

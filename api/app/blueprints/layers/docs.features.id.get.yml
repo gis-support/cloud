@@ -1,11 +1,16 @@
-Layers
+Feature
 ---
 tags:
-  - Layers
-summary: Get layers
+  - Features
+summary: Get feature by ID
 produces:
   - application/json
 parameters:
+  - name: id
+    in: path
+    description: Layer ID
+    required: true
+    type: string
   - name: token
     in: query
     description: Token
@@ -13,21 +18,17 @@ parameters:
     type: string
 responses:
   200:
-    description: Layers
+    description: GeoJSON
     schema:
       type: object
       properties:
-        layers:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Layer ID
-              name:
-                type: string
-                description: Layer name
+        type:
+          type: string
+          example: "Feature"
+        geometry:
+          type: object
+        properties:
+          type: object
   403:
     description: Token required
     schema:
