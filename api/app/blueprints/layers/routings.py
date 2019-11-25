@@ -127,25 +127,46 @@ def layers(cloud):
 @swag_from(path_by(__file__, 'docs.layers.id.get.yml'), methods=['GET'])
 @swag_from(path_by(__file__, 'docs.layers.id.delete.yml'), methods=['DELETE'])
 @token_required
-@layer_decorator
-def layers_id(layer, lid):
-    layer = Layer({"app": current_app, "user": request.user, "lid": lid})
+def layers_id(lid):
     if request.method == 'GET':
-        return jsonify(layer.as_geojson())
+        """
+        Get layer by ID with default permission
+        Returns GeoJSON
+        """
+        @layer_decorator(permission="read")
+        def get(layer, lid=None):
+            return jsonify(layer.as_geojson())
+        return get(lid=lid)
+
     elif request.method == 'DELETE':
-        layer.delete()
-        return jsonify({"layers": "{} deleted".format(layer.name)})
+        """
+        Delete layer by ID only with owner permission
+        Returns confirmation
+        """
+        @layer_decorator(permission="owner")
+        def delete(layer, lid=None):
+            layer.delete()
+            return jsonify({"layers": "{} deleted".format(layer.name)})
+        return delete(lid=lid)
+
     elif request.method == 'POST':
-        data = request.get_json(force=True)
-        geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
-        columns = []
-        values = []
-        for k, v in data['properties'].items():
-            if k in layer.columns():
-                columns.append(k)
-                values.append(v)
-        layer.add_feature(columns, values)
-        return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
+        """
+        Add new feature to layer by ID with write permission
+        Returns layer properties
+        """
+        @layer_decorator(permission="write")
+        def post(layer, lid=None):
+            data = request.get_json(force=True)
+            geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
+            columns = []
+            values = []
+            for k, v in data['properties'].items():
+                if k in layer.columns():
+                    columns.append(k)
+                    values.append(v)
+            layer.add_feature(columns, values)
+            return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
+        return post(lid=lid)
 
 
 @mod_layers.route('/layers/<lid>/features/<int:fid>', methods=['GET', 'PUT', 'DELETE'])
@@ -153,25 +174,46 @@ def layers_id(layer, lid):
 @swag_from(path_by(__file__, 'docs.features.id.put.yml'), methods=['PUT'])
 @swag_from(path_by(__file__, 'docs.features.id.delete.yml'), methods=['DELETE'])
 @token_required
-@layer_decorator
-def features_id(layer, lid, fid):
-    layer = Layer({"app": current_app, "user": request.user, "lid": lid})
+def features_id(lid, fid):
     if request.method == 'GET':
-        return layer.as_geojson_by_fid(fid)
+        """
+        Get feature by ID with default permission
+        Returns GeoJSON
+        """
+        @layer_decorator(permission="read")
+        def get(layer, lid=None):
+            return layer.as_geojson_by_fid(fid)
+        return get(lid=lid)
+
     elif request.method == 'PUT':
-        data = request.get_json(force=True)
-        geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
-        columns = []
-        values = []
-        for k, v in data['properties'].items():
-            if k in layer.columns():
-                columns.append(k)
-                values.append(v)
-        layer.edit_feature(fid, columns, values)
-        return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 200
+        """
+        Edit feature by ID with write permission
+        Returns layer properties
+        """
+        @layer_decorator(permission="write")
+        def put(layer, lid=None):
+            data = request.get_json(force=True)
+            geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
+            columns = []
+            values = []
+            for k, v in data['properties'].items():
+                if k in layer.columns():
+                    columns.append(k)
+                    values.append(v)
+            layer.edit_feature(fid, columns, values)
+            return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 200
+        return put(lid=lid)
+
     elif request.method == 'DELETE':
-        layer.delete_feature(fid)
-        return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 200
+        """
+        Delete feature by ID with write permission
+        Returns layer properties
+        """
+        @layer_decorator(permission="write")
+        def delete(layer, lid=None):
+            layer.delete_feature(fid)
+            return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 200
+        return delete(lid=lid)
 
 
 @mod_layers.route('/mvt/<int:z>/<int:x>/<int:y>', methods=['GET'])

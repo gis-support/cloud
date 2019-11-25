@@ -64,3 +64,6 @@ class Cloud:
         self.execute(SQL("""
             GRANT ALL PRIVILEGES ON TABLE {} TO {};
         """).format(Identifier(name), Identifier(self.user)))
+        self.execute(SQL("""
+            ALTER TABLE {} OWNER TO {};
+        """).format(Identifier(name), Identifier(self.user)))
