@@ -4,6 +4,12 @@ from app.helpers.cloud import Cloud
 from psycopg2.sql import SQL, Identifier, Placeholder
 import json
 
+PERMISSIONS = {
+    "read": "GRANT SELECT ON {} TO {};",
+    "write": "GRANT SELECT, UPDATE, INSERT ON {} TO {};",
+    "": "REVOKE ALL ON {} FROM {}"
+}
+
 
 class Layer(Cloud):
     def __init__(self, options):
@@ -18,8 +24,8 @@ class Layer(Cloud):
             # Nazwa warstwy
             self.name = self.unhash_name(self.lid)
         self.validate()
-    # Sprawdzenie czy warstwa istnieje + uprawnienia
 
+    # Sprawdzenie czy warstwa istnieje + uprawnienia
     def validate(self):
         cursor = self.execute(
             "SELECT relname FROM pg_class WHERE relkind in ('r', 'v', 't', 'm', 'f', 'p') AND relname = %s", (self.name,))
@@ -27,8 +33,29 @@ class Layer(Cloud):
             raise ValueError("layer not exists")
         if self.name not in [l['name'] for l in self.get_layers()]:
             raise PermissionError("access denied")
-    # Lista kolumn
 
+    # Sprawdzenie czy użytkownik jest właścicielem warstwy
+    def check_owner(self):
+        cursor = self.execute(
+            "SELECT tableowner FROM pg_tables WHERE tablename = %s", (self.name,))
+        if cursor.fetchone()[0] != self.user:
+            raise PermissionError("access denied, not an owner")
+
+    # Sprawdzenie czy użytkownik ma prawa edycji
+    def check_write(self):
+        cursor = self.execute(
+            "SELECT * FROM information_schema.role_table_grants WHERE grantee = %s", (self.user,))
+        if len(cursor.fetchall()) < 2:
+            raise PermissionError("access denied, read only permission")
+
+    def grant(self, user, permission):
+        self.execute(SQL(PERMISSIONS[""]).format(
+            Identifier(self.name), Identifier(user)))
+        if permission:
+            self.execute(SQL(PERMISSIONS[permission]).format(
+                Identifier(self.name), Identifier(user)))
+
+    # Lista kolumn
     def columns(self):
         cursor = self.execute(SQL("""
             SELECT * FROM {} LIMIT 0

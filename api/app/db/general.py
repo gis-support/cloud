@@ -5,7 +5,7 @@ from flask import current_app, request, jsonify
 from playhouse.postgres_ext import PostgresqlExtDatabase
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
-from functools import wraps
+from functools import wraps, partial
 from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
 import psycopg2
@@ -116,16 +116,23 @@ def cloud_decorator(f):
     return decorated_function
 
 
-def layer_decorator(f):
-    @wraps(f)
-    def decorated_function(*args, **kws):
+def layer_decorator(func=None, *, permission=None):
+    if func is None:
+        return partial(layer_decorator, permission=permission)
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
         try:
             layer = Layer(
-                {"app": current_app, "user": request.user, "lid": kws.get('lid')})
+                {"app": current_app, "user": request.user, "lid": kwargs.get('lid')})
+            if permission == "owner":
+                layer.check_owner()
+            if permission == 'write':
+                layer.check_write()
         except ValueError as e:
             return jsonify({"error": str(e)}), 401
         except PermissionError as e:
             return jsonify({"error": str(e)}), 403
-        kws['layer'] = layer
-        return f(*args, **kws)
-    return decorated_function
+        kwargs['layer'] = layer
+        return func(*args, **kwargs)
+    return wrapper

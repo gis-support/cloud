@@ -21,8 +21,9 @@ class BaseTest:
         assert r.json['register'] == 'user created'
         return user, password
 
-    def get_token(self, client):
-        user, password = self.register(client)
+    def get_token(self, client, user="", password=""):
+        if not user and not password:
+            user, password = self.register(client)
         r = client.post(
             '/api/login', data=json.dumps({"user": user, "password": password}))
         assert r.status_code == 200
