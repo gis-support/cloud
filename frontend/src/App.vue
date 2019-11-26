@@ -15,14 +15,14 @@
           </div>
           <nav class="collapse navbar-collapse" role="navigation">
             <ul class="nav navbar-nav navbar-right">
-              <li class="navbar-profile" :disabled="$i18n.locale == 'en'"
+              <!-- <li class="navbar-profile" :disabled="$i18n.locale == 'en'"
                 :class="{ btnActive: $i18n.locale == 'en'}" @click="changeLanguage('en')">
                 <a>EN</a>
               </li>
               <li class="navbar-profile" :disabled="$i18n.locale == 'pl'"
                 :class="{ btnActive: $i18n.locale == 'pl'}" @click="changeLanguage('pl')">
                 <a>PL</a>
-              </li>
+              </li> -->
               <li class="dropdown navbar-profile">
                 <a class="dropdown-toggle" style="padding-left: 15px;" data-toggle="dropdown"
                 href="javascript:;" >
@@ -91,6 +91,9 @@ export default {
   display: flex;
   justify-content: space-between;
 }
+.green {
+  color: #1e5b22 !important;
+}
 .icon-hover {
   opacity: 0.3;
   padding: 2px;
@@ -115,6 +118,12 @@ export default {
 }
 .pr-0 {
   padding-right: 0px !important;
+}
+.pb-10 {
+  padding-bottom: 10px !important;
+}
+.pt-10 {
+  padding-top: 10px !important;
 }
 .red {
   color: #f22a1f !important;

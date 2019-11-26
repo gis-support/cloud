@@ -1,5 +1,11 @@
 {
   "dashboard": {
+    "list": {
+      "addLayer": "Dodaj nową warstwę"
+    },
+    "modal":  {
+      "addLayer": "Dodawanie nowej warstwy"
+    },
     "placeholder": {
       "layersFilter": "Filtr warstw",
       "externalSourcesFilter": "Filtr źródeł"
@@ -8,5 +14,10 @@
       "vectorLayersList": "Lista warstw wektorowych",
       "externalSourcesList": "Lista ze źródeł zewnętrznych"
     }
+  },
+  "default": {
+    "cancel": "Anuluj",
+    "noLayers": "Brak warstw",
+    "save": "Zapisz"
   }
 }
