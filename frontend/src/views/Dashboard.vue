@@ -11,6 +11,31 @@
             :placeholder="$i18n.t('dashboard.placeholder.layersFilter')">
         </div>
       </h2>
+      <div class="section__content heading-block heading-block-main">
+        <template v-for="(val, key) in vectorLayersList">
+          <div class="mb-0" :key="key">
+            <div class="panel-heading pl-0 pr-0">
+              <h4 class="panel-title flex-center">
+                <span class="panel-title__names">
+                  <i class="icon-li fa fa-map-o fa-lg mr-5"></i>
+                  <span class="bold" href="#">
+                    {{ val.name }}
+                  </span>
+                  <span class="desc-sm">
+                    {{ val.team }}
+                  </span>
+                </span>
+                <span class="panel-title__tools">
+                  <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
+                    data-placement="top" title="Ustawienia"></i>
+                  <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
+                    data-placement="top" title="Usuń"></i>
+                </span>
+              </h4>
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
 
     <div class="col-sm-12 pl-0 pr-0 section">
@@ -34,6 +59,12 @@
 
 export default {
   name: 'dashboard',
+  data: () => ({
+    vectorLayersList: [
+      { name: 'brownfields', team: 'Hale' },
+      { name: 'greenfields', team: 'Grunty inwestycyjne' },
+    ],
+  }),
 };
 </script>
 
@@ -48,6 +79,22 @@ export default {
   height: calc(100% - 76px);
   padding-left: 0px;
   padding-right: 0px;
+}
+.desc-sm {
+  color: #b5b5b5;
+  font-family: "Open Sans","Trebuchet MS",arial,sans-serif;
+  font-size: 12px;
+  letter-spacing: -1px;
+  line-height: 1.75em;
+}
+.heading-block:after {
+  display: none;
+}
+.panel-title__names {
+  font-size: 14px;
+}
+.panel-title__tools i:not(:last-child) {
+  margin-right: 5px;
 }
 .section {
   height: 50%;

@@ -69,6 +69,9 @@ export default {
   text-align: center;
   align-items: center;
 }
+.bold {
+  font-weight: 600;
+}
 .btnActive {
   background-color: #283846;
 }
@@ -88,8 +91,21 @@ export default {
   display: flex;
   justify-content: space-between;
 }
+.icon-hover {
+  opacity: 0.3;
+  padding: 2px;
+  transition: all 0.2s;
+}
+.icon-hover:hover {
+  opacity: 1;
+  padding: 2px;
+  cursor: pointer;
+}
 .mb-0 {
-  margin-bottom: 0px;
+  margin-bottom: 0px !important;
+}
+.mr-5 {
+  margin-right: 5px !important;
 }
 .p-0 {
   padding: 0px;
@@ -99,6 +115,12 @@ export default {
 }
 .pr-0 {
   padding-right: 0px !important;
+}
+.red {
+  color: #f22a1f !important;
+}
+.yellow {
+  color: #bf822c !important;
 }
 #logo {
   height: 50px;
