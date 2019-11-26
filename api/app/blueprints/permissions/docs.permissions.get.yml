@@ -1,8 +1,8 @@
-Layer
+Get permissions
 ---
 tags:
-  - Layers
-summary: Add new feature to layer
+  - Permissions
+summary: Get permissions
 produces:
   - application/json
 parameters:
@@ -11,22 +11,6 @@ parameters:
     description: Layer ID
     required: true
     type: string
-  - in: body
-    name: body
-    required: true
-    schema:
-      type: object
-      properties:
-        type:
-          type: string
-          example: "Feature"
-          required: true
-        properties:
-          type: object
-          required: true
-        geometry:
-          type: object
-          required: true
   - name: token
     in: query
     description: Token
@@ -38,21 +22,20 @@ responses:
     schema:
       type: object
       properties:
-        type:
-          type: string
-          example: "FeatureCollection"
-        features:
+        permissions:
           type: array
           items:
             type: object
             properties:
-              type:
+              name:
                 type: string
-                example: "Feature"
-              geometry:
+                description: Layer name
+              id:
+                type: string
+                description: Layer ID
+              users:
                 type: object
-              properties:
-                type: object
+                description: For every user all layers and permissions
   403:
     description: Token required
     schema:

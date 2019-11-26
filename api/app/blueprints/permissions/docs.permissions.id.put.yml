@@ -1,8 +1,8 @@
-Edit feature
+Edit permissions
 ---
 tags:
-  - Features
-summary: Edit feature to layer
+  - Permissions
+summary: Edit permission for layer and user
 produces:
   - application/json
 parameters:
@@ -17,15 +17,17 @@ parameters:
     schema:
       type: object
       properties:
-        type:
+        user:
           type: string
-          example: "Feature"
+          example: "test"
           required: true
-        properties:
-          type: object
-          required: true
-        geometry:
-          type: object
+        permission:
+          enum:
+            - ""
+            - "read"
+            - "write"
+          type: string
+          example: "read"
           required: true
   - name: token
     in: query
@@ -41,18 +43,17 @@ responses:
         type:
           type: string
           example: "FeatureCollection"
-        features:
-          type: array
-          items:
+        permissions:
+          type: object
+          properties:
             type: object
             properties:
-              type:
+              user:
                 type: string
-                example: "Feature"
-              geometry:
-                type: object
-              properties:
-                type: object
+                example: "test"
+              permission:
+                type: string
+                example: "read"
   403:
     description: Token required
     schema:
@@ -61,3 +62,11 @@ responses:
         error:
           type: string
           example: "token required"
+  400:
+    description: User/Permission invalid
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "permission invalid"

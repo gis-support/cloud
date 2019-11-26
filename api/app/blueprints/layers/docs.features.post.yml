@@ -1,8 +1,8 @@
-Edit feature
+Add feature
 ---
 tags:
   - Features
-summary: Edit feature to layer
+summary: Add new feature to layer
 produces:
   - application/json
 parameters:

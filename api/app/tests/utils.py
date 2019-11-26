@@ -48,7 +48,7 @@ class BaseTest:
 
     def add_feature_to_layer(self, client, token, lid):
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
-        r = client.post('/api/layers/{}?token={}'.format(lid, token),
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
                         data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 201
         assert r.json
