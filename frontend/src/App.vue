@@ -15,6 +15,14 @@
           </div>
           <nav class="collapse navbar-collapse" role="navigation">
             <ul class="nav navbar-nav navbar-right">
+              <li class="navbar-profile" :disabled="$i18n.locale == 'en'"
+                :class="{ btnActive: $i18n.locale == 'en'}" @click="changeLanguage('en')">
+                <a>EN</a>
+              </li>
+              <li class="navbar-profile" :disabled="$i18n.locale == 'pl'"
+                :class="{ btnActive: $i18n.locale == 'pl'}" @click="changeLanguage('pl')">
+                <a>PL</a>
+              </li>
               <li class="dropdown navbar-profile">
                 <a class="dropdown-toggle" style="padding-left: 15px;" data-toggle="dropdown"
                 href="javascript:;" >
@@ -39,6 +47,20 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: 'App',
+  methods: {
+    changeLanguage(lang) {
+      this.$i18n.locale = lang;
+    },
+  },
+  mounted() {
+    this.changeLanguage('pl');
+  },
+};
+</script>
+
 <style>
 #app {
   height: 100%;
@@ -46,6 +68,12 @@
 .align-center {
   text-align: center;
   align-items: center;
+}
+.btnActive {
+  background-color: #283846;
+}
+.btnActive a {
+  color: #fff !important;
 }
 .container__border--bottom {
   border-bottom: 1px solid;
