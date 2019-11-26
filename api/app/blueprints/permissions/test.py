@@ -104,7 +104,7 @@ class TestPermissions(BaseTest):
         assert r.json['error'] == 'access denied, not an owner'
         # Try to add feature with read only permission
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
-        r = client.post('/api/layers/{}?token={}'.format(lid, token),
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
                         data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 403
         assert r.json
@@ -142,7 +142,7 @@ class TestPermissions(BaseTest):
         assert r.json['error'] == 'access denied'
         # Try to add feature with no permissions
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
-        r = client.post('/api/layers/{}?token={}'.format(lid, token),
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
                         data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 403
         assert r.json
@@ -182,7 +182,7 @@ class TestPermissions(BaseTest):
         assert r.json['error'] == 'access denied, not an owner'
         # Try to add feature with read only permission
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
-        r = client.post('/api/layers/{}?token={}'.format(lid, token),
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
                         data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 201
         # Try to delete feature with read only permission
@@ -214,7 +214,7 @@ class TestPermissions(BaseTest):
         assert r.json['error'] == 'access denied'
         # Try to add feature with no permissions
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
-        r = client.post('/api/layers/{}?token={}'.format(lid, token),
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
                         data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 403
         assert r.json

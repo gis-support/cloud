@@ -122,8 +122,7 @@ def layers(cloud):
         return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
 
 
-@mod_layers.route('/layers/<lid>', methods=['GET', 'POST', 'DELETE'])
-@swag_from(path_by(__file__, 'docs.layers.id.post.yml'), methods=['POST'])
+@mod_layers.route('/layers/<lid>', methods=['GET', 'DELETE'])
 @swag_from(path_by(__file__, 'docs.layers.id.get.yml'), methods=['GET'])
 @swag_from(path_by(__file__, 'docs.layers.id.delete.yml'), methods=['DELETE'])
 @token_required
@@ -149,24 +148,22 @@ def layers_id(lid):
             return jsonify({"layers": "{} deleted".format(layer.name)})
         return delete(lid=lid)
 
-    elif request.method == 'POST':
-        """
-        Add new feature to layer by ID with write permission
-        Returns layer properties
-        """
-        @layer_decorator(permission="write")
-        def post(layer, lid=None):
-            data = request.get_json(force=True)
-            geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
-            columns = []
-            values = []
-            for k, v in data['properties'].items():
-                if k in layer.columns():
-                    columns.append(k)
-                    values.append(v)
-            layer.add_feature(columns, values)
-            return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
-        return post(lid=lid)
+
+@mod_layers.route('/layers/<lid>/features', methods=['POST'])
+@swag_from(path_by(__file__, 'docs.features.post.yml'), methods=['POST'])
+@token_required
+@layer_decorator(permission="write")
+def features_post(layer, lid):
+    data = request.get_json(force=True)
+    geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
+    columns = []
+    values = []
+    for k, v in data['properties'].items():
+        if k in layer.columns():
+            columns.append(k)
+            values.append(v)
+    layer.add_feature(columns, values)
+    return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
 
 
 @mod_layers.route('/layers/<lid>/features/<int:fid>', methods=['GET', 'PUT', 'DELETE'])

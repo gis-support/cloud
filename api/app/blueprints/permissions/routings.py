@@ -4,11 +4,14 @@
 from flask import Blueprint, jsonify, request
 from app.db.general import token_required, layer_decorator, user_exists, cloud_decorator
 from app.helpers.layer import PERMISSIONS
+from flasgger import swag_from
+from app.docs import path_by
 
 mod_permissions = Blueprint("permissions", __name__)
 
 
 @mod_permissions.route('/permissions')
+@swag_from(path_by(__file__, 'docs.permissions.get.yml'))
 @token_required
 @cloud_decorator
 def permissions(cloud):
@@ -16,6 +19,7 @@ def permissions(cloud):
 
 
 @mod_permissions.route('/permissions/<lid>', methods=['PUT'])
+@swag_from(path_by(__file__, 'docs.permissions.id.put.yml'), methods=['PUT'])
 @token_required
 @layer_decorator(permission="owner")
 def permissions_by_layer_id(layer, lid):
