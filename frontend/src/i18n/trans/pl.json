@@ -12,12 +12,15 @@
     },
     "title": {
       "vectorLayersList": "Lista warstw wektorowych",
-      "externalSourcesList": "Lista ze źródeł zewnętrznych"
+      "externalSourcesList": "Lista warstw ze źródeł zewnętrznych"
     }
   },
   "default": {
     "cancel": "Anuluj",
+    "chooseFiles": "Wybierz pliki",
     "noLayers": "Brak warstw",
-    "save": "Zapisz"
+    "save": "Zapisz",
+    "startUpload": "Wyślij pliki",
+    "stopUpload": "Zatrzymaj"
   }
 }

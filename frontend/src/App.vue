@@ -88,8 +88,8 @@ export default {
   border-color: #d74b4b;
 }
 .flex-center {
-  display: flex;
-  justify-content: space-between;
+  display: flex !important;
+  justify-content: space-between !important;
 }
 .green {
   color: #1e5b22 !important;
