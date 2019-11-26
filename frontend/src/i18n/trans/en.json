@@ -1,0 +1,12 @@
+{
+  "dashboard": {
+    "placeholder": {
+      "layersFilter": "Layers filter",
+      "externalSourcesFilter": "External sources filter"
+    },
+    "title": {
+      "vectorLayersList": "List of vector layers",
+      "externalSourcesList": "List from external sources"
+    }
+  }
+}
