@@ -32,18 +32,18 @@ class BaseTest:
         assert len(r.json['token']) > 10
         return r.json['token']
 
-    def add_geojson_prg(self, client, token):
+    def add_geojson_prg(self, client, token, name='wojewodztwa'):
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct.geojson')
         file_request = {
             'file[]': (BytesIO(open(path, 'rb').read()), 'correct.geojson'),
-            'name': 'wojewodztwa'
+            'name': name
         }
         r = client.post('/api/layers?token={}'.format(token), data=file_request,
                         follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 201
         assert r.json
         assert r.json['layers']['features'] == 1
-        assert r.json['layers']['name'] == 'wojewodztwa'
+        assert r.json['layers']['name'] == name
         return r.json['layers']['id']
 
     def add_feature_to_layer(self, client, token, lid):
