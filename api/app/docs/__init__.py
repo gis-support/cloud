@@ -20,7 +20,8 @@ def create_swagger(app):
             "termsOfService": "",
             "version": "0.1"
         },
-        "basePath": app.config['HOST'],
+        "host": f"{app.config['APP_HOST']}:{app.config['APP_PORT']}" if app.config['APP_HOST'] == 'localhost' else app.config['APP_HOST'],
+        "basePath": "/",
         "schemes": [
             "http",
             "https"

@@ -11,7 +11,8 @@ class Config(object):
     DBPASS = 'docker'
     DBPORT = 5432
     DBHOST = 'cloud-db'
-    HOST = 'https://cbre.gis-support'
+    APP_HOST = 'cbre.gis-support'
+    APP_PORT = 5001
     REDIS_URL = "redis://@cloud-redis:6379/0"
     SECRET_KEY = 'test'
     DEBUG = False
