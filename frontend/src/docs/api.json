@@ -1,5 +1,5 @@
 {
-  "basePath": "http://localhost:5001", 
+  "basePath": "https://cloud.gis.support", 
   "definitions": {}, 
   "info": {
     "contact": {

@@ -95,7 +95,7 @@
       </div>
     </div>
 
-    <!--MODAL DODAWANIA/EDYCJI PROJEKTÓW-->
+    <!--MODAL DODAWANIA WARSTW-->
     <div class="modal fade" data-backdrop="static" id="addLayerModal" tabindex="-1" role="dialog"
       aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -104,10 +104,62 @@
             <h4 class="modal-title">{{$i18n.t('dashboard.modal.addLayer')}}</h4>
           </div>
           <div class="modal-body">
-
+            <div style="display: flex">
+              <label class="control-label col-sm-4">Nazwa warstwy</label>
+              <input type="text" class="form-control">
+            </div>
+            <div>
+              <div class="upload">
+                <div v-if="files.length > 0">Pliki w kolejce</div>
+                <ul class="files-list pl-0" style="display:flex; justify-content: center;">
+                  <li class="pl-0" v-for="(file, index) in files"
+                    :key="index + '_' + file.id">
+                    <span>{{file.name}}</span>
+                    <i class="fa fa-trash fa-lg red icon-hover"
+                      @click="$refs.upload.remove(file)" title="Usuń"></i>
+                    <span v-if="file.error">{{file.error}}</span>
+                    <span v-else-if="file.success">success</span>
+                    <span v-else-if="file.active">active</span>
+                    <span v-else></span>
+                  </li>
+                </ul>
+                <div class="example-btn">
+                  <!-- TODO change 'accept', 'extensions', 'post-action' -->
+                  <file-upload
+                    class="btn btn-primary btn-upload"
+                    post-action="/upload/post"
+                    extensions="gif,jpg,jpeg,png,webp"
+                    accept="image/png,image/gif,image/jpeg,image/webp"
+                    :multiple="true"
+                    :size="1024 * 1024 * 10"
+                    v-model="files"
+                    @input-filter="inputFilter"
+                    @input-file="inputFile"
+                    ref="upload"
+                  >
+                    <i class="fa fa-plus"></i>
+                    {{ $i18n.t('default.chooseFiles') }}
+                  </file-upload>
+                  <button type="button" class="btn btn-success"
+                    v-if="!$refs.upload || !$refs.upload.active"
+                    @click.prevent="$refs.upload.active = true"
+                  >
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    {{ $i18n.t('default.startUpload') }}
+                  </button>
+                  <button type="button" class="btn btn-danger"
+                    v-else @click.prevent="$refs.upload.active = false"
+                  >
+                    <i class="fa fa-stop" aria-hidden="true"></i>
+                    {{ $i18n.t('default.stopUpload') }}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">
+            <button type="button" class="btn btn-default" data-dismiss="modal"
+              @click="clearUploadFiles">
               {{$i18n.t('default.cancel')}}
             </button>
             <button type="button" class="btn btn-success">{{$i18n.t('default.save')}}</button>
@@ -120,10 +172,12 @@
 </template>
 
 <script>
+import FileUpload from 'vue-upload-component';
 
 export default {
   name: 'dashboard',
   data: () => ({
+    files: [],
     passwordModalVisible: false,
     searchExtSources: '',
     searchVector: '',
@@ -136,6 +190,9 @@ export default {
       { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
     ],
   }),
+  components: {
+    FileUpload,
+  },
   computed: {
     filteredListExternal() {
       return this.externalLayersList.filter(
@@ -148,6 +205,11 @@ export default {
       );
     },
   },
+  methods: {
+    clearUploadFiles() {
+      this.files = [];
+    },
+  },
   mounted() {
     this.$swagger.apis.Auth.post_api_login({ body: { user: 'test', password: 'test' } }).then((response) => {
       const { token } = response.obj;
@@ -158,11 +220,17 @@ export default {
 </script>
 
 <style scoped>
+.btn-upload {
+  margin-right: 20px;
+}
 .container {
   top: 20px;
 }
 .container__input {
   width: 300px;
+}
+.control-label {
+  line-height: 29px;
 }
 .dashboard.container {
   height: calc(100% - 76px);
@@ -176,6 +244,10 @@ export default {
   letter-spacing: -1px;
   line-height: 1.75em;
   margin-left: 5px;
+}
+.files-list li {
+  width: 120px;
+  list-style: none;
 }
 .heading-block:after {
   display: none;
