@@ -1,0 +1,54 @@
+Delete column
+---
+tags:
+  - Layers
+summary: Delete column by name
+produces:
+  - application/json
+parameters:
+  - name: id
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "test"
+          required: true
+  - name: token
+    in: query
+    description: Token
+    required: true
+    type: string
+responses:
+  200:
+    description: GeoJSON
+    schema:
+      type: object
+      properties:
+        layers:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Layer ID
+            name:
+              type: string
+              description: Layer name
+            features:
+              type: integer
+              description: Number of features
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

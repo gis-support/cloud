@@ -1,0 +1,37 @@
+Get settings
+---
+tags:
+  - Layers
+summary: Get layer settings by layer ID
+produces:
+  - application/json
+parameters:
+  - name: id
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - name: token
+    in: query
+    description: Token
+    required: true
+    type: string
+responses:
+  200:
+    schema:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        columns:
+          type: array
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
