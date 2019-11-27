@@ -60,6 +60,15 @@ class Layer(Cloud):
         if len(cursor.fetchall()) < 2:
             raise PermissionError("access denied, read only permission")
 
+    # Change layer name
+    def change_name(self, layer_name):
+        if self.layer_exists(layer_name):
+            raise ValueError("layer exists")
+        self.execute(
+            SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(self.name), Identifier(layer_name)))
+        self.name = layer_name
+        self.lid = self.hash_name(self.name)
+
     # Layer columns
     def settings(self):
         cursor = self.execute(

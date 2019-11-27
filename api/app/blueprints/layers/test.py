@@ -247,3 +247,23 @@ class TestLayersSettings(BaseTest):
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == "invalid column type"
+
+    def test_settings_change_name(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        new_column = {
+            "layer_name": "test"
+        }
+        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings'] != lid
+        new_lid = r.json['settings']
+        r = client.get(f'/api/layers/{lid}/settings?token={token}')
+        assert r.status_code == 401
+        assert r.json
+        assert r.json['error'] == 'layer not exists'
+        r = client.get(f'/api/layers/{new_lid}/settings?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings']['name'] == new_column['layer_name']

@@ -191,6 +191,13 @@ def layers_settings(lid):
             data = request.get_json(force=True)
             column_name = data.get('column_name')
             column_type = data.get('column_type')
+            layer_name = data.get('layer_name')
+            if layer_name:
+                try:
+                    layer.change_name(layer_name)
+                    return jsonify({"settings": layer.lid})
+                except ValueError as e:
+                    return jsonify({"error": str(e)}), 400
             try:
                 layer.add_column(column_name, column_type)
             except ValueError as e:

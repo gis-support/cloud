@@ -17,13 +17,16 @@ parameters:
     schema:
       type: object
       properties:
-        name:
+        column_name:
           type: string
           example: "test"
-          required: true
-        type:
+          required: false
+        column_type:
           type: string
-          required: true
+          required: false
+        layer_name:
+          type: string
+          required: false
   - name: token
     in: query
     description: Token
