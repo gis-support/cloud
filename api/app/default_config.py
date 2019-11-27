@@ -12,7 +12,7 @@ class Config(object):
     DBPORT = 5432
     DBHOST = 'cloud-db'
     HOST = 'http://localhost'
-    REDIS_URL = "redis://:password@cloud-redis:6379/0"
+    REDIS_URL = "redis://@cloud-redis:6379/0"
     SECRET_KEY = 'test'
     DEBUG = False
     TESTING = False

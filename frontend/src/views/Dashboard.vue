@@ -211,7 +211,7 @@ export default {
     },
   },
   mounted() {
-    this.$swagger.apis.Auth.post_api_login({ body: { user: 'test', password: 'test' } }).then((response) => {
+    this.$swagger.apis.Auth.post_api_login({ body: { user: 'docker', password: 'docker' } }).then((response) => {
       const { token } = response.obj;
       console.log(token);
     });
