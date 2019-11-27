@@ -30,7 +30,13 @@ def register():
 @swag_from(path_by(__file__, 'docs.login.post.yml'), methods=['POST'])
 def login():
     payload = request.get_json(force=True)
-    if not authenticate_user(payload['user'], payload['password']):
+    user = payload.get("user")
+    if not user:
+        return jsonify({"error": "user required"}), 400
+    password = payload.get("password")
+    if not password:
+        return jsonify({"error": "password required"}), 400
+    if not authenticate_user(user, password):
         return jsonify({"error": "invalid credentials"}), 403
-    token = create_token(payload['user'])
+    token = create_token(user)
     return jsonify({"token": token})

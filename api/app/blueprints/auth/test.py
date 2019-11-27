@@ -31,3 +31,16 @@ class TestAuth(BaseTest):
         assert r.status_code == 403
         assert r.json
         assert r.json['error'] == 'invalid credentials'
+
+    def test_login_user_password_required(self, client):
+        self.register(client)
+        r = client.post(
+            '/api/login', data=json.dumps({'test': 'test', 'password': '?'}))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == 'user required'
+        r = client.post(
+            '/api/login', data=json.dumps({'user': 'test', 'test': '?'}))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == 'password required'

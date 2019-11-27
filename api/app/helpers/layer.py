@@ -10,6 +10,11 @@ PERMISSIONS = {
     "": "REVOKE ALL ON {} FROM {}"
 }
 
+RESTRICTED_COLUMNS = (
+    "id",
+    "geometry"
+)
+
 
 class Layer(Cloud):
     def __init__(self, options):
@@ -62,10 +67,6 @@ class Layer(Cloud):
 
     # Remove layer column
     def remove_column(self, column_name):
-        if not column_name:
-            raise ValueError("column_name required")
-        if column_name in ['geometry', 'id']:
-            raise ValueError("column restricted")
         if not self.column_exists(column_name):
             raise ValueError("column not exists")
         self.execute(
@@ -73,12 +74,11 @@ class Layer(Cloud):
 
     # Check existence of column
     def column_exists(self, column_name):
-        cursor = self.execute("""
-            SELECT EXISTS (SELECT 1 
-            FROM information_schema.columns 
-            WHERE table_name=%s AND column_name=%s)
-        """, (self.name, column_name))
-        return cursor.fetchone()[0]
+        if not column_name:
+            raise ValueError("column_name required")
+        if column_name in RESTRICTED_COLUMNS:
+            raise ValueError("column restricted")
+        return column_name in self.columns()
 
     # Grant user with permission
     def grant(self, user, permission):
@@ -88,27 +88,27 @@ class Layer(Cloud):
             self.execute(SQL(PERMISSIONS[permission]).format(
                 Identifier(self.name), Identifier(user)))
 
-    # Lista kolumn
+    # Column lists
     def columns(self):
         cursor = self.execute(SQL("""
             SELECT * FROM {} LIMIT 0
         """).format(Identifier(self.name)))
-        return [description[0] for description in cursor.description if description[0] not in ['id', 'geometry']]
-    # Liczba features
+        return [description[0] for description in cursor.description if description[0] not in RESTRICTED_COLUMNS]
 
+    # Count features
     def count(self):
         cursor = self.execute(SQL("""
             SELECT count(*) FROM {}
         """).format(Identifier(self.name)))
         return cursor.fetchone()[0]
-    # Usunięcie warstwy
 
+    # Delete layer
     def delete(self):
         self.execute(SQL("""
             DROP TABLE {} CASCADE
         """).format(Identifier(self.name)))
-    # Wyświetlenie warstwy za pomocą GeoJSONa
 
+    # Convert layer to GeoJSON
     def as_geojson(self):
         cursor = self.execute(SQL("""
             SELECT json_build_object(
@@ -118,16 +118,16 @@ class Layer(Cloud):
             FROM (SELECT * from {}) as t;
         """).format(Identifier(self.name)))
         return cursor.fetchone()[0]
-    # Wyświetlenie pojedynczego feature
 
+    # Convert feature to GeoJSON
     def as_geojson_by_fid(self, fid):
         cursor = self.execute(SQL("""
             SELECT ST_AsGeoJSON(t.*)
             FROM (SELECT * from {} WHERE id=%s) AS t;
         """).format(Identifier(self.name)), (fid,))
         return json.loads(cursor.fetchone()[0])
-    # Dodanie nowego feature
 
+    # Add new feature
     def add_feature(self, columns, values):
         query_string = SQL("INSERT INTO {} ({}) values ({})").format(
             Identifier(self.name),
@@ -138,8 +138,8 @@ class Layer(Cloud):
         cursor = self.execute(
             SQL("SELECT count(*) FROM {}").format(Identifier(self.name)))
         return cursor.fetchone()[0]
-    # Edycja feature
 
+    # Edit existing feature
     def edit_feature(self, fid, columns, values):
         query_string = SQL("UPDATE {} SET {} WHERE id=%s").format(
             Identifier(self.name),
@@ -147,8 +147,8 @@ class Layer(Cloud):
                 map(lambda c: SQL("{} = %s").format(Identifier(c)), columns))
         )
         self.execute(query_string, *[values + [fid]])
-    # Usunięcie feature
 
+    # Delete feature
     def delete_feature(self, fid):
         query_string = SQL("DELETE FROM {} WHERE id=%s;").format(
             Identifier(self.name))
