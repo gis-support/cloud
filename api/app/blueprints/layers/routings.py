@@ -16,12 +16,12 @@ import os.path as op
 mod_layers = Blueprint("layers", __name__)
 
 
-FIELD_TYPES = {
-    "String": "varchar",
+GDAL_TO_PG = {
+    "String": "character varying",
     "Integer": "integer",
     "Real": "real",
-    "DateTime": "timestamp",
-    "Date": "timestamp",
+    "DateTime": "timestamp without time zone",
+    "Date": "timestamp without time zone",
     "Integer64": "integer"
 }
 
@@ -85,7 +85,7 @@ def layers(cloud):
             fdefn = ldefn.GetFieldDefn(n)
             fields.append({
                 'name': fdefn.name,
-                'type': FIELD_TYPES[fdefn.GetTypeName()],
+                'type': GDAL_TO_PG[fdefn.GetTypeName()],
             })
         with current_app._db.atomic() as transaction:
             cloud = Cloud({"app": current_app, "user": request.user})
@@ -162,7 +162,7 @@ def layers_settings(lid):
         """
         @layer_decorator(permission="owner")
         def get(layer, lid=None):
-            return jsonify({"settings": "test"})
+            return jsonify({"settings": layer.settings()})
         return get(lid=lid)
 
     elif request.method == 'DELETE':
@@ -172,7 +172,13 @@ def layers_settings(lid):
         """
         @layer_decorator(permission="owner")
         def delete(layer, lid=None):
-            return jsonify({"settings": "test"})
+            data = request.get_json(force=True)
+            column_name = data.get('column_name')
+            try:
+                layer.remove_column(column_name)
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 400
+            return jsonify({"settings": f"{column_name} deleted"})
         return delete(lid=lid)
 
     elif request.method == 'POST':

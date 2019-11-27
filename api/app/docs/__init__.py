@@ -20,7 +20,7 @@ def create_swagger(app):
             "termsOfService": "",
             "version": "0.1"
         },
-        "basePath": "/",
+        "basePath": app.config['HOST'],
         "schemes": [
             "http",
             "https"
@@ -43,16 +43,6 @@ def create_swagger(app):
         "specs_route": "/api/docs"
     }
     return Swagger(app, template=template, config=config)
-
-
-""" def swagger(path, filename, methods):
-    def wrapper(func):
-        @swag_from(os.path.abspath(os.path.join(os.path.dirname(path), filename)), methods=methods)
-        def func2(*args, **kwargs):
-            return func(*args, **kwargs)
-        func2.__name__ = func.__name__
-        return func2
-    return wrapper """
 
 
 def path_by(path, filename):

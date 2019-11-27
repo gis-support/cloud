@@ -17,7 +17,7 @@ parameters:
     schema:
       type: object
       properties:
-        name:
+        column_name:
           type: string
           example: "test"
           required: true

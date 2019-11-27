@@ -149,3 +149,54 @@ class TestLayers(BaseTest):
         assert r.status_code == 403
         assert r.json
         assert r.json['error'] == 'access denied'
+
+
+@pytest.mark.layerssettings
+class TestLayersSettings(BaseTest):
+
+    def test_settings_get_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        r = client.get(f'/api/layers/{lid}/settings?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings']['id'] == lid
+        assert len(r.json['settings']['columns'].keys()) == 30
+
+    def test_settings_delete_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "JPT_NAZWA_"}))
+        r = client.get(f'/api/layers/{lid}/settings?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings']['id'] == lid
+        assert len(r.json['settings']['columns'].keys()) == 29
+
+    def test_settings_delete_not_exists_column(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "test"}))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == 'column not exists'
+
+    def test_settings_delete_restricted_column(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "geometry"}))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == 'column restricted'
+        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "id"}))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == 'column restricted'
+
+    def test_settings_delete_empty_column(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({}))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == 'column_name required'

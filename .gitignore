@@ -1,6 +1,7 @@
 api/app/local_config.py
 docker/db/postgres_data/*
 docker/db/redis_data/*
+.pytest_cache
 
 .DS_Store
 frontend/node_modules

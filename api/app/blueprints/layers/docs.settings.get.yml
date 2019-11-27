@@ -26,7 +26,7 @@ responses:
         name:
           type: object
         columns:
-          type: array
+          type: object
   403:
     description: Token required
     schema:

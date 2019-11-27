@@ -14,18 +14,17 @@ PERMISSIONS = {
 class Layer(Cloud):
     def __init__(self, options):
         super().__init__(options)
-        # Nowy obiekt
         if options.get('name'):
+            # New object
             self.name = options['name']
             self.lid = self.hash_name(self.name)
         else:
-            # Zahaszowane ID warstwy
+            # Existing object
             self.lid = options['lid']
-            # Nazwa warstwy
             self.name = self.unhash_name(self.lid)
         self.validate()
 
-    # Sprawdzenie czy warstwa istnieje + uprawnienia
+    # Check existence and permissions
     def validate(self):
         cursor = self.execute(
             "SELECT relname FROM pg_class WHERE relkind in ('r', 'v', 't', 'm', 'f', 'p') AND relname = %s", (self.name,))
@@ -34,20 +33,54 @@ class Layer(Cloud):
         if self.name not in [l['name'] for l in self.get_layers()]:
             raise PermissionError("access denied")
 
-    # Sprawdzenie czy użytkownik jest właścicielem warstwy
+    # Check ownerhsip
     def check_owner(self):
         cursor = self.execute(
             "SELECT tableowner FROM pg_tables WHERE tablename = %s", (self.name,))
         if cursor.fetchone()[0] != self.user:
             raise PermissionError("access denied, not an owner")
 
-    # Sprawdzenie czy użytkownik ma prawa edycji
+    # Check write permission
     def check_write(self):
         cursor = self.execute(
             "SELECT * FROM information_schema.role_table_grants WHERE grantee = %s", (self.user,))
         if len(cursor.fetchall()) < 2:
             raise PermissionError("access denied, read only permission")
 
+    # Layer columns
+    def settings(self):
+        cursor = self.execute(
+            "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = %s AND column_name != 'geometry'", (self.name,))
+        settings = {
+            "id": self.lid,
+            "name": self.name,
+            "columns": {}
+        }
+        for row in cursor.fetchall():
+            settings['columns'][row[0]] = row[1]
+        return settings
+
+    # Remove layer column
+    def remove_column(self, column_name):
+        if not column_name:
+            raise ValueError("column_name required")
+        if column_name in ['geometry', 'id']:
+            raise ValueError("column restricted")
+        if not self.column_exists(column_name):
+            raise ValueError("column not exists")
+        self.execute(
+            SQL("ALTER TABLE {} DROP COLUMN {}").format(Identifier(self.name), Identifier(column_name)))
+
+    # Check existence of column
+    def column_exists(self, column_name):
+        cursor = self.execute("""
+            SELECT EXISTS (SELECT 1 
+            FROM information_schema.columns 
+            WHERE table_name=%s AND column_name=%s)
+        """, (self.name, column_name))
+        return cursor.fetchone()[0]
+
+    # Grant user with permission
     def grant(self, user, permission):
         self.execute(SQL(PERMISSIONS[""]).format(
             Identifier(self.name), Identifier(user)))

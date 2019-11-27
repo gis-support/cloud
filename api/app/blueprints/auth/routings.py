@@ -14,9 +14,15 @@ mod_auth = Blueprint("auth", __name__)
 @swag_from(path_by(__file__, 'docs.register.post.yml'), methods=['POST'])
 def register():
     payload = request.get_json(force=True)
-    if user_exists(payload['user']):
+    user = payload.get("user")
+    if not user:
+        return jsonify({"error": "user required"}), 400
+    password = payload.get("password")
+    if not user:
+        return jsonify({"error": "password required"}), 400
+    if user_exists(user):
         return jsonify({"error": "user exists"}), 409
-    create_user(payload['user'], payload['password'])
+    create_user(user, password)
     return jsonify({"register": "user created"}), 201
 
 
