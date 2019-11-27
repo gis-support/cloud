@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Swagger from 'swagger-client';
+import VueAlertify from 'vue-alertify';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -10,9 +11,9 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/css/mvpready-admin.css';
 
-
 Vue.prototype.$swagger = new Swagger({ spec: api }).client;
 Vue.config.productionTip = false;
+Vue.use(VueAlertify);
 
 window.vm = new Vue({
   router,

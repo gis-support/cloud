@@ -18,9 +18,19 @@
   "default": {
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
+    "email": "Email",
     "noLayers": "Brak warstw",
+    "password": "Hasło",
     "save": "Zapisz",
     "startUpload": "Wyślij pliki",
     "stopUpload": "Zatrzymaj"
+  },
+  "login": {
+    "loginTitle": "Logowanie",
+    "logIn": "Zaloguj się"
+  },
+  "register": {
+    "registerTitle": "Rejestracja",
+    "register": "Zarejestruj"
   }
 }

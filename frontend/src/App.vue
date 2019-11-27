@@ -13,7 +13,7 @@
               <img id="logo" alt="GIS Support logo" src="@/assets/logo.png">
             </a>
           </div>
-          <nav class="collapse navbar-collapse" role="navigation">
+          <nav v-if="user.length > 0" class="collapse navbar-collapse" role="navigation">
             <ul class="nav navbar-nav navbar-right">
               <!-- <li class="navbar-profile" :disabled="$i18n.locale == 'en'"
                 :class="{ btnActive: $i18n.locale == 'en'}" @click="changeLanguage('en')">
@@ -26,11 +26,11 @@
               <li class="dropdown navbar-profile">
                 <a class="dropdown-toggle" style="padding-left: 15px;" data-toggle="dropdown"
                 href="javascript:;" >
-                  <span>username &nbsp;</span>
+                  <span>{{ user }} &nbsp;</span>
                   <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="dropdown-menu" role="menu">
-                  <li>
+                  <li @click="logout">
                     <a>
                       <i class="fa fa-sign-out"></i>
                       &nbsp;&nbsp;<span>Wyloguj się</span>
@@ -50,9 +50,18 @@
 <script>
 export default {
   name: 'App',
+  computed: {
+    user() {
+      return this.$store.getters.getUser;
+    },
+  },
   methods: {
     changeLanguage(lang) {
       this.$i18n.locale = lang;
+    },
+    logout() {
+      this.$store.commit('logOut');
+      this.$router.push({ name: 'login' });
     },
   },
   mounted() {
