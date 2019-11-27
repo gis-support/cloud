@@ -13,11 +13,6 @@
                 id="login-password" :placeholder="$i18n.t('default.password')"
                 tabindex="2" v-model="password">
               </div>
-
-              <div class="form-group clearfix" v-if="loginError">
-                  <div class="alert alert-danger">{{ loginErrorMsg }}</div>
-              </div>
-
               <div class="form-group">
                 <button type="submit" id="loginButton" class="btn btn-primary btn-block btn-lg"
                 tabindex="4" @click="loginRequest">
@@ -34,8 +29,6 @@
 export default {
   data: () => ({
     email: 'docker',
-    loginError: false,
-    loginErrorMsg: '',
     password: 'docker',
   }),
   methods: {

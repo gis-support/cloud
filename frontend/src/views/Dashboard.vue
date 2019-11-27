@@ -209,7 +209,7 @@ export default {
     },
   },
   mounted() {
-
+    console.log(this.$swagger.apis);
   },
 };
 </script>

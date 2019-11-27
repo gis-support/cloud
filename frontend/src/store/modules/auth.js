@@ -37,6 +37,16 @@ export default {
         return err.response;
       }
     },
+    async register(ctx, payload) {
+      try {
+        console.log(payload);
+        const response = await swagger.apis.Auth.post_api_register({ body: payload });
+        console.log(response);
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
   },
   getters: {
     getToken(state) {

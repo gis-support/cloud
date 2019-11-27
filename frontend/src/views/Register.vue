@@ -13,11 +13,6 @@
                 id="register-password" :placeholder="$i18n.t('default.password')"
                 tabindex="2" v-model="password">
               </div>
-
-              <div class="form-group clearfix" v-if="registerError">
-                  <div class="alert alert-danger">{{ registerErrorMsg }}</div>
-              </div>
-
               <div class="form-group">
                 <button type="submit" id="registerButton" class="btn btn-primary btn-block btn-lg"
                 tabindex="4" @click="registerRequest">
@@ -34,13 +29,20 @@
 export default {
   data: () => ({
     email: '',
-    registerError: false,
-    registerErrorMsg: '',
     password: '',
   }),
   methods: {
-    registerRequest() {
-      console.log(this.email, this.password);
+    async registerRequest() {
+      const payload = { user: this.email, password: this.password };
+      const r = await this.$store.dispatch('register', payload);
+      if (r.status === 201) {
+        this.$alertify.success('Utworzono użytkownika - można przystąpić do logowania');
+        this.$router.push({ name: 'login' });
+      } else if (r.status === 409) {
+        this.$alertify.error('Użytkownik o podanym adresie email istnieje');
+      } else {
+        this.$alertify.error('Wystąpił błąd - skontaktuj się z administratorem');
+      }
     },
   },
 };
