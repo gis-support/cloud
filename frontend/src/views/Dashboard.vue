@@ -133,8 +133,6 @@
                     :multiple="true"
                     :size="1024 * 1024 * 10"
                     v-model="files"
-                    @input-filter="inputFilter"
-                    @input-file="inputFile"
                     ref="upload"
                   >
                     <i class="fa fa-plus"></i>
@@ -211,10 +209,7 @@ export default {
     },
   },
   mounted() {
-    this.$swagger.apis.Auth.post_api_login({ body: { user: 'docker', password: 'docker' } }).then((response) => {
-      const { token } = response.obj;
-      console.log(token);
-    });
+
   },
 };
 </script>
