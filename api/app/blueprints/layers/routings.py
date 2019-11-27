@@ -188,7 +188,14 @@ def layers_settings(lid):
         """
         @layer_decorator(permission="owner")
         def post(layer, lid=None):
-            return jsonify({"settings": "test"})
+            data = request.get_json(force=True)
+            column_name = data.get('column_name')
+            column_type = data.get('column_type')
+            try:
+                layer.add_column(column_name, column_type)
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 400
+            return jsonify({"settings": f"{column_name} added"})
         return post(lid=lid)
 
 

@@ -166,7 +166,11 @@ class TestLayersSettings(BaseTest):
     def test_settings_delete_correct(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
-        client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "JPT_NAZWA_"}))
+        column_to_delete = "JPT_NAZWA_"
+        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": column_to_delete}))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings'] == f'{column_to_delete} deleted'
         r = client.get(f'/api/layers/{lid}/settings?token={token}')
         assert r.status_code == 200
         assert r.json
@@ -200,3 +204,46 @@ class TestLayersSettings(BaseTest):
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == 'column_name required'
+
+    def test_settings_add_column_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        new_column = {
+            "column_name": "test",
+            "column_type": "character varying"
+        }
+        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings'] == f"{new_column['column_name']} added"
+        r = client.get(f'/api/layers/{lid}/settings?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings']['id'] == lid
+        assert len(r.json['settings']['columns'].keys()) == 31
+        assert r.json['settings']['columns'][new_column['column_name']
+                                             ] == new_column['column_type']
+
+    def test_settings_add_column_exists(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        new_column = {
+            "column_name": "JPT_NAZWA_",
+            "column_type": "character varying"
+        }
+        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == "column exists"
+
+    def test_settings_add_column_ivalid_type(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        new_column = {
+            "column_name": "test",
+            "column_type": "serial"
+        }
+        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == "invalid column type"

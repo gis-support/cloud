@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.helpers.cloud import Cloud
 from psycopg2.sql import SQL, Identifier, Placeholder
+from psycopg2.extensions import AsIs
 import json
 
 PERMISSIONS = {
@@ -13,6 +14,13 @@ PERMISSIONS = {
 RESTRICTED_COLUMNS = (
     "id",
     "geometry"
+)
+
+TYPES = (
+    'character varying',
+    'real',
+    'integer',
+    'timestamp without time zone'
 )
 
 
@@ -64,6 +72,15 @@ class Layer(Cloud):
         for row in cursor.fetchall():
             settings['columns'][row[0]] = row[1]
         return settings
+
+    # Add column to layer
+    def add_column(self, column_name, column_type):
+        if self.column_exists(column_name):
+            raise ValueError("column exists")
+        if column_type not in TYPES:
+            raise ValueError("invalid column type")
+        self.execute(
+            SQL("ALTER TABLE {} ADD COLUMN {} %s").format(Identifier(self.name), Identifier(column_name)), (AsIs(column_type),))
 
     # Remove layer column
     def remove_column(self, column_name):
