@@ -148,6 +148,12 @@ export default {
       );
     },
   },
+  mounted() {
+    this.$swagger.apis.Auth.post_api_login({ body: { user: 'test', password: 'test' } }).then((response) => {
+      const { token } = response.obj;
+      console.log(token);
+    });
+  },
 };
 </script>
 

@@ -9,6 +9,7 @@ from app.docs import create_swagger
 from app.db import create_db
 from app.blueprints.auth.routings import mod_auth
 from app.blueprints.layers.routings import mod_layers
+from app.blueprints.features.routings import mod_features
 from app.blueprints.permissions.routings import mod_permissions
 from hashids import Hashids
 try:
@@ -27,6 +28,7 @@ def create_app(config='development'):
     app._hashids = Hashids(salt=app.config['SECRET_KEY'])
     app.register_blueprint(mod_auth, url_prefix='/api')
     app.register_blueprint(mod_layers, url_prefix='/api')
+    app.register_blueprint(mod_features, url_prefix='/api')
     app.register_blueprint(mod_permissions, url_prefix='/api')
     return app
 

@@ -1,0 +1,895 @@
+{
+  "basePath": "http://localhost:5001", 
+  "definitions": {}, 
+  "info": {
+    "contact": {
+      "email": "", 
+      "responsibleDeveloper": "", 
+      "responsibleOrganization": "", 
+      "url": ""
+    }, 
+    "description": "", 
+    "termsOfService": "", 
+    "title": "Cloud", 
+    "version": "0.1"
+  }, 
+  "operationId": "getmyData", 
+  "paths": {
+    "/api/layers": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Layers", 
+            "schema": {
+              "properties": {
+                "layers": {
+                  "items": {
+                    "properties": {
+                      "id": {
+                        "description": "Layer ID", 
+                        "type": "string"
+                      }, 
+                      "name": {
+                        "description": "Layer name", 
+                        "type": "string"
+                      }
+                    }, 
+                    "type": "object"
+                  }, 
+                  "type": "array"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get layers", 
+        "tags": [
+          "Layers"
+        ]
+      }, 
+      "post": {
+        "parameters": [
+          {
+            "description": "Layer file", 
+            "in": "formData", 
+            "name": "file", 
+            "required": true, 
+            "type": "file"
+          }, 
+          {
+            "description": "Layer name", 
+            "example": "test", 
+            "in": "formData", 
+            "name": "name", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "EPSG number, 4326 default", 
+            "example": "4326", 
+            "in": "formData", 
+            "name": "epsg", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "201": {
+            "description": "Confirmation", 
+            "schema": {
+              "properties": {
+                "layers": {
+                  "properties": {
+                    "features": {
+                      "description": "Number of features", 
+                      "type": "integer"
+                    }, 
+                    "id": {
+                      "description": "Layer ID", 
+                      "type": "string"
+                    }, 
+                    "name": {
+                      "description": "Layer name", 
+                      "type": "string"
+                    }
+                  }, 
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "401": {
+            "description": "File is (required/invalid) / Name is required / Layer already exists", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "file is required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Add layer", 
+        "tags": [
+          "Layers"
+        ]
+      }
+    }, 
+    "/api/layers/{lid}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Confirmation", 
+            "schema": {
+              "properties": {
+                "layers": {
+                  "example": "layer deleted", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Delete layer", 
+        "tags": [
+          "Layers"
+        ]
+      }, 
+      "get": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "features": {
+                  "items": {
+                    "properties": {
+                      "geometry": {
+                        "type": "object"
+                      }, 
+                      "properties": {
+                        "type": "object"
+                      }, 
+                      "type": {
+                        "example": "Feature", 
+                        "type": "string"
+                      }
+                    }, 
+                    "type": "object"
+                  }, 
+                  "type": "array"
+                }, 
+                "type": {
+                  "example": "FeatureCollection", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get layer", 
+        "tags": [
+          "Layers"
+        ]
+      }
+    }, 
+    "/api/layers/{lid}/features": {
+      "post": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "geometry": {
+                  "required": true, 
+                  "type": "object"
+                }, 
+                "properties": {
+                  "required": true, 
+                  "type": "object"
+                }, 
+                "type": {
+                  "example": "Feature", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "features": {
+                  "items": {
+                    "properties": {
+                      "geometry": {
+                        "type": "object"
+                      }, 
+                      "properties": {
+                        "type": "object"
+                      }, 
+                      "type": {
+                        "example": "Feature", 
+                        "type": "string"
+                      }
+                    }, 
+                    "type": "object"
+                  }, 
+                  "type": "array"
+                }, 
+                "type": {
+                  "example": "FeatureCollection", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Add feature", 
+        "tags": [
+          "Features"
+        ]
+      }
+    }, 
+    "/api/layers/{lid}/features/{fid}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "layers": {
+                  "properties": {
+                    "features": {
+                      "description": "Number of features", 
+                      "type": "integer"
+                    }, 
+                    "id": {
+                      "description": "Layer ID", 
+                      "type": "string"
+                    }, 
+                    "name": {
+                      "description": "Layer name", 
+                      "type": "string"
+                    }
+                  }, 
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Delete feature", 
+        "tags": [
+          "Features"
+        ]
+      }, 
+      "get": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "geometry": {
+                  "type": "object"
+                }, 
+                "properties": {
+                  "type": "object"
+                }, 
+                "type": {
+                  "example": "Feature", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get feature", 
+        "tags": [
+          "Features"
+        ]
+      }, 
+      "put": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "geometry": {
+                  "required": true, 
+                  "type": "object"
+                }, 
+                "properties": {
+                  "required": true, 
+                  "type": "object"
+                }, 
+                "type": {
+                  "example": "Feature", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "features": {
+                  "items": {
+                    "properties": {
+                      "geometry": {
+                        "type": "object"
+                      }, 
+                      "properties": {
+                        "type": "object"
+                      }, 
+                      "type": {
+                        "example": "Feature", 
+                        "type": "string"
+                      }
+                    }, 
+                    "type": "object"
+                  }, 
+                  "type": "array"
+                }, 
+                "type": {
+                  "example": "FeatureCollection", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Edit feature", 
+        "tags": [
+          "Features"
+        ]
+      }
+    }, 
+    "/api/login": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "password": {
+                  "description": "User password", 
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "user": {
+                  "description": "User login", 
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Token", 
+            "schema": {
+              "properties": {
+                "token": {
+                  "description": "User token", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Invalid credentials", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "invalid credentials", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Login", 
+        "tags": [
+          "Auth"
+        ]
+      }
+    }, 
+    "/api/permissions": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "permissions": {
+                  "items": {
+                    "properties": {
+                      "id": {
+                        "description": "Layer ID", 
+                        "type": "string"
+                      }, 
+                      "name": {
+                        "description": "Layer name", 
+                        "type": "string"
+                      }, 
+                      "users": {
+                        "description": "For every user all layers and permissions", 
+                        "type": "object"
+                      }
+                    }, 
+                    "type": "object"
+                  }, 
+                  "type": "array"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get permissions", 
+        "tags": [
+          "Permissions"
+        ]
+      }
+    }, 
+    "/api/permissions/{lid}": {
+      "put": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "permission": {
+                  "enum": [
+                    "", 
+                    "read", 
+                    "write"
+                  ], 
+                  "example": "read", 
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "user": {
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "permissions": {
+                  "properties": {
+                    "properties": {
+                      "permission": {
+                        "example": "read", 
+                        "type": "string"
+                      }, 
+                      "user": {
+                        "example": "test", 
+                        "type": "string"
+                      }
+                    }, 
+                    "type": "object"
+                  }, 
+                  "type": "object"
+                }, 
+                "type": {
+                  "example": "FeatureCollection", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "400": {
+            "description": "User/Permission invalid", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "permission invalid", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Edit permissions", 
+        "tags": [
+          "Permissions"
+        ]
+      }
+    }, 
+    "/api/register": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "password": {
+                  "description": "User password", 
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "user": {
+                  "description": "User login", 
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "201": {
+            "description": "Confirmation", 
+            "schema": {
+              "properties": {
+                "register": {
+                  "example": "user created", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "409": {
+            "description": "User exists", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "user exists", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Register", 
+        "tags": [
+          "Auth"
+        ]
+      }
+    }
+  }, 
+  "schemes": [
+    "http", 
+    "https"
+  ], 
+  "swagger": "2.0"
+}
