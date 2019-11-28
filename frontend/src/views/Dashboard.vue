@@ -34,7 +34,7 @@
                 </span>
                 <span class="panel-title__tools">
                   <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Ustawienia"></i>
+                    data-placement="top" title="Ustawienia" @click="getLayers"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
                     data-placement="top" title="Usuń"></i>
                 </span>
@@ -202,14 +202,20 @@ export default {
         layer => layer.name.toLowerCase().includes(this.searchVector.toLowerCase()),
       );
     },
+    token() {
+      return this.$store.getters.getToken;
+    },
   },
   methods: {
     clearUploadFiles() {
       this.files = [];
     },
+    async getLayers() {
+      const r = await this.$store.dispatch('getLayers');
+      console.log(r);
+    },
   },
   mounted() {
-    console.log(this.$swagger.apis);
   },
 };
 </script>
