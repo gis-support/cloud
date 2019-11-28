@@ -4,12 +4,12 @@ import api from '@/docs/api.json';
 const swagger = new Swagger({
   spec: api,
   requestInterceptor: (r) => {
-    if (r.url.includes('/login') || r.url.includes('/register')) return r;
-
-    const el = r; // avoid no-param-reassign
-    el.url = `r.url?token=${localStorage.getItem('token')}`;
-    el.token = `${localStorage.getItem('token')}`;
-    return el;
+    if (r.url.includes('/login') || r.url.includes('/register')) {
+      return r;
+    }
+    const request = r;
+    request.headers.Authorization = localStorage.getItem('token');
+    return request;
   },
 }).client;
 
@@ -57,11 +57,10 @@ export default {
     },
     async getLayers() {
       try {
-        const response = await swagger.apis.Layers.get_api_layers({ token: '' });
+        const response = await swagger.apis.Layers.get_api_layers();
         console.log(response);
         return response;
       } catch (err) {
-        console.log(err);
         return err.response;
       }
     },

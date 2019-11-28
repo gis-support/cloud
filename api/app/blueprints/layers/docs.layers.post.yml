@@ -23,6 +23,11 @@ parameters:
     example: "4326"
     required: false
     type: string
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
 responses:
   201:
     description: Confirmation

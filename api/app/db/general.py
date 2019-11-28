@@ -86,6 +86,9 @@ def token_required(f):
         token = request.args.get('token')
         # W przypadku braku tokena
         if not token:
+            if 'Authorization' not in request.headers:
+                return jsonify({"error": "token required"}), 403
+            token = request.headers['Authorization']
             return jsonify({"error": "token required"}), 403
         # W przypadku niepoprawnego tokena
         try:
