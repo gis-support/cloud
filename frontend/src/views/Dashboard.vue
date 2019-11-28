@@ -34,7 +34,7 @@
                 </span>
                 <span class="panel-title__tools">
                   <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Ustawienia" @click="getLayers"></i>
+                    data-placement="top" title="Ustawienia"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
                     data-placement="top" title="Usuń"></i>
                 </span>
@@ -97,7 +97,7 @@
 
     <!--MODAL DODAWANIA WARSTW-->
     <div class="modal fade" data-backdrop="static" id="addLayerModal" tabindex="-1" role="dialog"
-      aria-hidden="true">
+      aria-hidden="true" ref="addLayerModal">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -106,53 +106,15 @@
           <div class="modal-body">
             <div style="display: flex">
               <label class="control-label col-sm-4">Nazwa warstwy</label>
-              <input type="text" class="form-control">
+              <input type="text" class="form-control" v-model="vectorLayerName">
             </div>
-            <div>
-              <div class="upload">
-                <div v-if="files.length > 0">Pliki w kolejce</div>
-                <ul class="files-list pl-0" style="display:flex; justify-content: center;">
-                  <li class="pl-0" v-for="(file, index) in files"
-                    :key="index + '_' + file.id">
-                    <span>{{file.name}}</span>
-                    <i class="fa fa-trash fa-lg red icon-hover"
-                      @click="$refs.upload.remove(file)" title="Usuń"></i>
-                    <span v-if="file.error">{{file.error}}</span>
-                    <span v-else-if="file.success">success</span>
-                    <span v-else-if="file.active">active</span>
-                    <span v-else></span>
-                  </li>
-                </ul>
-                <div class="example-btn">
-                  <!-- TODO change 'accept', 'extensions', 'post-action' -->
-                  <file-upload
-                    class="btn btn-primary btn-upload"
-                    post-action="/upload/post"
-                    extensions="gif,jpg,jpeg,png,webp"
-                    accept="image/png,image/gif,image/jpeg,image/webp"
-                    :multiple="true"
-                    :size="1024 * 1024 * 10"
-                    v-model="files"
-                    ref="upload"
-                  >
-                    <i class="fa fa-plus"></i>
-                    {{ $i18n.t('default.chooseFiles') }}
-                  </file-upload>
-                  <button type="button" class="btn btn-success"
-                    v-if="!$refs.upload || !$refs.upload.active"
-                    @click.prevent="$refs.upload.active = true"
-                  >
-                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
-                    {{ $i18n.t('default.startUpload') }}
-                  </button>
-                  <button type="button" class="btn btn-danger"
-                    v-else @click.prevent="$refs.upload.active = false"
-                  >
-                    <i class="fa fa-stop" aria-hidden="true"></i>
-                    {{ $i18n.t('default.stopUpload') }}
-                  </button>
-                </div>
-              </div>
+            <div class="pt-10">
+              <vue-dropzone
+                ref="dropzoneUploadLayer"
+                id="dropzone"
+                :options="dropzoneOptions"
+                @vdropzone-sending-multiple="sendingEvent"
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -160,7 +122,9 @@
               @click="clearUploadFiles">
               {{$i18n.t('default.cancel')}}
             </button>
-            <button type="button" class="btn btn-success">{{$i18n.t('default.save')}}</button>
+            <button type="button" class="btn btn-success" @click="sendVectorLayer">
+              {{$i18n.t('default.save')}}
+            </button>
           </div>
         </div>
       </div>
@@ -170,28 +134,51 @@
 </template>
 
 <script>
-import FileUpload from 'vue-upload-component';
+import vue2Dropzone from 'vue2-dropzone';
+import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 
 export default {
   name: 'dashboard',
-  data: () => ({
-    files: [],
-    passwordModalVisible: false,
-    searchExtSources: '',
-    searchVector: '',
-    vectorLayersList: [
-      { name: 'brownfields', team: 'Hale' },
-      { name: 'greenfields', team: 'Grunty inwestycyjne' },
-    ],
-    externalLayersList: [
-      { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
-      { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
-    ],
-  }),
+  data() {
+    const self = this;
+    return {
+      passwordModalVisible: false,
+      searchExtSources: '',
+      searchVector: '',
+      vectorLayerName: '',
+      vectorLayersList: [],
+      externalLayersList: [
+        { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
+        { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
+      ],
+      dropzoneOptions: {
+        url: `${self.apiUrl}/layers?token=${self.token}`,
+        addRemoveLinks: true,
+        autoProcessQueue: false,
+        dictCancelUpload: 'Anuluj wysyłanie',
+        dictRemoveFile: 'Usuń plik',
+        dictDefaultMessage: 'Przeciągnij pliki lub kliknij i wybierz pliki do przesłania',
+        thumbnailWidth: 150,
+        maxFilesize: 2,
+        uploadMultiple: true,
+        methods: 'post',
+        acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
+        success() {
+          self.$alertify.success('Pomyślnie dodano warstwę');
+        },
+        error() {
+          self.$alertify.error('Błąd podczas przesyłania pliku');
+        },
+      },
+    };
+  },
   components: {
-    FileUpload,
+    vueDropzone: vue2Dropzone,
   },
   computed: {
+    apiUrl() {
+      return this.$store.getters.getApiUrl;
+    },
     filteredListExternal() {
       return this.externalLayersList.filter(
         layer => layer.name.toLowerCase().includes(this.searchExtSources.toLowerCase()),
@@ -212,10 +199,21 @@ export default {
     },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
-      console.log(r.body);
+      this.vectorLayersList = r.body.layers;
+    },
+    sendingEvent(files, xhr, formData) {
+      formData.append('name', this.vectorLayerName);
+    },
+    sendVectorLayer() {
+      if (this.vectorLayerName === '') {
+        this.$alertify.error('Podaj nazwę warstwy');
+        return;
+      }
+      this.$refs.dropzoneUploadLayer.processQueue();
     },
   },
   mounted() {
+    this.getLayers();
   },
 };
 </script>

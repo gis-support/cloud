@@ -58,14 +58,6 @@ export default {
         return err.response;
       }
     },
-    async getLayers() {
-      try {
-        const response = await swagger.apis.Layers.get_api_layers();
-        return response;
-      } catch (err) {
-        return err.response;
-      }
-    },
   },
   getters: {
     getToken(state) {
