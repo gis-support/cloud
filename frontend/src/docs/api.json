@@ -1,6 +1,7 @@
 {
-  "basePath": "https://cloud.gis.support", 
+  "basePath": "/", 
   "definitions": {}, 
+  "host": "cloud.gis.support", 
   "info": {
     "contact": {
       "email": "", 
@@ -22,7 +23,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -94,6 +95,13 @@
             "example": "4326", 
             "in": "formData", 
             "name": "epsg", 
+            "required": false, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
             "required": false, 
             "type": "string"
           }
@@ -172,7 +180,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -223,7 +231,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -317,7 +325,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -388,7 +396,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -452,7 +460,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -532,7 +540,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -586,6 +594,221 @@
         "summary": "Edit feature", 
         "tags": [
           "Features"
+        ]
+      }
+    }, 
+    "/api/layers/{lid}/settings": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "column_name": {
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "layers": {
+                  "properties": {
+                    "features": {
+                      "description": "Number of features", 
+                      "type": "integer"
+                    }, 
+                    "id": {
+                      "description": "Layer ID", 
+                      "type": "string"
+                    }, 
+                    "name": {
+                      "description": "Layer name", 
+                      "type": "string"
+                    }
+                  }, 
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Delete column", 
+        "tags": [
+          "Layers"
+        ]
+      }, 
+      "get": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "columns": {
+                  "type": "object"
+                }, 
+                "id": {
+                  "type": "string"
+                }, 
+                "name": {
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get settings", 
+        "tags": [
+          "Layers"
+        ]
+      }, 
+      "post": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "id", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "column_name": {
+                  "example": "test", 
+                  "required": false, 
+                  "type": "string"
+                }, 
+                "column_type": {
+                  "required": false, 
+                  "type": "string"
+                }, 
+                "layer_name": {
+                  "required": false, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "columns": {
+                  "type": "array"
+                }, 
+                "id": {
+                  "type": "string"
+                }, 
+                "name": {
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Add column", 
+        "tags": [
+          "Layers"
         ]
       }
     }, 
@@ -664,7 +887,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 
@@ -758,7 +981,7 @@
             "description": "Token", 
             "in": "query", 
             "name": "token", 
-            "required": true, 
+            "required": false, 
             "type": "string"
           }
         ], 

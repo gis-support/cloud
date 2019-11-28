@@ -212,7 +212,7 @@ export default {
     },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
-      console.log(r);
+      console.log(r.body);
     },
   },
   mounted() {
