@@ -21,6 +21,15 @@ export default {
     apiUrl: 'https://cloud.gis.support/api',
   },
   actions: {
+    async changeLayerName(ctx, payload) {
+      try {
+        const response = await swagger.apis.Layers
+          .post_api_layers__lid__settings({ body: payload.body, lid: payload.lid });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async getLayers() {
       try {
         const response = await swagger.apis.Layers.get_api_layers();
@@ -29,9 +38,9 @@ export default {
         return err.response;
       }
     },
-    async getLayerColumns(ctx, payload) {
+    async getLayerColumns(ctx, lid) {
       try {
-        const response = await swagger.apis.Layers.get_api_layers__lid__settings({ body: payload });
+        const response = await swagger.apis.Layers.get_api_layers__lid__settings({ lid });
         return response;
       } catch (err) {
         return err.response;

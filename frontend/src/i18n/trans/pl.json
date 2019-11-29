@@ -23,11 +23,13 @@
   "default": {
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
+    "close": "Zamknij",
     "email": "Email",
     "loading": "Trwa ładowanie danych",
     "noLayers": "Brak warstw",
     "password": "Hasło",
     "save": "Zapisz",
+    "saveName": "Zapisz nazwę",
     "startUpload": "Wyślij pliki",
     "stopUpload": "Zatrzymaj"
   },

@@ -158,15 +158,16 @@
           <div class="modal-body">
             <div style="display: flex">
               <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
-              <input type="text" class="form-control" v-model="currentEditedLayer.name">
+              <input type="text" class="form-control mr-5"
+                v-model="currentEditedLayer.name">
+              <button type="button" class="btn btn-success" @click="saveLayerName">
+                {{$i18n.t('default.saveName')}}
+              </button>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">
-              {{$i18n.t('default.cancel')}}
-            </button>
-            <button type="button" class="btn btn-success">
-              {{$i18n.t('default.save')}}
+              {{$i18n.t('default.close')}}
             </button>
           </div>
         </div>
@@ -196,7 +197,7 @@ export default {
         { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
       ],
       dropzoneOptions: {
-        url: `${self.apiUrl}/layers?token=${self.token}`,
+        url: `${self.$store.getters.getApiUrl}/layers?token=${self.$store.getters.getToken}`,
         addRemoveLinks: true,
         autoProcessQueue: false,
         dictCancelUpload: 'Anuluj wysyłanie',
@@ -205,6 +206,7 @@ export default {
         thumbnailWidth: 150,
         maxFilesize: 2,
         uploadMultiple: true,
+        parallelUploads: 10,
         methods: 'post',
         acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
         success() {
@@ -221,9 +223,6 @@ export default {
     vueDropzone: vue2Dropzone,
   },
   computed: {
-    apiUrl() {
-      return this.$store.getters.getApiUrl;
-    },
     filteredListExternal() {
       if (!this.externalLayersList) {
         return false;
@@ -240,23 +239,27 @@ export default {
         layer => layer.name.toLowerCase().includes(this.searchVector.toLowerCase()),
       );
     },
-    token() {
-      return this.$store.getters.getToken;
-    },
   },
   methods: {
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
     },
+    async saveLayerName() {
+      /* const payload = {
+        body: {
+          layer_name: this.currentEditedLayer.name,
+        },
+        lid: this.currentEditedLayer.id,
+      };
+      const r = await this.$store.dispatch('changeLayerName', payload);
+      console.log(r.obj.settings); */
+    },
     async setEditedLayer(layType, key) {
       if (layType === 'vector') {
         this.currentEditedLayer = this.vectorLayersList[key];
       }
-      const payload = {
-        lid: this.currentEditedLayer.id,
-      };
-      const r = await this.$store.dispatch('getLayerColumns', payload);
+      const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
       this.currentLayerSettings = r.body.settings;
     },
     clearUploadFiles() {
@@ -292,6 +295,7 @@ export default {
 }
 .control-label {
   line-height: 29px;
+  font-size: 12px;
 }
 .dashboard.container {
   height: calc(100% - 76px);
@@ -310,7 +314,7 @@ export default {
   width: 120px;
   list-style: none;
 }
-.heading-block:after {
+.heading-block:after, .heading-block:before {
   display: none;
 }
 .loading-overlay {
@@ -325,6 +329,10 @@ export default {
 }
 .section {
   height: 50%;
+}
+.section__content.heading-block.heading-block-main {
+  overflow-y: auto;
+  max-height: calc(100% - 50px);
 }
 .section__header {
   padding-bottom: 15px;
