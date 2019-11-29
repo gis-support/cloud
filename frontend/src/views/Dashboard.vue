@@ -16,6 +16,12 @@
           <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
           <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
         </span>
+
+        <div class="loading-overlay pt-10 pb-10" v-if="!vectorLayersList">
+          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
+          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        </div>
+
         <div v-if="filteredListVector.length == 0" class="pt-10 pb-10">
           {{$i18n.t('default.noLayers')}}
         </div>
@@ -33,8 +39,9 @@
                   </span>
                 </span>
                 <span class="panel-title__tools">
-                  <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Ustawienia"></i>
+                  <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="modal"
+                  data-target="#layerSettingsModal" data-placement="top"
+                  title="Ustawienia" @click="setEditedLayer('vector', key)"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
                     data-placement="top" title="Usuń"></i>
                 </span>
@@ -63,6 +70,12 @@
           <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
           <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
         </span>
+
+        <div class="loading-overlay pt-10 pb-10" v-if="!externalLayersList">
+          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
+          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        </div>
+
         <div v-if="filteredListExternal.length == 0" class="pt-10 pb-10">
           {{$i18n.t('default.noLayers')}}
         </div>
@@ -105,7 +118,7 @@
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label class="control-label col-sm-4">Nazwa warstwy</label>
+              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
               <input type="text" class="form-control" v-model="vectorLayerName">
             </div>
             <div class="pt-10">
@@ -130,6 +143,36 @@
       </div>
     </div>
     <!--KONIEC MODALA-->
+
+    <!--MODAL USTAWIENIA WARSTWY-->
+    <div class="modal fade" data-backdrop="static" id="layerSettingsModal" tabindex="-1"
+      role="dialog" aria-hidden="true" ref="layerSettingsModal">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" v-if="currentEditedLayer">
+          <div class="modal-header">
+            <h4 class="modal-title">
+              {{$i18n.t('dashboard.modal.settingsLayer')}}
+              <span class="red">{{currentEditedLayer.name}}</span>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <div style="display: flex">
+              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
+              <input type="text" class="form-control" v-model="currentEditedLayer.name">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              {{$i18n.t('default.cancel')}}
+            </button>
+            <button type="button" class="btn btn-success">
+              {{$i18n.t('default.save')}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--KONIEC MODALA-->
   </div>
 </template>
 
@@ -142,11 +185,11 @@ export default {
   data() {
     const self = this;
     return {
-      passwordModalVisible: false,
+      currentEditedLayer: undefined,
       searchExtSources: '',
       searchVector: '',
       vectorLayerName: '',
-      vectorLayersList: [],
+      vectorLayersList: undefined,
       externalLayersList: [
         { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
         { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
@@ -165,6 +208,7 @@ export default {
         acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
         success() {
           self.$alertify.success('Pomyślnie dodano warstwę');
+          self.getLayers();
         },
         error() {
           self.$alertify.error('Błąd podczas przesyłania pliku');
@@ -180,11 +224,17 @@ export default {
       return this.$store.getters.getApiUrl;
     },
     filteredListExternal() {
+      if (!this.externalLayersList) {
+        return false;
+      }
       return this.externalLayersList.filter(
         layer => layer.name.toLowerCase().includes(this.searchExtSources.toLowerCase()),
       );
     },
     filteredListVector() {
+      if (!this.vectorLayersList) {
+        return false;
+      }
       return this.vectorLayersList.filter(
         layer => layer.name.toLowerCase().includes(this.searchVector.toLowerCase()),
       );
@@ -195,7 +245,7 @@ export default {
   },
   methods: {
     clearUploadFiles() {
-      this.files = [];
+      this.$refs.dropzoneUploadLayer.removeAllFiles();
     },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
@@ -210,6 +260,11 @@ export default {
         return;
       }
       this.$refs.dropzoneUploadLayer.processQueue();
+    },
+    setEditedLayer(layType, key) {
+      if (layType === 'vector') {
+        this.currentEditedLayer = this.vectorLayersList[key];
+      }
     },
   },
   mounted() {
@@ -250,6 +305,10 @@ export default {
 }
 .heading-block:after {
   display: none;
+}
+.loading-overlay {
+  width: 100%;
+  text-align: center;
 }
 .panel-title__names {
   font-size: 14px;
