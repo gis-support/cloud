@@ -172,7 +172,7 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
             "required": true, 
             "type": "string"
           }, 
@@ -223,7 +223,7 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
             "required": true, 
             "type": "string"
           }, 
@@ -603,7 +603,7 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
             "required": true, 
             "type": "string"
           }, 
@@ -682,7 +682,7 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
             "required": true, 
             "type": "string"
           }, 
@@ -737,7 +737,7 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
             "required": true, 
             "type": "string"
           }, 

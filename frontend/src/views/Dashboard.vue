@@ -186,6 +186,7 @@ export default {
     const self = this;
     return {
       currentEditedLayer: undefined,
+      currentLayerSettings: [],
       searchExtSources: '',
       searchVector: '',
       vectorLayerName: '',
@@ -244,12 +245,22 @@ export default {
     },
   },
   methods: {
-    clearUploadFiles() {
-      this.$refs.dropzoneUploadLayer.removeAllFiles();
-    },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
+    },
+    async setEditedLayer(layType, key) {
+      if (layType === 'vector') {
+        this.currentEditedLayer = this.vectorLayersList[key];
+      }
+      const payload = {
+        lid: this.currentEditedLayer.id,
+      };
+      const r = await this.$store.dispatch('getLayerColumns', payload);
+      this.currentLayerSettings = r.body.settings;
+    },
+    clearUploadFiles() {
+      this.$refs.dropzoneUploadLayer.removeAllFiles();
     },
     sendingEvent(files, xhr, formData) {
       formData.append('name', this.vectorLayerName);
@@ -261,13 +272,9 @@ export default {
       }
       this.$refs.dropzoneUploadLayer.processQueue();
     },
-    setEditedLayer(layType, key) {
-      if (layType === 'vector') {
-        this.currentEditedLayer = this.vectorLayersList[key];
-      }
-    },
   },
   mounted() {
+    // console.log(this.$swagger);
     this.getLayers();
   },
 };

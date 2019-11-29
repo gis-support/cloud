@@ -29,6 +29,14 @@ export default {
         return err.response;
       }
     },
+    async getLayerColumns(ctx, payload) {
+      try {
+        const response = await swagger.apis.Layers.get_api_layers__lid__settings({ body: payload });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
   },
   getters: {
     getApiUrl(state) {
