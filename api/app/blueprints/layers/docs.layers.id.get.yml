@@ -6,7 +6,7 @@ summary: Get layer by ID
 produces:
   - application/json
 parameters:
-  - name: id
+  - name: lid
     in: path
     description: Layer ID
     required: true

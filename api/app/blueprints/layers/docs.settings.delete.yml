@@ -6,7 +6,7 @@ summary: Delete column by name
 produces:
   - application/json
 parameters:
-  - name: id
+  - name: lid
     in: path
     description: Layer ID
     required: true
