@@ -4,7 +4,9 @@
       "addLayer": "Dodaj nową warstwę"
     },
     "modal":  {
-      "addLayer": "Dodawanie nowej warstwy"
+      "addLayer": "Dodawanie nowej warstwy",
+      "layerName": "Nazwa warstwy",
+      "settingsLayer": "Ustawienia warstwy"
     },
     "placeholder": {
       "layersFilter": "Filtr warstw",
@@ -19,6 +21,7 @@
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
     "email": "Email",
+    "loading": "Trwa ładowanie danych",
     "noLayers": "Brak warstw",
     "password": "Hasło",
     "save": "Zapisz",

@@ -16,6 +16,12 @@
           <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
           <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
         </span>
+
+        <div class="loading-overlay pt-10 pb-10" v-if="!vectorLayersList">
+          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
+          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        </div>
+
         <div v-if="filteredListVector.length == 0" class="pt-10 pb-10">
           {{$i18n.t('default.noLayers')}}
         </div>
@@ -33,8 +39,9 @@
                   </span>
                 </span>
                 <span class="panel-title__tools">
-                  <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Ustawienia" @click="getLayers"></i>
+                  <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="modal"
+                  data-target="#layerSettingsModal" data-placement="top"
+                  title="Ustawienia" @click="setEditedLayer('vector', key)"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
                     data-placement="top" title="Usuń"></i>
                 </span>
@@ -63,6 +70,12 @@
           <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
           <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
         </span>
+
+        <div class="loading-overlay pt-10 pb-10" v-if="!externalLayersList">
+          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
+          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        </div>
+
         <div v-if="filteredListExternal.length == 0" class="pt-10 pb-10">
           {{$i18n.t('default.noLayers')}}
         </div>
@@ -97,7 +110,7 @@
 
     <!--MODAL DODAWANIA WARSTW-->
     <div class="modal fade" data-backdrop="static" id="addLayerModal" tabindex="-1" role="dialog"
-      aria-hidden="true">
+      aria-hidden="true" ref="addLayerModal">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -105,54 +118,16 @@
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label class="control-label col-sm-4">Nazwa warstwy</label>
-              <input type="text" class="form-control">
+              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
+              <input type="text" class="form-control" v-model="vectorLayerName">
             </div>
-            <div>
-              <div class="upload">
-                <div v-if="files.length > 0">Pliki w kolejce</div>
-                <ul class="files-list pl-0" style="display:flex; justify-content: center;">
-                  <li class="pl-0" v-for="(file, index) in files"
-                    :key="index + '_' + file.id">
-                    <span>{{file.name}}</span>
-                    <i class="fa fa-trash fa-lg red icon-hover"
-                      @click="$refs.upload.remove(file)" title="Usuń"></i>
-                    <span v-if="file.error">{{file.error}}</span>
-                    <span v-else-if="file.success">success</span>
-                    <span v-else-if="file.active">active</span>
-                    <span v-else></span>
-                  </li>
-                </ul>
-                <div class="example-btn">
-                  <!-- TODO change 'accept', 'extensions', 'post-action' -->
-                  <file-upload
-                    class="btn btn-primary btn-upload"
-                    post-action="/upload/post"
-                    extensions="gif,jpg,jpeg,png,webp"
-                    accept="image/png,image/gif,image/jpeg,image/webp"
-                    :multiple="true"
-                    :size="1024 * 1024 * 10"
-                    v-model="files"
-                    ref="upload"
-                  >
-                    <i class="fa fa-plus"></i>
-                    {{ $i18n.t('default.chooseFiles') }}
-                  </file-upload>
-                  <button type="button" class="btn btn-success"
-                    v-if="!$refs.upload || !$refs.upload.active"
-                    @click.prevent="$refs.upload.active = true"
-                  >
-                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
-                    {{ $i18n.t('default.startUpload') }}
-                  </button>
-                  <button type="button" class="btn btn-danger"
-                    v-else @click.prevent="$refs.upload.active = false"
-                  >
-                    <i class="fa fa-stop" aria-hidden="true"></i>
-                    {{ $i18n.t('default.stopUpload') }}
-                  </button>
-                </div>
-              </div>
+            <div class="pt-10">
+              <vue-dropzone
+                ref="dropzoneUploadLayer"
+                id="dropzone"
+                :options="dropzoneOptions"
+                @vdropzone-sending-multiple="sendingEvent"
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -160,7 +135,39 @@
               @click="clearUploadFiles">
               {{$i18n.t('default.cancel')}}
             </button>
-            <button type="button" class="btn btn-success">{{$i18n.t('default.save')}}</button>
+            <button type="button" class="btn btn-success" @click="sendVectorLayer">
+              {{$i18n.t('default.save')}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--KONIEC MODALA-->
+
+    <!--MODAL USTAWIENIA WARSTWY-->
+    <div class="modal fade" data-backdrop="static" id="layerSettingsModal" tabindex="-1"
+      role="dialog" aria-hidden="true" ref="layerSettingsModal">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" v-if="currentEditedLayer">
+          <div class="modal-header">
+            <h4 class="modal-title">
+              {{$i18n.t('dashboard.modal.settingsLayer')}}
+              <span class="red">{{currentEditedLayer.name}}</span>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <div style="display: flex">
+              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
+              <input type="text" class="form-control" v-model="currentEditedLayer.name">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              {{$i18n.t('default.cancel')}}
+            </button>
+            <button type="button" class="btn btn-success">
+              {{$i18n.t('default.save')}}
+            </button>
           </div>
         </div>
       </div>
@@ -170,34 +177,64 @@
 </template>
 
 <script>
-import FileUpload from 'vue-upload-component';
+import vue2Dropzone from 'vue2-dropzone';
+import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 
 export default {
   name: 'dashboard',
-  data: () => ({
-    files: [],
-    passwordModalVisible: false,
-    searchExtSources: '',
-    searchVector: '',
-    vectorLayersList: [
-      { name: 'brownfields', team: 'Hale' },
-      { name: 'greenfields', team: 'Grunty inwestycyjne' },
-    ],
-    externalLayersList: [
-      { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
-      { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
-    ],
-  }),
+  data() {
+    const self = this;
+    return {
+      currentEditedLayer: undefined,
+      searchExtSources: '',
+      searchVector: '',
+      vectorLayerName: '',
+      vectorLayersList: undefined,
+      externalLayersList: [
+        { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
+        { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
+      ],
+      dropzoneOptions: {
+        url: `${self.apiUrl}/layers?token=${self.token}`,
+        addRemoveLinks: true,
+        autoProcessQueue: false,
+        dictCancelUpload: 'Anuluj wysyłanie',
+        dictRemoveFile: 'Usuń plik',
+        dictDefaultMessage: 'Przeciągnij pliki lub kliknij i wybierz pliki do przesłania',
+        thumbnailWidth: 150,
+        maxFilesize: 2,
+        uploadMultiple: true,
+        methods: 'post',
+        acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
+        success() {
+          self.$alertify.success('Pomyślnie dodano warstwę');
+          self.getLayers();
+        },
+        error() {
+          self.$alertify.error('Błąd podczas przesyłania pliku');
+        },
+      },
+    };
+  },
   components: {
-    FileUpload,
+    vueDropzone: vue2Dropzone,
   },
   computed: {
+    apiUrl() {
+      return this.$store.getters.getApiUrl;
+    },
     filteredListExternal() {
+      if (!this.externalLayersList) {
+        return false;
+      }
       return this.externalLayersList.filter(
         layer => layer.name.toLowerCase().includes(this.searchExtSources.toLowerCase()),
       );
     },
     filteredListVector() {
+      if (!this.vectorLayersList) {
+        return false;
+      }
       return this.vectorLayersList.filter(
         layer => layer.name.toLowerCase().includes(this.searchVector.toLowerCase()),
       );
@@ -208,14 +245,30 @@ export default {
   },
   methods: {
     clearUploadFiles() {
-      this.files = [];
+      this.$refs.dropzoneUploadLayer.removeAllFiles();
     },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
-      console.log(r.body);
+      this.vectorLayersList = r.body.layers;
+    },
+    sendingEvent(files, xhr, formData) {
+      formData.append('name', this.vectorLayerName);
+    },
+    sendVectorLayer() {
+      if (this.vectorLayerName === '') {
+        this.$alertify.error('Podaj nazwę warstwy');
+        return;
+      }
+      this.$refs.dropzoneUploadLayer.processQueue();
+    },
+    setEditedLayer(layType, key) {
+      if (layType === 'vector') {
+        this.currentEditedLayer = this.vectorLayersList[key];
+      }
     },
   },
   mounted() {
+    this.getLayers();
   },
 };
 </script>
@@ -252,6 +305,10 @@ export default {
 }
 .heading-block:after {
   display: none;
+}
+.loading-overlay {
+  width: 100%;
+  text-align: center;
 }
 .panel-title__names {
   font-size: 14px;
