@@ -11,6 +11,7 @@
       "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
       "deleteLayerTitle": "Usuwanie warstwy",
       "layerName": "Nazwa warstwy",
+      "layerNameChanged": "Zmieniono nazwę warstwy",
       "settingsLayer": "Ustawienia warstwy"
     },
     "placeholder": {
@@ -29,7 +30,7 @@
     "delete": "Usuń",
     "deleted": "Usunięto",
     "email": "Email",
-    "errorDeleting": "Wystąpił błąd podczas usuwania",
+    "error": "Wystąpił błąd",
     "loading": "Trwa ładowanie danych",
     "noLayers": "Brak warstw",
     "password": "Hasło",

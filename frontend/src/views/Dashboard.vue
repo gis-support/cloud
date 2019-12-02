@@ -160,7 +160,6 @@
           <div class="modal-header">
             <h4 class="modal-title">
               {{$i18n.t('dashboard.modal.settingsLayer')}}
-              <span class="red">{{currentEditedLayer.name}}</span>
             </h4>
           </div>
           <div class="modal-body">
@@ -174,7 +173,8 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">
+            <button type="button" class="btn btn-default" data-dismiss="modal"
+              @click="closeSettingsModal">
               {{$i18n.t('default.close')}}
             </button>
           </div>
@@ -254,6 +254,9 @@ export default {
     changeUploadSuccess(isSuccessful) {
       this.isUploadSuccessful = isSuccessful;
     },
+    closeSettingsModal() {
+      this.currentEditedLayer = {};
+    },
     deleteLayer(el) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
         const r = await this.$store.dispatch('deleteLayer', el.id);
@@ -261,7 +264,7 @@ export default {
           this.vectorLayersList = this.vectorLayersList.filter(lay => lay.id !== el.id);
           this.$alertify.success(this.$i18n.t('default.deleted'));
         } else {
-          this.$alertify.error(this.$i18n.t('default.errorDeleting'));
+          this.$alertify.error(this.$i18n.t('default.error'));
         }
       }, () => {})
         .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
@@ -272,18 +275,30 @@ export default {
       this.vectorLayersList = r.body.layers;
     },
     async saveLayerName() {
-      /* const payload = {
+      const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
+      const payload = {
         body: {
           layer_name: this.currentEditedLayer.name,
         },
         lid: this.currentEditedLayer.id,
       };
+
       const r = await this.$store.dispatch('changeLayerName', payload);
-      console.log(r.obj.settings); */
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('dashboard.modal.layerNameChanged'));
+        this.$set(
+          this.vectorLayersList[layIndex], 'id', r.obj.settings,
+        ); // zmiana id
+        this.$set(
+          this.vectorLayersList[layIndex], 'name', this.currentEditedLayer.name,
+        ); // zmiana nazwy
+      } else {
+        this.$i18n.t('default.error');
+      }
     },
     async setEditedLayer(layType, key) {
       if (layType === 'vector') {
-        this.currentEditedLayer = this.vectorLayersList[key];
+        this.currentEditedLayer = Object.assign({}, this.vectorLayersList[key]);
       }
       const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
       this.currentLayerSettings = r.body.settings;
