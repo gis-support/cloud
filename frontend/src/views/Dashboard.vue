@@ -43,7 +43,7 @@
                   data-target="#layerSettingsModal" data-placement="top"
                   title="Ustawienia" @click="setEditedLayer('vector', key)"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Usuń"></i>
+                    data-placement="top" title="Usuń" @click="deleteLayer(val)"></i>
                 </span>
               </h4>
             </div>
@@ -200,9 +200,9 @@ export default {
         url: `${self.$store.getters.getApiUrl}/layers?token=${self.$store.getters.getToken}`,
         addRemoveLinks: true,
         autoProcessQueue: false,
-        dictCancelUpload: 'Anuluj wysyłanie',
-        dictRemoveFile: 'Usuń plik',
-        dictDefaultMessage: 'Przeciągnij pliki lub kliknij i wybierz pliki do przesłania',
+        dictCancelUpload: self.$i18n.t('upload.cancelUpload'),
+        dictRemoveFile: self.$i18n.t('upload.removeFile'),
+        dictDefaultMessage: self.$i18n.t('upload.defaultMessage'),
         thumbnailWidth: 150,
         maxFilesize: 2,
         uploadMultiple: true,
@@ -210,11 +210,11 @@ export default {
         methods: 'post',
         acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
         success() {
-          self.$alertify.success('Pomyślnie dodano warstwę');
+          self.$alertify.success(self.$i18n.t('upload.uploadSuccess'));
           self.getLayers();
         },
         error() {
-          self.$alertify.error('Błąd podczas przesyłania pliku');
+          self.$alertify.error(self.$i18n.t('upload.uploadError'));
         },
       },
     };
@@ -241,6 +241,19 @@ export default {
     },
   },
   methods: {
+    deleteLayer(el) {
+      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
+        const r = await this.$store.dispatch('deleteLayer', el.id);
+        if (r.status === 200) {
+          this.vectorLayersList = this.vectorLayersList.filter(lay => lay.id !== el.id);
+          this.$alertify.success(this.$i18n.t('default.deleted'));
+        } else {
+          this.$alertify.error(this.$i18n.t('default.errorDeleting'));
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;

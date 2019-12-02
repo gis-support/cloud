@@ -8,6 +8,8 @@
       "addColumn": "Dodawanie kolumny do warstwy",
       "columnName": "Nazwa kolumny",
       "columns": "Kolumny warstwy",
+      "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
+      "deleteLayerTitle": "Usuwanie warstwy",
       "layerName": "Nazwa warstwy",
       "settingsLayer": "Ustawienia warstwy"
     },
@@ -24,7 +26,10 @@
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
     "close": "Zamknij",
+    "delete": "Usuń",
+    "deleted": "Usunięto",
     "email": "Email",
+    "errorDeleting": "Wystąpił błąd podczas usuwania",
     "loading": "Trwa ładowanie danych",
     "noLayers": "Brak warstw",
     "password": "Hasło",
@@ -40,5 +45,12 @@
   "register": {
     "registerTitle": "Rejestracja",
     "register": "Zarejestruj"
+  },
+  "upload": {
+    "cancelUpload": "Anuluj wysyłanie",
+    "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",
+    "removeFile": "Usuń plik",
+    "uploadError": "Błąd podczas przesyłania pliku",
+    "uploadSuccess": "Pomyślnie przesłano plik"
   }
 }

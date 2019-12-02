@@ -30,6 +30,15 @@ export default {
         return err.response;
       }
     },
+    async deleteLayer(ctx, lid) {
+      try {
+        // eslint-disable-next-line no-underscore-dangle
+        const response = await swagger.apis.Layers.delete_api_layers__lid_({ lid });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async getLayers() {
       try {
         const response = await swagger.apis.Layers.get_api_layers();
