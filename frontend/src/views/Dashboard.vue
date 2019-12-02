@@ -131,13 +131,21 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal"
-              @click="clearUploadFiles">
-              {{$i18n.t('default.cancel')}}
-            </button>
-            <button type="button" class="btn btn-success" @click="sendVectorLayer">
-              {{$i18n.t('default.save')}}
-            </button>
+            <span v-if="isUploadSuccessful">
+              <button type="button" class="btn btn-default" data-dismiss="modal"
+                @click="clearUploadFiles">
+                {{$i18n.t('default.close')}}
+              </button>
+            </span>
+            <span v-else>
+              <button type="button" class="btn btn-default" data-dismiss="modal"
+                @click="clearUploadFiles">
+                {{$i18n.t('default.cancel')}}
+              </button>
+              <button type="button" class="btn btn-success" @click="sendVectorLayer">
+                {{$i18n.t('default.save')}}
+              </button>
+            </span>
           </div>
         </div>
       </div>
@@ -188,6 +196,7 @@ export default {
     return {
       currentEditedLayer: undefined,
       currentLayerSettings: [],
+      isUploadSuccessful: false,
       searchExtSources: '',
       searchVector: '',
       vectorLayerName: '',
@@ -209,9 +218,13 @@ export default {
         parallelUploads: 10,
         methods: 'post',
         acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
-        success() {
+        success(file, response) {
           self.$alertify.success(self.$i18n.t('upload.uploadSuccess'));
-          self.getLayers();
+          self.isUploadSuccessful = true;
+          const newLayer = { id: response.layers.id, name: response.layers.name };
+          if (!self.vectorLayersList.find(el => el.id === newLayer.id)) {
+            self.vectorLayersList.push(newLayer);
+          }
         },
         error() {
           self.$alertify.error(self.$i18n.t('upload.uploadError'));
@@ -277,13 +290,15 @@ export default {
     },
     clearUploadFiles() {
       this.$refs.dropzoneUploadLayer.removeAllFiles();
+      this.isUploadSuccessful = false;
     },
     sendingEvent(files, xhr, formData) {
       formData.append('name', this.vectorLayerName);
     },
     sendVectorLayer() {
       if (this.vectorLayerName === '') {
-        this.$alertify.error('Podaj nazwę warstwy');
+        const msg = this.$i18n.t('upload.noLayerNameError');
+        this.$alertify.error(msg);
         return;
       }
       this.$refs.dropzoneUploadLayer.processQueue();

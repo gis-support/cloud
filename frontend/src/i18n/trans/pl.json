@@ -49,6 +49,7 @@
   "upload": {
     "cancelUpload": "Anuluj wysyłanie",
     "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",
+    "noLayerNameError": "Nazwa warstwy jest wymagana",
     "removeFile": "Usuń plik",
     "uploadError": "Błąd podczas przesyłania pliku",
     "uploadSuccess": "Pomyślnie przesłano plik"
