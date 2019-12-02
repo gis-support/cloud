@@ -191,47 +191,44 @@ import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 
 export default {
   name: 'dashboard',
-  data() {
-    const self = this;
-    return {
-      currentEditedLayer: undefined,
-      currentLayerSettings: [],
-      isUploadSuccessful: false,
-      searchExtSources: '',
-      searchVector: '',
-      vectorLayerName: '',
-      vectorLayersList: undefined,
-      externalLayersList: [
-        { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
-        { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
-      ],
-      dropzoneOptions: {
-        url: `${self.$store.getters.getApiUrl}/layers?token=${self.$store.getters.getToken}`,
-        addRemoveLinks: true,
-        autoProcessQueue: false,
-        dictCancelUpload: self.$i18n.t('upload.cancelUpload'),
-        dictRemoveFile: self.$i18n.t('upload.removeFile'),
-        dictDefaultMessage: self.$i18n.t('upload.defaultMessage'),
-        thumbnailWidth: 150,
-        maxFilesize: 2,
-        uploadMultiple: true,
-        parallelUploads: 10,
-        methods: 'post',
-        acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
-        success(file, response) {
-          self.$alertify.success(self.$i18n.t('upload.uploadSuccess'));
-          self.isUploadSuccessful = true;
-          const newLayer = { id: response.layers.id, name: response.layers.name };
-          if (!self.vectorLayersList.find(el => el.id === newLayer.id)) {
-            self.vectorLayersList.push(newLayer);
-          }
-        },
-        error() {
-          self.$alertify.error(self.$i18n.t('upload.uploadError'));
-        },
+  data: vm => ({
+    currentEditedLayer: undefined,
+    currentLayerSettings: [],
+    isUploadSuccessful: false,
+    searchExtSources: '',
+    searchVector: '',
+    vectorLayerName: '',
+    vectorLayersList: undefined,
+    externalLayersList: [
+      { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
+      { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
+    ],
+    dropzoneOptions: {
+      url: `${vm.$store.getters.getApiUrl}/layers?token=${vm.$store.getters.getToken}`,
+      addRemoveLinks: true,
+      autoProcessQueue: false,
+      dictCancelUpload: vm.$i18n.t('upload.cancelUpload'),
+      dictRemoveFile: vm.$i18n.t('upload.removeFile'),
+      dictDefaultMessage: vm.$i18n.t('upload.defaultMessage'),
+      thumbnailWidth: 150,
+      maxFilesize: 2,
+      uploadMultiple: true,
+      parallelUploads: 10,
+      methods: 'post',
+      acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
+      success(file, response) {
+        vm.$alertify.success(vm.$i18n.t('upload.uploadSuccess'));
+        vm.changeUploadSuccess(true);
+        const newLayer = { id: response.layers.id, name: response.layers.name };
+        if (!vm.vectorLayersList.find(el => el.id === newLayer.id)) {
+          vm.vectorLayersList.push(newLayer);
+        }
       },
-    };
-  },
+      error() {
+        vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
+      },
+    },
+  }),
   components: {
     vueDropzone: vue2Dropzone,
   },
@@ -254,6 +251,9 @@ export default {
     },
   },
   methods: {
+    changeUploadSuccess(isSuccessful) {
+      this.isUploadSuccessful = isSuccessful;
+    },
     deleteLayer(el) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
         const r = await this.$store.dispatch('deleteLayer', el.id);
