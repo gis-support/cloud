@@ -163,13 +163,30 @@
             </h4>
           </div>
           <div class="modal-body">
+            <h4 class="text-left">{{$i18n.t('dashboard.modal.layerName')}}</h4>
             <div style="display: flex">
-              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
               <input type="text" class="form-control mr-5"
                 v-model="currentEditedLayer.name">
               <button type="button" class="btn btn-success" @click="saveLayerName">
                 {{$i18n.t('default.saveName')}}
               </button>
+            </div>
+            <div class="pt-10">
+              <h4 class="text-left">{{$i18n.t('dashboard.modal.layerColumns')}}</h4>
+              <table class="table table-striped table-bordered table-hover">
+                <thead>
+                  <tr role="row">
+                    <th class="text-centered">{{$i18n.t('default.name')}}</th>
+                    <th class="text-centered">{{$i18n.t('default.dataType')}}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(value, name, index) in currentLayerSettings.columns" :key="index">
+                    <td>{{name}}</td>
+                    <td>{{value}}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
           <div class="modal-footer">
@@ -251,25 +268,6 @@ export default {
     },
   },
   methods: {
-    changeUploadSuccess(isSuccessful) {
-      this.isUploadSuccessful = isSuccessful;
-    },
-    closeSettingsModal() {
-      this.currentEditedLayer = {};
-    },
-    deleteLayer(el) {
-      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
-        const r = await this.$store.dispatch('deleteLayer', el.id);
-        if (r.status === 200) {
-          this.vectorLayersList = this.vectorLayersList.filter(lay => lay.id !== el.id);
-          this.$alertify.success(this.$i18n.t('default.deleted'));
-        } else {
-          this.$alertify.error(this.$i18n.t('default.error'));
-        }
-      }, () => {})
-        .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
-        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
-    },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
@@ -302,10 +300,30 @@ export default {
       }
       const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
       this.currentLayerSettings = r.body.settings;
+      console.log(this.currentLayerSettings);
+    },
+    changeUploadSuccess(isSuccessful) {
+      this.isUploadSuccessful = isSuccessful;
     },
     clearUploadFiles() {
       this.$refs.dropzoneUploadLayer.removeAllFiles();
       this.isUploadSuccessful = false;
+    },
+    closeSettingsModal() {
+      this.currentEditedLayer = {};
+    },
+    deleteLayer(el) {
+      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
+        const r = await this.$store.dispatch('deleteLayer', el.id);
+        if (r.status === 200) {
+          this.vectorLayersList = this.vectorLayersList.filter(lay => lay.id !== el.id);
+          this.$alertify.success(this.$i18n.t('default.deleted'));
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
     sendingEvent(files, xhr, formData) {
       formData.append('name', this.vectorLayerName);
@@ -380,5 +398,11 @@ export default {
 .section__header {
   padding-bottom: 15px;
   margin-bottom: -1px;
+}
+.text-centered {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
 }
 </style>
