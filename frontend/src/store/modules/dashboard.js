@@ -21,7 +21,7 @@ export default {
     apiUrl: 'https://cloud.gis.support/api',
   },
   actions: {
-    async changeLayerName(ctx, payload) {
+    async changeLayer(ctx, payload) {
       try {
         const response = await swagger.apis.Layers
           .post_api_layers__lid__settings({ body: payload.body, lid: payload.lid });

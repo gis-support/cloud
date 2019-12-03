@@ -172,8 +172,18 @@
               </button>
             </div>
             <div class="pt-10">
-              <h4 class="text-left">{{$i18n.t('dashboard.modal.layerColumns')}}</h4>
-              <table class="table table-striped table-bordered table-hover">
+              <h4 class="text-left">
+                {{$i18n.t('dashboard.modal.layerColumns')}}
+                <i class="fa fa-chevron-up" @click="toggleColumnsSection(false)"
+                  v-if="isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
+                  :title="$i18n.t('dashboard.modal.hideColumns')"
+                ></i>
+                <i class="fa fa-chevron-down" @click="toggleColumnsSection(true)"
+                  v-if="!isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
+                  :title="$i18n.t('dashboard.modal.showColumns')"
+                ></i>
+              </h4>
+              <table v-if="isColumnsVisible" class="table table-striped table-bordered table-hover">
                 <thead>
                   <tr role="row">
                     <th class="text-centered">{{$i18n.t('default.name')}}</th>
@@ -187,6 +197,24 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div class="pt-10">
+              <h4 class="text-left">{{$i18n.t('dashboard.modal.addColumn')}}</h4>
+              <div style="display: flex">
+                <input type="text" class="form-control mr-5"
+                 placeholder="Nazwa kolumny" v-model="newColumnName">
+                <select class="form-control mr-5" name="column-types-select"
+                  v-model="newColumnType">
+                  <option value="" selected>Wybierz typ kolumny</option>
+                  <option value="character varying">character varying</option>
+                  <option value="real">real</option>
+                  <option value="integer">integer</option>
+                  <option value="timestamp without time zone">timestamp without time zone</option>
+                </select>
+                <button type="button" class="btn btn-success" @click="addNewColumn">
+                  {{$i18n.t('default.add')}}
+                </button>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
@@ -211,7 +239,10 @@ export default {
   data: vm => ({
     currentEditedLayer: undefined,
     currentLayerSettings: [],
+    isColumnsVisible: true,
     isUploadSuccessful: false,
+    newColumnName: undefined,
+    newColumnType: '',
     searchExtSources: '',
     searchVector: '',
     vectorLayerName: '',
@@ -268,6 +299,28 @@ export default {
     },
   },
   methods: {
+    async addNewColumn() {
+      if (!this.newColumnName || !this.newColumnType) {
+        this.$alertify.error(this.$i18n.t('dashboard.modal.noNameOrType'));
+        return;
+      }
+      const payload = {
+        body: {
+          column_name: this.newColumnName,
+          column_type: this.newColumnType,
+        },
+        lid: this.currentLayerSettings.id,
+      };
+      const r = await this.$store.dispatch('changeLayer', payload);
+      if (r.status === 200) {
+        this.currentLayerSettings.columns[this.newColumnName] = this.newColumnType;
+        this.newColumnName = undefined;
+        this.newColumnType = '';
+        this.$alertify.success(this.$i18n.t('dashbaord.modal.columnAdded'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
@@ -281,15 +334,23 @@ export default {
         lid: this.currentEditedLayer.id,
       };
 
-      const r = await this.$store.dispatch('changeLayerName', payload);
+      const r = await this.$store.dispatch('changeLayer', payload);
       if (r.status === 200) {
         this.$alertify.success(this.$i18n.t('dashboard.modal.layerNameChanged'));
+        // zmiana id
         this.$set(
           this.vectorLayersList[layIndex], 'id', r.obj.settings,
-        ); // zmiana id
+        );
+        this.$set(
+          this.currentLayerSettings, 'id', r.obj.settings,
+        );
+        // zmiana nazwy
         this.$set(
           this.vectorLayersList[layIndex], 'name', this.currentEditedLayer.name,
-        ); // zmiana nazwy
+        );
+        this.$set(
+          this.currentLayerSettings, 'name', this.currentEditedLayer.name,
+        );
       } else {
         this.$i18n.t('default.error');
       }
@@ -300,7 +361,6 @@ export default {
       }
       const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
       this.currentLayerSettings = r.body.settings;
-      console.log(this.currentLayerSettings);
     },
     changeUploadSuccess(isSuccessful) {
       this.isUploadSuccessful = isSuccessful;
@@ -311,6 +371,8 @@ export default {
     },
     closeSettingsModal() {
       this.currentEditedLayer = {};
+      this.newColumnName = undefined;
+      this.newColumnType = '';
     },
     deleteLayer(el) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
@@ -335,6 +397,9 @@ export default {
         return;
       }
       this.$refs.dropzoneUploadLayer.processQueue();
+    },
+    toggleColumnsSection(isVisible) {
+      this.isColumnsVisible = isVisible;
     },
   },
   mounted() {

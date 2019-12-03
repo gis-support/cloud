@@ -6,14 +6,18 @@
     "modal":  {
       "addLayer": "Dodawanie nowej warstwy",
       "addColumn": "Dodawanie kolumny do warstwy",
+      "columnAdded": "Dodano kolumnę",
       "columnName": "Nazwa kolumny",
       "columns": "Kolumny warstwy",
       "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
       "deleteLayerTitle": "Usuwanie warstwy",
+      "hideColumns": "Ukryj kolumny warstwy",
       "layerColumns": "Kolumny warstwy",
       "layerName": "Nazwa warstwy",
       "layerNameChanged": "Zmieniono nazwę warstwy",
-      "settingsLayer": "Ustawienia warstwy"
+      "noNameOrType": "Brak nazwy lub typu kolumny",
+      "settingsLayer": "Ustawienia warstwy",
+      "showColumns": "Pokaż kolumny warstwy"
     },
     "placeholder": {
       "layersFilter": "Filtr warstw",
@@ -25,6 +29,7 @@
     }
   },
   "default": {
+    "add": "Dodaj",
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
     "close": "Zamknij",
