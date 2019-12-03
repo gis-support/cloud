@@ -41,9 +41,10 @@
                 <span class="panel-title__tools">
                   <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="modal"
                   data-target="#layerSettingsModal" data-placement="top"
-                  title="Ustawienia" @click="setEditedLayer('vector', key)"></i>
+                  :title="$i18n.t('default.settings')" @click="setEditedLayer('vector', key)"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Usuń" @click="deleteLayer(val)"></i>
+                    data-placement="top" :title="$i18n.t('default.delete')"
+                    @click="deleteLayer(val)"></i>
                 </span>
               </h4>
             </div>
@@ -97,9 +98,9 @@
                 </span>
                 <span class="panel-title__tools">
                   <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Ustawienia"></i>
+                    data-placement="top" :title="$i18n.t('default.settings')"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Usuń"></i>
+                    data-placement="top" :title="$i18n.t('default.delete')"></i>
                 </span>
               </h4>
             </div>
@@ -188,12 +189,17 @@
                   <tr role="row">
                     <th class="text-centered">{{$i18n.t('default.name')}}</th>
                     <th class="text-centered">{{$i18n.t('default.dataType')}}</th>
+                    <th class="text-centered">{{$i18n.t('default.actions')}}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(value, name, index) in currentLayerSettings.columns" :key="index">
                     <td>{{name}}</td>
                     <td>{{value}}</td>
+                    <td>
+                      <i class="fa fa-trash fa-lg red icon-hover" :title="$i18n.t('default.delete')"
+                        @click="deleteColumn(name)"></i>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -320,6 +326,24 @@ export default {
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    async deleteColumn(colName) {
+      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerColumn'), async () => {
+        const payload = {
+          body: { column_name: colName },
+          lid: this.currentEditedLayer.id,
+        };
+
+        const r = await this.$store.dispatch('deleteColumn', payload);
+        if (r.status === 200) {
+          this.$alertify.success(this.$i18n.t('default.deleted'));
+          this.$delete(this.currentLayerSettings.columns, colName);
+        } else {
+          this.$i18n.t('default.error');
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('dashboard.modal.deleteColumnTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');

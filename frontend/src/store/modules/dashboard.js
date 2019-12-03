@@ -30,6 +30,15 @@ export default {
         return err.response;
       }
     },
+    async deleteColumn(ctx, payload) {
+      try {
+        const response = await swagger.apis.Layers
+          .delete_api_layers__lid__settings({ body: payload.body, lid: payload.lid });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async deleteLayer(ctx, lid) {
       try {
         // eslint-disable-next-line no-underscore-dangle

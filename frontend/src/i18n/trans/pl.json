@@ -9,7 +9,9 @@
       "columnAdded": "Dodano kolumnę",
       "columnName": "Nazwa kolumny",
       "columns": "Kolumny warstwy",
+      "deleteLayerColumn": "Czy na pewno chcesz usunąć kolumnę?",
       "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
+      "deleteColumnTitle": "Usuwanie kolumny",
       "deleteLayerTitle": "Usuwanie warstwy",
       "hideColumns": "Ukryj kolumny warstwy",
       "layerColumns": "Kolumny warstwy",
@@ -29,6 +31,7 @@
     }
   },
   "default": {
+    "actions": "Akcje",
     "add": "Dodaj",
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
@@ -44,6 +47,7 @@
     "password": "Hasło",
     "save": "Zapisz",
     "saveName": "Zapisz nazwę",
+    "settings": "Ustawienia",
     "startUpload": "Wyślij pliki",
     "stopUpload": "Zatrzymaj"
   },
