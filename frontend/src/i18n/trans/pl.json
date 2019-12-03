@@ -42,6 +42,7 @@
     "email": "Email",
     "error": "Wystąpił błąd",
     "loading": "Trwa ładowanie danych",
+    "logout": "Wyloguj się",
     "name": "Nazwa",
     "noLayers": "Brak warstw",
     "password": "Hasło",
@@ -49,7 +50,8 @@
     "saveName": "Zapisz nazwę",
     "settings": "Ustawienia",
     "startUpload": "Wyślij pliki",
-    "stopUpload": "Zatrzymaj"
+    "stopUpload": "Zatrzymaj",
+    "users": "Użytkownicy"
   },
   "login": {
     "loginTitle": "Logowanie",
@@ -66,5 +68,15 @@
     "removeFile": "Usuń plik",
     "uploadError": "Błąd podczas przesyłania pliku",
     "uploadSuccess": "Pomyślnie przesłano plik"
+  },
+  "users": {
+    "responses": {
+      "noEmailOrPassword": "Nie podano adresu email lub hasła",
+      "userCreated": "Utworzono użytkownika",
+      "userExists": "Użytkownik o podanym adresie email istnieje"
+    },
+    "title": {
+      "addUser": "Dodawanie użytkownika"
+    }
   }
 }
