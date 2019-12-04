@@ -21,11 +21,11 @@ class TestPermissions(BaseTest):
         # Second for normal user read only
         lid2 = self.add_geojson_prg(client, token_admin, name='wojewodztwa2')
         r = client.put(f'/api/permissions/{lid2}?token={token_admin}',
-                        data=json.dumps({'user': user, 'permission': 'read'}))
+                       data=json.dumps({'user': user, 'permission': 'read'}))
         # Third for normal user write permission
         lid3 = self.add_geojson_prg(client, token_admin, name='wojewodztwa3')
         r = client.put(f'/api/permissions/{lid3}?token={token_admin}',
-                        data=json.dumps({'user': user, 'permission': 'write'}))
+                       data=json.dumps({'user': user, 'permission': 'write'}))
         # Fourth only for normal user
         token = self.get_token(client, user=user, password=password)
         lid4 = self.add_geojson_prg(client, token, name='wojewodztwa4')
@@ -35,15 +35,15 @@ class TestPermissions(BaseTest):
         assert r.json
         # Rules
         # There are three layers for admin user
-        assert len(r.json['permissions']) == 3
+        assert len(r.json['users']) == 3
         # There are three users so every layer has three users (more if prod db is up)
         for perm in r.json['permissions']:
-            assert len(perm['users']) > 3
+            assert len(perm['users']) > 2
             # First only has write to admin
             if perm['id'] == lid1:
                 counter = 0
                 for user in perm['users']:
-                    if perm['users'][user].get('wojewodztwa') == 'write':
+                    if perm['users'][user] == 'write':
                         counter += 1
                 assert counter == 1
             # Second read only + write:
@@ -51,9 +51,9 @@ class TestPermissions(BaseTest):
                 counter_w = 0
                 counter_r = 0
                 for user in perm['users']:
-                    if perm['users'][user].get('wojewodztwa2') == 'write':
+                    if perm['users'][user] == 'write':
                         counter_w += 1
-                    if perm['users'][user].get('wojewodztwa2') == 'read':
+                    if perm['users'][user] == 'read':
                         counter_r += 1
                 assert counter_w == 1
                 assert counter_r == 1
@@ -61,7 +61,7 @@ class TestPermissions(BaseTest):
             if perm['id'] == lid3:
                 counter = 0
                 for user in perm['users']:
-                    if perm['users'][user].get('wojewodztwa3') == 'write':
+                    if perm['users'][user] == 'write':
                         counter += 1
                 assert counter == 2
             # Fourth only one for user
@@ -69,7 +69,7 @@ class TestPermissions(BaseTest):
                 counter = 0
                 write_user = ""
                 for user in perm['users']:
-                    if perm['users'][user].get('wojewodztwa4') == 'write':
+                    if perm['users'][user] == 'write':
                         counter += 1
                         write_user = user
                 assert counter == 1
@@ -94,7 +94,7 @@ class TestPermissions(BaseTest):
         user, password = self.register(client)
         # Grant permission for normal user by admin
         r = client.put(f'/api/permissions/{lid}?token={token_admin}',
-                        data=json.dumps({'user': user, 'permission': 'read'}))
+                       data=json.dumps({'user': user, 'permission': 'read'}))
         # Normal user log in
         token = self.get_token(client, user=user, password=password)
         # Try to delete layer with different owner
@@ -129,7 +129,7 @@ class TestPermissions(BaseTest):
         assert r.status_code == 200
         # Revoke permissions for normal user by admin
         r = client.put(f'/api/permissions/{lid}?token={token_admin}',
-                        data=json.dumps({'user': user, 'permission': ''}))
+                       data=json.dumps({'user': user, 'permission': ''}))
         # Try to get layer
         r = client.get('/api/layers/{}?token={}'.format(lid, token))
         assert r.status_code == 403
@@ -172,7 +172,7 @@ class TestPermissions(BaseTest):
         user, password = self.register(client)
         # Grant permission for normal user by admin
         r = client.put(f'/api/permissions/{lid}?token={token_admin}',
-                        data=json.dumps({'user': user, 'permission': 'write'}))
+                       data=json.dumps({'user': user, 'permission': 'write'}))
         # Normal user log in
         token = self.get_token(client, user=user, password=password)
         # Try to delete layer with different owner
@@ -201,7 +201,7 @@ class TestPermissions(BaseTest):
         assert r.status_code == 200
         # Revoke permissions for normal user by admin
         r = client.put(f'/api/permissions/{lid}?token={token_admin}',
-                        data=json.dumps({'user': user, 'permission': ''}))
+                       data=json.dumps({'user': user, 'permission': ''}))
         # Try to get layer
         r = client.get('/api/layers/{}?token={}'.format(lid, token))
         assert r.status_code == 403

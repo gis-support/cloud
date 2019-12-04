@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from flasgger import swag_from
 from app.docs import path_by
 from app.db.general import user_exists, create_user, authenticate_user, create_token

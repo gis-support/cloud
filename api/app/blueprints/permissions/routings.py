@@ -15,7 +15,7 @@ mod_permissions = Blueprint("permissions", __name__)
 @token_required
 @cloud_decorator
 def permissions(cloud):
-    return jsonify({"permissions": cloud.get_permissions()})
+    return jsonify(cloud.get_permissions())
 
 
 @mod_permissions.route('/permissions/<lid>', methods=['PUT'])

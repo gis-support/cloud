@@ -75,11 +75,12 @@ def layers(cloud):
             transform = osr.CoordinateTransformation(
                 inSpatialRef, outSpatialRef)
         ldefn = layer.GetLayerDefn()
-        test_geom_type_feature = layer.GetNextFeature()
+        test_feature = layer.GetNextFeature()
+        geom_type = test_feature.GetGeometryRef().GetGeometryName()
         layer.ResetReading()
         fields = [{
             "name": "geometry",
-            "type": "geometry({}, 4326)".format(test_geom_type_feature.GetGeometryRef().GetGeometryName())
+            "type": f"geometry({geom_type}, 4326)"
         }]
         for n in range(ldefn.GetFieldCount()):
             fdefn = ldefn.GetFieldDefn(n)
@@ -89,7 +90,7 @@ def layers(cloud):
             })
         with current_app._db.atomic() as transaction:
             cloud = Cloud({"app": current_app, "user": request.user})
-            cloud.create_layer(name, fields)
+            cloud.create_layer(name, fields, geom_type)
             with tempfile.SpooledTemporaryFile(mode='w') as tfile:
                 columns = list(map(lambda f: f['name'], fields))
                 count_features = 0
