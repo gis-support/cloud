@@ -5,8 +5,21 @@
     },
     "modal":  {
       "addLayer": "Dodawanie nowej warstwy",
+      "addColumn": "Dodawanie kolumny do warstwy",
+      "columnAdded": "Dodano kolumnę",
+      "columnName": "Nazwa kolumny",
+      "columns": "Kolumny warstwy",
+      "deleteLayerColumn": "Czy na pewno chcesz usunąć kolumnę?",
+      "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
+      "deleteColumnTitle": "Usuwanie kolumny",
+      "deleteLayerTitle": "Usuwanie warstwy",
+      "hideColumns": "Ukryj kolumny warstwy",
+      "layerColumns": "Kolumny warstwy",
       "layerName": "Nazwa warstwy",
-      "settingsLayer": "Ustawienia warstwy"
+      "layerNameChanged": "Zmieniono nazwę warstwy",
+      "noNameOrType": "Brak nazwy lub typu kolumny",
+      "settingsLayer": "Ustawienia warstwy",
+      "showColumns": "Pokaż kolumny warstwy"
     },
     "placeholder": {
       "layersFilter": "Filtr warstw",
@@ -18,15 +31,27 @@
     }
   },
   "default": {
+    "actions": "Akcje",
+    "add": "Dodaj",
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
+    "close": "Zamknij",
+    "dataType": "Typ danych",
+    "delete": "Usuń",
+    "deleted": "Usunięto",
     "email": "Email",
+    "error": "Wystąpił błąd",
     "loading": "Trwa ładowanie danych",
+    "logout": "Wyloguj się",
+    "name": "Nazwa",
     "noLayers": "Brak warstw",
     "password": "Hasło",
     "save": "Zapisz",
+    "saveName": "Zapisz nazwę",
+    "settings": "Ustawienia",
     "startUpload": "Wyślij pliki",
-    "stopUpload": "Zatrzymaj"
+    "stopUpload": "Zatrzymaj",
+    "users": "Użytkownicy"
   },
   "login": {
     "loginTitle": "Logowanie",
@@ -35,5 +60,23 @@
   "register": {
     "registerTitle": "Rejestracja",
     "register": "Zarejestruj"
+  },
+  "upload": {
+    "cancelUpload": "Anuluj wysyłanie",
+    "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",
+    "noLayerNameError": "Nazwa warstwy jest wymagana",
+    "removeFile": "Usuń plik",
+    "uploadError": "Błąd podczas przesyłania pliku",
+    "uploadSuccess": "Pomyślnie przesłano plik"
+  },
+  "users": {
+    "responses": {
+      "noEmailOrPassword": "Nie podano adresu email lub hasła",
+      "userCreated": "Utworzono użytkownika",
+      "userExists": "Użytkownik o podanym adresie email istnieje"
+    },
+    "title": {
+      "addUser": "Dodawanie użytkownika"
+    }
   }
 }

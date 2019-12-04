@@ -41,9 +41,10 @@
                 <span class="panel-title__tools">
                   <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="modal"
                   data-target="#layerSettingsModal" data-placement="top"
-                  title="Ustawienia" @click="setEditedLayer('vector', key)"></i>
+                  :title="$i18n.t('default.settings')" @click="setEditedLayer('vector', key)"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Usuń"></i>
+                    data-placement="top" :title="$i18n.t('default.delete')"
+                    @click="deleteLayer(val)"></i>
                 </span>
               </h4>
             </div>
@@ -97,9 +98,9 @@
                 </span>
                 <span class="panel-title__tools">
                   <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Ustawienia"></i>
+                    data-placement="top" :title="$i18n.t('default.settings')"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" title="Usuń"></i>
+                    data-placement="top" :title="$i18n.t('default.delete')"></i>
                 </span>
               </h4>
             </div>
@@ -131,13 +132,21 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal"
-              @click="clearUploadFiles">
-              {{$i18n.t('default.cancel')}}
-            </button>
-            <button type="button" class="btn btn-success" @click="sendVectorLayer">
-              {{$i18n.t('default.save')}}
-            </button>
+            <span v-if="isUploadSuccessful">
+              <button type="button" class="btn btn-default" data-dismiss="modal"
+                @click="clearUploadFiles">
+                {{$i18n.t('default.close')}}
+              </button>
+            </span>
+            <span v-else>
+              <button type="button" class="btn btn-default" data-dismiss="modal"
+                @click="clearUploadFiles">
+                {{$i18n.t('default.cancel')}}
+              </button>
+              <button type="button" class="btn btn-success" @click="sendVectorLayer">
+                {{$i18n.t('default.save')}}
+              </button>
+            </span>
           </div>
         </div>
       </div>
@@ -152,21 +161,72 @@
           <div class="modal-header">
             <h4 class="modal-title">
               {{$i18n.t('dashboard.modal.settingsLayer')}}
-              <span class="red">{{currentEditedLayer.name}}</span>
             </h4>
           </div>
           <div class="modal-body">
+            <h4 class="text-left">{{$i18n.t('dashboard.modal.layerName')}}</h4>
             <div style="display: flex">
-              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
-              <input type="text" class="form-control" v-model="currentEditedLayer.name">
+              <input type="text" class="form-control mr-5"
+                v-model="currentEditedLayer.name">
+              <button type="button" class="btn btn-success" @click="saveLayerName">
+                {{$i18n.t('default.saveName')}}
+              </button>
+            </div>
+            <div class="pt-10">
+              <h4 class="text-left">
+                {{$i18n.t('dashboard.modal.layerColumns')}}
+                <i class="fa fa-chevron-up" @click="toggleColumnsSection(false)"
+                  v-if="isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
+                  :title="$i18n.t('dashboard.modal.hideColumns')"
+                ></i>
+                <i class="fa fa-chevron-down" @click="toggleColumnsSection(true)"
+                  v-if="!isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
+                  :title="$i18n.t('dashboard.modal.showColumns')"
+                ></i>
+              </h4>
+              <table v-if="isColumnsVisible" class="table table-striped table-bordered table-hover">
+                <thead>
+                  <tr role="row">
+                    <th class="text-centered">{{$i18n.t('default.name')}}</th>
+                    <th class="text-centered">{{$i18n.t('default.dataType')}}</th>
+                    <th class="text-centered">{{$i18n.t('default.actions')}}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(value, name, index) in currentLayerSettings.columns" :key="index">
+                    <td>{{name}}</td>
+                    <td>{{value}}</td>
+                    <td>
+                      <i class="fa fa-trash fa-lg red icon-hover" :title="$i18n.t('default.delete')"
+                        @click="deleteColumn(name)"></i>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pt-10">
+              <h4 class="text-left">{{$i18n.t('dashboard.modal.addColumn')}}</h4>
+              <div style="display: flex">
+                <input type="text" class="form-control mr-5"
+                 placeholder="Nazwa kolumny" v-model="newColumnName">
+                <select class="form-control mr-5" name="column-types-select"
+                  v-model="newColumnType">
+                  <option value="" selected>Wybierz typ kolumny</option>
+                  <option value="character varying">character varying</option>
+                  <option value="real">real</option>
+                  <option value="integer">integer</option>
+                  <option value="timestamp without time zone">timestamp without time zone</option>
+                </select>
+                <button type="button" class="btn btn-success" @click="addNewColumn">
+                  {{$i18n.t('default.add')}}
+                </button>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">
-              {{$i18n.t('default.cancel')}}
-            </button>
-            <button type="button" class="btn btn-success">
-              {{$i18n.t('default.save')}}
+            <button type="button" class="btn btn-default" data-dismiss="modal"
+              @click="closeSettingsModal">
+              {{$i18n.t('default.close')}}
             </button>
           </div>
         </div>
@@ -182,47 +242,51 @@ import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 
 export default {
   name: 'dashboard',
-  data() {
-    const self = this;
-    return {
-      currentEditedLayer: undefined,
-      searchExtSources: '',
-      searchVector: '',
-      vectorLayerName: '',
-      vectorLayersList: undefined,
-      externalLayersList: [
-        { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
-        { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
-      ],
-      dropzoneOptions: {
-        url: `${self.apiUrl}/layers?token=${self.token}`,
-        addRemoveLinks: true,
-        autoProcessQueue: false,
-        dictCancelUpload: 'Anuluj wysyłanie',
-        dictRemoveFile: 'Usuń plik',
-        dictDefaultMessage: 'Przeciągnij pliki lub kliknij i wybierz pliki do przesłania',
-        thumbnailWidth: 150,
-        maxFilesize: 2,
-        uploadMultiple: true,
-        methods: 'post',
-        acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
-        success() {
-          self.$alertify.success('Pomyślnie dodano warstwę');
-          self.getLayers();
-        },
-        error() {
-          self.$alertify.error('Błąd podczas przesyłania pliku');
-        },
+  data: vm => ({
+    currentEditedLayer: undefined,
+    currentLayerSettings: [],
+    isColumnsVisible: true,
+    isUploadSuccessful: false,
+    newColumnName: undefined,
+    newColumnType: '',
+    searchExtSources: '',
+    searchVector: '',
+    vectorLayerName: '',
+    vectorLayersList: undefined,
+    externalLayersList: [
+      { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
+      { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
+    ],
+    dropzoneOptions: {
+      url: `${vm.$store.getters.getApiUrl}/layers?token=${vm.$store.getters.getToken}`,
+      addRemoveLinks: true,
+      autoProcessQueue: false,
+      dictCancelUpload: vm.$i18n.t('upload.cancelUpload'),
+      dictRemoveFile: vm.$i18n.t('upload.removeFile'),
+      dictDefaultMessage: vm.$i18n.t('upload.defaultMessage'),
+      thumbnailWidth: 150,
+      maxFilesize: 2,
+      uploadMultiple: true,
+      parallelUploads: 10,
+      methods: 'post',
+      acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
+      success(file, response) {
+        vm.$alertify.success(vm.$i18n.t('upload.uploadSuccess'));
+        vm.changeUploadSuccess(true);
+        const newLayer = { id: response.layers.id, name: response.layers.name };
+        if (!vm.vectorLayersList.find(el => el.id === newLayer.id)) {
+          vm.vectorLayersList.push(newLayer);
+        }
       },
-    };
-  },
+      error() {
+        vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
+      },
+    },
+  }),
   components: {
     vueDropzone: vue2Dropzone,
   },
   computed: {
-    apiUrl() {
-      return this.$store.getters.getApiUrl;
-    },
     filteredListExternal() {
       if (!this.externalLayersList) {
         return false;
@@ -239,35 +303,131 @@ export default {
         layer => layer.name.toLowerCase().includes(this.searchVector.toLowerCase()),
       );
     },
-    token() {
-      return this.$store.getters.getToken;
-    },
   },
   methods: {
-    clearUploadFiles() {
-      this.$refs.dropzoneUploadLayer.removeAllFiles();
+    async addNewColumn() {
+      if (!this.newColumnName || !this.newColumnType) {
+        this.$alertify.error(this.$i18n.t('dashboard.modal.noNameOrType'));
+        return;
+      }
+      const payload = {
+        body: {
+          column_name: this.newColumnName,
+          column_type: this.newColumnType,
+        },
+        lid: this.currentLayerSettings.id,
+      };
+      const r = await this.$store.dispatch('changeLayer', payload);
+      if (r.status === 200) {
+        this.currentLayerSettings.columns[this.newColumnName] = this.newColumnType;
+        this.newColumnName = undefined;
+        this.newColumnType = '';
+        this.$alertify.success(this.$i18n.t('dashbaord.modal.columnAdded'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async deleteColumn(colName) {
+      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerColumn'), async () => {
+        const payload = {
+          body: { column_name: colName },
+          lid: this.currentEditedLayer.id,
+        };
+
+        const r = await this.$store.dispatch('deleteColumn', payload);
+        if (r.status === 200) {
+          this.$alertify.success(this.$i18n.t('default.deleted'));
+          this.$delete(this.currentLayerSettings.columns, colName);
+        } else {
+          this.$i18n.t('default.error');
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('dashboard.modal.deleteColumnTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
+    },
+    async saveLayerName() {
+      const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
+      const payload = {
+        body: {
+          layer_name: this.currentEditedLayer.name,
+        },
+        lid: this.currentEditedLayer.id,
+      };
+
+      const r = await this.$store.dispatch('changeLayer', payload);
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('dashboard.modal.layerNameChanged'));
+        // zmiana id
+        this.$set(
+          this.vectorLayersList[layIndex], 'id', r.obj.settings,
+        );
+        this.$set(
+          this.currentLayerSettings, 'id', r.obj.settings,
+        );
+        // zmiana nazwy
+        this.$set(
+          this.vectorLayersList[layIndex], 'name', this.currentEditedLayer.name,
+        );
+        this.$set(
+          this.currentLayerSettings, 'name', this.currentEditedLayer.name,
+        );
+      } else {
+        this.$i18n.t('default.error');
+      }
+    },
+    async setEditedLayer(layType, key) {
+      if (layType === 'vector') {
+        this.currentEditedLayer = Object.assign({}, this.vectorLayersList[key]);
+      }
+      const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
+      this.currentLayerSettings = r.body.settings;
+    },
+    changeUploadSuccess(isSuccessful) {
+      this.isUploadSuccessful = isSuccessful;
+    },
+    clearUploadFiles() {
+      this.$refs.dropzoneUploadLayer.removeAllFiles();
+      this.isUploadSuccessful = false;
+    },
+    closeSettingsModal() {
+      this.currentEditedLayer = {};
+      this.newColumnName = undefined;
+      this.newColumnType = '';
+    },
+    deleteLayer(el) {
+      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
+        const r = await this.$store.dispatch('deleteLayer', el.id);
+        if (r.status === 200) {
+          this.vectorLayersList = this.vectorLayersList.filter(lay => lay.id !== el.id);
+          this.$alertify.success(this.$i18n.t('default.deleted'));
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
     sendingEvent(files, xhr, formData) {
       formData.append('name', this.vectorLayerName);
     },
     sendVectorLayer() {
       if (this.vectorLayerName === '') {
-        this.$alertify.error('Podaj nazwę warstwy');
+        const msg = this.$i18n.t('upload.noLayerNameError');
+        this.$alertify.error(msg);
         return;
       }
       this.$refs.dropzoneUploadLayer.processQueue();
     },
-    setEditedLayer(layType, key) {
-      if (layType === 'vector') {
-        this.currentEditedLayer = this.vectorLayersList[key];
-      }
+    toggleColumnsSection(isVisible) {
+      this.isColumnsVisible = isVisible;
     },
   },
   mounted() {
+    // console.log(this.$swagger);
     this.getLayers();
   },
 };
@@ -285,6 +445,7 @@ export default {
 }
 .control-label {
   line-height: 29px;
+  font-size: 12px;
 }
 .dashboard.container {
   height: calc(100% - 76px);
@@ -303,7 +464,7 @@ export default {
   width: 120px;
   list-style: none;
 }
-.heading-block:after {
+.heading-block:after, .heading-block:before {
   display: none;
 }
 .loading-overlay {
@@ -319,8 +480,18 @@ export default {
 .section {
   height: 50%;
 }
+.section__content.heading-block.heading-block-main {
+  overflow-y: auto;
+  max-height: calc(100% - 50px);
+}
 .section__header {
   padding-bottom: 15px;
   margin-bottom: -1px;
+}
+.text-centered {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
 }
 </style>

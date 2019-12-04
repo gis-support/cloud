@@ -30,10 +30,16 @@
                   <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="dropdown-menu" role="menu">
+                  <li @click="goToUsers">
+                    <a>
+                      <i class="fa fa-users"></i>
+                      &nbsp;&nbsp;<span>{{$i18n.t('default.users')}}</span>
+                    </a>
+                  </li>
                   <li @click="logout">
                     <a>
                       <i class="fa fa-sign-out"></i>
-                      &nbsp;&nbsp;<span>Wyloguj się</span>
+                      &nbsp;&nbsp;<span>{{$i18n.t('default.logout')}}</span>
                     </a>
                   </li>
                 </ul>
@@ -58,6 +64,9 @@ export default {
   methods: {
     changeLanguage(lang) {
       this.$i18n.locale = lang;
+    },
+    goToUsers() {
+      this.$router.push({ name: 'users' });
     },
     logout() {
       this.$store.commit('logOut');
