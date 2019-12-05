@@ -2,17 +2,22 @@
 # -*- coding: utf-8 -*-
 
 from flask import current_app, request, jsonify
+from flask.cli import with_appcontext
 from playhouse.postgres_ext import PostgresqlExtDatabase
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from functools import wraps, partial
 from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
+from shapely.geometry import shape
+from os import path as op
+from io import BytesIO
 import psycopg2
 import jwt
 import uuid
 import math
 import json
+import click
 
 database = PostgresqlExtDatabase(
     None,
@@ -138,3 +143,30 @@ def layer_decorator(func=None, *, permission=None):
         kwargs['layer'] = layer
         return func(*args, **kwargs)
     return wrapper
+
+
+@click.command(short_help='Fill db with default values.')
+@with_appcontext
+def fill_data():
+    if not user_exists('cli'):
+        create_user('cli', 'cli')
+    cloud = Cloud({"app": current_app, "user": "cli"})
+    name = "elo layr"
+    geom_type = "MULTIPOLYGON"
+    fields = [
+        {'name': 'geometry', 'type': 'geometry(MULTIPOLYGON, 4326)'},
+        {'name': 'test', 'type': 'character varying'}
+    ]
+    cloud.create_layer(name, fields, geom_type)
+    layer = Layer({"app": current_app, "user": "cli", "name": "polygon layer"})
+    TEST_DATA_PATH = op.join(op.dirname(op.abspath(
+        __file__)), '..', 'tests', 'layers', 'correct_feature.json')
+    data = json.loads(open(TEST_DATA_PATH).read())
+    geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
+    columns = []
+    values = []
+    for k, v in data['properties'].items():
+        if k in layer.columns():
+            columns.append(k)
+            values.append(v)
+    layer.add_feature(columns, values)

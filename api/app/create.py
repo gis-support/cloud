@@ -7,6 +7,7 @@ from flask_cors import CORS
 from flask_redis import FlaskRedis
 from app.docs import create_swagger
 from app.db import create_db
+from app.db.general import fill_data
 from app.blueprints.auth.routings import mod_auth
 from app.blueprints.layers.routings import mod_layers
 from app.blueprints.features.routings import mod_features
@@ -30,6 +31,8 @@ def create_app(config='development'):
     app.register_blueprint(mod_layers, url_prefix='/api')
     app.register_blueprint(mod_features, url_prefix='/api')
     app.register_blueprint(mod_permissions, url_prefix='/api')
+    # CLI
+    # app.cli.add_command(fill_data)
     return app
 
 

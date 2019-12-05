@@ -11,3 +11,5 @@ COPY ./docker/api/start.sh ./
 RUN chmod +x ./start.sh
 COPY ./docker/api/tests.sh /usr/bin/tests
 RUN chmod +x /usr/bin/tests
+COPY ./docker/api/cli.sh /usr/bin/cli
+RUN chmod +x /usr/bin/cli
