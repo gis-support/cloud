@@ -35,7 +35,7 @@ class TestPermissions(BaseTest):
         assert r.json
         # Rules
         # There are three layers for admin user
-        assert len(r.json['users']) == 3
+        assert len(r.json['permissions']) == 3
         # There are three users so every layer has three users (more if prod db is up)
         for perm in r.json['permissions']:
             assert len(perm['users']) > 2

@@ -167,7 +167,8 @@ class TestLayersSettings(BaseTest):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
         column_to_delete = "JPT_NAZWA_"
-        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": column_to_delete}))
+        r = client.delete(f'/api/layers/{lid}/settings?token={token}',
+                          data=json.dumps({"column_name": column_to_delete}))
         assert r.status_code == 200
         assert r.json
         assert r.json['settings'] == f'{column_to_delete} deleted'
@@ -180,7 +181,8 @@ class TestLayersSettings(BaseTest):
     def test_settings_delete_not_exists_column(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
-        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "test"}))
+        r = client.delete(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "test"}))
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == 'column not exists'
@@ -188,11 +190,13 @@ class TestLayersSettings(BaseTest):
     def test_settings_delete_restricted_column(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
-        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "geometry"}))
+        r = client.delete(f'/api/layers/{lid}/settings?token={token}',
+                          data=json.dumps({"column_name": "geometry"}))
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == 'column restricted'
-        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "id"}))
+        r = client.delete(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps({"column_name": "id"}))
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == 'column restricted'
@@ -200,7 +204,8 @@ class TestLayersSettings(BaseTest):
     def test_settings_delete_empty_column(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
-        r = client.delete(f'/api/layers/{lid}/settings?token={token}', data=json.dumps({}))
+        r = client.delete(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps({}))
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == 'column_name required'
@@ -212,7 +217,8 @@ class TestLayersSettings(BaseTest):
             "column_name": "test",
             "column_type": "character varying"
         }
-        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        r = client.post(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
         assert r.status_code == 200
         assert r.json
         assert r.json['settings'] == f"{new_column['column_name']} added"
@@ -231,7 +237,8 @@ class TestLayersSettings(BaseTest):
             "column_name": "JPT_NAZWA_",
             "column_type": "character varying"
         }
-        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        r = client.post(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == "column exists"
@@ -243,7 +250,8 @@ class TestLayersSettings(BaseTest):
             "column_name": "test",
             "column_type": "serial"
         }
-        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        r = client.post(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == "invalid column type"
@@ -254,7 +262,8 @@ class TestLayersSettings(BaseTest):
         new_column = {
             "layer_name": "test"
         }
-        r = client.post(f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        r = client.post(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
         assert r.status_code == 200
         assert r.json
         assert r.json['settings'] != lid
@@ -267,3 +276,59 @@ class TestLayersSettings(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['settings']['name'] == new_column['layer_name']
+
+
+@pytest.mark.styles
+class TestLayersStyles(BaseTest):
+
+    def test_styles_get_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        r = client.get(f'/api/layers/{lid}/style?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['fill-color'] == '255,255,255,0.4'
+        assert r.json['style']['stroke-color'] == '51,153,204,255'
+        assert r.json['style']['stroke-width'] == '2'
+
+    def test_styles_set_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        new_fill_color = '0,0,0,0.4'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps({'fill-color': new_fill_color}))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['fill-color'] == new_fill_color
+        r = client.get(f'/api/layers/{lid}/style?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['fill-color'] == new_fill_color
+        assert r.json['style']['stroke-color'] == '51,153,204,255'
+        assert r.json['style']['stroke-width'] == '2'
+        new_stroke_color = '255,255,255,255'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps({'stroke-color': new_stroke_color}))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['stroke-color'] == new_stroke_color
+        r = client.get(f'/api/layers/{lid}/style?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['fill-color'] == new_fill_color
+        assert r.json['style']['stroke-color'] == new_stroke_color
+        assert r.json['style']['stroke-width'] == '2'
+
+    def test_styles_invalid_property(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        new_fill_color = '0,0,0,0.4'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps({'test-color': new_fill_color}))
+        # nothing change
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['fill-color'] == '255,255,255,0.4'
+        assert r.json['style']['stroke-color'] == '51,153,204,255'
+        assert r.json['style']['stroke-width'] == '2'
+        # TODO validate color values + width

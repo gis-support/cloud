@@ -51,8 +51,29 @@ DEFAULT_POLYGON_STYLE = """
 </qgis>
 """
 
+QML_TO_OL = {
+    "marker": {
+        "color": "fill-color",
+        "outline_color": "stroke-color",
+        "outline_width": "stroke-width"
+    },
+    "line": {
+        "line_color": "stroke-color",
+        "line_width": "stroke-width"
+    },
+    "fill": {
+        "color": "fill-color",
+        "outline_color": "stroke-color",
+        "outline_width": "stroke-width"
+    }
+}
 
-def create_qml(geom_type, fill_color="255,255,255,0.4", stroke_color="51,153,204,255", stroke_width="2"):
+
+def create_qml(geom_type, style={}):
+    fill_color = style.get('fill-color', '255,255,255,0.4')
+    stroke_color = style.get('stroke-color', '51,153,204,255')
+    stroke_width = style.get('stroke-width', '2')
+
     if 'point' in geom_type.lower():
         return DEFAULT_POINT_STYLE.format(fill_color, stroke_color, stroke_width)
     elif 'line' in geom_type.lower():
