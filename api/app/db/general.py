@@ -6,6 +6,7 @@ from flask.cli import with_appcontext
 from playhouse.postgres_ext import PostgresqlExtDatabase
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
+from peewee import Model
 from functools import wraps, partial
 from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
@@ -27,6 +28,11 @@ database = PostgresqlExtDatabase(
 )
 
 
+class BaseModel(Model):
+    class Meta:
+        database = database
+
+
 def user_exists(user):
     cur = current_app._db.execute_sql(
         'SELECT 1 FROM pg_roles WHERE rolname=%s AND rolcanlogin=true', (user,))
@@ -38,6 +44,8 @@ def create_user(user, password):
         Identifier(user)), (password,))
     current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(
         Identifier(current_app.config['DBNAME']), Identifier(user)))
+    current_app._db.execute_sql(
+        SQL("""ALTER GROUP "default" ADD USER {}""").format(Identifier(user)))
     if current_app.config['TESTING']:
         current_app._redis.lpush('user_list', user)
 

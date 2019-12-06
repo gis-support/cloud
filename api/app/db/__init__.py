@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from app.db.general import database
+from peewee import ProgrammingError
 
 
 def create_db(config):
@@ -30,4 +31,10 @@ def create_db(config):
                 CONSTRAINT layer_styles_pkey PRIMARY KEY (id)
             );
         """)
+        try:
+            database.execute_sql("""
+                CREATE GROUP "default";
+            """)
+        except ProgrammingError:
+            pass
     return database

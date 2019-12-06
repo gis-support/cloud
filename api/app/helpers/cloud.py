@@ -48,7 +48,6 @@ class Cloud:
 
     # Get permissions for layers
     def get_permissions(self):
-        # TODO UNION zamiast JOIN
         cursor = self.execute("""
             SELECT t1.rolname, t2.table_name, t2.privilege_type
             FROM pg_roles AS t1
@@ -87,6 +86,15 @@ class Cloud:
             'permissions': permissions,
             'users': list(users.keys())
         }
+
+    # Get user groups
+    def get_groups(self):
+        groups = []
+        cursor = self.execute(
+            """SELECT groname FROM pg_group WHERE groname NOT LIKE 'pg_%%';""")
+        for row in cursor.fetchall():
+            groups.append(row[0])
+        return groups
 
     # Layers list
     def get_layers(self):

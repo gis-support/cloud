@@ -1,0 +1,56 @@
+Edit style
+---
+tags:
+  - Layers
+summary: Edit style by layer
+produces:
+  - application/json
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        fill-color:
+          type: string
+          required: false
+        stroke-color:
+          type: string
+          required: false
+        stroke-width:
+          type: string
+          required: false
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    description: Style
+    schema:
+      type: object
+      properties:
+        style:
+          type: object
+          properties:
+            fill-color:
+              type: string
+            stroke-color:
+              type: string
+            stroke-width:
+              type: string
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

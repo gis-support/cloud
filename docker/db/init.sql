@@ -15,3 +15,4 @@ CREATE TABLE IF NOT EXISTS public.layer_styles (
     update_time timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT layer_styles_pkey PRIMARY KEY (id)
 );
+CREATE GROUP default;
