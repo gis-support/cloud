@@ -8,13 +8,13 @@ from app.helpers.style import create_qml
 
 DB_RESTRICTED_USERS = (
     'docker',  # Superadmin from docker-compose.yml
-    'replicator',
-    'postgres'
+    'replicator',  # Docker Kartoza user for slave
+    'postgres'  # Superadmin default
 )
 
 DB_RESTRICTED_TABLES = (
-    'spatial_ref_sys',
-    'layer_styles'
+    'spatial_ref_sys',  # Postgis dependency
+    'layer_styles'  # QGIS styles source
 )
 
 

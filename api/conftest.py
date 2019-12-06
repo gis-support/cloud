@@ -10,7 +10,8 @@ SYSTEM_TABLES = [
     'geometry_columns',
     'spatial_ref_sys',
     'raster_columns',
-    'raster_overviews'
+    'raster_overviews',
+    'layer_styles'
 ]
 
 
@@ -26,6 +27,7 @@ def app():
                 user=Identifier(user.decode('utf-8'))))
         except:
             pass
+    app._db.execute_sql("TRUNCATE layer_styles RESTART IDENTITY;")
     app._redis.delete('user_list')
     cur = app._db.execute_sql(
         "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
