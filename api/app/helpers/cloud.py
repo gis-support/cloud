@@ -96,6 +96,16 @@ class Cloud:
             groups.append(row[0])
         return groups
 
+    def get_user_group(self):
+        cursor = self.execute("""
+            SELECT rolname FROM pg_user
+            JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
+            JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
+            WHERE
+            pg_user.usename = %s;
+        """, (self.user,))
+        return cursor.fetchone()[0]
+
     # Layers list
     def get_layers(self):
         cursor = self.execute("""
