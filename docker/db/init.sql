@@ -18,3 +18,7 @@ CREATE TABLE IF NOT EXISTS public.layer_styles (
 -- Dwie grupy na start, każdy użytkownik domyślnie jest dopisywany do default
 CREATE GROUP "default";
 CREATE GROUP "private";
+-- Hardkodowane póki co, docelowo po ENV
+CREATE USER admin WITH ENCRYPTED PASSWORD 'admin';
+GRANT CONNECT ON DATABASE "cloud" TO admin;
+ALTER GROUP "default" ADD USER admin;
