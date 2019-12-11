@@ -15,10 +15,3 @@ CREATE TABLE IF NOT EXISTS public.layer_styles (
     update_time timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT layer_styles_pkey PRIMARY KEY (id)
 );
--- Dwie grupy na start, każdy użytkownik domyślnie jest dopisywany do default
-CREATE GROUP "default";
-CREATE GROUP "private";
--- Hardkodowane póki co, docelowo po ENV
-CREATE USER admin WITH ENCRYPTED PASSWORD 'admin';
-GRANT CONNECT ON DATABASE "cloud" TO admin;
-ALTER GROUP "default" ADD USER admin;

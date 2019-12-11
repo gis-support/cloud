@@ -26,8 +26,19 @@ else
     if find "/docker-entrypoint-initdb.d" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
         for f in /docker-entrypoint-initdb.d/*; do
         export PGPASSWORD=${POSTGRES_PASS}
-        list=(`echo ${POSTGRES_DBNAME} | tr ',' ' '`)
-        for db in "${list[@]}"
+        groups_list=(`echo ${DEFAULT_GROUPS} | tr ',' ' '`)
+        db_list=(`echo ${POSTGRES_DBNAME} | tr ',' ' '`)
+        main_db="${db_list[0]}"
+        testing_db="${db_list[1]}"
+        for g in "${groups_list[@]}"
+        do
+            :
+            psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "CREATE GROUP \"$g\";"
+        done;
+        psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "CREATE USER $DEFAULT_USER WITH ENCRYPTED PASSWORD '$DEFAULT_PASS';"
+        psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "GRANT CONNECT ON DATABASE \"cloud\" TO $DEFAULT_USER;"
+        psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "ALTER GROUP \"default\" ADD USER $DEFAULT_USER;"
+        for db in "${db_list[@]}"
         do
             :
             case "$f" in
