@@ -28,8 +28,8 @@
 <script>
 export default {
   data: () => ({
-    email: 'docker',
-    password: 'docker',
+    email: '',
+    password: '',
   }),
   methods: {
     async loginRequest() {

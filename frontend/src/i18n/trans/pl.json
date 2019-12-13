@@ -70,13 +70,19 @@
     "uploadSuccess": "Pomyślnie przesłano plik"
   },
   "users": {
+    "modal": {
+      "changePermissions": "Zmiana uprawnień",
+      "permissionType": "Rodzaj uprawnień"
+    },
     "responses": {
       "noEmailOrPassword": "Nie podano adresu email lub hasła",
+      "permissionsChanged": "Pomyślnie zmieniono uprawnienia",
       "userCreated": "Utworzono użytkownika",
       "userExists": "Użytkownik o podanym adresie email istnieje"
     },
     "title": {
-      "addUser": "Dodawanie użytkownika"
+      "addUser": "Dodawanie użytkownika",
+      "permissions": "Uprawnienia użytkowników"
     }
   }
 }

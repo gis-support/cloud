@@ -17,17 +17,123 @@
         </button>
       </div>
     </div>
+    <div class="col-sm-12 pl-0 pr-0 section">
+      <h2 class="flex-center container__border--bottom container__border--grey mb-0">
+        <div class="p-0 container__border--bottom container__border--red section__header">
+          <i class="fa fa-lock"></i>
+          <span data-i18n="dashboard.title"> {{$i18n.t('users.title.permissions')}}</span>
+        </div>
+      </h2>
+      <div class="section__content heading-block heading-block-main pt-10" style="display: flex;">
+        <table class="table table-striped table-bordered table-hover">
+          <thead>
+            <tr role="row">
+              <div>
+                <div class="legend-square legend-edit"></div>
+                <div class="legend-square legend-read"></div>
+                <div class="legend-square legend-noaccess"></div>
+              </div>
+              <th class="text-centered"
+                v-for="perm of permissions"
+                :key="perm.id"
+              >
+                <p><i class="fa fa-map-o fa-lg mr-5"></i>{{perm.name}}</p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr role="row" v-for="user of users" :key="user">
+              <td class="text-centered">{{user}}</td>
+              <td
+                class="text-centered"
+                v-for="perm of permissions"
+                :style="{'background': mapPermissionColors[perm.users[user]]}"
+                :key="perm.id"
+              >
+                <i class="fa fa-pencil handler"
+                  data-toggle="modal"
+                  data-target="#permissionsModal"
+                  :title="$i18n.t('users.modal.changePermissions')"
+                  @click="saveCurrentPermissions(perm.users[user], perm.id, user)"
+                ></i>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <!--MODAL UPRAWNIEŃ-->
+    <div class="modal fade" data-backdrop="static" id="permissionsModal" tabindex="-1" role="dialog"
+      aria-hidden="true" ref="permissionsModal">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{{$i18n.t('users.modal.changePermissions')}}</h4>
+          </div>
+          <div class="modal-body" style="display: flex">
+            <label class="control-label col-sm-4">{{$i18n.t('users.modal.permissionType')}}</label>
+            <select class="form-control mr-5" name="column-types-select"
+              v-model="currentPermissions.permission">
+              <option value="write">Edycja</option>
+              <option value="read">Podgląd</option>
+              <option value="">Brak dostępu</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" ref="closeModalBtn" data-dismiss="modal">
+              {{$i18n.t('default.cancel')}}
+            </button>
+            <button type="button" class="btn btn-success" @click="editPermissions">
+              {{$i18n.t('default.save')}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--KONIEC MODALA-->
   </div>
 </template>
 
 <script>
 export default {
   data: () => ({
+    currentPermissions: {},
     email: undefined,
+    mapPermissionColors: {
+      write: '#48B343',
+      read: '#F9A122',
+      '': '#EC3C36',
+    },
     password: undefined,
+    permissions: undefined,
+    users: undefined,
   }),
   methods: {
+    async editPermissions() {
+      const payload = {
+        lid: this.currentPermissions.layId,
+        body: {
+          permission: this.currentPermissions.permission,
+          user: this.currentPermissions.username,
+        },
+      };
+
+      const r = await this.$store.dispatch('editPermissions', payload);
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('users.responses.permissionsChanged'));
+        const layer = this.permissions.find(el => el.id === this.currentPermissions.layId);
+        this.$set(layer.users, r.obj.permissions.user, r.obj.permissions.permission);
+        this.$refs.closeModalBtn.click();
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async getPermissions() {
+      const r = await this.$store.dispatch('getPermissions');
+      this.permissions = r.obj.permissions;
+      this.users = r.obj.users;
+    },
     async registerRequest() {
       if (!this.email || !this.password) {
         this.$alertify.error(this.$i18n.t('users.responses.noEmailOrPassword'));
@@ -37,6 +143,7 @@ export default {
       const r = await this.$store.dispatch('register', payload);
       if (r.status === 201) {
         this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
+        this.getPermissions(); // update permissions table
         this.email = undefined;
         this.password = undefined;
       } else if (r.status === 409) {
@@ -45,6 +152,14 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+    saveCurrentPermissions(permission, layerId, username) {
+      this.$set(this.currentPermissions, 'permission', permission);
+      this.$set(this.currentPermissions, 'layId', layerId);
+      this.$set(this.currentPermissions, 'username', username);
+    },
+  },
+  mounted() {
+    this.getPermissions();
   },
 };
 </script>
@@ -80,8 +195,45 @@ export default {
   width: 120px;
   list-style: none;
 }
+.handler:hover {
+  cursor: pointer;
+}
 .heading-block:after, .heading-block:before {
   display: none;
+}
+.legend-edit {
+  background: #48B343;
+  margin: 5px;
+}
+.legend-edit::after {
+  content: "- Edycja";
+  display: block;
+  margin-left: 25px;
+  width: 200px;
+}
+.legend-noaccess {
+  background: #EC3C36;
+  margin: 5px;
+}
+.legend-noaccess::after {
+  content: "- Brak dostępu";
+  display: block;
+  margin-left: 25px;
+  width: 200px;
+}
+.legend-read {
+  background: #F9A122;
+  margin: 5px;
+}
+.legend-read::after {
+  content: "- Podgląd";
+  display: block;
+  margin-left: 25px;
+  width: 200px;
+}
+.legend-square {
+  height: 20px;
+  width: 20px;
 }
 .loading-overlay {
   width: 100%;
@@ -93,9 +245,9 @@ export default {
 .panel-title__tools i:not(:last-child) {
   margin-right: 5px;
 }
-.section {
+/* .section {
   height: 50%;
-}
+} */
 .section__content.heading-block.heading-block-main {
   overflow-y: auto;
   max-height: calc(100% - 50px);
@@ -106,6 +258,10 @@ export default {
 }
 .text-centered {
   text-align: center;
+}
+.text-horizontal {
+  writing-mode: vertical-lr;
+  text-orientation: sideways-right;
 }
 .text-left {
   text-align: left;

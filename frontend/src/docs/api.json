@@ -812,6 +812,151 @@
         ]
       }
     }, 
+    "/api/layers/{lid}/style": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "style": {
+                  "properties": {
+                    "fill-color": {
+                      "type": "string"
+                    }, 
+                    "stroke-color": {
+                      "type": "string"
+                    }, 
+                    "stroke-width": {
+                      "type": "string"
+                    }
+                  }, 
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get style", 
+        "tags": [
+          "Layers"
+        ]
+      }, 
+      "put": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "fill-color": {
+                  "required": false, 
+                  "type": "string"
+                }, 
+                "stroke-color": {
+                  "required": false, 
+                  "type": "string"
+                }, 
+                "stroke-width": {
+                  "required": false, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Style", 
+            "schema": {
+              "properties": {
+                "style": {
+                  "properties": {
+                    "fill-color": {
+                      "type": "string"
+                    }, 
+                    "stroke-color": {
+                      "type": "string"
+                    }, 
+                    "stroke-width": {
+                      "type": "string"
+                    }
+                  }, 
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Edit style", 
+        "tags": [
+          "Layers"
+        ]
+      }
+    }, 
     "/api/login": {
       "post": {
         "parameters": [
@@ -877,13 +1022,6 @@
       "get": {
         "parameters": [
           {
-            "description": "Layer ID", 
-            "in": "path", 
-            "name": "id", 
-            "required": true, 
-            "type": "string"
-          }, 
-          {
             "description": "Token", 
             "in": "query", 
             "name": "token", 
@@ -948,7 +1086,7 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
             "required": true, 
             "type": "string"
           }, 
