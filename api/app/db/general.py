@@ -2,17 +2,23 @@
 # -*- coding: utf-8 -*-
 
 from flask import current_app, request, jsonify
+from flask.cli import with_appcontext
 from playhouse.postgres_ext import PostgresqlExtDatabase
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
+from peewee import Model
 from functools import wraps, partial
 from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
+from shapely.geometry import shape
+from os import path as op
+from io import BytesIO
 import psycopg2
 import jwt
 import uuid
 import math
 import json
+import click
 
 database = PostgresqlExtDatabase(
     None,
@@ -20,6 +26,11 @@ database = PostgresqlExtDatabase(
     autorollback=True,
     field_types={'geometry': 'geometry'}
 )
+
+
+class BaseModel(Model):
+    class Meta:
+        database = database
 
 
 def user_exists(user):
@@ -33,6 +44,8 @@ def create_user(user, password):
         Identifier(user)), (password,))
     current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(
         Identifier(current_app.config['DBNAME']), Identifier(user)))
+    current_app._db.execute_sql(
+        SQL("""ALTER GROUP "default" ADD USER {}""").format(Identifier(user)))
     if current_app.config['TESTING']:
         current_app._redis.lpush('user_list', user)
 
@@ -138,3 +151,30 @@ def layer_decorator(func=None, *, permission=None):
         kwargs['layer'] = layer
         return func(*args, **kwargs)
     return wrapper
+
+
+@click.command(short_help='Fill db with default values.')
+@with_appcontext
+def fill_data():
+    if not user_exists('cli'):
+        create_user('cli', 'cli')
+    cloud = Cloud({"app": current_app, "user": "cli"})
+    name = "elo layr"
+    geom_type = "MULTIPOLYGON"
+    fields = [
+        {'name': 'geometry', 'type': 'geometry(MULTIPOLYGON, 4326)'},
+        {'name': 'test', 'type': 'character varying'}
+    ]
+    cloud.create_layer(name, fields, geom_type)
+    layer = Layer({"app": current_app, "user": "cli", "name": "polygon layer"})
+    TEST_DATA_PATH = op.join(op.dirname(op.abspath(
+        __file__)), '..', 'tests', 'layers', 'correct_feature.json')
+    data = json.loads(open(TEST_DATA_PATH).read())
+    geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
+    columns = []
+    values = []
+    for k, v in data['properties'].items():
+        if k in layer.columns():
+            columns.append(k)
+            values.append(v)
+    layer.add_feature(columns, values)

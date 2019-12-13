@@ -8,7 +8,7 @@
 class Config(object):
     DBNAME = 'cloud'
     DBUSER = 'docker'
-    DBPASS = 'docker'
+    DBPASS = 'nielogowacsienategousera'
     DBPORT = 5432
     DBHOST = 'cloud-db'
     APP_HOST = 'cbre.gis-support'

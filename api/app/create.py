@@ -7,10 +7,12 @@ from flask_cors import CORS
 from flask_redis import FlaskRedis
 from app.docs import create_swagger
 from app.db import create_db
+from app.db.general import fill_data
 from app.blueprints.auth.routings import mod_auth
 from app.blueprints.layers.routings import mod_layers
 from app.blueprints.features.routings import mod_features
 from app.blueprints.permissions.routings import mod_permissions
+from app.blueprints.rdos import init_rdos
 from hashids import Hashids
 try:
     from app.local_config import *
@@ -30,6 +32,9 @@ def create_app(config='development'):
     app.register_blueprint(mod_layers, url_prefix='/api')
     app.register_blueprint(mod_features, url_prefix='/api')
     app.register_blueprint(mod_permissions, url_prefix='/api')
+    init_rdos(app)
+    # CLI
+    # app.cli.add_command(fill_data)
     return app
 
 

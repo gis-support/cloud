@@ -75,11 +75,12 @@ def layers(cloud):
             transform = osr.CoordinateTransformation(
                 inSpatialRef, outSpatialRef)
         ldefn = layer.GetLayerDefn()
-        test_geom_type_feature = layer.GetNextFeature()
+        test_feature = layer.GetNextFeature()
+        geom_type = test_feature.GetGeometryRef().GetGeometryName()
         layer.ResetReading()
         fields = [{
             "name": "geometry",
-            "type": "geometry({}, 4326)".format(test_geom_type_feature.GetGeometryRef().GetGeometryName())
+            "type": f"geometry({geom_type}, 4326)"
         }]
         for n in range(ldefn.GetFieldCount()):
             fdefn = ldefn.GetFieldDefn(n)
@@ -89,7 +90,7 @@ def layers(cloud):
             })
         with current_app._db.atomic() as transaction:
             cloud = Cloud({"app": current_app, "user": request.user})
-            cloud.create_layer(name, fields)
+            cloud.create_layer(name, fields, geom_type)
             with tempfile.SpooledTemporaryFile(mode='w') as tfile:
                 columns = list(map(lambda f: f['name'], fields))
                 count_features = 0
@@ -147,6 +148,37 @@ def layers_id(lid):
             layer.delete()
             return jsonify({"layers": "{} deleted".format(layer.name)})
         return delete(lid=lid)
+
+
+@mod_layers.route('/layers/<lid>/style', methods=['GET', 'PUT'])
+@swag_from(path_by(__file__, 'docs.style.get.yml'), methods=['GET'])
+@swag_from(path_by(__file__, 'docs.style.put.yml'), methods=['PUT'])
+@token_required
+def layers_style(lid):
+    if request.method == 'GET':
+        """
+        Get layer style
+        Returns style
+        """
+        @layer_decorator(permission="read")
+        def get(layer, lid=None):
+            return jsonify({"style": layer.get_style()})
+        return get(lid=lid)
+
+    elif request.method == 'PUT':
+        """
+        Change layer style
+        Returns confirmation
+        """
+        @layer_decorator(permission="owner")
+        def post(layer, lid=None):
+            data = request.get_json(force=True)
+            try:
+                style = layer.set_style(data)
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 400
+            return jsonify({"style": style})
+        return post(lid=lid)
 
 
 @mod_layers.route('/layers/<lid>/settings', methods=['GET', 'DELETE', 'POST'])

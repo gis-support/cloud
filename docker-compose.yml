@@ -1,4 +1,4 @@
-version: '3.3'
+version: "3.3"
 services:
   db:
     container_name: cloud-db
@@ -14,6 +14,10 @@ services:
       - DEFAULT_COLLATION=pl_PL.UTF-8
       - DEFAULT_CTYPE=pl_PL.UTF-8
       - DEFAULT_ENCODING=UTF8
+      - POSTGRES_PASS=nielogowacsienategousera
+      - DEFAULT_USER=admin
+      - DEFAULT_PASS=admin
+      - DEFAULT_GROUPS=default,private
   api:
     container_name: cloud-api
     build:
@@ -27,6 +31,7 @@ services:
       - ./api:/api
     environment:
       - PYTHONUNBUFFERED=0
+      - FLASK_APP=run:create_app()
     depends_on:
       - db
       - redis
