@@ -6,7 +6,7 @@ summary: Edit permission for layer and user
 produces:
   - application/json
 parameters:
-  - name: id
+  - name: lid
     in: path
     description: Layer ID
     required: true
