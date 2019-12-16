@@ -108,6 +108,9 @@ export default {
 .d-flex {
   display: flex;
 }
+.dropdown-menu:hover {
+  cursor: default;
+}
 .flex-center {
   display: flex !important;
   justify-content: space-between !important;

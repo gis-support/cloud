@@ -6,6 +6,7 @@
     "modal":  {
       "addLayer": "Dodawanie nowej warstwy",
       "addColumn": "Dodawanie kolumny do warstwy",
+      "chooseColumnType": "Wybierz typ kolumny",
       "columnAdded": "Dodano kolumnę",
       "columnName": "Nazwa kolumny",
       "columns": "Kolumny warstwy",

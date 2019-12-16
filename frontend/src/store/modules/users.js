@@ -19,7 +19,6 @@ const swagger = new Swagger({
 export default {
   actions: {
     async editPermissions(ctx, payload) {
-      console.log(payload);
       try {
         // eslint-disable-next-line no-underscore-dangle
         const response = await swagger.apis.Permissions

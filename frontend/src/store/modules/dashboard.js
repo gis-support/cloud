@@ -19,6 +19,7 @@ const swagger = new Swagger({
 export default {
   state: {
     apiUrl: 'https://cloud.gis.support/api',
+    columnTypes: ['character varying', 'real', 'integer', 'timestamp without time zone'],
   },
   actions: {
     async changeLayer(ctx, payload) {
@@ -68,6 +69,9 @@ export default {
   getters: {
     getApiUrl(state) {
       return state.apiUrl;
+    },
+    getColumnTypes(state) {
+      return state.columnTypes;
     },
   },
 };

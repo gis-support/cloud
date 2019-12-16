@@ -203,11 +203,10 @@
                  placeholder="Nazwa kolumny" v-model="newColumnName">
                 <select class="form-control mr-5" name="column-types-select"
                   v-model="newColumnType">
-                  <option value="" selected>Wybierz typ kolumny</option>
-                  <option value="character varying">character varying</option>
-                  <option value="real">real</option>
-                  <option value="integer">integer</option>
-                  <option value="timestamp without time zone">timestamp without time zone</option>
+                  <option value="" selected>{{$i18n.t('dashboard.modal.chooseColumnType')}}</option>
+                  <option v-for="colType in columnTypes" :key="colType" :value="colType">
+                    {{colType}}
+                  </option>
                 </select>
                 <button type="button" class="btn btn-success" @click="addNewColumn">
                   {{$i18n.t('default.add')}}
@@ -278,6 +277,9 @@ export default {
     vueDropzone: vue2Dropzone,
   },
   computed: {
+    columnTypes() {
+      return this.$store.getters.getColumnTypes;
+    },
     filteredListExternal() {
       if (!this.externalLayersList) {
         return false;

@@ -12,7 +12,7 @@
           :placeholder="$i18n.t('default.email')">
         <input type="password" class="form-control container__input mr-5" v-model="password"
           :placeholder="$i18n.t('default.password')">
-        <button type="button" class="btn btn-success" @click="registerRequest">
+        <button type="button" class="btn btn-success" @click="addNewUser">
           {{$i18n.t('default.add')}}
         </button>
       </div>
@@ -114,6 +114,24 @@ export default {
     users: undefined,
   }),
   methods: {
+    async addNewUser() {
+      if (!this.email || !this.password) {
+        this.$alertify.error(this.$i18n.t('users.responses.noEmailOrPassword'));
+        return;
+      }
+      const payload = { user: this.email, password: this.password };
+      const r = await this.$store.dispatch('register', payload);
+      if (r.status === 201) {
+        this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
+        this.getPermissions(); // update permissions table
+        this.email = undefined;
+        this.password = undefined;
+      } else if (r.status === 409) {
+        this.$alertify.error(this.$i18n.t('users.responses.userExists'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
     async editPermissions() {
       const payload = {
         lid: this.currentPermissions.layId,
@@ -137,24 +155,6 @@ export default {
       const r = await this.$store.dispatch('getPermissions');
       this.permissions = r.obj.permissions;
       this.users = r.obj.users;
-    },
-    async registerRequest() {
-      if (!this.email || !this.password) {
-        this.$alertify.error(this.$i18n.t('users.responses.noEmailOrPassword'));
-        return;
-      }
-      const payload = { user: this.email, password: this.password };
-      const r = await this.$store.dispatch('register', payload);
-      if (r.status === 201) {
-        this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
-        this.getPermissions(); // update permissions table
-        this.email = undefined;
-        this.password = undefined;
-      } else if (r.status === 409) {
-        this.$alertify.error(this.$i18n.t('users.responses.userExists'));
-      } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
-      }
     },
     saveCurrentPermissions(permission, layerId, username) {
       this.$set(this.currentPermissions, 'permission', permission);
