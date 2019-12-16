@@ -105,9 +105,15 @@ export default {
 .container__border--red {
   border-color: #d74b4b;
 }
+.d-flex {
+  display: flex;
+}
 .flex-center {
   display: flex !important;
   justify-content: space-between !important;
+}
+.full-width {
+  width: 100%;
 }
 .green {
   color: #1e5b22 !important;

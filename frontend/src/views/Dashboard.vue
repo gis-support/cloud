@@ -132,21 +132,13 @@
             </div>
           </div>
           <div class="modal-footer">
-            <span v-if="isUploadSuccessful">
-              <button type="button" class="btn btn-default" data-dismiss="modal"
-                @click="clearUploadFiles">
-                {{$i18n.t('default.close')}}
-              </button>
-            </span>
-            <span v-else>
-              <button type="button" class="btn btn-default" data-dismiss="modal"
-                @click="clearUploadFiles">
-                {{$i18n.t('default.cancel')}}
-              </button>
-              <button type="button" class="btn btn-success" @click="sendVectorLayer">
-                {{$i18n.t('default.save')}}
-              </button>
-            </span>
+            <button type="button" class="btn btn-default" data-dismiss="modal"
+              @click="clearUploadFiles" ref="closeModalBtn">
+              {{$i18n.t('default.cancel')}}
+            </button>
+            <button type="button" class="btn btn-success" @click="sendVectorLayer">
+              {{$i18n.t('default.save')}}
+            </button>
           </div>
         </div>
       </div>
@@ -246,7 +238,6 @@ export default {
     currentEditedLayer: undefined,
     currentLayerSettings: [],
     isColumnsVisible: true,
-    isUploadSuccessful: false,
     newColumnName: undefined,
     newColumnType: '',
     searchExtSources: '',
@@ -272,11 +263,11 @@ export default {
       acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson',
       success(file, response) {
         vm.$alertify.success(vm.$i18n.t('upload.uploadSuccess'));
-        vm.changeUploadSuccess(true);
         const newLayer = { id: response.layers.id, name: response.layers.name };
         if (!vm.vectorLayersList.find(el => el.id === newLayer.id)) {
           vm.vectorLayersList.push(newLayer);
         }
+        vm.$refs.closeModalBtn.click();
       },
       error() {
         vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
@@ -386,12 +377,9 @@ export default {
       const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
       this.currentLayerSettings = r.body.settings;
     },
-    changeUploadSuccess(isSuccessful) {
-      this.isUploadSuccessful = isSuccessful;
-    },
     clearUploadFiles() {
       this.$refs.dropzoneUploadLayer.removeAllFiles();
-      this.isUploadSuccessful = false;
+      this.vectorLayerName = '';
     },
     closeSettingsModal() {
       this.currentEditedLayer = {};

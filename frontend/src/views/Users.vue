@@ -24,7 +24,7 @@
           <span data-i18n="dashboard.title"> {{$i18n.t('users.title.permissions')}}</span>
         </div>
       </h2>
-      <div class="section__content heading-block heading-block-main pt-10" style="display: flex;">
+      <div class="section__content heading-block heading-block-main pt-10 d-flex">
         <table class="table table-striped table-bordered table-hover">
           <thead>
             <tr role="row">
@@ -33,11 +33,15 @@
                 <div class="legend-square legend-read"></div>
                 <div class="legend-square legend-noaccess"></div>
               </div>
-              <th class="text-centered"
+              <th
                 v-for="perm of permissions"
                 :key="perm.id"
               >
-                <p><i class="fa fa-map-o fa-lg mr-5"></i>{{perm.name}}</p>
+                <p class="text-vertical full-width d-flex align-center">
+                  <i class="fa fa-map-o fa-lg"
+                  style="transform: rotate(90deg); padding-top: 5px; padding-right: 10px"></i>
+                  {{perm.name}}
+                </p>
               </th>
             </tr>
           </thead>
@@ -259,9 +263,9 @@ export default {
 .text-centered {
   text-align: center;
 }
-.text-horizontal {
-  writing-mode: vertical-lr;
-  text-orientation: sideways-right;
+.text-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
 .text-left {
   text-align: left;
