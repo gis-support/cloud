@@ -25,7 +25,7 @@
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main pt-10 d-flex">
-        <table class="table table-striped table-bordered table-hover">
+        <table class="table table-striped table-bordered table-hover" id="permissions-table">
           <thead>
             <tr role="row">
               <div>
@@ -54,7 +54,9 @@
                 :style="{'background': mapPermissionColors[perm.users[user]]}"
                 :key="perm.id"
               >
-                <i class="fa fa-pencil handler"
+                <i class="fa handler"
+                  :class="perm.users[user] == 'write' ? 'fa-pencil' :
+                    (perm.users[user] == 'read' ? 'fa-eye' : 'fa-times')"
                   data-toggle="modal"
                   data-target="#permissionsModal"
                   :title="$i18n.t('users.modal.changePermissions')"
@@ -79,9 +81,9 @@
             <label class="control-label col-sm-4">{{$i18n.t('users.modal.permissionType')}}</label>
             <select class="form-control mr-5" name="column-types-select"
               v-model="currentPermissions.permission">
-              <option value="write">Edycja</option>
-              <option value="read">Podgląd</option>
-              <option value="">Brak dostępu</option>
+              <option value="write">{{$i18n.t('default.edit')}}</option>
+              <option value="read">{{$i18n.t('default.read')}}</option>
+              <option value="">{{$i18n.t('default.noAccess')}}</option>
             </select>
           </div>
           <div class="modal-footer">
@@ -249,9 +251,9 @@ export default {
 .panel-title__tools i:not(:last-child) {
   margin-right: 5px;
 }
-/* .section {
-  height: 50%;
-} */
+#permissions-table {
+  max-width: calc(100% - 1px);
+}
 .section__content.heading-block.heading-block-main {
   overflow-y: auto;
   max-height: calc(100% - 50px);
@@ -266,6 +268,7 @@ export default {
 .text-vertical {
   writing-mode: vertical-rl;
   text-orientation: mixed;
+  transform: rotate(180deg);
 }
 .text-left {
   text-align: left;
