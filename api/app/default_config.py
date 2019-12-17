@@ -11,8 +11,8 @@ class Config(object):
     DBPASS = 'nielogowacsienategousera'
     DBPORT = 5432
     DBHOST = 'cloud-db'
-    APP_HOST = 'cbre.gis-support'
-    APP_PORT = 5001
+    APP_HOST = 'cloud.gis.support'
+    APP_PORT = 4999
     REDIS_URL = "redis://@cloud-redis:6379/0"
     SECRET_KEY = 'test'
     DEBUG = False
@@ -21,6 +21,8 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    APP_PORT = 5001
+    APP_HOST = 'localhost'
 
 
 class TestingConfig(Config):

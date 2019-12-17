@@ -1,0 +1,65 @@
+version: "3.3"
+services:
+  nginx:
+    restart: always
+    container_name: cloud-nginx
+    build:
+      context: ./
+      dockerfile: ./docker/nginx/Dockerfile
+    tty: true
+    ports:
+      - "4999:80"
+    depends_on:
+      - db
+      - api
+      - redis
+  db:
+    restart: always
+    container_name: cloud-db
+    build:
+      context: ./
+      dockerfile: ./docker/db/Dockerfile
+    volumes:
+      - ./docker/db/prod_postgres_data:/var/lib/postgresql
+    environment:
+      - POSTGRES_DBNAME=cloud,cloud-testing
+      - DEFAULT_COLLATION=pl_PL.UTF-8
+      - DEFAULT_CTYPE=pl_PL.UTF-8
+      - DEFAULT_ENCODING=UTF8
+      - POSTGRES_PASS=nielogowacsienategousera
+      - DEFAULT_USER=admin
+      - DEFAULT_PASS=admin
+      - DEFAULT_GROUPS=default,private
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "export",
+          "PGPASSWORD=nielogowacsienategousera",
+          "&&",
+          "pg_isready",
+          "-U",
+          "docker",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  api:
+    restart: always
+    container_name: cloud-api
+    build:
+      context: ./
+      dockerfile: ./docker/api/Dockerfile
+    command: bash -c "./prod_start.sh"
+    environment:
+      - PYTHONUNBUFFERED=0
+      - FLASK_APP=run:create_app()
+    depends_on:
+      - db
+      - redis
+  redis:
+    restart: always
+    container_name: cloud-redis
+    image: redis:5.0.6
+    volumes:
+      - ./docker/db/prod_redis_data:/data

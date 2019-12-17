@@ -17,6 +17,7 @@ pyjwt = "*"
 flask-redis = "*"
 hashids = "*"
 shapely = "*"
+uwsgi = "*"
 
 [requires]
 python_version = "3.7.3"

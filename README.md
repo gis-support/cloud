@@ -113,4 +113,10 @@ sudo rm -rf ./docker/db/redis_data
 
 ## III. Deployment
 
-TODO
+1. Wymagania:
+
+* Docker 19.03+
+
+* Docker Compose 1.21+
+
+2. 
