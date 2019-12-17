@@ -119,4 +119,7 @@ sudo rm -rf ./docker/db/redis_data
 
 * Docker Compose 1.21+
 
-2. 
+2. Należy uruchomić polecenie:
+```
+docker-compose -f docker-production.yml up -d
+```

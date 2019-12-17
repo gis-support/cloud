@@ -2,7 +2,7 @@ version: "3.3"
 services:
   nginx:
     restart: always
-    container_name: cloud-nginx
+    container_name: cloud-nginx-prod
     build:
       context: ./
       dockerfile: ./docker/nginx/Dockerfile
@@ -15,7 +15,7 @@ services:
       - redis
   db:
     restart: always
-    container_name: cloud-db
+    container_name: cloud-db-prod
     build:
       context: ./
       dockerfile: ./docker/db/Dockerfile
@@ -46,7 +46,7 @@ services:
       retries: 5
   api:
     restart: always
-    container_name: cloud-api
+    container_name: cloud-api-prod
     build:
       context: ./
       dockerfile: ./docker/api/Dockerfile
@@ -59,7 +59,7 @@ services:
       - redis
   redis:
     restart: always
-    container_name: cloud-redis
+    container_name: cloud-redis-prod
     image: redis:5.0.6
     volumes:
       - ./docker/db/prod_redis_data:/data
