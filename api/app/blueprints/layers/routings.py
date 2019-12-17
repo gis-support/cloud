@@ -10,6 +10,8 @@ from app.helpers.layer import Layer
 from shapely.geometry import shape
 from osgeo import osr
 from osgeo import ogr
+# Layer id sync
+from app.blueprints.rdos.attachments.models import Attachment
 import tempfile
 import os.path as op
 
@@ -226,7 +228,7 @@ def layers_settings(lid):
             layer_name = data.get('layer_name')
             if layer_name:
                 try:
-                    layer.change_name(layer_name)
+                    layer.change_name(layer_name, callback=Attachment.sync)
                     return jsonify({"settings": layer.lid})
                 except ValueError as e:
                     return jsonify({"error": str(e)}), 400

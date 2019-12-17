@@ -55,3 +55,22 @@ class BaseTest:
         assert r.json['layers']['features'] == 2
         assert r.json['layers']['name'] == 'wojewodztwa'
         return r.json['layers']['id']
+
+    def add_attachment_to_feature(self, client, token, lid, fid, public=True, name='test', link='https://gis-support.pl/'):
+        r = client.get(
+            f'/api/layers/{lid}/features/{fid}/attachments?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['attachments']['public'] == []
+        new_attachment = {
+            'lid': lid,
+            'fid': fid,
+            'public': public,
+            'link': link,
+            'name': name
+        }
+        r = client.post(
+            f'/api/layers/{lid}/features/{fid}/attachments?token={token}', data=json.dumps(new_attachment))
+        assert r.status_code == 201
+        assert r.json
+        return r.json['attachments']
