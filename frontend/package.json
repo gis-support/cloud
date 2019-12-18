@@ -12,6 +12,7 @@
     "bootstrap": "^3.3.5",
     "core-js": "^3.3.2",
     "jquery": "^2.1.4",
+    "lodash": "^4.17.15",
     "swagger-client": "^3.9.6",
     "vue": "^2.6.10",
     "vue-alertify": "^1.1.0",
