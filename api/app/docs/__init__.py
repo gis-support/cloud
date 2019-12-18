@@ -39,7 +39,7 @@ def create_swagger(app):
                 "model_filter": lambda tag: True,  # all in
             }
         ],
-        "static_url_path": "/flasgger_static",
+        "static_url_path": "/api/flasgger_static",
         "swagger_ui": True,
         "specs_route": "/api/docs"
     }

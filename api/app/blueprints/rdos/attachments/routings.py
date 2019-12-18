@@ -11,9 +11,39 @@ from app.blueprints.rdos.attachments.models import Attachment
 mod_attachments = Blueprint("attachments", __name__)
 
 
-@mod_attachments.route('/layers/<lid>/attachments', methods=['GET'])
+@mod_attachments.route('/layers/<lid>/features/<int:fid>/attachments', methods=['GET', 'POST'])
 @swag_from(path_by(__file__, 'docs.attachments.get.yml'), methods=['GET'])
+# @swag_from(path_by(__file__, 'docs.attachments.post.yml'), methods=['POST'])
 @token_required
-@layer_decorator(permission="read")
-def attachments(layer, lid):
-    return jsonify({"attachments": Attachment.get_all_for_group(layer.get_user_group())})
+def attachments(lid, fid):
+    if request.method == 'GET':
+        """
+        Get attachments for feature
+        Returns attachments list
+        """
+        @layer_decorator(permission="write")
+        def get(layer, lid=None, fid=None):
+            return jsonify({"attachments": Attachment.get_attachments(lid=lid, fid=fid, group='default')})
+        return get(lid=lid, fid=fid)
+
+    elif request.method == 'POST':
+        """
+        Add attachment to feature
+        Returns confirmation
+        """
+        @layer_decorator(permission="write")
+        def post(layer, lid=None, fid=None):
+            data = request.get_json(force=True)
+            model = {
+                'lid': lid,
+                'fid': fid,
+                # Domyślnie dodawany załącznik jest publiczny
+                'group': 'public' if data.get('public', True) else layer.get_user_group(),
+                # Domyślny link do GIS Support
+                'link': data.get('link', 'https://gis-support.pl/'),
+                # Domyślna nazwa załącznika to null
+                'name': data.get('name', None)
+            }
+            attachment = Attachment.add_attachment(model)
+            return jsonify({"attachments": attachment}), 201
+        return post(lid=lid, fid=fid)

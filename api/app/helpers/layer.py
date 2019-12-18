@@ -95,13 +95,15 @@ class Layer(Cloud):
         return style
 
     # Change layer name
-    def change_name(self, layer_name):
+    def change_name(self, layer_name, callback=lambda old_lid, new_lid: None):
         if self.layer_exists(layer_name):
             raise ValueError("layer exists")
+        old_lid = self.lid
         self.execute(
             SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(self.name), Identifier(layer_name)))
         self.name = layer_name
         self.lid = self.hash_name(self.name)
+        callback(old_lid, self.lid)
 
     # Layer columns
     def settings(self):
