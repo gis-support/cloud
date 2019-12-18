@@ -2,9 +2,14 @@
   <div class="content">
     <!-- {{ $route.params.layerId }} -->
     <FeatureManagerTable
+      v-if="items.length > 0"
       :items="items"
       :columns="columns"
     />
+    <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
+      <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
+      <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+    </div>
 
     <!-- <virtual-table
           style="height: calc(100% - 54px); position: relative;"
@@ -28,7 +33,9 @@ export default {
     FeatureManagerTable,
   },
   data: () => ({
-    columns: [],
+    columns: [{
+      head: true, sortable: true, filter: true,
+    }],
     items: [],
   }),
   methods: {
@@ -47,7 +54,6 @@ export default {
           tempItem[k] = v;
         });
         this.items.push(tempItem);
-        console.log(this.items, this.columns);
       });
     } else {
       this.$alertify.error(this.$i18n.t('default.error'));

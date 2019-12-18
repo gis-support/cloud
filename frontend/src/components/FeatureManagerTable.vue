@@ -16,11 +16,7 @@
         </div>
       </nav>
       <div class="vscroll">
-        <div class="loading-overlay pt-10 pb-10" v-if="columns.length < 2">
-          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
-          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
-        </div>
-        <div class="table-data table-responsive" v-else>
+        <div class="table-data table-responsive">
           <table class="table table-bordered table-hover table-striped">
             <thead>
               <tr>
