@@ -21,23 +21,27 @@
         </div>
 
         <!-- <virtual-table
-              style="height: calc(100% - 54px); position: relative;"
-              ref="table-data"
-              :items="spatialFilteredItems"
-              :columns="itemColumns"
-              :search="searchItemValue"
-              :column-filters="currentColumnFilters"
-              :editing="editing"
-              @update-filtred-count="updateCount"
-              @update-select-item="updateSelectItem"
-              ></virtual-table> -->
+          style="height: calc(100% - 54px); position: relative;"
+          ref="table-data"
+          :items="spatialFilteredItems"
+          :columns="itemColumns"
+          :search="searchItemValue"
+          :column-filters="currentColumnFilters"
+          :editing="editing"
+          @update-filtred-count="updateCount"
+          @update-select-item="updateSelectItem"
+          ></virtual-table> -->
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { fromLonLat } from 'ol/proj';
 import Map from 'ol/Map';
+import MVT from 'ol/format/MVT';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import VectorTileSource from 'ol/source/VectorTile';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
@@ -53,7 +57,27 @@ export default {
     }],
     items: [],
   }),
+  computed: {
+    apiUrl() {
+      return this.$store.getters.getApiUrl;
+    },
+    mapCenter() {
+      return this.$store.getters.getMapCenter;
+    },
+    mapZoom() {
+      return this.$store.getters.getMapZoom;
+    },
+    token() {
+      return this.$store.getters.getToken;
+    },
+  },
   methods: {
+    getLayerByName(name) {
+      return this.map
+        .getLayers()
+        .getArray()
+        .find(l => l.get('name') === name);
+    },
   },
   async mounted() {
     this.map = new Map({
@@ -64,10 +88,17 @@ export default {
             url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
           }),
         }),
+        new VectorTileLayer({
+          name: 'features',
+          source: new VectorTileSource({
+            format: new MVT(),
+            url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
+          }),
+        }),
       ],
       view: new View({
-        center: [0, 0],
-        zoom: 2,
+        center: fromLonLat([this.mapCenter.lon, this.mapCenter.lat]),
+        zoom: this.mapZoom,
       }),
     });
 
@@ -83,13 +114,6 @@ export default {
         Object.entries(feat.properties).forEach(([k, v]) => {
           tempItem[k] = v;
         });
-        this.items.push(tempItem);
-        this.items.push(tempItem);
-        this.items.push(tempItem);
-        this.items.push(tempItem);
-        this.items.push(tempItem);
-        this.items.push(tempItem);
-        this.items.push(tempItem);
         this.items.push(tempItem);
       });
     } else {
