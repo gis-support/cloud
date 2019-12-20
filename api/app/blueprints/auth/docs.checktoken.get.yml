@@ -1,0 +1,30 @@
+Check token
+---
+tags:
+  - Auth
+summary: Get token
+produces:
+  - application/json
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    description: Token
+    schema:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Valid
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "invalid token"
