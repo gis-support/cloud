@@ -19,7 +19,7 @@ source /setup-pg_hba.sh
 # Running extended script or sql if provided.
 # Useful for people who extends the image.
 function entry_point_script {
-SETUP_LOCKFILE="/docker-entrypoint-initdb.d/.entry_point.lock"
+SETUP_LOCKFILE="/var/lib/postgresql/12/main/.entry_point.lock"
 if [[ -f "${SETUP_LOCKFILE}" ]]; then
 	return 0
 else
