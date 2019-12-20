@@ -1,20 +1,7 @@
 <template>
   <div class="table-content">
     <div>
-      <nav
-        class="navbar navbar-default table-menu"
-        style="margin-bottom: 0px;"
-      >
-        <div class="container-fluid">
-          <p
-            class="navbar-text"
-            v-cloak
-            title="Ilość wszystkich elemetów"
-          >Ilość obiektów:
-            <span v-text="items.length"></span>
-          </p>
-        </div>
-      </nav>
+
 
       <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-if="items.length < 1">
         <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
@@ -136,7 +123,6 @@ export default {
   computed: {
     searchedItems() {
       const self = this;
-
       if (!self.search) {
         return self.items;
       }
@@ -260,7 +246,6 @@ export default {
       // this._computedWatchers.selectedItem.update();
       this.$recompute('selectedItem');
       if (emit && this.selectedIndex !== -1) {
-        console.log(this.selectedItem);
         this.$emit('update-select-item', this.selectedItem);
       }
     },
@@ -386,7 +371,7 @@ export default {
 
 <style>
 .table-content {
-  height: 40%;
+  height: calc(40% - 54px);
   max-height: 100%;
   max-width: 100%;
 }
@@ -394,7 +379,7 @@ export default {
   text-align: center;
 }
 .vscroll {
-  height: calc(100% - 56px);
+  height: 100%;
   position: relative;
 }
 .vscroll th {
@@ -508,7 +493,7 @@ export default {
 #root .map-table-content .table-content > div {
     position: absolute;
     width: 100%;
-    height: 40%;
+    height: calc(40% - 54px);
     max-height: 100%;
 }
 #root .map-table-content .table-content  .virtual-scroller  tr {

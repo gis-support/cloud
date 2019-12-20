@@ -35,13 +35,13 @@ export default {
     async loginRequest() {
       const payload = { user: this.email, password: this.password };
       const r = await this.$store.dispatch('logIn', payload);
-      if (r.status === 200) {
-        this.$alertify.success('Zalogowano');
+      if (r && r.status === 200) {
+        this.$alertify.success(this.$i18n.t('default.error'));
         this.$router.push({ name: 'dashboard' });
-      } else if (r.status === 403) {
-        this.$alertify.error('Nieprawidłowa nazwa użytkownika lub hasło');
+      } else if (r && r.status === 403) {
+        this.$alertify.error(this.$i18n.t('default.loginError'));
       } else {
-        this.$alertify.error('Wystąpił błąd - skontaktuj się z administratorem');
+        this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
   },

@@ -7,6 +7,27 @@
 
           </div>
         </div>
+        <nav
+        class="navbar navbar-default table-menu"
+        style="margin-bottom: 0px;"
+      >
+        <div class="container-fluid">
+          <p
+            class="navbar-text"
+            v-cloak
+            title="Ilość wszystkich elemetów"
+          >Ilość obiektów:
+            <span v-text="items.length"></span>
+          </p>
+          <div class="navbar-form navbar-right">
+            <div class="form-group">
+              <input type="text" class="form-control"
+              placeholder="Wyszukaj" title="wysukiwanie lokalne"
+              v-model.trim="searchItemValue"/>
+            </div>
+          </div>
+        </div>
+      </nav>
         <!-- {{ $route.params.layerId }} -->
         <FeatureManagerTable
           v-if="items.length > 0"
@@ -14,6 +35,7 @@
           :columns="columns"
           :editing="false"
           :items="items"
+          :search="searchItemValue"
         />
         <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
           <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
@@ -56,6 +78,8 @@ export default {
       head: true, sortable: true, filter: true,
     }],
     items: [],
+    searchItemValue: '',
+    tilesError: false,
   }),
   computed: {
     apiUrl() {
@@ -80,6 +104,11 @@ export default {
     },
   },
   async mounted() {
+    const tileSource = new VectorTileSource({
+      format: new MVT(),
+      url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
+    });
+
     this.map = new Map({
       target: 'map',
       layers: [
@@ -90,10 +119,7 @@ export default {
         }),
         new VectorTileLayer({
           name: 'features',
-          source: new VectorTileSource({
-            format: new MVT(),
-            url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
-          }),
+          source: tileSource,
         }),
       ],
       view: new View({

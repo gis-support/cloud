@@ -45,6 +45,7 @@
     "email": "Email",
     "error": "Wystąpił błąd",
     "loading": "Trwa ładowanie danych",
+    "loginError": "Nieprawidłowa nazwa uzytkownika lub hasło",
     "logout": "Wyloguj się",
     "name": "Nazwa",
     "noAccess": "Brak dostępu",
