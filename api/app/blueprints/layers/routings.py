@@ -15,7 +15,6 @@ from osgeo import ogr
 from app.blueprints.rdos.attachments.models import Attachment
 import tempfile
 import os.path as op
-import math
 
 mod_layers = Blueprint("layers", __name__)
 
@@ -254,21 +253,12 @@ def lid(layer, lid, z=0, x=0, y=0):
     return response
 
 
-def tile_ul(x, y, z):
-    n = 2.0 ** z
-    lon_deg = x / n * 360.0 - 180.0
-    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
-    lat_deg = math.degrees(lat_rad)
-    return lon_deg, lat_deg
-
-
 def create_mvt_tile(z, x, y, name):
-    xmin, ymin = tile_ul(x, y, z)
-    xmax, ymax = tile_ul(x+1, y+1, z)
     cur = current_app._db.cursor()
-    query = SQL('''SELECT ST_AsMVT(tile) FROM (SELECT id,
-        ST_AsMVTGeom(geometry,ST_Makebox2d(ST_SetSrid(ST_MakePoint(%s,%s),4326),
-        ST_SetSrid(ST_MakePoint(%s,%s),4326)),4096,8,true) AS geom FROM {}) AS tile''').format(Identifier(name))
-    cur.execute(query, (xmin, ymin, xmax, ymax))
+    query = SQL('''
+        SELECT ST_AsMVT(tile) FROM (SELECT id,
+        ST_AsMVTGeom(geometry,tilebbox(%s, %s, %s, 3857),4096,8,true) AS geom FROM {}) AS tile
+    ''').format(Identifier(name))
+    cur.execute(query, (z, x, y))
     tile = cur.fetchone()[0]
     return tile.tobytes()
