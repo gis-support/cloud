@@ -11,7 +11,7 @@
             v-cloak
             title="Ilość wszystkich elemetów"
           >Ilość obiektów:
-            <span v-text="items.length - 1"></span>
+            <span v-text="items.length"></span>
           </p>
         </div>
       </nav>
@@ -84,7 +84,7 @@
           </table>
         </div>
         <div class="table-scroll-bar" :style="{top: `${itemHeight}px`}"
-          v-show="filteredItems.length - 1 > windowItems.length">
+          v-show="filteredItems.length > windowItems.length">
           <div :style="{height : `${filteredItems.length * (itemHeight)}px`}" style="width: 1px;">
 
           </div>
@@ -163,11 +163,9 @@ export default {
     },
     windowItems() {
       const self = this;
-      console.log(self.maxItems);
       if (self.maxItems === 0) {
         return [];
       }
-      console.log(self.sortedItems, self.indexFirstItem, self.indexFirstItem + self.maxItems);
       return _.slice(self.sortedItems, self.indexFirstItem, self.indexFirstItem + self.maxItems);
     },
 
@@ -262,6 +260,7 @@ export default {
       // this._computedWatchers.selectedItem.update();
       this.$recompute('selectedItem');
       if (emit && this.selectedIndex !== -1) {
+        console.log(this.selectedItem);
         this.$emit('update-select-item', this.selectedItem);
       }
     },
@@ -312,14 +311,9 @@ export default {
       self.scrollEl = self.$el.querySelector('.table-scroll-bar');
       const theadTrhEl = tableEl.querySelector('thead tr');
 
-      console.log(self.$el.querySelector('.table-scroll-bar'));
-      console.log(self.scrollEl);
-
       self.itemHeight = theadTrhEl.offsetHeight - 1;
       self.arenaHeight = tableEl.offsetHeight - self.itemHeight;
-      // self.maxItems = Math.floor((self.arenaHeight) / self.itemHeight);
-      self.maxItems = 100;
-      console.log(self.maxItems);
+      self.maxItems = Math.floor((self.arenaHeight) / self.itemHeight);
       // self._computedWatchers.windowItems.update();
       this.$recompute('windowItems');
 
