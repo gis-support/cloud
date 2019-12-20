@@ -257,7 +257,7 @@ def create_mvt_tile(z, x, y, name):
     cur = current_app._db.cursor()
     query = SQL('''
         SELECT ST_AsMVT(tile) FROM (SELECT id,
-        ST_AsMVTGeom(geometry,tilebbox(%s, %s, %s, 3857),4096,8,true) AS geom FROM {}) AS tile
+        ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,8,true) AS geom FROM {}) AS tile
     ''').format(Identifier(name))
     cur.execute(query, (z, x, y))
     tile = cur.fetchone()[0]
