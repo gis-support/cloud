@@ -4,16 +4,18 @@
 from flask import Blueprint, jsonify, request, current_app, make_response
 from flasgger import swag_from
 from app.docs import path_by
-from app.db.general import token_required, cloud_decorator, create_mvt_tile, layer_decorator
+from app.db.general import token_required, cloud_decorator, layer_decorator
 from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
 from shapely.geometry import shape
+from psycopg2.sql import SQL, Identifier
 from osgeo import osr
 from osgeo import ogr
 # Layer id sync
 from app.blueprints.rdos.attachments.models import Attachment
 import tempfile
 import os.path as op
+import math
 
 mod_layers = Blueprint("layers", __name__)
 
@@ -240,14 +242,33 @@ def layers_settings(lid):
         return post(lid=lid)
 
 
-@mod_layers.route('/mvt/<int:z>/<int:x>/<int:y>', methods=['GET'])
-def tiles(z=0, x=0, y=0):
-    name = request.args.get('name')
-    if not name:
-        return jsonify({"error": "invalid layer name"})
-    tile = create_mvt_tile(z, x, y, name)
+@mod_layers.route('/mvt/<lid>/<int:z>/<int:x>/<int:y>', methods=['GET'])
+@token_required
+@layer_decorator(permission="read")
+def lid(layer, lid, z=0, x=0, y=0):
+    tile = create_mvt_tile(z, x, y, layer.name)
     if not tile:
         return ('', 204)
     response = make_response(tile)
     response.headers['Content-Type'] = "application/octet-stream"
     return response
+
+
+def tile_ul(x, y, z):
+    n = 2.0 ** z
+    lon_deg = x / n * 360.0 - 180.0
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
+    lat_deg = math.degrees(lat_rad)
+    return lon_deg, lat_deg
+
+
+def create_mvt_tile(z, x, y, name):
+    xmin, ymin = tile_ul(x, y, z)
+    xmax, ymax = tile_ul(x+1, y+1, z)
+    cur = current_app._db.cursor()
+    query = SQL('''SELECT ST_AsMVT(tile) FROM (SELECT id,
+        ST_AsMVTGeom(geometry,ST_Makebox2d(ST_SetSrid(ST_MakePoint(%s,%s),4326),
+        ST_SetSrid(ST_MakePoint(%s,%s),4326)),4096,8,true) AS geom FROM {}) AS tile''').format(Identifier(name))
+    cur.execute(query, (xmin, ymin, xmax, ymax))
+    tile = cur.fetchone()[0]
+    return tile.tobytes()

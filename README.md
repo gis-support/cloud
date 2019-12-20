@@ -121,5 +121,5 @@ sudo rm -rf ./docker/db/redis_data
 
 2. Należy uruchomić polecenie:
 ```
-docker-compose -f docker-production.yml up -d
+docker-compose -f docker-production.yml up -d --build
 ```

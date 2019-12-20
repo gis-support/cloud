@@ -20,6 +20,7 @@ services:
       - DEFAULT_GROUPS=default,private
   api:
     container_name: cloud-api
+    restart: always
     build:
       context: ./
       dockerfile: ./docker/api/Dockerfile
