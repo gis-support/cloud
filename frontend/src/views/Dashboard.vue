@@ -31,7 +31,8 @@
               <h4 class="panel-title flex-center">
                 <span class="panel-title__names">
                   <i class="icon-li fa fa-map-o fa-lg mr-5"></i>
-                  <span class="bold" href="#">
+                  <span class="bold" href="#"
+                    @click="$router.push({ name: 'feature_manager', params: { layerId: val.id} })">
                     {{ val.name }}
                   </span>
                   <span class="desc-sm">
@@ -463,6 +464,9 @@ export default {
 }
 .panel-title__names {
   font-size: 14px;
+}
+.panel-title__names .bold:hover {
+  cursor: pointer !important;
 }
 .panel-title__tools i:not(:last-child) {
   margin-right: 5px;

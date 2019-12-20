@@ -18,6 +18,15 @@ const routes = [
     },
   },
   {
+    path: '/feature_manager/:layerId',
+    name: 'feature_manager',
+    component: () => import(/* webpackChunkName: "dashboard" */ '../views/FeatureManager.vue'),
+    meta: {
+      requiresAuth: true,
+    },
+    props: true,
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue'),
