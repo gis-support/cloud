@@ -11,11 +11,16 @@
             v-cloak
             title="Ilość wszystkich elemetów"
           >Ilość obiektów:
-            <span v-text="items.length"></span>
+            <span v-text="items.length - 1"></span>
           </p>
         </div>
       </nav>
-      <div class="vscroll">
+
+      <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-if="items.length < 1">
+        <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
+        <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+      </div>
+      <div class="vscroll" v-else>
         <div class="table-data table-responsive">
           <table class="table table-bordered table-hover table-striped">
             <thead>
@@ -78,6 +83,12 @@
             </tbody>
           </table>
         </div>
+        <div class="table-scroll-bar" :style="{top: `${itemHeight}px`}"
+          v-show="filteredItems.length - 1 > windowItems.length">
+          <div :style="{height : `${filteredItems.length * (itemHeight)}px`}" style="width: 1px;">
+
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -115,7 +126,7 @@ export default {
   data: () => ({
     itemHeight: 0,
     arenaHeight: 0,
-    maxItems: 5,
+    maxItems: 1,
     indexFirstItem: 0,
     sortedColumn: false,
     sortedColumnType: 'asc',
@@ -152,9 +163,11 @@ export default {
     },
     windowItems() {
       const self = this;
+      console.log(self.maxItems);
       if (self.maxItems === 0) {
         return [];
       }
+      console.log(self.sortedItems, self.indexFirstItem, self.indexFirstItem + self.maxItems);
       return _.slice(self.sortedItems, self.indexFirstItem, self.indexFirstItem + self.maxItems);
     },
 
@@ -188,7 +201,7 @@ export default {
       this.$recompute('windowItems');
     },
     items() {
-      // this.scroll_el.scrollTop = 0;
+      this.scrollEl.scrollTop = 0;
       this.indexFirstItem = 0;
       // this._computedWatchers.searchedItems.update();
       this.$recompute('searchedItems');
@@ -286,7 +299,7 @@ export default {
         indexScroll = index - y;
       }
 
-      self.scroll_el.scrollTop = indexScroll * self.itemHeight;
+      self.scrollEl.scrollTop = indexScroll * self.itemHeight;
     },
 
     initVirtualTable() {
@@ -299,10 +312,14 @@ export default {
       self.scrollEl = self.$el.querySelector('.table-scroll-bar');
       const theadTrhEl = tableEl.querySelector('thead tr');
 
+      console.log(self.$el.querySelector('.table-scroll-bar'));
+      console.log(self.scrollEl);
+
       self.itemHeight = theadTrhEl.offsetHeight - 1;
       self.arenaHeight = tableEl.offsetHeight - self.itemHeight;
-
       // self.maxItems = Math.floor((self.arenaHeight) / self.itemHeight);
+      self.maxItems = 100;
+      console.log(self.maxItems);
       // self._computedWatchers.windowItems.update();
       this.$recompute('windowItems');
 
@@ -318,19 +335,19 @@ export default {
         }
       }).observe(tableEl);
 
-      /* function checkScrollPosition() {
-        self.indexFirstItem = Math.floor(self.scroll_el.scrollTop / self.itemHeight + 0.6);
+      function checkScrollPosition() {
+        self.indexFirstItem = Math.floor(self.scrollEl.scrollTop / self.itemHeight + 0.6);
         // self._computedWatchers.windowItems.update();
-        this.$recompute(self.windowItems);
+        self.$recompute('windowItems');
       }
-      self.scroll_el.addEventListener('scroll', checkScrollPosition);
+      self.scrollEl.addEventListener('scroll', checkScrollPosition);
 
       function checkScrollPosition2(e) {
         if (!e.shiftKey) {
-          self.scroll_el.scrollTop -= e.wheelDeltaY || (e.deltaY * -40);
+          self.scrollEl.scrollTop -= e.wheelDeltaY || (e.deltaY * -40);
         }
       }
-      tableEl.addEventListener('wheel', checkScrollPosition2); */
+      tableEl.addEventListener('wheel', checkScrollPosition2);
     },
 
     sort($event, kolumn) {
@@ -373,9 +390,18 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+.table-content {
+  height: 40%;
+  max-height: 100%;
+  max-width: 100%;
+}
 .loading-indicator {
   text-align: center;
+}
+.vscroll {
+  height: calc(100% - 56px);
+  position: relative;
 }
 .vscroll th {
   white-space: nowrap;
@@ -455,5 +481,62 @@ export default {
 }
 .vscroll .table-data table thead th:not(.first) div{
     display: flex;
+}
+#wrapper {
+    width: 100%;
+    height: calc(100% - 56px);
+    padding: 0;
+    margin: 0;
+    min-height: calc(100% - 56px);
+}
+#root {
+    width: 100%;
+    height: 100%;
+}
+#root .map-table-content {
+    width: 75%;
+    height: 100%;
+
+    min-width: 25%;
+    max-width: 85%;
+}
+#root .map-table-content .map-content {
+    width: 100%;
+    height: 60%;
+
+    min-height: 25%;
+    max-height: 85%;
+}
+#root .map-table-content .table-content {
+    width: 100%;
+    flex-grow: 1;
+}
+#root .map-table-content .table-content > div {
+    position: absolute;
+    width: 100%;
+    height: 40%;
+    max-height: 100%;
+}
+#root .map-table-content .table-content  .virtual-scroller  tr {
+     height: 5px;
+}
+
+
+#root .right-panel {
+    flex-grow: 1;
+}
+.padding-0 {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+/*full map*/
+#root .map-table-content-full {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+#root .map-table-content .map-content-full{
+    height: 100% !important;
+    max-height: 100% !important;
 }
 </style>

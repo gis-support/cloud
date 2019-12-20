@@ -10,6 +10,7 @@ import api from './docs/api.json'; // do podglądania api w monuted
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/css/mvpready-admin.css';
+import 'ol/ol.css';
 
 Vue.prototype.$swagger = new Swagger({ spec: api })
   .client; // do podglądania api w monuted
