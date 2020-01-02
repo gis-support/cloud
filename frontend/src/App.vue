@@ -30,13 +30,13 @@
                   <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="dropdown-menu" role="menu">
-                  <li @click="changePage('dashboard')">
+                  <li @click="changePage('dashboard')" v-if="this.$route.name !== 'dashboard'">
                     <a>
                       <i class="fa fa-dashboard"></i>
                       &nbsp;&nbsp;<span>{{$i18n.t('default.dashboard')}}</span>
                     </a>
                   </li>
-                  <li @click="changePage('users')">
+                  <li @click="changePage('users')" v-if="this.$route.name !== 'users'">
                     <a>
                       <i class="fa fa-users"></i>
                       &nbsp;&nbsp;<span>{{$i18n.t('default.users')}}</span>

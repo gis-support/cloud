@@ -39,6 +39,13 @@ export default {
     },
   },
   actions: {
+    async checkToken() {
+      try {
+        return await swagger.apis.Auth.get_api_check_token();
+      } catch (err) {
+        return err.response;
+      }
+    },
     async logIn(ctx, payload) {
       try {
         const response = await swagger.apis.Auth.post_api_login({ body: payload });

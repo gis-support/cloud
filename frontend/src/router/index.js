@@ -45,14 +45,15 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!store.getters.getLogged) {
-      // TODO - Dodać sprawdzanie tokena po backendzie
-      next({
-        name: 'login',
-      });
-    } else {
-      next();
-    }
+    store.dispatch('checkToken').then((r) => {
+      if (r && r.body.token === 'valid') {
+        next();
+      } else {
+        next({
+          name: 'login',
+        });
+      }
+    });
   } else {
     next();
   }

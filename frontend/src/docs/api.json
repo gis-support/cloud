@@ -16,6 +16,52 @@
   }, 
   "operationId": "getmyData", 
   "paths": {
+    "/api/check_token": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Token", 
+            "schema": {
+              "properties": {
+                "token": {
+                  "description": "Valid", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "invalid token", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Check token", 
+        "tags": [
+          "Auth"
+        ]
+      }
+    }, 
     "/api/layers": {
       "get": {
         "parameters": [
