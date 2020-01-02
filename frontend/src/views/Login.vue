@@ -36,7 +36,7 @@ export default {
       const payload = { user: this.email, password: this.password };
       const r = await this.$store.dispatch('logIn', payload);
       if (r && r.status === 200) {
-        this.$alertify.success(this.$i18n.t('default.error'));
+        this.$alertify.success(this.$i18n.t('default.loginSuccess'));
         this.$router.push({ name: 'dashboard' });
       } else if (r && r.status === 403) {
         this.$alertify.error(this.$i18n.t('default.loginError'));

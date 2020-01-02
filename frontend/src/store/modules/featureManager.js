@@ -18,6 +18,7 @@ const swagger = new Swagger({
 
 export default {
   state: {
+    activeLayer: undefined,
     mapCenter: {
       lat: 51.919438,
       lon: 19.145136,
@@ -25,11 +26,19 @@ export default {
     mapZoom: 6,
   },
   getters: {
+    getActiveLayer(state) {
+      return state.activeLayer;
+    },
     getMapCenter(state) {
       return state.mapCenter;
     },
     getMapZoom(state) {
       return state.mapZoom;
+    },
+  },
+  mutations: {
+    setActiveLayer(state, activeLayer) {
+      state.activeLayer = activeLayer;
     },
   },
 };

@@ -111,10 +111,11 @@ export default {
     },
   },
   data: () => ({
-    itemHeight: 0,
     arenaHeight: 0,
+    currentFeatureId: undefined,
     maxItems: 1,
     indexFirstItem: 0,
+    itemHeight: 0,
     sortedColumn: false,
     sortedColumnType: 'asc',
 
@@ -203,11 +204,6 @@ export default {
     },
   },
   methods: {
-    wyszukaj(items, wartosc) {
-      return _.filter(items, item => _.some(
-        item, value => value && value.toString().indexOf(wartosc) !== -1,
-      ));
-    },
     filtrowanie(items) {
       const self = this;
 
@@ -241,7 +237,6 @@ export default {
       });
       return _.concat(...result);
     },
-
     updateSelectedItem(emit) {
       // this._computedWatchers.selectedItem.update();
       this.$recompute('selectedItem');
@@ -249,12 +244,17 @@ export default {
         this.$emit('update-select-item', this.selectedItem);
       }
     },
-    selectItemIndex(index) {
+    selectFeatureFromId(id) {
+      this.currentFeatureId = id;
+      this.$emit('selectFeatureById', id);
+    },
+    selectItemIndex(index, prop) {
       if (this.editing) {
         return;
       }
       this.selectedIndex = index;
       this.updateSelectedItem(true);
+      this.selectFeatureFromId(prop.id, true);
     },
     clearSelection() {
       this.selectedIndex = -1;
@@ -284,6 +284,11 @@ export default {
       }
 
       self.scrollEl.scrollTop = indexScroll * self.itemHeight;
+    },
+    wyszukaj(items, wartosc) {
+      return _.filter(items, item => _.some(
+        item, value => value && value.toString().indexOf(wartosc) !== -1,
+      ));
     },
 
     initVirtualTable() {

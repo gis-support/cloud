@@ -36,6 +36,7 @@
           :editing="false"
           :items="items"
           :search="searchItemValue"
+          @selectFeatureById="selectFeatureById"
         />
         <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
           <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
@@ -60,6 +61,7 @@
 
 <script>
 import { fromLonLat } from 'ol/proj';
+import GeoJSON from 'ol/format/GeoJSON';
 import Map from 'ol/Map';
 import MVT from 'ol/format/MVT';
 import VectorTileLayer from 'ol/layer/VectorTile';
@@ -82,6 +84,9 @@ export default {
     tilesError: false,
   }),
   computed: {
+    activeLayer() {
+      return this.$store.getters.getActiveLayer;
+    },
     apiUrl() {
       return this.$store.getters.getApiUrl;
     },
@@ -102,13 +107,16 @@ export default {
         .getArray()
         .find(l => l.get('name') === name);
     },
+    selectFeatureById(fid) {
+      const tempFeature = this.activeLayer.features.find(el => el.properties.id === fid);
+      const feature = new GeoJSON().readFeature(tempFeature, {
+        featureProjection: 'EPSG:3857',
+        dataProjection: 'EPSG:4326',
+      });
+      this.map.getView().fit(feature.getGeometry());
+    },
   },
   async mounted() {
-    const tileSource = new VectorTileSource({
-      format: new MVT(),
-      url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
-    });
-
     this.map = new Map({
       target: 'map',
       layers: [
@@ -119,7 +127,10 @@ export default {
         }),
         new VectorTileLayer({
           name: 'features',
-          source: tileSource,
+          source: new VectorTileSource({
+            format: new MVT(),
+            url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
+          }),
         }),
       ],
       view: new View({
@@ -130,6 +141,7 @@ export default {
 
     const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
     if (r.status === 200) {
+      this.$store.commit('setActiveLayer', r.obj);
       r.obj.features.forEach((feat) => {
         Object.keys(feat.properties).forEach((el) => {
           this.columns.push({
