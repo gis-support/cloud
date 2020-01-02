@@ -476,6 +476,7 @@ export default {
 #root {
     width: 100%;
     height: 100%;
+    display: flex;
 }
 #root .map-table-content {
     width: 75%;

@@ -32,7 +32,11 @@
                 <span class="panel-title__names">
                   <i class="icon-li fa fa-map-o fa-lg mr-5"></i>
                   <span class="bold" href="#"
-                    @click="$router.push({ name: 'feature_manager', params: { layerId: val.id} })">
+                    @click="$router.push(
+                      {
+                        name: 'feature_manager',
+                        params: { layerId: val.id, layerName: val.name}
+                      })">
                     {{ val.name }}
                   </span>
                   <span class="desc-sm">
