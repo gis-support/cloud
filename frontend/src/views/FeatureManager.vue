@@ -86,8 +86,22 @@
               </div>
             </div>
 
+            <ul class="nav nav-tabs nav-justified"
+              style="margin-left: -15px; width: calc(100% + 30px);">
+              <li role="presentation" :class="{active: indexActiveTab === 0}">
+                <a href="#" @click="indexActiveTab = 0"><i class="fa fa-bars"></i> Legenda</a>
+              </li>
+              <li role="presentation"
+                :class="{active: indexActiveTab === 1}" v-show="currentFeature">
+                <a href="#" @click="indexActiveTab = 1"><i class="fa fa-table"></i> Atrybuty</a>
+              </li>
+              <li role="presentation"
+                :class="{active: indexActiveTab === 2}" v-show="currentFeature">
+                <a href="#" @click="indexActiveTab = 2"><i class="fa fa-info"></i> Informacje</a>
+              </li>
+            </ul>
             <div class="scroll-tab">
-              <div class="legend-panel right-sub-panel">
+              <div v-show="indexActiveTab == 0" class="legend-panel right-sub-panel">
                 <div>
                   <div class="baseLayers">
                     <h4>Warstwy podkładowe:</h4>
@@ -103,6 +117,14 @@
                     </ul>
                   </div>
                 </div>
+              </div>
+
+              <div v-show="indexActiveTab == 1">
+                <AttributesPanel
+                  v-if="currentFeature"
+                  ref="attributes-panel"
+                  :fields="currentFeature"
+                />
               </div>
             </div>
           </div>
@@ -124,9 +146,11 @@ import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
+import AttributesPanel from '@/components/AttributesPanel.vue';
 
 export default {
   components: {
+    AttributesPanel,
     FeatureManagerTable,
   },
   data: () => ({
@@ -135,6 +159,8 @@ export default {
       head: true, sortable: true, filter: true,
     }],
     currentBaseLayer: 'OpenStreetMap',
+    currentFeature: undefined,
+    indexActiveTab: 0,
     items: [],
     searchItemValue: '',
     tilesError: false,
@@ -207,12 +233,13 @@ export default {
       });
     },
     selectFeatureById(fid) {
-      const tempFeature = this.activeLayer.features.find(el => el.properties.id === fid);
-      const feature = new GeoJSON().readFeature(tempFeature, {
+      this.currentFeature = this.activeLayer.features.find(el => el.properties.id === fid);
+      const feature = new GeoJSON().readFeature(this.currentFeature, {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326',
       });
       this.map.getView().fit(feature.getGeometry());
+      this.indexActiveTab = 1; // change tab in sidepanel
     },
   },
   async mounted() {
