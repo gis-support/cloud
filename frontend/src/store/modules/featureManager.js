@@ -1,4 +1,4 @@
-/* import Swagger from 'swagger-client';
+import Swagger from 'swagger-client';
 import api from '@/docs/api.json';
 
 const swagger = new Swagger({
@@ -14,7 +14,7 @@ const swagger = new Swagger({
     request.headers.Authorization = localStorage.getItem('token');
     return request;
   },
-}).client; */
+}).client;
 
 export default {
   state: {
@@ -24,6 +24,30 @@ export default {
       lon: 19.145136,
     },
     mapZoom: 6,
+  },
+  actions: {
+    async editFeature(ctx, payload) {
+      try {
+        // eslint-disable-next-line no-underscore-dangle
+        const response = await swagger.apis.Features.put_api_layers__lid__features__fid_({
+          body: payload.feature,
+          lid: payload.lid,
+          fid: payload.fid,
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async getLayerStyle(ctx, lid) {
+      try {
+        const response = await swagger.apis.Layers
+          .get_api_layers__lid__style({ lid });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
   },
   getters: {
     getActiveLayer(state) {

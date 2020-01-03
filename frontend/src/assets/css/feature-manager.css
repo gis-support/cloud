@@ -3,7 +3,7 @@
   background-color: #2b3d4c;
 }
 .dropdown-menu {
-  left: -40px;
+  left: -75px;
 }
 #map{
   width: 100%;
@@ -35,7 +35,24 @@
 
 .scroll-tab {
     overflow: auto;
-    height: calc(100vh - 234px);
+    height: calc(100vh - 254px);
+}
+.btn-group-edit {
+  margin-bottom: 20px;
+  width: 100%;
+}
+.btn-group-edit .btn-success {
+  width: 100%;
+}
+
+.btn-group-action {
+  width: 33%;
+}
+.btn-group-action:not(.btn-danger) {
+  padding-right: 5px;
+}
+.btn-group-action .btn {
+  width: 100%;
 }
 
 .right-sub-panel {

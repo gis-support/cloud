@@ -97,9 +97,9 @@
                 <a href="#" @click="indexActiveTab = 2"><i class="fa fa-info"></i> Informacje</a>
               </li>
             </ul>
-            <div class="scroll-tab">
+            <div>
               <div v-show="indexActiveTab == 0" class="legend-panel right-sub-panel">
-                <div>
+                <div class="scroll-tab">
                   <div class="baseLayers">
                     <h4>Warstwy podkładowe:</h4>
                     <ul class="list-group">
@@ -117,11 +117,43 @@
               </div>
 
               <div v-show="indexActiveTab == 1">
-                <AttributesPanel
-                  v-if="currentFeature"
-                  ref="attributes-panel"
-                  :fields="currentFeature"
-                />
+                <template v-if="!editing">
+                  <div class="btn-group btn-group-edit" role="group">
+                    <button
+                      type="button"
+                      class="btn btn-success"
+                      @click="editAttributes"
+                    >Edytuj</button>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="btn-group btn-group-action btn-group-edit" role="group">
+                    <button
+                      type="button"
+                      class="btn btn-success"
+                      @click="saveEditing"
+                    >Zapisz</button>
+                  </div>
+                  <div class="btn-group btn-group-action btn-group-edit" role="group">
+                    <button
+                      type="button"
+                      class="btn btn-default"
+                      @click="cancelEditing"
+                    >Anuluj</button>
+                  </div>
+                  <div class="btn-group btn-group-action btn-group-edit" role="group">
+                    <button type="button" class="btn btn-danger">Usuń</button>
+                  </div>
+                </template>
+
+                <div class="scroll-tab">
+                  <AttributesPanel
+                    v-if="currentFeature"
+                    ref="attributes-panel"
+                    :editing="editing"
+                    :fields="currentFeature"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -140,6 +172,7 @@ import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
+import { Fill, Stroke, Style } from 'ol/style';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
@@ -160,6 +193,8 @@ export default {
     }],
     currentBaseLayer: 'OpenStreetMap',
     currentFeature: undefined,
+    editing: false,
+    editingDataCopy: undefined,
     indexActiveTab: 0,
     items: [],
     searchItemValue: '',
@@ -183,6 +218,23 @@ export default {
     },
   },
   methods: {
+    async saveEditing() {
+      const payload = {
+        body: this.currentFeature,
+        lid: this.$route.params.layerId,
+        fid: this.currentFeature.properties.id,
+      };
+      const r = await this.$store.dispatch('editFeature', payload);
+      if (r.status === 200) {
+        this.$alertify.error(this.$i18n.t('default.success'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    cancelEditing() {
+      this.editing = false;
+      this.currentFeature = this.editingDataCopy;
+    },
     changeBaseLayer(layerName) {
       this.map.getLayers().getArray().forEach((el) => {
         if (el.get('group') === 'baselayers') {
@@ -214,6 +266,10 @@ export default {
           return active;
         },
       };
+    },
+    editAttributes() {
+      this.editing = true;
+      this.editingDataCopy = JSON.parse(JSON.stringify(this.currentFeature));
     },
     getLayerByName(name) {
       return this.map
@@ -294,12 +350,26 @@ export default {
 
     const ortofoto = await this.initOrtofoto();
     this.map.addLayer(ortofoto);
+
+    const featureStyleResponse = await this.$store.dispatch(
+      'getLayerStyle', this.$route.params.layerId,
+    );
+    const featureStyle = featureStyleResponse.obj.style;
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
         source: new VectorTileSource({
           format: new MVT(),
           url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
+        }),
+        style: new Style({
+          fill: new Fill({
+            color: `rgba(${featureStyle['fill-color']})`,
+          }),
+          stroke: new Stroke({
+            color: `rgba(${featureStyle['stroke-color']})`,
+            width: `${featureStyle['stroke-width']}`,
+          }),
         }),
       }),
     );
