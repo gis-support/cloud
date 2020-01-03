@@ -62,7 +62,7 @@
                     v-else
                     v-text="item[column.key]"
                     :key="idx2 + 'item'"
-                    :class="{'warning' : selectedIndex == indexFirstItem + index}"
+                    :class="{'active-cell' : selectedIndex == indexFirstItem + index}"
                     @click="selectItemIndex(indexFirstItem + index, item)"
                   />
                 </template>
@@ -200,7 +200,6 @@ export default {
       // this._computedWatchers.filteredColumns.update();
       // this._computedWatchers.filteredItems.update();
       this.$recompute('filteredItems');
-      this.$recompute('filteredItems');
     },
   },
   methods: {
@@ -262,7 +261,7 @@ export default {
     },
     selectItem(item) {
       if (!item) {
-        this.$alertify.warning('Dane element nie znajduje się w cześci załadowanych danych z serwera');
+        this.$alertify.warning('Dany element nie znajduje się w cześci załadowanych danych z serwera');
         return;
       }
       this.selectedIndex = _.findIndex(this.sortedItems, o => o === item);
@@ -373,155 +372,3 @@ export default {
   destroyed() {},
 };
 </script>
-
-<style>
-.table-content {
-  height: calc(40% - 54px);
-  max-height: 100%;
-  max-width: 100%;
-}
-.loading-indicator {
-  text-align: center;
-}
-.vscroll {
-  height: 100%;
-  position: relative;
-}
-.vscroll th {
-  white-space: nowrap;
-}
-.vscroll td {
-  white-space: nowrap;
-}
-.vscroll .table-scroll-bar {
-    position: absolute;
-    width: 15px;
-    right: 0px;
-    bottom: 0px;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-.vscroll .table-data {
-  height : 100%;
-  overflow-y: hidden;
-}
-.vscroll .table-data table {
-  /*height : calc(100% - 24px);*/
-  overflow-y: hidden;
-}
-.vscroll .table-data table thead th div span {
-    flex: 0;
-}
-.vscroll .table-data table thead .sorting,
-.vscroll .table-data table thead .sorting_asc,
-.vscroll .table-data table thead .sorting_desc,
-.vscroll .table-data table thead .sorting_asc_disabled,
-.vscroll .table-data table thead .sorting_desc_disabled {
-    cursor: pointer;
-    position: relative;
-    flex: 0;
-}
-.vscroll .table-data table thead .sorting:after,
-.vscroll .table-data table thead .sorting_asc:after,
-.vscroll .table-data table thead .sorting_desc:after,
-.vscroll .table-data table thead .sorting_asc_disabled:after,
-.vscroll .table-data table thead .sorting_desc_disabled:after {
-    font-family: 'Glyphicons Halflings';
-    opacity: 0.5;
-    text-align: right;
-    float:right;
-    margin-left: 2px;
-}
-.vscroll .table-data table thead .sorting:after {
-    opacity: 0.2;
-    content: "\e150";
-}
-.vscroll .table-data table thead .sorting_asc:after {
-    content: "\e155";
-}
-.vscroll .table-data table thead .sorting_desc:after {
-    content: "\e156";
-}
-.vscroll .table-data table thead .sorting_asc_disabled:after,
-.vscroll .table-data table thead .sorting_desc_disabled:after {
-    color: #eee;
-}
-.vscroll .table-data table thead .filter,
-.vscroll .table-data table thead .filtered{
-    cursor: pointer;
-    position: relative;
-    flex: 1;
-}
-.vscroll .table-data table thead .filter:before{
-    font-family: 'Glyphicons Halflings';
-    opacity: 0.2;
-    content: "\e138";
-    text-align: right;
-    float:right;
-    margin-left: 2px;
-}
-.vscroll .table-data table thead .filtered:before {
-    opacity: 0.5;
-}
-.vscroll .table-data table thead th:not(.first) div{
-    display: flex;
-}
-#wrapper {
-    width: 100%;
-    height: calc(100% - 56px);
-    padding: 0;
-    margin: 0;
-    min-height: calc(100% - 56px);
-}
-#root {
-    width: 100%;
-    height: 100%;
-    display: flex;
-}
-#root .map-table-content {
-    width: 75%;
-    height: 100%;
-
-    min-width: 25%;
-    max-width: 85%;
-}
-#root .map-table-content .map-content {
-    width: 100%;
-    height: 60%;
-
-    min-height: 25%;
-    max-height: 85%;
-}
-#root .map-table-content .table-content {
-    width: 100%;
-    flex-grow: 1;
-}
-#root .map-table-content .table-content > div {
-    position: absolute;
-    width: 100%;
-    height: calc(40% - 54px);
-    max-height: 100%;
-}
-#root .map-table-content .table-content  .virtual-scroller  tr {
-     height: 5px;
-}
-
-
-#root .right-panel {
-    flex-grow: 1;
-}
-.padding-0 {
-    padding-left: 0px;
-    padding-right: 0px;
-}
-
-/*full map*/
-#root .map-table-content-full {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-#root .map-table-content .map-content-full{
-    height: 100% !important;
-    max-height: 100% !important;
-}
-</style>

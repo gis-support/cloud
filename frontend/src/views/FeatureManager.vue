@@ -77,9 +77,6 @@
                     </ul>
                   </div>
                   <a class="btn btn-default">
-                    <i class="fa fa-upload blue icon-hover"></i>
-                  </a>
-                  <a class="btn btn-default">
                     <i class="fa fa-cog yellow icon-hover"></i>
                   </a>
                 </div>
@@ -134,6 +131,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import { fromLonLat, get as getProjection } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 import Map from 'ol/Map';
@@ -147,6 +145,8 @@ import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
+
+import '@/assets/css/feature-manager.css';
 
 export default {
   components: {
@@ -195,6 +195,26 @@ export default {
         }
       });
     },
+    createSelectInteraction() {
+      let active = true;
+      this.map.on('click', (evt) => {
+        if (!active) return;
+
+        const feature = this.map.forEachFeatureAtPixel(evt.pixel,
+          feat => feat, {
+            hitTolerance: 5,
+          });
+        this.selectFeature(feature);
+      });
+      return {
+        setActive(value) {
+          active = value;
+        },
+        getActive() {
+          return active;
+        },
+      };
+    },
     getLayerByName(name) {
       return this.map
         .getLayers()
@@ -228,9 +248,21 @@ export default {
             }),
           );
         }).catch((err) => {
+          this.$alertify.error(this.$i18n.t('featureManager.ortoError'));
           reject(err);
         });
       });
+    },
+    selectFeature(feature) {
+      if (feature) {
+        const fid = feature.get('id');
+        this.selectFeatureById(fid);
+        if ('table-data' in this.$refs) {
+          this.$refs['table-data'].selectItem(_.find(this.items, o => o.id === fid));
+        }
+      } else {
+        this.$refs['table-data'].clearSelection();
+      }
     },
     selectFeatureById(fid) {
       this.currentFeature = this.activeLayer.features.find(el => el.properties.id === fid);
@@ -272,15 +304,17 @@ export default {
       }),
     );
 
+    this.createSelectInteraction();
+
     const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
     if (r.status === 200) {
       this.$store.commit('setActiveLayer', r.obj);
-      r.obj.features.forEach((feat) => {
-        Object.keys(feat.properties).forEach((el) => {
-          this.columns.push({
-            key: el, name: el, sortable: true, filter: true,
-          });
+      Object.keys(r.obj.features[0].properties).forEach((el) => {
+        this.columns.push({
+          key: el, name: el, sortable: true, filter: true,
         });
+      });
+      r.obj.features.forEach((feat) => {
         const tempItem = {};
         Object.entries(feat.properties).forEach(([k, v]) => {
           tempItem[k] = v;
@@ -293,113 +327,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.activeLayer {
-  color: #ffffff;
-  background-color: #2b3d4c;
-}
-.dropdown-menu {
-  left: -40px;
-}
-#map{
-  width: 100%;
-  height: 100%;
-}
-.map-table-content, .map-content {
-  position: relative;
-  z-index: 1;
-}
-.right-panel__name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  max-width: calc(100% - 25px);
-}
-.right-panel__title {
-  display: inline-block;
-  margin-bottom: 30px;
-  line-height: 22px;
-  margin-top: 6px;
-  padding-left: 0px;
-}
-.title__icon {
-  position: relative;
-  top: -3px;
-  margin-right: 10px;
-}
-
-.scroll-tab {
-    overflow: auto;
-    height: calc(100vh - 234px);
-}
-
-.right-sub-panel {
-    width: 100%;
-    display: table;
-}
-.right-sub-panel > div {
-    display: table-caption;
-}
-.right-sub-panel > div > hr {
-    margin-top: 0px;
-    margin-bottom: 5px;
-}
-.right-sub-panel .empty-sub-panel {
-    background-color: #eee;
-    border-color: #eee;
-    color: black;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-}
-.right-sub-panel .btn.action {
-    padding: 0;
-}
-
-.attributes-panel .view hr {
-    margin-top: 0px;
-    margin-bottom: 10px;
-}
-.attributes-panel .view {
-    margin-top: 10px;
-}
-.attachments-panel .upload {
-    display: none;
-}
-.attachments-panel .thumbnail{
-    max-width: 100%;
-    margin-bottom: 0px;
-}
-
-.attributes-panel .html-preview{
-    border-style: dotted;
-    border-color: black;
-    border-width: 1px;
-    padding: 5px;
-}
-
-.filter-panel {
-    background-color: #eee;
-    border-color: #eee;
-    color: black;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-}
-.filter-panel .form-group:not(:last-child) {
-    margin-bottom: 10px;
-}
-.filter-panel .form-group:last-child {
-    margin-bottom: 0px;
-}
-
-.filters-panel .condition .control-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-</style>

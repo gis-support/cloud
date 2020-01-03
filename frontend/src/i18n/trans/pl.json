@@ -60,6 +60,9 @@
     "stopUpload": "Zatrzymaj",
     "users": "Użytkownicy"
   },
+  "featureManager": {
+    "ortoError": "Błąd ładowania Ortofotomapy"
+  },
   "login": {
     "loginTitle": "Logowanie",
     "logIn": "Zaloguj się"
