@@ -15,14 +15,14 @@
           <p
             class="navbar-text"
             v-cloak
-            title="Ilość wszystkich elemetów"
-          >Ilość obiektów:
+          >{{$i18n.t('featureManager.objectsNumber')}}
             <span v-text="items.length"></span>
           </p>
           <div class="navbar-form navbar-right">
             <div class="form-group">
               <input type="text" class="form-control"
-              placeholder="Wyszukaj" title="wysukiwanie lokalne"
+              placeholder="Wyszukaj"
+              :title="$i18n.t('featureManager.localSearch')"
               v-model.trim="searchItemValue"/>
             </div>
           </div>
@@ -101,7 +101,7 @@
               <div v-show="indexActiveTab == 0" class="legend-panel right-sub-panel">
                 <div class="scroll-tab">
                   <div class="baseLayers">
-                    <h4>Warstwy podkładowe:</h4>
+                    <h4>{{$i18n.t('default.basemaps')}}:</h4>
                     <ul class="list-group">
                       <li class="list-group-item"
                         v-for="name in baseLayers"
@@ -123,7 +123,7 @@
                       type="button"
                       class="btn btn-success"
                       @click="editAttributes"
-                    >Edytuj</button>
+                    >{{$i18n.t('default.edit')}}</button>
                   </div>
                 </template>
                 <template v-else>
@@ -132,17 +132,19 @@
                       type="button"
                       class="btn btn-success"
                       @click="saveEditing"
-                    >Zapisz</button>
+                    >{{$i18n.t('default.save')}}</button>
                   </div>
                   <div class="btn-group btn-group-action btn-group-edit" role="group">
                     <button
                       type="button"
                       class="btn btn-default"
                       @click="cancelEditing"
-                    >Anuluj</button>
+                    >{{$i18n.t('default.cancel')}}</button>
                   </div>
                   <div class="btn-group btn-group-action btn-group-edit" role="group">
-                    <button type="button" class="btn btn-danger">Usuń</button>
+                    <button type="button" class="btn btn-danger">
+                      {{$i18n.t('default.delete')}}
+                    </button>
                   </div>
                 </template>
 
@@ -154,6 +156,13 @@
                     :fields="currentFeature"
                   />
                 </div>
+              </div>
+              <div v-show="indexActiveTab == 2">
+                <CommentsPanel
+                  ref="comments-panel"
+                  @changeDialogVisibility="changeDialogVisibility"
+                  :selected-id="$route.params.layerId" />
+                <AttachmentsPanel ref="attachments-panel" :selected-id="$route.params.layerId" />
               </div>
             </div>
           </div>
@@ -178,12 +187,15 @@ import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
-
+import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
+import CommentsPanel from '@/components/CommentsPanel.vue';
 import '@/assets/css/feature-manager.css';
 
 export default {
   components: {
+    AttachmentsPanel,
     AttributesPanel,
+    CommentsPanel,
     FeatureManagerTable,
   },
   data: () => ({
@@ -196,6 +208,7 @@ export default {
     editing: false,
     editingDataCopy: undefined,
     indexActiveTab: 0,
+    isInfoDialogVisible: false,
     items: [],
     searchItemValue: '',
     tilesError: false,
@@ -246,6 +259,9 @@ export default {
           }
         }
       });
+    },
+    changeDialogVisibility(vis) {
+      this.isInfoDialogVisible = vis;
     },
     createSelectInteraction() {
       let active = true;

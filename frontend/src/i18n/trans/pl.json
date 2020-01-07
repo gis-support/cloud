@@ -34,6 +34,7 @@
   "default": {
     "actions": "Akcje",
     "add": "Dodaj",
+    "basemaps": "Mapy podkładowe",
     "cancel": "Anuluj",
     "chooseFiles": "Wybierz pliki",
     "close": "Zamknij",
@@ -50,6 +51,9 @@
     "logout": "Wyloguj się",
     "name": "Nazwa",
     "noAccess": "Brak dostępu",
+    "noAttachments": "Brak załączników",
+    "noComments": "Brak komentarzy",
+    "noData": "Brak danych",
     "noLayers": "Brak warstw",
     "password": "Hasło",
     "read": "Podgląd",
@@ -61,6 +65,17 @@
     "users": "Użytkownicy"
   },
   "featureManager": {
+    "addAttachment": "Dodaj załącznik",
+    "addComment": "Dodaj komentarz",
+    "attachmentsTitle": "Załączniki",
+    "commentsTitle": "Komentarze",
+    "deleteAttachmentConfirm": "Czy na pewno chcesz załącznik?",
+    "deleteAttachmentHeader": "Usuwanie załącznika",
+    "deleteCommentConfirm": "Czy na pewno chcesz usunąć komentarz?",
+    "deleteCommentHeader": "Usuwanie komentarza",
+    "deleteLink": "Usuń link",
+    "localSearch": "Wyszukiwanie lokalne",
+    "objectsNumber": "Ilość obiektów",
     "ortoError": "Błąd ładowania Ortofotomapy"
   },
   "login": {

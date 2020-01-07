@@ -5,7 +5,7 @@
       <br/>
       <template v-if="!editing">
         <span v-if="value">{{ value }}</span>
-        <span v-else style="color: lightgrey">Brak danych</span>
+        <span v-else style="color: lightgrey">{{$i18n.t('default.noData')}}</span>
       </template>
       <template v-else>
         <input
