@@ -340,7 +340,7 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
             "required": true, 
             "type": "string"
           }, 
@@ -434,7 +434,14 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Feature ID", 
+            "in": "path", 
+            "name": "fid", 
             "required": true, 
             "type": "string"
           }, 
@@ -498,7 +505,14 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Feature ID", 
+            "in": "path", 
+            "name": "fid", 
             "required": true, 
             "type": "string"
           }, 
@@ -555,7 +569,14 @@
           {
             "description": "Layer ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Feature ID", 
+            "in": "path", 
+            "name": "fid", 
             "required": true, 
             "type": "string"
           }, 
@@ -640,6 +661,151 @@
         "summary": "Edit feature", 
         "tags": [
           "Features"
+        ]
+      }
+    }, 
+    "/api/layers/{lid}/features/{fid}/attachments": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Feature ID", 
+            "in": "path", 
+            "name": "fid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "attachments": {
+                  "properties": {
+                    "default": {
+                      "type": "object"
+                    }, 
+                    "public": {
+                      "type": "object"
+                    }
+                  }, 
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get attachments", 
+        "tags": [
+          "Attachments"
+        ]
+      }, 
+      "post": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Feature ID", 
+            "in": "path", 
+            "name": "fid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "link": {
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "name": {
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "public": {
+                  "required": false, 
+                  "type": "boolean"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "GeoJSON", 
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "integer"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Add attachment to feature", 
+        "tags": [
+          "Attachments"
         ]
       }
     }, 
