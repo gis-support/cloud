@@ -19,6 +19,7 @@ const swagger = new Swagger({
 export default {
   state: {
     activeLayer: undefined,
+    currentFeaturesTypes: undefined,
     mapCenter: {
       lat: 51.919438,
       lon: 19.145136,
@@ -39,6 +40,15 @@ export default {
         return err.response;
       }
     },
+    async getCurrentFeatures(ctx, lid) {
+      try {
+        const response = await swagger.apis.Layers
+          .get_api_layers__lid__settings({ lid });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async getLayerStyle(ctx, lid) {
       try {
         const response = await swagger.apis.Layers
@@ -53,6 +63,9 @@ export default {
     getActiveLayer(state) {
       return state.activeLayer;
     },
+    getCurrentFeaturesTypes(state) {
+      return state.currentFeaturesTypes;
+    },
     getMapCenter(state) {
       return state.mapCenter;
     },
@@ -63,6 +76,9 @@ export default {
   mutations: {
     setActiveLayer(state, activeLayer) {
       state.activeLayer = activeLayer;
+    },
+    setCurrentFeaturesTypes(state, types) {
+      state.currentFeaturesTypes = types;
     },
   },
 };
