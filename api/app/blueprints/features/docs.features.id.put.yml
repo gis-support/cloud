@@ -11,6 +11,11 @@ parameters:
     description: Layer ID
     required: true
     type: string
+  - name: fid
+    in: path
+    description: Feature ID
+    required: true
+    type: string
   - in: body
     name: body
     required: true
