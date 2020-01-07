@@ -6,7 +6,7 @@ summary: Add new feature to layer
 produces:
   - application/json
 parameters:
-  - name: id
+  - name: lid
     in: path
     description: Layer ID
     required: true

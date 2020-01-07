@@ -71,7 +71,7 @@ QML_TO_OL = {
 
 def create_qml(geom_type, style={}):
     fill_color = style.get('fill-color', '255,255,255,0.4')
-    stroke_color = style.get('stroke-color', '51,153,204,255')
+    stroke_color = style.get('stroke-color', '51,153,204,1')
     stroke_width = style.get('stroke-width', '2')
 
     if 'point' in geom_type.lower():

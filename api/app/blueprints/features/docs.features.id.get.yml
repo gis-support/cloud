@@ -6,9 +6,14 @@ summary: Get feature by ID
 produces:
   - application/json
 parameters:
-  - name: id
+  - name: lid
     in: path
     description: Layer ID
+    required: true
+    type: string
+  - name: fid
+    in: path
+    description: Feature ID
     required: true
     type: string
   - name: token
