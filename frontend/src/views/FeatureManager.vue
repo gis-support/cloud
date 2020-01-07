@@ -26,6 +26,10 @@
               v-model.trim="searchItemValue"/>
             </div>
           </div>
+          <button type="button" class="btn navbar-btn navbar-right btn-default"
+            :title="$i18n.t('featureManager.objectsFilter')"
+            @click="openColumnFilterDecision"><i class="fa fa-filter"></i>
+          </button>
         </div>
       </nav>
         <!-- {{ $route.params.layerId }} -->
@@ -33,6 +37,7 @@
           v-if="items.length > 0"
           ref="table-data"
           :columns="columns"
+          :column-filters="currentColumnFilters"
           :editing="false"
           :items="items"
           :search="searchItemValue"
@@ -41,6 +46,42 @@
         <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
           <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
           <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        </div>
+
+        <div class="modal-mask" v-if="columnFilterDecisionDialogView">
+          <div class="modal-wrapper">
+            <div class="modal-dialog modal-md">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Filtrowanie obiektów</h4>
+                </div>
+                <div class="modal-body">
+                  <FiltersPanel
+                    ref="column-filters"
+                    :columns="columns"
+                    v-model="selectedColumnFilters"></FiltersPanel>
+                  <p>dupa</p>
+                </div>
+                <div class="modal-footer">
+                  <div class="btn-group btn-group-justified" role="group">
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-success"
+                        @click="$emit('columnFilterDecision', 'accept')"
+                        :disabled="!isFiltersValidated(selectedColumnFilters)">Zastosuj</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-danger"
+                        @click="$emit('columnFilterDecision', 'clear')">Wyczyść</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-default"
+                        @click="$emit('columnFilterDecision', 'cancel')">Anuluj</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- <virtual-table
@@ -189,6 +230,7 @@ import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import CommentsPanel from '@/components/CommentsPanel.vue';
+import FiltersPanel from '@/components/FiltersPanel.vue';
 import '@/assets/css/feature-manager.css';
 
 export default {
@@ -197,13 +239,16 @@ export default {
     AttributesPanel,
     CommentsPanel,
     FeatureManagerTable,
+    FiltersPanel,
   },
   data: () => ({
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
+    columnFilterDecisionDialogView: false,
     columns: [{
       head: true, sortable: true, filter: true,
     }],
     currentBaseLayer: 'OpenStreetMap',
+    currentColumnFilters: [],
     currentFeature: undefined,
     editing: false,
     editingDataCopy: undefined,
@@ -211,7 +256,7 @@ export default {
     isInfoDialogVisible: false,
     items: [],
     searchItemValue: '',
-    tilesError: false,
+    selectedColumnFilters: [],
   }),
   computed: {
     activeLayer() {
@@ -287,6 +332,9 @@ export default {
       this.editing = true;
       this.editingDataCopy = JSON.parse(JSON.stringify(this.currentFeature));
     },
+    isFiltersValidated(filters) {
+      return _.every(filters, filter => filter.operation !== '' && filter.column !== '' && filter.value !== '');
+    },
     getLayerByName(name) {
       return this.map
         .getLayers()
@@ -324,6 +372,29 @@ export default {
           reject(err);
         });
       });
+    },
+    openColumnFilterDecision() {
+      const self = this;
+
+      const handle = (key) => {
+        if (key === 'accept') {
+          self.currentColumnFilters = JSON.parse(JSON.stringify(self.selectedColumnFilters));
+
+          self.columnFilterDecisionDialogView = false;
+          self.$off('columnFilterDecision', handle);
+          // self.$emit('update-column-filters');
+        } else if (key === 'clear') {
+          self.selectedColumnFilters = [];
+        } else {
+          self.selectedColumnFilters = JSON.parse(JSON.stringify(self.currentColumnFilters));
+
+          self.columnFilterDecisionDialogView = false;
+          self.$off('columnFilterDecision', handle);
+        }
+      };
+
+      self.$on('columnFilterDecision', handle);
+      self.columnFilterDecisionDialogView = true;
     },
     selectFeature(feature) {
       if (feature) {
@@ -410,6 +481,9 @@ export default {
     } else {
       this.$alertify.error(this.$i18n.t('default.error'));
     }
+
+    const res = await this.$store.dispatch('getCurrentFeatures', this.$route.params.layerId);
+    this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
   },
 };
 </script>
