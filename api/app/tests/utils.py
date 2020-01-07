@@ -63,8 +63,6 @@ class BaseTest:
         assert r.json
         assert r.json['attachments']['public'] == []
         new_attachment = {
-            'lid': lid,
-            'fid': fid,
             'public': public,
             'link': link,
             'name': name

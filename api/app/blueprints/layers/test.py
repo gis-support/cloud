@@ -288,7 +288,7 @@ class TestLayersStyles(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
-        assert r.json['style']['stroke-color'] == '51,153,204,255'
+        assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
 
     def test_styles_set_correct(self, client):
@@ -304,7 +304,7 @@ class TestLayersStyles(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['style']['fill-color'] == new_fill_color
-        assert r.json['style']['stroke-color'] == '51,153,204,255'
+        assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
         new_stroke_color = '255,255,255,255'
         r = client.put(f'/api/layers/{lid}/style?token={token}',
@@ -329,6 +329,6 @@ class TestLayersStyles(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
-        assert r.json['style']['stroke-color'] == '51,153,204,255'
+        assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
         # TODO validate color values + width

@@ -13,7 +13,7 @@ mod_attachments = Blueprint("attachments", __name__)
 
 @mod_attachments.route('/layers/<lid>/features/<int:fid>/attachments', methods=['GET', 'POST'])
 @swag_from(path_by(__file__, 'docs.attachments.get.yml'), methods=['GET'])
-# @swag_from(path_by(__file__, 'docs.attachments.post.yml'), methods=['POST'])
+@swag_from(path_by(__file__, 'docs.attachments.post.yml'), methods=['POST'])
 @token_required
 def attachments(lid, fid):
     if request.method == 'GET':

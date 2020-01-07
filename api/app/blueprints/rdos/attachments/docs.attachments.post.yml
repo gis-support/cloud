@@ -1,8 +1,8 @@
-Get attachments
+Add attachment to feature
 ---
 tags:
   - Attachments
-summary: Get all attachments by groups
+summary: Add new attachment to feature
 produces:
   - application/json
 parameters:
@@ -16,6 +16,21 @@ parameters:
     description: Feature ID
     required: true
     type: string
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        public:
+          type: boolean
+          required: false
+        link:
+          type: string
+          required: true
+        name:
+          type: string
+          required: true
   - name: token
     in: query
     description: Token
@@ -23,16 +38,12 @@ parameters:
     type: string
 responses:
   200:
+    description: GeoJSON
     schema:
       type: object
       properties:
-        attachments:
-          type: object
-          properties:
-            public:
-              type: object
-            default:
-              type: object
+        id:
+          type: integer
   403:
     description: Token required
     schema:

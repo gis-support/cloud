@@ -30,4 +30,5 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     DBNAME = 'cloud-testing'
+    DBHOST = 'cloud-db'
     REDIS_URL = "redis://@cloud-redis:6379/1"
