@@ -31,7 +31,7 @@ export default {
       try {
         // eslint-disable-next-line no-underscore-dangle
         const response = await swagger.apis.Features.put_api_layers__lid__features__fid_({
-          body: payload.feature,
+          body: payload.body,
           lid: payload.lid,
           fid: payload.fid,
         });

@@ -284,7 +284,7 @@ export default {
       };
       const r = await this.$store.dispatch('editFeature', payload);
       if (r.status === 200) {
-        this.$alertify.error(this.$i18n.t('default.success'));
+        this.$alertify.success(this.$i18n.t('default.editSuccess'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
