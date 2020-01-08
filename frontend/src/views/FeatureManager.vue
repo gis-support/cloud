@@ -27,6 +27,8 @@
             </div>
           </div>
           <button type="button" class="btn navbar-btn navbar-right btn-default"
+            :class="{'btn-danger' : currentColumnFilters.length > 0,
+              'btn-default' : currentColumnFilters.length == 0 }"
             :title="$i18n.t('featureManager.objectsFilter')"
             @click="openColumnFilterDecision"><i class="fa fa-filter"></i>
           </button>
