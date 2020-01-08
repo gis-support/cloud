@@ -60,7 +60,6 @@
                     ref="column-filters"
                     :columns="columns"
                     v-model="selectedColumnFilters"></FiltersPanel>
-                  <p>dupa</p>
                 </div>
                 <div class="modal-footer">
                   <div class="btn-group btn-group-justified" role="group">

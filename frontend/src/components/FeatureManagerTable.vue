@@ -136,7 +136,6 @@ export default {
       if (_.isEmpty(self.columnFilters)) {
         return self.searchedItems;
       }
-
       return self.filtrowanie(self.searchedItems);
     },
     sortedItems() {
@@ -220,7 +219,7 @@ export default {
         } else if (condition === 'AND') {
           filtersGroup[filtersGroup.length - 1].push(filter);
         }
-        condition = filter[condition];
+        ({ condition } = filter);
       });
 
       const result = [];

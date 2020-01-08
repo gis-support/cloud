@@ -49,7 +49,7 @@ class ValueFilterEqual extends ValueFilter {
   }
  */
   isFiltered(orginal) {
-    return _.eq(this.value, orginal) || this.value === orginal;
+    return _.eq(parseFloat(this.value), orginal) || this.value === orginal;
   }
 }
 
@@ -106,7 +106,7 @@ class ValueFilterEndsWith extends ValueFilter {
   } */
 
   isFiltered(orginal) {
-    return _.endsWith(this.value, orginal);
+    return _.endsWith(orginal, this.value);
   }
 }
 class ValueFilterStartsWith extends ValueFilter {
@@ -115,7 +115,7 @@ class ValueFilterStartsWith extends ValueFilter {
   } */
 
   isFiltered(orginal) {
-    return _.startsWith(this.value, orginal);
+    return _.startsWith(orginal, this.value);
   }
 }
 class ValueFilterContains extends ValueFilter {
@@ -137,10 +137,10 @@ const ValueFilterMap = {
   '!endwith': value => new ValueFilterNot(new ValueFilterEndsWith(value)),
   contains: value => new ValueFilterContains(value),
   '!contains': value => new ValueFilterNot(new ValueFilterContains(value)),
-  '<': value => new ValueFilterLt(value),
-  '=<': value => new ValueFilterLte(value),
-  '=>': value => new ValueFilterGte(value),
-  '>': value => new ValueFilterGt(value),
+  '>': value => new ValueFilterLt(value),
+  '=>': value => new ValueFilterLte(value),
+  '=<': value => new ValueFilterGte(value),
+  '<': value => new ValueFilterGt(value),
   between: (value1, value2) => new ValueFilterBetween(value1, value2),
   '!between': (value1, value2) => new ValueFilterNot(new ValueFilterBetween(value1, value2)),
 };

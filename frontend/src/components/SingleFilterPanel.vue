@@ -8,9 +8,9 @@
             <select class="form-control"
               :value="value.column"
               @input="updateValue('column', $event.target.value)">
-              <option v-for="field in fields"
+              <option v-for="(field, idx) in fields"
                 v-text="field"
-                :key="field"
+                :key="field+idx"
                 :value="field"/>
             </select>
             <span class="input-group-btn">
@@ -31,11 +31,12 @@
             <div class="input-group-btn">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-                <span v-text="value.operation == '' ? 'Operacja' : value.operation"/>
+                <span style="position: relative; left: -5px;"
+                  v-text="value.operation == '' ? 'Operacja' : value.operation"/>
                 <span class="caret"/>
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li v-for="operation in getOperations(value.column)" :key="operation">
+                <li v-for="(operation, idx) in getOperations(value.column)" :key="operation+idx">
                   <a href="#"
                     @click="updateValue('operation', operation)"
                     v-text="operation"/>

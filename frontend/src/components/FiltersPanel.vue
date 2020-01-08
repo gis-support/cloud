@@ -17,17 +17,17 @@
           />
           <form class="form-horizontal condition">
             <div class="form-group">
-              <label class="control-label col-sm-4">Wybierz następny warunek:</label>
+              <label class="control-label col-sm-4">Następny warunek:</label>
               <div class="col-sm-8">
                 <select class="form-control" v-model="filter.condition"
                     :value="filter.condition"
                     @input="updateNext(filter, $event.target.value)">
                   <option value="" v-if="filter.condition == ''"/>
                   <option
-                    v-for="operation in filterMergeOperations"
+                    v-for="(operation, idx) in filterMergeOperations"
                     v-text="operation"
                     :value="operation"
-                    :key="operation"/>
+                    :key="operation + idx"/>
                 </select>
               </div>
             </div>
@@ -35,20 +35,22 @@
         </div>
       </div>
       <div>
-        <span>Znajdź w tabeli obiekty z warstwy <b v-text="$root.layerName"/>
+        <span>Znajdź w tabeli obiekty z warstwy <b v-text="$route.params.layerName"/>
           które spełniają warunki:
-          <template v-for="filter in value">
-            <span :key="filter.column"
+          <ul>
+          <template v-for="(filter, idx) in value">
+            <span :key="filter.column+idx"
               v-if="filter.operation != '' && filter.column != '' && filter.value != ''">
-            <span>atrybut
-              <b v-text="fields[filter.column]"/> jest
+            <li>atrybut
+              <b v-text="filter.column"/> jest
               <span v-text="filterOperationsText[filter.operation]"/>&nbsp;
               <b v-text="filter.value"/>&nbsp;
               <span v-text="filterMergeOperationsText[filter.condition]"
                 v-if="filter.condition != ''"/>&nbsp;
-            </span>
+            </li>
             </span>
           </template>
+          </ul>
         </span>
       </div>
     </template>
@@ -85,6 +87,10 @@ export default {
       endwith: 'kończy się',
       contains: 'zawiera',
       '!contains': 'nie zawiera',
+      '<': 'mniejszy niż',
+      '=<': 'mniejszy lub równy',
+      '=>': 'większy lub równy',
+      '>': 'większy niż',
     },
     filterMergeOperationsText: {
       AND: 'i',
