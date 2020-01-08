@@ -109,6 +109,9 @@ export default {
       type: Boolean,
       default: true,
     },
+    layId: {
+      type: String,
+    },
   },
   data: () => ({
     arenaHeight: 0,
@@ -169,6 +172,9 @@ export default {
     selectedItem() {
       return this.selectedIndex === -1 ? null : this.sortedItems[this.selectedIndex];
     },
+    featureAttachments() {
+      return this.$store.getters.getFeatureAttachments;
+    },
   },
   watch: {
     searchedItems() {
@@ -202,6 +208,18 @@ export default {
     },
   },
   methods: {
+    async getAttachments(prop) {
+      const fid = prop.id;
+      if (!this.featureAttachments[this.layId]) {
+        const payload = { lid: this.layId, fid };
+        const r = await this.$store.dispatch('getFeatureAttachments', payload);
+        if (r.status === 200) {
+          this.$store.commit('setFeatureAttachments', { lid: this.layId, fid, attachments: r.body.attachments });
+        } else {
+          this.$alertify.error(this.$i18n.t('featureManager.errorAttachmentsFetch'));
+        }
+      }
+    },
     filtrowanie(items) {
       const self = this;
 
@@ -253,6 +271,7 @@ export default {
       this.selectedIndex = index;
       this.updateSelectedItem(true);
       this.selectFeatureFromId(prop.id, true);
+      this.getAttachments(prop);
     },
     clearSelection() {
       this.selectedIndex = -1;

@@ -20,6 +20,7 @@ export default {
   state: {
     activeLayer: undefined,
     currentFeaturesTypes: undefined,
+    featureAttachments: {},
     mapCenter: {
       lat: 51.919438,
       lon: 19.145136,
@@ -49,6 +50,18 @@ export default {
         return err.response;
       }
     },
+    async getFeatureAttachments(ctx, payload) {
+      try {
+        const response = await swagger.apis.Attachments
+          .get_api_layers__lid__features__fid__attachments({
+            lid: payload.lid,
+            fid: payload.fid,
+          });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async getLayerStyle(ctx, lid) {
       try {
         const response = await swagger.apis.Layers
@@ -66,6 +79,9 @@ export default {
     getCurrentFeaturesTypes(state) {
       return state.currentFeaturesTypes;
     },
+    getFeatureAttachments(state) {
+      return state.featureAttachments;
+    },
     getMapCenter(state) {
       return state.mapCenter;
     },
@@ -79,6 +95,10 @@ export default {
     },
     setCurrentFeaturesTypes(state, types) {
       state.currentFeaturesTypes = types;
+    },
+    setFeatureAttachments(state, mutationData) {
+      state.featureAttachments[mutationData.lid] = {};
+      state.featureAttachments[mutationData.lid][mutationData.fid] = mutationData.attachments;
     },
   },
 };

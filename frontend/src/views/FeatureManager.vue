@@ -42,6 +42,7 @@
           :column-filters="currentColumnFilters"
           :editing="false"
           :items="items"
+          :layId="$route.params.layerId"
           :search="searchItemValue"
           @selectFeatureById="selectFeatureById"
         />
@@ -200,11 +201,15 @@
                 </div>
               </div>
               <div v-show="indexActiveTab == 2">
-                <CommentsPanel
+                <!-- <CommentsPanel
                   ref="comments-panel"
                   @changeDialogVisibility="changeDialogVisibility"
-                  :selected-id="$route.params.layerId" />
-                <AttachmentsPanel ref="attachments-panel" :selected-id="$route.params.layerId" />
+                  :selected-id="$route.params.layerId" /> -->
+                <AttachmentsPanel
+                  ref="attachments-panel"
+                  v-if="currentFeature && featureAttachments"
+                  :lid="$route.params.layerId"
+                  :fid="currentFeature.properties.id" />
               </div>
             </div>
           </div>
@@ -230,7 +235,7 @@ import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
-import CommentsPanel from '@/components/CommentsPanel.vue';
+// import CommentsPanel from '@/components/CommentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import '@/assets/css/feature-manager.css';
 
@@ -238,7 +243,7 @@ export default {
   components: {
     AttachmentsPanel,
     AttributesPanel,
-    CommentsPanel,
+    // CommentsPanel,
     FeatureManagerTable,
     FiltersPanel,
   },
@@ -265,6 +270,9 @@ export default {
     },
     apiUrl() {
       return this.$store.getters.getApiUrl;
+    },
+    featureAttachments() {
+      return this.$store.getters.getFeatureAttachments;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
