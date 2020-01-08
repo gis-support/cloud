@@ -42,7 +42,7 @@
             <span :key="filter.column+idx"
               v-if="filter.operation != '' && filter.column != '' && filter.value != ''">
             <li>atrybut
-              <b v-text="filter.column"/> jest
+              <b v-text="filter.column"/>&nbsp;
               <span v-text="filterOperationsText[filter.operation]"/>&nbsp;
               <b v-text="filter.value"/>&nbsp;
               <span v-text="filterMergeOperationsText[filter.condition]"
@@ -79,18 +79,18 @@ export default {
   data: () => ({
     filterMergeOperations: ['AND', 'OR'],
     filterOperationsText: {
-      '=': 'równy',
-      '!=': 'nie równy',
-      startwith: 'zaczyna się',
-      '!startwith': 'nie zaczyna się',
-      '!endwith': 'nie kończy się',
-      endwith: 'kończy się',
+      '=': 'równa się',
+      '!=': 'nie równa się',
+      startwith: 'zaczyna się od',
+      '!startwith': 'nie zaczyna się od',
+      '!endwith': 'nie kończy się na',
+      endwith: 'kończy się na',
       contains: 'zawiera',
       '!contains': 'nie zawiera',
-      '<': 'mniejszy niż',
-      '=<': 'mniejszy lub równy',
-      '=>': 'większy lub równy',
-      '>': 'większy niż',
+      '<': 'jest mniejszy niż',
+      '=<': 'jest mniejszy lub równy',
+      '=>': 'jest większy lub równy',
+      '>': 'jest większy niż',
     },
     filterMergeOperationsText: {
       AND: 'i',
