@@ -67,7 +67,6 @@
                   <div class="col-sm-8">
                     <select
                       class="form-control"
-                      :value="$i18n.t(`default.${mode}`)"
                       v-model="isAttachmentPublic">
                       <option :value="false">{{$i18n.t('default.private')}}</option>
                       <option :value="true">{{$i18n.t('default.public')}}</option>
@@ -131,7 +130,7 @@ export default {
     attachmentModes: ['public', 'default'],
     attachmentName: undefined,
     isAttachmentAdding: false,
-    isAttachmentPublic: false,
+    isAttachmentPublic: '',
   }),
   computed: {
     featureAttachments() {
@@ -167,6 +166,10 @@ export default {
     toggleAttachmentAdding(vis, mode) {
       this.isAttachmentAdding = vis;
       this.addingMode = mode;
+
+      this.attachmentLink = '';
+      this.attachmentName = '';
+      this.isAttachmentPublic = '';
     },
   },
 };
