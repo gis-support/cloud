@@ -28,6 +28,19 @@ export default {
     mapZoom: 6,
   },
   actions: {
+    async addAttachment(ctx, payload) {
+      try {
+        const response = await swagger.apis.Attachments
+          .post_api_layers__lid__features__fid__attachments({
+            body: payload.body,
+            lid: payload.lid,
+            fid: payload.fid,
+          });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async editFeature(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle

@@ -268,10 +268,10 @@ export default {
       if (this.editing) {
         return;
       }
+      this.getAttachments(prop);
       this.selectedIndex = index;
       this.updateSelectedItem(true);
       this.selectFeatureFromId(prop.id, true);
-      this.getAttachments(prop);
     },
     clearSelection() {
       this.selectedIndex = -1;

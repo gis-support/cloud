@@ -56,7 +56,7 @@
             <div class="modal-dialog modal-md">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">Filtrowanie obiektów</h4>
+                  <h4 class="modal-title">{{$i18n.t('featureManager.objectsFilter')}}</h4>
                 </div>
                 <div class="modal-body">
                   <FiltersPanel
@@ -69,15 +69,21 @@
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-success"
                         @click="$emit('columnFilterDecision', 'accept')"
-                        :disabled="!isFiltersValidated(selectedColumnFilters)">Zastosuj</button>
+                        :disabled="!isFiltersValidated(selectedColumnFilters)">
+                          {{$i18n.t('default.save')}}
+                        </button>
                     </div>
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-danger"
-                        @click="$emit('columnFilterDecision', 'clear')">Wyczyść</button>
+                        @click="$emit('columnFilterDecision', 'clear')">
+                        {{$i18.t('default.clear')}}
+                      </button>
                     </div>
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-default"
-                        @click="$emit('columnFilterDecision', 'cancel')">Anuluj</button>
+                        @click="$emit('columnFilterDecision', 'cancel')">
+                        {{$i18n.t('default.cancel')}}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -129,15 +135,19 @@
             <ul class="nav nav-tabs nav-justified"
               style="margin-left: -15px; width: calc(100% + 30px);">
               <li role="presentation" :class="{active: indexActiveTab === 0}">
-                <a href="#" @click="indexActiveTab = 0"><i class="fa fa-bars"></i> Legenda</a>
+                <a href="#" @click="indexActiveTab = 0">
+                  <i class="fa fa-bars"></i> {{$i18n.t('featureManager.legend')}}</a>
               </li>
               <li role="presentation"
                 :class="{active: indexActiveTab === 1}" v-show="currentFeature">
-                <a href="#" @click="indexActiveTab = 1"><i class="fa fa-table"></i> Atrybuty</a>
+                <a href="#" @click="indexActiveTab = 1">
+                  <i class="fa fa-table"></i> {{$i18n.t('featureManager.attributes')}}</a>
               </li>
               <li role="presentation"
-                :class="{active: indexActiveTab === 2}" v-show="currentFeature">
-                <a href="#" @click="indexActiveTab = 2"><i class="fa fa-info"></i> Informacje</a>
+                :class="{active: indexActiveTab === 2, disabled: !featureAttachments}"
+                v-show="currentFeature">
+                <a href="#" @click="indexActiveTab = 2">
+                  <i class="fa fa-info"></i> {{$i18n.t('featureManager.informations')}}</a>
               </li>
             </ul>
             <div>
@@ -207,7 +217,7 @@
                   :selected-id="$route.params.layerId" /> -->
                 <AttachmentsPanel
                   ref="attachments-panel"
-                  v-if="currentFeature && featureAttachments"
+                  v-if="currentFeature && Object.keys(featureAttachments).length > 0"
                   :lid="$route.params.layerId"
                   :fid="currentFeature.properties.id" />
               </div>
