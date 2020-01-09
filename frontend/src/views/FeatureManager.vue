@@ -236,6 +236,8 @@ import Map from 'ol/Map';
 import MVT from 'ol/format/MVT';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { Fill, Stroke, Style } from 'ol/style';
@@ -311,6 +313,9 @@ export default {
     cancelEditing() {
       this.editing = false;
       this.currentFeature = this.editingDataCopy;
+
+      this.getLayerByName('features').setVisible(true);
+      this.getLayerByName('featuresVector').getSource().clear();
     },
     changeBaseLayer(layerName) {
       this.map.getLayers().getArray().forEach((el) => {
@@ -350,6 +355,16 @@ export default {
     editAttributes() {
       this.editing = true;
       this.editingDataCopy = JSON.parse(JSON.stringify(this.currentFeature));
+
+      this.getLayerByName('features').setVisible(false);
+      this.activeLayer.features.forEach((feature) => {
+        const tempFeature = new GeoJSON().readFeature(feature, {
+          featureProjection: 'EPSG:3857',
+          dataProjection: 'EPSG:4326',
+        });
+        this.getLayerByName('featuresVector').getSource().addFeature(tempFeature);
+      });
+      this.getLayerByName('featuresVector').setVisible(true);
     },
     isFiltersValidated(filters) {
       return _.every(filters, filter => filter.operation !== '' && filter.column !== '' && filter.value !== '');
@@ -419,7 +434,7 @@ export default {
       if (feature) {
         const fid = feature.get('id');
         this.selectFeatureById(fid);
-        this.$refs['table-data'].getAttachments(fid);
+        this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
           this.$refs['table-data'].selectItem(_.find(this.items, o => o.id === fid));
         }
@@ -455,13 +470,22 @@ export default {
       }),
     });
 
-    const ortofoto = await this.initOrtofoto();
-    this.map.addLayer(ortofoto);
+    /* const ortofoto = await this.initOrtofoto();
+    this.map.addLayer(ortofoto); */
 
     const featureStyleResponse = await this.$store.dispatch(
       'getLayerStyle', this.$route.params.layerId,
     );
     const featureStyle = featureStyleResponse.obj.style;
+    const featureStyleDef = new Style({
+      fill: new Fill({
+        color: `rgba(${featureStyle['fill-color']})`,
+      }),
+      stroke: new Stroke({
+        color: `rgba(${featureStyle['stroke-color']})`,
+        width: `${featureStyle['stroke-width']}`,
+      }),
+    });
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
@@ -469,15 +493,15 @@ export default {
           format: new MVT(),
           url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
         }),
-        style: new Style({
-          fill: new Fill({
-            color: `rgba(${featureStyle['fill-color']})`,
-          }),
-          stroke: new Stroke({
-            color: `rgba(${featureStyle['stroke-color']})`,
-            width: `${featureStyle['stroke-width']}`,
-          }),
-        }),
+        style: featureStyleDef,
+      }),
+    );
+    this.map.addLayer(
+      new VectorLayer({
+        name: 'featuresVector',
+        visible: false,
+        source: new VectorSource({}),
+        style: featureStyleDef,
       }),
     );
 
