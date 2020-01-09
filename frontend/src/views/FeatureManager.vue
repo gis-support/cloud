@@ -76,7 +76,7 @@
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-danger"
                         @click="$emit('columnFilterDecision', 'clear')">
-                        {{$i18.t('default.clear')}}
+                        {{$i18n.t('default.clear')}}
                       </button>
                     </div>
                     <div class="btn-group" role="group">
