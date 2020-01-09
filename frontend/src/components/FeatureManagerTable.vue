@@ -208,8 +208,7 @@ export default {
     },
   },
   methods: {
-    async getAttachments(prop) {
-      const fid = prop.id;
+    async getAttachments(fid) {
       if (!this.featureAttachments[this.layId]) {
         const payload = { lid: this.layId, fid };
         const r = await this.$store.dispatch('getFeatureAttachments', payload);
@@ -268,7 +267,7 @@ export default {
       if (this.editing) {
         return;
       }
-      this.getAttachments(prop);
+      this.getAttachments(prop.id);
       this.selectedIndex = index;
       this.updateSelectedItem(true);
       this.selectFeatureFromId(prop.id, true);

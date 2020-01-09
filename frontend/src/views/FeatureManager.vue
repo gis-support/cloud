@@ -419,6 +419,7 @@ export default {
       if (feature) {
         const fid = feature.get('id');
         this.selectFeatureById(fid);
+        this.$refs['table-data'].getAttachments(fid);
         if ('table-data' in this.$refs) {
           this.$refs['table-data'].selectItem(_.find(this.items, o => o.id === fid));
         }
