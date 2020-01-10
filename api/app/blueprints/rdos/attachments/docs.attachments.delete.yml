@@ -1,0 +1,43 @@
+Delete attachment
+---
+tags:
+  - Attachments
+summary: Delete attachment with permissions
+produces:
+  - application/json
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - name: fid
+    in: path
+    description: Feature ID
+    required: true
+    type: string
+  - name: id
+    in: path
+    description: Attachment ID
+    required: true
+    type: integer
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    schema:
+      type: object
+      properties:
+        aid:
+          type: string
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
