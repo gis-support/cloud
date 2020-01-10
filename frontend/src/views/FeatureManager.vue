@@ -233,6 +233,7 @@ import _ from 'lodash';
 import { fromLonLat, get as getProjection } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 import Map from 'ol/Map';
+import Modify from 'ol/interaction/Modify';
 import MVT from 'ol/format/MVT';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
@@ -305,6 +306,8 @@ export default {
       };
       const r = await this.$store.dispatch('editFeature', payload);
       if (r.status === 200) {
+        this.editingEndOperations();
+        this.refreshVectorSource(this.getLayerByName('features'));
         this.$alertify.success(this.$i18n.t('default.editSuccess'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -313,9 +316,7 @@ export default {
     cancelEditing() {
       this.editing = false;
       this.currentFeature = this.editingDataCopy;
-
-      this.getLayerByName('features').setVisible(true);
-      this.getLayerByName('featuresVector').getSource().clear();
+      this.editingEndOperations();
     },
     changeBaseLayer(layerName) {
       this.map.getLayers().getArray().forEach((el) => {
@@ -332,10 +333,18 @@ export default {
     changeDialogVisibility(vis) {
       this.isInfoDialogVisible = vis;
     },
+    createModifyInteraction() {
+      const modifyInteraction = new Modify({
+        source: this.getLayerByName('featuresVector').getSource(),
+      });
+      modifyInteraction.set('name', 'modifyInteraction');
+      modifyInteraction.setActive(false);
+      this.map.addInteraction(modifyInteraction);
+    },
     createSelectInteraction() {
       let active = true;
       this.map.on('click', (evt) => {
-        if (!active) return;
+        if (!active || this.isInteractionActive('modifyInteraction')) return;
 
         const feature = this.map.forEachFeatureAtPixel(evt.pixel,
           feat => feat, {
@@ -364,10 +373,19 @@ export default {
         });
         this.getLayerByName('featuresVector').getSource().addFeature(tempFeature);
       });
+      if (!this.getInteractionByName('modifyInteraction')) {
+        this.createModifyInteraction();
+      }
       this.getLayerByName('featuresVector').setVisible(true);
+      this.getInteractionByName('modifyInteraction').setActive(true);
     },
-    isFiltersValidated(filters) {
-      return _.every(filters, filter => filter.operation !== '' && filter.column !== '' && filter.value !== '');
+    editingEndOperations() {
+      this.getLayerByName('features').setVisible(true);
+      this.getInteractionByName('modifyInteraction').setActive(false);
+      this.getLayerByName('featuresVector').getSource().clear();
+    },
+    getInteractionByName(name) {
+      return this.map.getInteractions().getArray().find(i => i.get('name') === name);
     },
     getLayerByName(name) {
       return this.map
@@ -407,6 +425,16 @@ export default {
         });
       });
     },
+    isFiltersValidated(filters) {
+      return _.every(filters, filter => filter.operation !== '' && filter.column !== '' && filter.value !== '');
+    },
+    isInteractionActive(interaction) {
+      if (this.getInteractionByName(interaction)
+        && this.getInteractionByName(interaction).getActive()) {
+        return true;
+      }
+      return false;
+    },
     openColumnFilterDecision() {
       const self = this;
 
@@ -429,6 +457,13 @@ export default {
 
       self.$on('columnFilterDecision', handle);
       self.columnFilterDecisionDialogView = true;
+    },
+    refreshVectorSource(layer) {
+      const source = layer.getSource();
+      source.tileCache.expireCache({});
+      source.tileCache.clear();
+      source.refresh();
+      layer.changed();
     },
     selectFeature(feature) {
       if (feature) {
@@ -489,7 +524,9 @@ export default {
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
+        preload: 0,
         source: new VectorTileSource({
+          cacheSize: 1,
           format: new MVT(),
           url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
         }),
