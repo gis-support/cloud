@@ -39,6 +39,21 @@ class TestFeatures(BaseTest):
         lid = self.add_geojson_prg(client, token)
         fid = 1
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
+        r = client.get(
+            '/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
+        base_geometry = len(r.json['geometry']['coordinates'][0][0])
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
+                       data=open(path), follow_redirects=True, content_type='multipart/form-data')
+        r = client.get(
+            '/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
+        edited_geometry = len(r.json['geometry']['coordinates'][0][0])
+        assert base_geometry > edited_geometry
+
+    def test_features_put_geometry_correct(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        fid = 1
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
         r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
                        data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 200
