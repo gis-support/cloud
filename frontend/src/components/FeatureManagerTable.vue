@@ -109,6 +109,9 @@ export default {
       type: Boolean,
       default: true,
     },
+    layId: {
+      type: String,
+    },
   },
   data: () => ({
     arenaHeight: 0,
@@ -136,7 +139,6 @@ export default {
       if (_.isEmpty(self.columnFilters)) {
         return self.searchedItems;
       }
-
       return self.filtrowanie(self.searchedItems);
     },
     sortedItems() {
@@ -169,6 +171,9 @@ export default {
     },
     selectedItem() {
       return this.selectedIndex === -1 ? null : this.sortedItems[this.selectedIndex];
+    },
+    featureAttachments() {
+      return this.$store.getters.getFeatureAttachments;
     },
   },
   watch: {
@@ -203,6 +208,17 @@ export default {
     },
   },
   methods: {
+    async getAttachments(fid) {
+      if (!this.featureAttachments[this.layId]) {
+        const payload = { lid: this.layId, fid };
+        const r = await this.$store.dispatch('getFeatureAttachments', payload);
+        if (r.status === 200) {
+          this.$store.commit('setFeatureAttachments', { lid: this.layId, fid, attachments: r.body.attachments });
+        } else {
+          this.$alertify.error(this.$i18n.t('featureManager.errorAttachmentsFetch'));
+        }
+      }
+    },
     filtrowanie(items) {
       const self = this;
 
@@ -220,7 +236,7 @@ export default {
         } else if (condition === 'AND') {
           filtersGroup[filtersGroup.length - 1].push(filter);
         }
-        condition = filter[condition];
+        ({ condition } = filter);
       });
 
       const result = [];
@@ -251,6 +267,7 @@ export default {
       if (this.editing) {
         return;
       }
+      this.getAttachments(prop.id);
       this.selectedIndex = index;
       this.updateSelectedItem(true);
       this.selectFeatureFromId(prop.id, true);

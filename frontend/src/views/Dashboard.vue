@@ -422,7 +422,7 @@ export default {
     },
   },
   mounted() {
-    console.log(this.$swagger);
+    // console.log(this.$swagger);
     this.getLayers();
   },
 };

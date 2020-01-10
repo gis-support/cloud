@@ -27,6 +27,8 @@
             </div>
           </div>
           <button type="button" class="btn navbar-btn navbar-right btn-default"
+            :class="{'btn-danger' : currentColumnFilters.length > 0,
+              'btn-default' : currentColumnFilters.length == 0 }"
             :title="$i18n.t('featureManager.objectsFilter')"
             @click="openColumnFilterDecision"><i class="fa fa-filter"></i>
           </button>
@@ -40,6 +42,7 @@
           :column-filters="currentColumnFilters"
           :editing="false"
           :items="items"
+          :layId="$route.params.layerId"
           :search="searchItemValue"
           @selectFeatureById="selectFeatureById"
         />
@@ -53,29 +56,34 @@
             <div class="modal-dialog modal-md">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">Filtrowanie obiektów</h4>
+                  <h4 class="modal-title">{{$i18n.t('featureManager.objectsFilter')}}</h4>
                 </div>
                 <div class="modal-body">
                   <FiltersPanel
                     ref="column-filters"
                     :columns="columns"
                     v-model="selectedColumnFilters"></FiltersPanel>
-                  <p>dupa</p>
                 </div>
                 <div class="modal-footer">
                   <div class="btn-group btn-group-justified" role="group">
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-success"
                         @click="$emit('columnFilterDecision', 'accept')"
-                        :disabled="!isFiltersValidated(selectedColumnFilters)">Zastosuj</button>
+                        :disabled="!isFiltersValidated(selectedColumnFilters)">
+                          {{$i18n.t('default.save')}}
+                        </button>
                     </div>
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-danger"
-                        @click="$emit('columnFilterDecision', 'clear')">Wyczyść</button>
+                        @click="$emit('columnFilterDecision', 'clear')">
+                        {{$i18n.t('default.clear')}}
+                      </button>
                     </div>
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-default"
-                        @click="$emit('columnFilterDecision', 'cancel')">Anuluj</button>
+                        @click="$emit('columnFilterDecision', 'cancel')">
+                        {{$i18n.t('default.cancel')}}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -127,15 +135,19 @@
             <ul class="nav nav-tabs nav-justified"
               style="margin-left: -15px; width: calc(100% + 30px);">
               <li role="presentation" :class="{active: indexActiveTab === 0}">
-                <a href="#" @click="indexActiveTab = 0"><i class="fa fa-bars"></i> Legenda</a>
+                <a href="#" @click="indexActiveTab = 0">
+                  <i class="fa fa-bars"></i> {{$i18n.t('featureManager.legend')}}</a>
               </li>
               <li role="presentation"
                 :class="{active: indexActiveTab === 1}" v-show="currentFeature">
-                <a href="#" @click="indexActiveTab = 1"><i class="fa fa-table"></i> Atrybuty</a>
+                <a href="#" @click="indexActiveTab = 1">
+                  <i class="fa fa-table"></i> {{$i18n.t('featureManager.attributes')}}</a>
               </li>
               <li role="presentation"
-                :class="{active: indexActiveTab === 2}" v-show="currentFeature">
-                <a href="#" @click="indexActiveTab = 2"><i class="fa fa-info"></i> Informacje</a>
+                :class="{active: indexActiveTab === 2, disabled: !featureAttachments}"
+                v-show="currentFeature">
+                <a href="#" @click="indexActiveTab = 2">
+                  <i class="fa fa-info"></i> {{$i18n.t('featureManager.informations')}}</a>
               </li>
             </ul>
             <div>
@@ -199,11 +211,15 @@
                 </div>
               </div>
               <div v-show="indexActiveTab == 2">
-                <CommentsPanel
+                <!-- <CommentsPanel
                   ref="comments-panel"
                   @changeDialogVisibility="changeDialogVisibility"
-                  :selected-id="$route.params.layerId" />
-                <AttachmentsPanel ref="attachments-panel" :selected-id="$route.params.layerId" />
+                  :selected-id="$route.params.layerId" /> -->
+                <AttachmentsPanel
+                  ref="attachments-panel"
+                  v-if="currentFeature && Object.keys(featureAttachments).length > 0"
+                  :lid="$route.params.layerId"
+                  :fid="currentFeature.properties.id" />
               </div>
             </div>
           </div>
@@ -220,6 +236,8 @@ import Map from 'ol/Map';
 import MVT from 'ol/format/MVT';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { Fill, Stroke, Style } from 'ol/style';
@@ -229,7 +247,7 @@ import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
-import CommentsPanel from '@/components/CommentsPanel.vue';
+// import CommentsPanel from '@/components/CommentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import '@/assets/css/feature-manager.css';
 
@@ -237,7 +255,7 @@ export default {
   components: {
     AttachmentsPanel,
     AttributesPanel,
-    CommentsPanel,
+    // CommentsPanel,
     FeatureManagerTable,
     FiltersPanel,
   },
@@ -265,6 +283,9 @@ export default {
     apiUrl() {
       return this.$store.getters.getApiUrl;
     },
+    featureAttachments() {
+      return this.$store.getters.getFeatureAttachments;
+    },
     mapCenter() {
       return this.$store.getters.getMapCenter;
     },
@@ -284,7 +305,7 @@ export default {
       };
       const r = await this.$store.dispatch('editFeature', payload);
       if (r.status === 200) {
-        this.$alertify.error(this.$i18n.t('default.success'));
+        this.$alertify.success(this.$i18n.t('default.editSuccess'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
@@ -292,6 +313,9 @@ export default {
     cancelEditing() {
       this.editing = false;
       this.currentFeature = this.editingDataCopy;
+
+      this.getLayerByName('features').setVisible(true);
+      this.getLayerByName('featuresVector').getSource().clear();
     },
     changeBaseLayer(layerName) {
       this.map.getLayers().getArray().forEach((el) => {
@@ -331,6 +355,16 @@ export default {
     editAttributes() {
       this.editing = true;
       this.editingDataCopy = JSON.parse(JSON.stringify(this.currentFeature));
+
+      this.getLayerByName('features').setVisible(false);
+      this.activeLayer.features.forEach((feature) => {
+        const tempFeature = new GeoJSON().readFeature(feature, {
+          featureProjection: 'EPSG:3857',
+          dataProjection: 'EPSG:4326',
+        });
+        this.getLayerByName('featuresVector').getSource().addFeature(tempFeature);
+      });
+      this.getLayerByName('featuresVector').setVisible(true);
     },
     isFiltersValidated(filters) {
       return _.every(filters, filter => filter.operation !== '' && filter.column !== '' && filter.value !== '');
@@ -400,6 +434,7 @@ export default {
       if (feature) {
         const fid = feature.get('id');
         this.selectFeatureById(fid);
+        this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
           this.$refs['table-data'].selectItem(_.find(this.items, o => o.id === fid));
         }
@@ -435,13 +470,22 @@ export default {
       }),
     });
 
-    const ortofoto = await this.initOrtofoto();
-    this.map.addLayer(ortofoto);
+    /* const ortofoto = await this.initOrtofoto();
+    this.map.addLayer(ortofoto); */
 
     const featureStyleResponse = await this.$store.dispatch(
       'getLayerStyle', this.$route.params.layerId,
     );
     const featureStyle = featureStyleResponse.obj.style;
+    const featureStyleDef = new Style({
+      fill: new Fill({
+        color: `rgba(${featureStyle['fill-color']})`,
+      }),
+      stroke: new Stroke({
+        color: `rgba(${featureStyle['stroke-color']})`,
+        width: `${featureStyle['stroke-width']}`,
+      }),
+    });
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
@@ -449,15 +493,15 @@ export default {
           format: new MVT(),
           url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
         }),
-        style: new Style({
-          fill: new Fill({
-            color: `rgba(${featureStyle['fill-color']})`,
-          }),
-          stroke: new Stroke({
-            color: `rgba(${featureStyle['stroke-color']})`,
-            width: `${featureStyle['stroke-width']}`,
-          }),
-        }),
+        style: featureStyleDef,
+      }),
+    );
+    this.map.addLayer(
+      new VectorLayer({
+        name: 'featuresVector',
+        visible: false,
+        source: new VectorSource({}),
+        style: featureStyleDef,
       }),
     );
 

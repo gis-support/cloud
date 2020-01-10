@@ -8,9 +8,9 @@
             <select class="form-control"
               :value="value.column"
               @input="updateValue('column', $event.target.value)">
-              <option v-for="field in fields"
+              <option v-for="(field, idx) in fields"
                 v-text="field"
-                :key="field"
+                :key="field+idx"
                 :value="field"/>
             </select>
             <span class="input-group-btn">
@@ -24,24 +24,34 @@
         <label class="control-label col-sm-4">Wartość:</label>
         <div class="col-sm-8">
           <div class="input-group">
-            <input type="text" class="form-control"
-              :value="value.value"
-              @input="updateValue('value', $event.target.value)"
-              placeholder="Wpisz wartość"/>
             <div class="input-group-btn">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-                <span v-text="value.operation == '' ? 'Operacja' : value.operation"/>
+                <span v-if="featureTypes[value.column] === 'character varying'"
+                  style="position: relative; left: -5px;"
+                  v-text="value.operation == '' ? 'Operacja' : filterMap[value.operation]"/>
+                  <span v-else
+                  style="position: relative; left: -5px;"
+                  v-text="value.operation == '' ? 'Operacja' : value.operation"/>
                 <span class="caret"/>
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li v-for="operation in getOperations(value.column)" :key="operation">
+                <li v-for="(operation, idx) in getOperations(value.column)" :key="operation+idx">
                   <a href="#"
+                    v-if="featureTypes[value.column] === 'character varying'"
+                    @click="updateValue('operation', operation)"
+                    v-text="filterMap[operation]"/>
+                  <a href="#"
+                    v-else
                     @click="updateValue('operation', operation)"
                     v-text="operation"/>
                 </li>
               </ul>
             </div>
+            <input type="text" class="form-control"
+              :value="value.value"
+              @input="updateValue('value', $event.target.value)"
+              placeholder="Wpisz wartość"/>
           </div>
         </div>
       </div>
@@ -69,6 +79,16 @@ export default {
       integer: ['=', '<', '=<', '=>', '>', '!='],
       real: ['=', '<', '=<', '=>', '>', '!='],
       'timestamp without time zone': ['=', '<', '=<', '=>', '>', '!='],
+    },
+    filterMap: {
+      '=': 'Równa się',
+      '!=': 'Nie równa się',
+      startwith: 'Zaczyna się od',
+      '!startwith': 'Nie zaczyna się od',
+      endwith: 'Kończy się na',
+      '!endwith': 'Nie kończy się na',
+      contains: 'Zawiera',
+      '!contains': 'Nie zawiera',
     },
   }),
   computed: {

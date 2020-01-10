@@ -20,6 +20,7 @@ export default {
   state: {
     activeLayer: undefined,
     currentFeaturesTypes: undefined,
+    featureAttachments: {},
     mapCenter: {
       lat: 51.919438,
       lon: 19.145136,
@@ -27,11 +28,24 @@ export default {
     mapZoom: 6,
   },
   actions: {
+    async addAttachment(ctx, payload) {
+      try {
+        const response = await swagger.apis.Attachments
+          .post_api_layers__lid__features__fid__attachments({
+            body: payload.body,
+            lid: payload.lid,
+            fid: payload.fid,
+          });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async editFeature(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle
         const response = await swagger.apis.Features.put_api_layers__lid__features__fid_({
-          body: payload.feature,
+          body: payload.body,
           lid: payload.lid,
           fid: payload.fid,
         });
@@ -44,6 +58,18 @@ export default {
       try {
         const response = await swagger.apis.Layers
           .get_api_layers__lid__settings({ lid });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async getFeatureAttachments(ctx, payload) {
+      try {
+        const response = await swagger.apis.Attachments
+          .get_api_layers__lid__features__fid__attachments({
+            lid: payload.lid,
+            fid: payload.fid,
+          });
         return response;
       } catch (err) {
         return err.response;
@@ -66,6 +92,9 @@ export default {
     getCurrentFeaturesTypes(state) {
       return state.currentFeaturesTypes;
     },
+    getFeatureAttachments(state) {
+      return state.featureAttachments;
+    },
     getMapCenter(state) {
       return state.mapCenter;
     },
@@ -79,6 +108,10 @@ export default {
     },
     setCurrentFeaturesTypes(state, types) {
       state.currentFeaturesTypes = types;
+    },
+    setFeatureAttachments(state, mutationData) {
+      state.featureAttachments[mutationData.lid] = {};
+      state.featureAttachments[mutationData.lid][mutationData.fid] = mutationData.attachments;
     },
   },
 };
