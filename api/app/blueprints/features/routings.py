@@ -18,14 +18,14 @@ mod_features = Blueprint("features", __name__)
 def features_post(layer, lid):
     data = request.get_json(force=True)
     geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
-    columns = []
-    values = []
+    columns = ['geometry']
+    values = [geometry]
     for k, v in data['properties'].items():
         if k in layer.columns():
             columns.append(k)
             values.append(v)
-    layer.add_feature(columns, values)
-    return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
+    feature = layer.add_feature(columns, values)
+    return jsonify(feature), 201
 
 
 @mod_features.route('/layers/<lid>/features/<int:fid>', methods=['GET', 'PUT', 'DELETE'])
@@ -41,7 +41,10 @@ def features_id(lid, fid):
         """
         @layer_decorator(permission="read")
         def get(layer, lid=None):
-            return layer.as_geojson_by_fid(fid)
+            try:
+                return layer.as_geojson_by_fid(fid)
+            except ValueError:
+                return jsonify({"error": "feature not exists"}), 404
         return get(lid=lid)
 
     elif request.method == 'PUT':
@@ -53,14 +56,14 @@ def features_id(lid, fid):
         def put(layer, lid=None):
             data = request.get_json(force=True)
             geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
-            columns = []
-            values = []
+            columns = ['geometry']
+            values = [geometry]
             for k, v in data['properties'].items():
                 if k in layer.columns():
                     columns.append(k)
                     values.append(v)
-            layer.edit_feature(fid, columns, values)
-            return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 200
+            feature = layer.edit_feature(fid, columns, values)
+            return jsonify(feature), 200
         return put(lid=lid)
 
     elif request.method == 'DELETE':
@@ -71,5 +74,5 @@ def features_id(lid, fid):
         @layer_decorator(permission="write")
         def delete(layer, lid=None):
             layer.delete_feature(fid)
-            return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 200
+            return jsonify({"fid": fid}), 200
         return delete(lid=lid)

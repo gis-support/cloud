@@ -45,19 +45,11 @@ responses:
       properties:
         type:
           type: string
-          example: "FeatureCollection"
-        features:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                example: "Feature"
-              geometry:
-                type: object
-              properties:
-                type: object
+          example: "Feature"
+        geometry:
+          type: object
+        properties:
+          type: object
   403:
     description: Token required
     schema:

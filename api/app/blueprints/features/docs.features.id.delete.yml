@@ -27,18 +27,13 @@ responses:
     schema:
       type: object
       properties:
-        layers:
+        type:
+          type: string
+          example: "Feature"
+        geometry:
           type: object
-          properties:
-            id:
-              type: string
-              description: Layer ID
-            name:
-              type: string
-              description: Layer name
-            features:
-              type: integer
-              description: Number of features
+        properties:
+          type: object
   403:
     description: Token required
     schema:

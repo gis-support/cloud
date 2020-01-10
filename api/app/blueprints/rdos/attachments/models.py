@@ -31,6 +31,15 @@ class Attachment(BaseModel):
         return attachment.id
 
     @staticmethod
+    def delete_attachment(lid, fid, aid):
+        attachment = Attachment.delete().where(
+            (Attachment.lid == lid) &
+            (Attachment.fid == fid) &
+            (Attachment.id == aid)
+        ).execute()
+        return attachment
+
+    @staticmethod
     def sync(old_lid, new_lid):
         Attachment.update(lid=new_lid).where(
             Attachment.lid == old_lid).execute()

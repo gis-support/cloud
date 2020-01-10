@@ -183,7 +183,10 @@ class Layer(Cloud):
             )
             FROM (SELECT * from {}) as t;
         """).format(Identifier(self.name)))
-        return cursor.fetchone()[0]
+        feature_collection = cursor.fetchone()[0]
+        if not feature_collection['features']:
+            feature_collection['features'] = []
+        return feature_collection
 
     # Convert feature to GeoJSON
     def as_geojson_by_fid(self, fid):
@@ -191,19 +194,20 @@ class Layer(Cloud):
             SELECT ST_AsGeoJSON(t.*)
             FROM (SELECT * from {} WHERE id=%s) AS t;
         """).format(Identifier(self.name)), (fid,))
-        return json.loads(cursor.fetchone()[0])
+        feature = cursor.fetchone()
+        if not feature:
+            raise ValueError("feature not exists")
+        return json.loads(feature[0])
 
     # Add new feature
     def add_feature(self, columns, values):
-        query_string = SQL("INSERT INTO {} ({}) values ({})").format(
+        query_string = SQL("INSERT INTO {} ({}) values ({})  RETURNING id;").format(
             Identifier(self.name),
             SQL(', ').join(map(lambda c: Identifier(c), columns)),
             SQL(', ').join(Placeholder() * len(columns))
         )
-        self.execute(query_string, *[values])
-        cursor = self.execute(
-            SQL("SELECT count(*) FROM {}").format(Identifier(self.name)))
-        return cursor.fetchone()[0]
+        cursor = self.execute(query_string, *[values])
+        return self.as_geojson_by_fid(cursor.fetchone()[0])
 
     # Edit existing feature
     def edit_feature(self, fid, columns, values):
@@ -213,6 +217,7 @@ class Layer(Cloud):
                 map(lambda c: SQL("{} = %s").format(Identifier(c)), columns))
         )
         self.execute(query_string, *[values + [fid]])
+        return self.as_geojson_by_fid(fid)
 
     # Delete feature
     def delete_feature(self, fid):

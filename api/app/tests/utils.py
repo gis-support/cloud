@@ -52,9 +52,7 @@ class BaseTest:
                         data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 201
         assert r.json
-        assert r.json['layers']['features'] == 2
-        assert r.json['layers']['name'] == 'wojewodztwa'
-        return r.json['layers']['id']
+        assert r.json['type'] == 'Feature'
 
     def add_attachment_to_feature(self, client, token, lid, fid, public=True, name='test', link='https://gis-support.pl/'):
         r = client.get(

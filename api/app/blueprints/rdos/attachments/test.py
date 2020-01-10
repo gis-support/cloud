@@ -52,3 +52,20 @@ class TestAttachments(BaseTest):
         assert r.json
         assert len(r.json['attachments']['public']) == 1
         assert len(r.json['attachments']['default']) == 0
+
+    def test_attachments_delete_public(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        fid = 1
+        aid = self.add_attachment_to_feature(
+            client, token, lid, fid, public=True)
+        r = client.delete(
+            f'/api/layers/{lid}/features/{fid}/attachments/1?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['aid'] == 1
+        r = client.get(
+            f'/api/layers/{lid}/features/{fid}/attachments?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['attachments']['public'] == []

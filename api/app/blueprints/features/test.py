@@ -43,8 +43,7 @@ class TestFeatures(BaseTest):
                        data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 200
         assert r.json
-        assert r.json['layers']['features'] == 1
-        assert r.json['layers']['name'] == 'wojewodztwa'
+        assert r.json['type'] == 'Feature'
 
     def test_features_delete_correct(self, client):
         token = self.get_token(client)
@@ -54,5 +53,14 @@ class TestFeatures(BaseTest):
             '/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
         assert r.status_code == 200
         assert r.json
-        assert r.json['layers']['features'] == 0
-        assert r.json['layers']['name'] == 'wojewodztwa'
+        assert r.json['fid'] == fid
+        r = client.get(
+            '/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
+        assert r.status_code == 404
+        assert r.json
+        assert r.json['error'] == 'feature not exists'
+        r = client.get(
+            '/api/layers/{}?token={}'.format(lid, token))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['features'] == []

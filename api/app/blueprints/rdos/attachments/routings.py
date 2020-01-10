@@ -11,6 +11,21 @@ from app.blueprints.rdos.attachments.models import Attachment
 mod_attachments = Blueprint("attachments", __name__)
 
 
+@mod_attachments.route('/layers/<lid>/features/<int:fid>/attachments/<int:aid>', methods=['DELETE'])
+@swag_from(path_by(__file__, 'docs.attachments.delete.yml'), methods=['DELETE'])
+@token_required
+def attachment_delete(lid, fid, aid):
+    if request.method == 'DELETE':
+        """
+        Delete attachment for feature
+        Returns attachments list
+        """
+        @layer_decorator(permission="owner")
+        def delete(layer, lid=lid, fid=fid, aid=None):
+            return jsonify({"aid": Attachment.delete_attachment(lid, fid, aid)})
+        return delete(lid=lid, fid=fid, aid=aid)
+
+
 @mod_attachments.route('/layers/<lid>/features/<int:fid>/attachments', methods=['GET', 'POST'])
 @swag_from(path_by(__file__, 'docs.attachments.get.yml'), methods=['GET'])
 @swag_from(path_by(__file__, 'docs.attachments.post.yml'), methods=['POST'])
