@@ -69,4 +69,4 @@ class BaseTest:
             f'/api/layers/{lid}/features/{fid}/attachments?token={token}', data=json.dumps(new_attachment))
         assert r.status_code == 201
         assert r.json
-        return r.json['attachments']
+        return r.json['attachments']['id']

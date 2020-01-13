@@ -1,5 +1,6 @@
 from app.db.general import BaseModel
 from peewee import TextField
+from playhouse.shortcuts import model_to_dict
 
 
 class Attachment(BaseModel):
@@ -28,7 +29,7 @@ class Attachment(BaseModel):
     @staticmethod
     def add_attachment(data):
         attachment = Attachment.create(**data)
-        return attachment.id
+        return model_to_dict(attachment)
 
     @staticmethod
     def delete_attachment(lid, fid, aid):
