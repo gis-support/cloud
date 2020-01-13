@@ -313,6 +313,9 @@ export default {
       if (r.status === 200) {
         this.editingEndOperations();
         this.refreshVectorSource(this.getLayerByName('features'));
+        const itemsIdx = this.items.findIndex(el => el.id === fid);
+        this.items[itemsIdx] = r.obj.properties;
+        this.$refs['table-data'].$recompute('windowItems'); // update table data
         this.$alertify.success(this.$i18n.t('default.editSuccess'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
