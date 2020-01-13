@@ -299,12 +299,14 @@ export default {
   },
   methods: {
     async saveEditing() {
-      const geom = this.getLayerByName('featuresVector').getSource().getFeatures()[0].getGeometry().transform('EPSG:3857', 'EPSG:4326');
-      this.currentFeature.geometry.coordinates = geom.getCoordinates();
+      const fid = this.currentFeature.properties.id;
+      const features = this.getLayerByName('featuresVector').getSource().getFeatures();
+      const vectorFeature = features.find(el => el.get('id') === fid).clone();
+      this.currentFeature.geometry.coordinates = vectorFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
       const payload = {
         body: this.currentFeature,
         lid: this.$route.params.layerId,
-        fid: this.currentFeature.properties.id,
+        fid,
       };
       this.$alertify.warning(this.$i18n.t('default.editInProgress'));
       const r = await this.$store.dispatch('editFeature', payload);
