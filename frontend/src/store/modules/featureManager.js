@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import Swagger from 'swagger-client';
 import api from '@/docs/api.json';
 
@@ -135,8 +136,10 @@ export default {
       state.currentFeaturesTypes = types;
     },
     setFeatureAttachments(state, mutationData) {
-      state.featureAttachments[mutationData.lid] = {};
-      state.featureAttachments[mutationData.lid][mutationData.fid] = mutationData.attachments;
+      Vue.set(state.featureAttachments, mutationData.lid, {});
+      Vue.set(
+        state.featureAttachments[mutationData.lid], mutationData.fid, mutationData.attachments,
+      );
     },
   },
 };
