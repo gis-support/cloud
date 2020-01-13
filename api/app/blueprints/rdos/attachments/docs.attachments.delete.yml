@@ -16,7 +16,7 @@ parameters:
     description: Feature ID
     required: true
     type: string
-  - name: id
+  - name: aid
     in: path
     description: Attachment ID
     required: true
