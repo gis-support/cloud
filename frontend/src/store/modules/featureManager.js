@@ -117,6 +117,10 @@ export default {
     },
   },
   mutations: {
+    addSingleAttachment(state, mutationData) {
+      state.featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
+        .push(mutationData.attachment);
+    },
     deleteFeatureAttachment(state, mutationData) {
       const attachmentIdx = state
         .featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]

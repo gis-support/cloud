@@ -147,8 +147,13 @@ export default {
           public: this.isAttachmentPublic,
         },
       });
-
       if (r.status === 201) {
+        this.$store.commit('addSingleAttachment', {
+          lid: this.lid,
+          fid: this.fid,
+          attachType: this.isAttachmentPublic ? 'public' : 'default',
+          attachment: r.body.attachments,
+        });
         this.toggleAttachmentAdding(false);
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
