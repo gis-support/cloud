@@ -68,7 +68,7 @@ export default {
         return err.response;
       }
     },
-    async getCurrentFeatures(ctx, lid) {
+    async getCurrentSettings(ctx, lid) {
       try {
         const response = await swagger.apis.Layers
           .get_api_layers__lid__settings({ lid });
