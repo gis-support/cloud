@@ -130,7 +130,6 @@ export default {
       if (!self.search) {
         return self.items;
       }
-
       return self.wyszukaj(self.items, self.search);
     },
     filteredItems() {
