@@ -32,6 +32,10 @@
             :title="$i18n.t('featureManager.objectsFilter')"
             @click="openColumnFilterDecision"><i class="fa fa-filter"></i>
           </button>
+          <button type="button" class="btn navbar-btn navbar-right btn-default"
+            :title="$i18n.t('featureManager.addFeature')" @click="addNewFeature">
+            <i class="fa fa-plus"></i>
+          </button>
         </div>
       </nav>
         <!-- {{ $route.params.layerId }} -->
@@ -231,6 +235,7 @@
 <script>
 import _ from 'lodash';
 import { fromLonLat, get as getProjection } from 'ol/proj';
+import Draw from 'ol/interaction/Draw';
 import GeoJSON from 'ol/format/GeoJSON';
 import Map from 'ol/Map';
 import Modify from 'ol/interaction/Modify';
@@ -269,6 +274,8 @@ export default {
     currentBaseLayer: 'OpenStreetMap',
     currentColumnFilters: [],
     currentFeature: undefined,
+    currentLayerType: undefined,
+    draw: undefined,
     editing: false,
     editingDataCopy: undefined,
     indexActiveTab: 0,
@@ -320,6 +327,26 @@ export default {
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    addNewFeature() {
+      const source = new VectorSource({ wrapX: false });
+      const vector = new VectorLayer({ source });
+      this.map.addLayer(vector);
+      let drawType;
+      if (this.currentLayerType === 'polygon' || this.currentLayerType === 'multipolygon') {
+        drawType = 'Polygon';
+      } else if (this.currentLayerType === 'linestring') {
+        drawType = 'LineString';
+      } else {
+        drawType = 'Circle';
+      }
+
+      const draw = new Draw({
+        source,
+        type: drawType,
+      });
+      draw.set('name', 'drawInteraction');
+      this.map.addInteraction(draw);
     },
     cancelEditing() {
       this.currentFeature = this.editingDataCopy;
@@ -571,7 +598,8 @@ export default {
       this.$alertify.error(this.$i18n.t('default.error'));
     }
 
-    const res = await this.$store.dispatch('getCurrentFeatures', this.$route.params.layerId);
+    const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
+    this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
     this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
   },
 };

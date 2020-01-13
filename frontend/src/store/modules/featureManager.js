@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import Swagger from 'swagger-client';
 import api from '@/docs/api.json';
 
@@ -68,7 +69,7 @@ export default {
         return err.response;
       }
     },
-    async getCurrentFeatures(ctx, lid) {
+    async getCurrentSettings(ctx, lid) {
       try {
         const response = await swagger.apis.Layers
           .get_api_layers__lid__settings({ lid });
@@ -117,10 +118,16 @@ export default {
     },
   },
   mutations: {
+    addSingleAttachment(state, mutationData) {
+      state.featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
+        .push(mutationData.attachment);
+    },
     deleteFeatureAttachment(state, mutationData) {
-      const attachmentIdx = state.featureAttachments[mutationData.lid][mutationData.fid]
+      const attachmentIdx = state
+        .featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
         .findIndex(el => el.id === mutationData.aid);
-      state.featureAttachments[mutationData.lid][mutationData.fid].splice(attachmentIdx, 1);
+      state.featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
+        .splice(attachmentIdx, 1);
     },
     setActiveLayer(state, activeLayer) {
       state.activeLayer = activeLayer;
@@ -129,8 +136,10 @@ export default {
       state.currentFeaturesTypes = types;
     },
     setFeatureAttachments(state, mutationData) {
-      state.featureAttachments[mutationData.lid] = {};
-      state.featureAttachments[mutationData.lid][mutationData.fid] = mutationData.attachments;
+      Vue.set(state.featureAttachments, mutationData.lid, {});
+      Vue.set(
+        state.featureAttachments[mutationData.lid], mutationData.fid, mutationData.attachments,
+      );
     },
   },
 };

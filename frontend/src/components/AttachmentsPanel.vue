@@ -147,8 +147,13 @@ export default {
           public: this.isAttachmentPublic,
         },
       });
-
       if (r.status === 201) {
+        this.$store.commit('addSingleAttachment', {
+          lid: this.lid,
+          fid: this.fid,
+          attachType: this.isAttachmentPublic ? 'public' : 'default',
+          attachment: r.body.attachments,
+        });
         this.toggleAttachmentAdding(false);
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -156,14 +161,18 @@ export default {
     },
     deleteLink(item) {
       this.$alertify.confirm(this.$i18n.t('featureManager.deleteAttachmentConfirm'), async () => {
-        const payload = {
+        const r = await this.$store.dispatch('deleteAttachment', {
           lid: this.lid,
           fid: this.fid,
           aid: item.id,
-        };
-        const r = await this.$store.dispatch('deleteAttachment', payload);
+        });
         if (r.status === 200) {
-          this.$store.commit('deleteFeatureAttachment', payload);
+          this.$store.commit('deleteFeatureAttachment', {
+            lid: this.lid,
+            fid: this.fid,
+            aid: item.id,
+            attachType: item.group,
+          });
         }
       }, () => {})
         .set({ title: this.$i18n.t('featureManager.deleteAttachmentHeader') })
