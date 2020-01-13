@@ -27,6 +27,13 @@ def app():
                 user=Identifier(user.decode('utf-8'))))
         except:
             pass
+    groups_to_delete = app._redis.lrange('group_list', 0, -1)
+    for group in groups_to_delete:
+        try:
+            app._db.execute_sql(SQL("DROP GROUP IF EXISTS {user};").format(
+                user=Identifier(group.decode('utf-8'))))
+        except:
+            pass
     app._db.execute_sql("TRUNCATE layer_styles RESTART IDENTITY;")
     app._redis.delete('user_list')
     cur = app._db.execute_sql(

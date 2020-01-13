@@ -45,7 +45,7 @@ def create_user(user, password):
     current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(
         Identifier(current_app.config['DBNAME']), Identifier(user)))
     current_app._db.execute_sql(
-        SQL("""ALTER GROUP "default" ADD USER {}""").format(Identifier(user)))
+        SQL("""ALTER GROUP {} ADD USER {}""").format(Identifier(current_app.config['DEFAULT_GROUP']), Identifier(user)))
     if current_app.config['TESTING']:
         current_app._redis.lpush('user_list', user)
 

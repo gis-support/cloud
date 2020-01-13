@@ -4,7 +4,7 @@
 from flask import Blueprint, jsonify, request
 from flasgger import swag_from
 from app.docs import path_by
-from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required
+from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, cloud_decorator
 
 
 mod_auth = Blueprint("auth", __name__)
@@ -47,3 +47,34 @@ def login():
 @token_required
 def check_token():
     return jsonify({"token": "valid"})
+
+
+@mod_auth.route('/groups', methods=['GET', 'POST', 'DELETE'])
+@swag_from(path_by(__file__, 'docs.groups.get.yml'), methods=['GET'])
+@swag_from(path_by(__file__, 'docs.groups.post.yml'), methods=['POST'])
+@swag_from(path_by(__file__, 'docs.groups.delete.yml'), methods=['DELETE'])
+@token_required
+@cloud_decorator
+def groups(cloud):
+    if request.method == 'GET':
+        return jsonify({"groups": cloud.get_groups()})
+    elif request.method == 'POST':
+        payload = request.get_json(force=True)
+        group = payload.get('group')
+        if not group:
+            return jsonify({"error": "group name required"}), 400
+        try:
+            cloud.add_group(group)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        return jsonify({"groups": "group added"}), 201
+    elif request.method == 'DELETE':
+        payload = request.get_json(force=True)
+        group = payload.get('group')
+        if not group:
+            return jsonify({"error": "group name required"}), 400
+        try:
+            cloud.delete_group(group)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        return jsonify({"groups": "group deleted"})

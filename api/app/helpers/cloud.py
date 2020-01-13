@@ -87,6 +87,28 @@ class Cloud:
             'users': list(users.keys())
         }
 
+    def group_exists(self, group):
+        cursor = self.execute(SQL("""
+            SELECT 1 FROM pg_group WHERE groname NOT LIKE 'pg_%%' AND groname = %s
+        """), (group,))
+        return cursor.fetchone() != None
+
+    def add_group(self, group):
+        if self.group_exists(group):
+            raise ValueError("group exists")
+        self.execute(SQL("""
+            CREATE GROUP {};
+        """).format(Identifier(group)))
+        if self.app.config['TESTING']:
+            self.redis.lpush('group_list', group)
+
+    def delete_group(self, group):
+        if not self.group_exists(group):
+            raise ValueError("group not exists")
+        self.execute(SQL("""
+            DROP GROUP {};
+        """).format(Identifier(group)))
+
     # Get user groups
     def get_groups(self):
         groups = []

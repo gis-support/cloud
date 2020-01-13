@@ -1,0 +1,44 @@
+Delete group
+---
+tags:
+  - Auth
+summary: Delete group
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        group:
+          type: string
+          description: Group name
+          example: "test"
+          required: true
+responses:
+  200:
+    description: Success
+    schema:
+      type: object
+      properties:
+        group:
+          type: string
+          description: Group deleted
+  400:
+    description: Group not exists
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Group not exists
+  403:
+    description: Invalid credentials
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "invalid credentials"

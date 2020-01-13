@@ -17,6 +17,8 @@ class Config(object):
     SECRET_KEY = 'test'
     DEBUG = False
     TESTING = False
+    DEFAULT_GROUP = [g.strip() for g in environ['DEFAULT_GROUPS'].split(
+        ',')][0] if environ.get('DEFAULT_GROUPS') else 'default'
 
 
 class DevelopmentConfig(Config):

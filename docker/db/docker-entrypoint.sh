@@ -28,6 +28,7 @@ else
         export PGPASSWORD=${POSTGRES_PASS}
         groups_list=(`echo ${DEFAULT_GROUPS} | tr ',' ' '`)
         db_list=(`echo ${POSTGRES_DBNAME} | tr ',' ' '`)
+        main_group="${groups_list[0]}"
         main_db="${db_list[0]}"
         testing_db="${db_list[1]}"
         for g in "${groups_list[@]}"
@@ -37,7 +38,7 @@ else
         done;
         psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "CREATE USER $DEFAULT_USER WITH ENCRYPTED PASSWORD '$DEFAULT_PASS';"
         psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "GRANT CONNECT ON DATABASE \"cloud\" TO $DEFAULT_USER;"
-        psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "ALTER GROUP \"default\" ADD USER $DEFAULT_USER;"
+        psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "ALTER GROUP \"$main_group\" ADD USER $DEFAULT_USER;"
         for db in "${db_list[@]}"
         do
             :

@@ -10,14 +10,14 @@ services:
     volumes:
       - ./docker/db/postgres_data:/var/lib/postgresql
     environment:
-      - POSTGRES_DBNAME=cloud,cloud-testing
-      - DEFAULT_COLLATION=pl_PL.UTF-8
-      - DEFAULT_CTYPE=pl_PL.UTF-8
-      - DEFAULT_ENCODING=UTF8
-      - POSTGRES_PASS=nielogowacsienategousera
-      - DEFAULT_USER=admin
-      - DEFAULT_PASS=admin
-      - DEFAULT_GROUPS=default,private
+      - POSTGRES_DBNAME
+      - DEFAULT_COLLATION
+      - DEFAULT_CTYPE
+      - DEFAULT_ENCODING
+      - POSTGRES_PASS
+      - DEFAULT_USER
+      - DEFAULT_PASS
+      - DEFAULT_GROUPS
   api:
     container_name: cloud-api
     restart: always
@@ -31,8 +31,9 @@ services:
     volumes:
       - ./api:/api
     environment:
-      - PYTHONUNBUFFERED=0
-      - FLASK_APP=run:create_app()
+      - PYTHONUNBUFFERED
+      - FLASK_APP
+      - DEFAULT_GROUPS
     depends_on:
       - db
       - redis

@@ -1,0 +1,44 @@
+Add new group
+---
+tags:
+  - Auth
+summary: Add group
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        group:
+          type: string
+          description: Group name
+          example: "test"
+          required: true
+responses:
+  201:
+    description: Success
+    schema:
+      type: object
+      properties:
+        group:
+          type: string
+          description: New group added
+  400:
+    description: Group exists
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Group exists
+  403:
+    description: Invalid credentials
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "invalid credentials"
