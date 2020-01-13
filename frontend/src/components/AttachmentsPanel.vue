@@ -1,11 +1,11 @@
 <template>
   <div class="attachments-panel right-sub-panel">
+    <button class="btn btn-link" @click="toggleAttachmentAdding(true)">
+      <i class="fa fa-plus-circle" aria-hidden="true"/>
+      {{$i18n.t(`featureManager.addAttachment`)}}
+    </button>
     <div v-for="mode in attachmentModes" :key="mode">
       <h4>{{$i18n.t(`featureManager.attachmentsTitle${mode}`)}}:</h4>
-      <button class="btn btn-link" @click="toggleAttachmentAdding(true, mode)">
-        <i class="fa fa-plus-circle" aria-hidden="true"/>
-        {{$i18n.t(`featureManager.addAttachment${mode}`)}}
-      </button>
       <div>
         <div v-if="!featureAttachments[lid] || featureAttachments[lid][fid][mode].length === 0"
           class="empty-sub-panel">
@@ -28,7 +28,7 @@
                   <button
                     class="btn btn-link action"
                     :title="$i18n.t('featureManager.deleteLink')"
-                    @click="deleteLink(item.url)"
+                    @click="deleteLink(item)"
                   >
                     <i class="fa fa-trash" aria-hidden="true"/>
                   </button>
@@ -125,7 +125,6 @@ export default {
     },
   },
   data: () => ({
-    addingMode: undefined,
     attachmentLink: undefined,
     attachmentModes: ['public', 'default'],
     attachmentName: undefined,
@@ -155,17 +154,23 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
-    deleteLink(itemUrl) {
-      this.$alertify.confirm(this.$i18n.t('featureManager.deleteAttachmentConfirm'), () => {
-        const linkIdx = this.items.findIndex(el => el.url === itemUrl);
-        this.items.splice(linkIdx, 1);
+    deleteLink(item) {
+      this.$alertify.confirm(this.$i18n.t('featureManager.deleteAttachmentConfirm'), async () => {
+        const payload = {
+          lid: this.lid,
+          fid: this.fid,
+          aid: item.id,
+        };
+        const r = await this.$store.dispatch('deleteAttachment', payload);
+        if (r.status === 200) {
+          this.$store.commit('deleteFeatureAttachment', payload);
+        }
       }, () => {})
         .set({ title: this.$i18n.t('featureManager.deleteAttachmentHeader') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
-    toggleAttachmentAdding(vis, mode) {
+    toggleAttachmentAdding(vis) {
       this.isAttachmentAdding = vis;
-      this.addingMode = mode;
 
       this.attachmentLink = '';
       this.attachmentName = '';

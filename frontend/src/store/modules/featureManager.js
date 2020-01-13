@@ -41,6 +41,20 @@ export default {
         return err.response;
       }
     },
+    async deleteAttachment(ctx, payload) {
+      try {
+        // eslint-disable-next-line no-underscore-dangle
+        const response = await swagger.apis.Attachments
+          .delete_api_layers__lid__features__fid__attachments__aid_({
+            lid: payload.lid,
+            fid: payload.fid,
+            aid: payload.aid,
+          });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async editFeature(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle
@@ -103,6 +117,11 @@ export default {
     },
   },
   mutations: {
+    deleteFeatureAttachment(state, mutationData) {
+      const attachmentIdx = state.featureAttachments[mutationData.lid][mutationData.fid]
+        .findIndex(el => el.id === mutationData.aid);
+      state.featureAttachments[mutationData.lid][mutationData.fid].splice(attachmentIdx, 1);
+    },
     setActiveLayer(state, activeLayer) {
       state.activeLayer = activeLayer;
     },
