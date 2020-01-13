@@ -299,11 +299,14 @@ export default {
   },
   methods: {
     async saveEditing() {
+      const geom = this.getLayerByName('featuresVector').getSource().getFeatures()[0].getGeometry().transform('EPSG:3857', 'EPSG:4326');
+      this.currentFeature.geometry.coordinates = geom.getCoordinates();
       const payload = {
         body: this.currentFeature,
         lid: this.$route.params.layerId,
         fid: this.currentFeature.properties.id,
       };
+      this.$alertify.warning(this.$i18n.t('default.editInProgress'));
       const r = await this.$store.dispatch('editFeature', payload);
       if (r.status === 200) {
         this.editingEndOperations();
@@ -314,7 +317,6 @@ export default {
       }
     },
     cancelEditing() {
-      this.editing = false;
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
     },
@@ -383,6 +385,7 @@ export default {
       this.getLayerByName('features').setVisible(true);
       this.getInteractionByName('modifyInteraction').setActive(false);
       this.getLayerByName('featuresVector').getSource().clear();
+      this.editing = false;
     },
     getInteractionByName(name) {
       return this.map.getInteractions().getArray().find(i => i.get('name') === name);
