@@ -156,14 +156,18 @@ export default {
     },
     deleteLink(item) {
       this.$alertify.confirm(this.$i18n.t('featureManager.deleteAttachmentConfirm'), async () => {
-        const payload = {
+        const r = await this.$store.dispatch('deleteAttachment', {
           lid: this.lid,
           fid: this.fid,
           aid: item.id,
-        };
-        const r = await this.$store.dispatch('deleteAttachment', payload);
+        });
         if (r.status === 200) {
-          this.$store.commit('deleteFeatureAttachment', payload);
+          this.$store.commit('deleteFeatureAttachment', {
+            lid: this.lid,
+            fid: this.fid,
+            aid: item.id,
+            attachType: item.group,
+          });
         }
       }, () => {})
         .set({ title: this.$i18n.t('featureManager.deleteAttachmentHeader') })

@@ -118,9 +118,11 @@ export default {
   },
   mutations: {
     deleteFeatureAttachment(state, mutationData) {
-      const attachmentIdx = state.featureAttachments[mutationData.lid][mutationData.fid]
+      const attachmentIdx = state
+        .featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
         .findIndex(el => el.id === mutationData.aid);
-      state.featureAttachments[mutationData.lid][mutationData.fid].splice(attachmentIdx, 1);
+      state.featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
+        .splice(attachmentIdx, 1);
     },
     setActiveLayer(state, activeLayer) {
       state.activeLayer = activeLayer;
