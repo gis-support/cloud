@@ -798,7 +798,7 @@
           {
             "description": "Attachment ID", 
             "in": "path", 
-            "name": "id", 
+            "name": "aid", 
             "required": true, 
             "type": "integer"
           }, 
