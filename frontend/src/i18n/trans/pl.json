@@ -89,6 +89,8 @@
     "deleteAttachmentHeader": "Usuwanie załącznika",
     "deleteCommentConfirm": "Czy na pewno chcesz usunąć komentarz?",
     "deleteCommentHeader": "Usuwanie komentarza",
+    "deleteFeatureConfirm": "Czy na pewno chcesz usunąć wybrany obiekt?",
+    "deleteFeatureHeader": "Usuwanie obiektu",
     "deleteLink": "Usuń link",
     "errorAttachmentsFetch": "Błąd pobierania załączników",
     "informations": "Informacje",

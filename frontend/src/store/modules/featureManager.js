@@ -43,7 +43,6 @@ export default {
       }
     },
     async addFeature(ctx, payload) {
-      console.log(payload);
       try {
         // eslint-disable-next-line no-underscore-dangle
         const response = await swagger.apis.Features
@@ -53,7 +52,6 @@ export default {
           });
         return response;
       } catch (err) {
-        console.log(err);
         return err.response;
       }
     },
@@ -65,6 +63,19 @@ export default {
             lid: payload.lid,
             fid: payload.fid,
             aid: payload.aid,
+          });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async deleteFeature(ctx, payload) {
+      try {
+        // eslint-disable-next-line no-underscore-dangle
+        const response = await swagger.apis.Features
+          .delete_api_layers__lid__features__fid_({
+            lid: payload.lid,
+            fid: payload.fid,
           });
         return response;
       } catch (err) {

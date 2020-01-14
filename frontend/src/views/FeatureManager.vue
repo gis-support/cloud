@@ -236,7 +236,7 @@
                   <div class="btn-group btn-group-edit" role="group">
                     <button
                       type="button"
-                      class="btn btn-success"
+                      class="btn btn-success btn-group-justified"
                       @click="editAttributes"
                     >{{$i18n.t('default.edit')}}</button>
                   </div>
@@ -257,7 +257,7 @@
                     >{{$i18n.t('default.cancel')}}</button>
                   </div>
                   <div class="btn-group btn-group-action btn-group-edit" role="group">
-                    <button type="button" class="btn btn-danger">
+                    <button type="button" class="btn btn-danger" @click="deleteFeature">
                       {{$i18n.t('default.delete')}}
                     </button>
                   </div>
@@ -369,6 +369,28 @@ export default {
     },
   },
   methods: {
+    async deleteFeature() {
+      this.$alertify.confirm(this.$i18n.t('featureManager.deleteFeatureConfirm'), async () => {
+        const r = await this.$store.dispatch('deleteFeature', {
+          lid: this.$route.params.layerId,
+          fid: this.currentFeature.properties.id,
+        });
+        if (r.status === 200) {
+          this.editingEndOperations();
+          this.refreshVectorSource(this.getLayerByName('features'));
+          const featIdx = this.items.findIndex(el => el.id === this.currentFeature.properties.id);
+          this.items.splice(featIdx, 1);
+          this.$refs['table-data'].$recompute('windowItems'); // update table data
+          const featIdxLay = this.activeLayer.features.findIndex(
+            el => el.properties.id === this.currentFeature.properties.id,
+          );
+          this.activeLayer.features.splice(featIdxLay, 1);
+          this.selectFeature(undefined);
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
       const features = this.getLayerByName('featuresVector').getSource().getFeatures();
@@ -623,7 +645,8 @@ export default {
     },
     selectFeature(feature) {
       if (feature) {
-        const fid = feature.get('id');
+        // eslint-disable-next-line no-underscore-dangle
+        const fid = feature.properties_.id;
         this.selectFeatureById(fid);
         this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
