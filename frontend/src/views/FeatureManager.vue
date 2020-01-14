@@ -33,8 +33,14 @@
             @click="openColumnFilterDecision"><i class="fa fa-filter"></i>
           </button>
           <button type="button" class="btn navbar-btn navbar-right btn-default"
-            :title="$i18n.t('featureManager.addFeature')" @click="addNewFeature">
+            :title="$i18n.t('featureManager.addFeature')" @click="drawNewFeature"
+            v-if="!isDrawing">
             <i class="fa fa-plus"></i>
+          </button>
+          <button type="button" class="btn navbar-btn navbar-right btn-default"
+            :title="$i18n.t('featureManager.addFeatureEnd')" @click="drawFeatureEnd"
+            v-else>
+            <i class="fa fa-times-circle"></i>
           </button>
         </div>
       </nav>
@@ -86,6 +92,53 @@
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-default"
                         @click="$emit('columnFilterDecision', 'cancel')">
+                        {{$i18n.t('default.cancel')}}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-mask" v-if="addFeatureDialog">
+          <div class="modal-wrapper">
+            <div class="modal-dialog modal-md modal-new-feature">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">{{$i18n.t('featureManager.addFeatureTitle')}}</h4>
+                </div>
+                <div class="modal-body" v-if="activeLayer">
+                  <template v-for="name in Object.keys(activeLayer.features[0].properties)">
+                    <div class="form-group" style="display: flex;" :key="name" v-if="name !== 'id'">
+                      <label class="control-label col-sm-4" style="position: relative; top: 8px">
+                        {{name}}
+                      </label>
+                      <input class="form-control col-sm-7"
+                        v-model="newFeatureProperties[name]"
+                        v-if="featureTypes[name] === 'real' || featureTypes[name] === 'integer'"
+                        type="number"/>
+                      <input class="form-control col-sm-7"
+                        v-model="newFeatureProperties[name]"
+                        v-else-if="featureTypes[name] === 'character varying'"
+                        type="text"/>
+                      <input class="form-control col-sm-7"
+                        v-model="newFeatureProperties[name]"
+                        v-else-if="featureTypes[name] === 'timestamp without time zone'"
+                        type="datetime-local"/>
+                    </div>
+                  </template>
+                </div>
+                <div class="modal-footer">
+                  <div class="btn-group btn-group-justified" role="group">
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-danger" @click="saveNewFeature">
+                        {{$i18n.t('default.save')}}
+                      </button>
+                    </div>
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-default" @click="cancelFeatureAdding">
                         {{$i18n.t('default.cancel')}}
                       </button>
                     </div>
@@ -266,6 +319,7 @@ export default {
     FiltersPanel,
   },
   data: () => ({
+    addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
     columnFilterDecisionDialogView: false,
     columns: [{
@@ -279,8 +333,10 @@ export default {
     editing: false,
     editingDataCopy: undefined,
     indexActiveTab: 0,
+    isDrawing: false,
     isInfoDialogVisible: false,
     items: [],
+    newFeatureProperties: {},
     searchItemValue: '',
     selectedColumnFilters: [],
   }),
@@ -293,6 +349,9 @@ export default {
     },
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
+    },
+    featureTypes() {
+      return this.$store.getters.getCurrentFeaturesTypes;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
@@ -328,29 +387,34 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
-    addNewFeature() {
-      const source = new VectorSource({ wrapX: false });
-      const vector = new VectorLayer({ source });
-      this.map.addLayer(vector);
-      let drawType;
-      if (this.currentLayerType === 'polygon' || this.currentLayerType === 'multipolygon') {
-        drawType = 'Polygon';
-      } else if (this.currentLayerType === 'linestring') {
-        drawType = 'LineString';
-      } else {
-        drawType = 'Circle';
-      }
+    async saveNewFeature() {
+      const newFeature = this.getLayerByName('newFeature').getSource().getFeatures()[0];
+      const coords = newFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
 
-      const draw = new Draw({
-        source,
-        type: drawType,
+      const r = await this.$store.dispatch('addFeature', {
+        lid: this.$route.params.layerId,
+        body: {
+          geometry: coords,
+          properties: this.newFeatureProperties,
+          type: 'Feature',
+        },
       });
-      draw.set('name', 'drawInteraction');
-      this.map.addInteraction(draw);
+
+      if (r.status === 200) {
+        console.log(r);
+        this.refreshVectorSource(this.getLayerByName('features'));
+      } else {
+        console.log(r);
+      }
     },
     cancelEditing() {
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
+    },
+    cancelFeatureAdding() {
+      this.isDrawing = false;
+      this.addFeatureDialog = false;
+      this.getLayerByName('newFeature').getSource().clear();
     },
     changeBaseLayer(layerName) {
       this.map.getLayers().getArray().forEach((el) => {
@@ -378,7 +442,8 @@ export default {
     createSelectInteraction() {
       let active = true;
       this.map.on('click', (evt) => {
-        if (!active || this.isInteractionActive('modifyInteraction')) return;
+        if (!active || this.isInteractionActive('modifyInteraction')
+          || this.isInteractionActive('drawInteraction')) return;
 
         const feature = this.map.forEachFeatureAtPixel(evt.pixel,
           feat => feat, {
@@ -394,6 +459,38 @@ export default {
           return active;
         },
       };
+    },
+    drawFeatureEnd() {
+      this.isDrawing = false;
+      this.getInteractionByName('drawInteraction').setActive(false);
+      // const feature = this.getLayerByName('newFeature').getSource().getFeatures()[0];
+      this.addFeatureDialog = true;
+    },
+    drawNewFeature() {
+      this.selectFeature(undefined);
+      this.isDrawing = true;
+      if (!this.getInteractionByName('drawInteraction')) {
+        const source = new VectorSource({ wrapX: false });
+        const vector = new VectorLayer({ source, name: 'newFeature' });
+        this.map.addLayer(vector);
+        let drawType;
+        if (this.currentLayerType === 'polygon' || this.currentLayerType === 'multipolygon') {
+          drawType = 'Polygon';
+        } else if (this.currentLayerType === 'linestring') {
+          drawType = 'LineString';
+        } else {
+          drawType = 'Circle';
+        }
+
+        const draw = new Draw({
+          source,
+          type: drawType,
+        });
+        draw.set('name', 'drawInteraction');
+        this.map.addInteraction(draw);
+      } else {
+        this.getInteractionByName('drawInteraction').setActive(true);
+      }
     },
     editAttributes() {
       this.editing = true;
@@ -510,6 +607,8 @@ export default {
         }
       } else {
         this.$refs['table-data'].clearSelection();
+        this.currentFeature = undefined;
+        this.indexActiveTab = 0;
       }
     },
     selectFeatureById(fid) {
@@ -604,3 +703,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.modal-new-feature .modal-body {
+  height: 70vh;
+  overflow-y: auto;
+}
+</style>
