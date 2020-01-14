@@ -37,11 +37,16 @@
             v-if="!isDrawing">
             <i class="fa fa-plus"></i>
           </button>
-          <button type="button" class="btn navbar-btn navbar-right btn-default"
-            :title="$i18n.t('featureManager.addFeatureEnd')" @click="drawFeatureEnd"
-            v-else>
-            <i class="fa fa-times-circle"></i>
-          </button>
+          <span class="navbar-right" v-else>
+            <button type="button" class="btn navbar-btn btn-default"
+              :title="$i18n.t('featureManager.cancelFeatureAdding')" @click="clearFeatureAdding">
+              <i class="fa fa-times-circle"></i>
+            </button>
+            <button type="button" class="btn navbar-btn btn-default"
+              :title="$i18n.t('featureManager.addFeatureEnd')" @click="drawFeatureEnd">
+              <i class="fa fa-check-circle"></i>
+            </button>
+          </span>
         </div>
       </nav>
         <!-- {{ $route.params.layerId }} -->
@@ -138,7 +143,7 @@
                       </button>
                     </div>
                     <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-default" @click="cancelFeatureAdding">
+                      <button type="button" class="btn btn-default" @click="clearFeatureAdding">
                         {{$i18n.t('default.cancel')}}
                       </button>
                     </div>
@@ -231,7 +236,7 @@
                   <div class="btn-group btn-group-edit" role="group">
                     <button
                       type="button"
-                      class="btn btn-success"
+                      class="btn btn-success btn-group-justified"
                       @click="editAttributes"
                     >{{$i18n.t('default.edit')}}</button>
                   </div>
@@ -252,7 +257,7 @@
                     >{{$i18n.t('default.cancel')}}</button>
                   </div>
                   <div class="btn-group btn-group-action btn-group-edit" role="group">
-                    <button type="button" class="btn btn-danger">
+                    <button type="button" class="btn btn-danger" @click="deleteFeature">
                       {{$i18n.t('default.delete')}}
                     </button>
                   </div>
@@ -364,6 +369,28 @@ export default {
     },
   },
   methods: {
+    async deleteFeature() {
+      this.$alertify.confirm(this.$i18n.t('featureManager.deleteFeatureConfirm'), async () => {
+        const r = await this.$store.dispatch('deleteFeature', {
+          lid: this.$route.params.layerId,
+          fid: this.currentFeature.properties.id,
+        });
+        if (r.status === 200) {
+          this.editingEndOperations();
+          this.refreshVectorSource(this.getLayerByName('features'));
+          const featIdx = this.items.findIndex(el => el.id === this.currentFeature.properties.id);
+          this.items.splice(featIdx, 1);
+          this.$refs['table-data'].$recompute('windowItems'); // update table data
+          const featIdxLay = this.activeLayer.features.findIndex(
+            el => el.properties.id === this.currentFeature.properties.id,
+          );
+          this.activeLayer.features.splice(featIdxLay, 1);
+          this.selectFeature(undefined);
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
       const features = this.getLayerByName('featuresVector').getSource().getFeatures();
@@ -390,31 +417,50 @@ export default {
     async saveNewFeature() {
       const newFeature = this.getLayerByName('newFeature').getSource().getFeatures()[0];
       const coords = newFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
+      Object.entries(this.newFeatureProperties).forEach((k) => {
+        if (!this.newFeatureProperties[k[0]]) return;
+
+        if (this.featureTypes[k[0]] === 'integer') {
+          this.newFeatureProperties[k[0]] = parseInt(this.newFeatureProperties[k[0]], 10);
+        } else if (this.featureTypes[k[0]] === 'real') {
+          this.newFeatureProperties[k[0]] = parseFloat(this.newFeatureProperties[k[0]]);
+        } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
+          this.newFeatureProperties[k[0]] = new Date(`${this.newFeatureProperties[k[0]]}`);
+        }
+      });
 
       const r = await this.$store.dispatch('addFeature', {
         lid: this.$route.params.layerId,
         body: {
-          geometry: coords,
+          geometry: {
+            coordinates: [coords],
+            type: this.currentLayerType,
+          },
           properties: this.newFeatureProperties,
           type: 'Feature',
         },
       });
 
-      if (r.status === 200) {
-        console.log(r);
+      if (r.status === 201) {
         this.refreshVectorSource(this.getLayerByName('features'));
+        this.clearFeatureAdding();
+        this.items.push(r.obj.properties);
+        this.activeLayer.features.push(r.obj);
+        this.$refs['table-data'].$recompute('windowItems'); // update table data
       } else {
-        console.log(r);
+        this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
     cancelEditing() {
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
     },
-    cancelFeatureAdding() {
+    clearFeatureAdding() {
       this.isDrawing = false;
       this.addFeatureDialog = false;
       this.getLayerByName('newFeature').getSource().clear();
+      this.getInteractionByName('drawInteraction').setActive(false);
+      this.newFeatureProperties = {};
     },
     changeBaseLayer(layerName) {
       this.map.getLayers().getArray().forEach((el) => {
@@ -599,7 +645,8 @@ export default {
     },
     selectFeature(feature) {
       if (feature) {
-        const fid = feature.get('id');
+        // eslint-disable-next-line no-underscore-dangle
+        const fid = feature.properties_.id;
         this.selectFeatureById(fid);
         this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
