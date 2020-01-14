@@ -116,7 +116,7 @@ export default {
   data: () => ({
     arenaHeight: 0,
     currentFeatureId: undefined,
-    maxItems: 1,
+    maxItems: 0,
     indexFirstItem: 0,
     itemHeight: 0,
     sortedColumn: false,
@@ -291,6 +291,10 @@ export default {
       if (index < 0 || index >= self.sortedItems.length) {
         return;
       }
+      if (index === self.sortedItems.length - 1) {
+        self.scrollEl.scrollTop = self.sortedItems.length * self.itemHeight;
+        return;
+      }
 
       let indexScroll = index;
       const y = self.selectedIndex + self.maxItems - (self.sortedItems.length - 1);
@@ -335,7 +339,7 @@ export default {
       }).observe(tableEl);
 
       function checkScrollPosition() {
-        self.indexFirstItem = Math.floor(self.scrollEl.scrollTop / self.itemHeight + 0.6);
+        self.indexFirstItem = Math.floor(self.scrollEl.scrollTop / self.itemHeight + 0.78);
         // self._computedWatchers.windowItems.update();
         self.$recompute('windowItems');
       }

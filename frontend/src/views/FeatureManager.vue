@@ -138,7 +138,7 @@
                       </button>
                     </div>
                     <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-default" @click="cancelFeatureAdding">
+                      <button type="button" class="btn btn-default" @click="clearFeatureAdding">
                         {{$i18n.t('default.cancel')}}
                       </button>
                     </div>
@@ -390,28 +390,45 @@ export default {
     async saveNewFeature() {
       const newFeature = this.getLayerByName('newFeature').getSource().getFeatures()[0];
       const coords = newFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
+      Object.entries(this.newFeatureProperties).forEach((k) => {
+        if (!this.newFeatureProperties[k[0]]) return;
+
+        if (this.featureTypes[k[0]] === 'integer') {
+          this.newFeatureProperties[k[0]] = parseInt(this.newFeatureProperties[k[0]], 10);
+        } else if (this.featureTypes[k[0]] === 'real') {
+          this.newFeatureProperties[k[0]] = parseFloat(this.newFeatureProperties[k[0]]);
+        } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
+          this.newFeatureProperties[k[0]] = new Date(`${this.newFeatureProperties[k[0]]}`);
+        }
+      });
 
       const r = await this.$store.dispatch('addFeature', {
         lid: this.$route.params.layerId,
         body: {
-          geometry: coords,
+          geometry: {
+            coordinates: [coords],
+            type: this.currentLayerType,
+          },
           properties: this.newFeatureProperties,
           type: 'Feature',
         },
       });
 
-      if (r.status === 200) {
-        console.log(r);
+      if (r.status === 201) {
         this.refreshVectorSource(this.getLayerByName('features'));
+        this.clearFeatureAdding();
+        this.items.push(r.obj.properties);
+        this.activeLayer.features.push(r.obj);
+        this.$refs['table-data'].$recompute('windowItems'); // update table data
       } else {
-        console.log(r);
+        this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
     cancelEditing() {
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
     },
-    cancelFeatureAdding() {
+    clearFeatureAdding() {
       this.isDrawing = false;
       this.addFeatureDialog = false;
       this.getLayerByName('newFeature').getSource().clear();
