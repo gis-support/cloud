@@ -37,11 +37,16 @@
             v-if="!isDrawing">
             <i class="fa fa-plus"></i>
           </button>
-          <button type="button" class="btn navbar-btn navbar-right btn-default"
-            :title="$i18n.t('featureManager.addFeatureEnd')" @click="drawFeatureEnd"
-            v-else>
-            <i class="fa fa-times-circle"></i>
-          </button>
+          <span class="navbar-right" v-else>
+            <button type="button" class="btn navbar-btn btn-default"
+              :title="$i18n.t('featureManager.cancelFeatureAdding')" @click="clearFeatureAdding">
+              <i class="fa fa-times-circle"></i>
+            </button>
+            <button type="button" class="btn navbar-btn btn-default"
+              :title="$i18n.t('featureManager.addFeatureEnd')" @click="drawFeatureEnd">
+              <i class="fa fa-check-circle"></i>
+            </button>
+          </span>
         </div>
       </nav>
         <!-- {{ $route.params.layerId }} -->
@@ -432,6 +437,8 @@ export default {
       this.isDrawing = false;
       this.addFeatureDialog = false;
       this.getLayerByName('newFeature').getSource().clear();
+      this.getInteractionByName('drawInteraction').setActive(false);
+      this.newFeatureProperties = {};
     },
     changeBaseLayer(layerName) {
       this.map.getLayers().getArray().forEach((el) => {
