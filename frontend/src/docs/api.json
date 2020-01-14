@@ -1432,7 +1432,7 @@
         ]
       }
     }, 
-    "/api/register": {
+    "/api/users": {
       "post": {
         "parameters": [
           {
@@ -1466,7 +1466,7 @@
             "description": "Confirmation", 
             "schema": {
               "properties": {
-                "register": {
+                "users": {
                   "example": "user created", 
                   "type": "string"
                 }
@@ -1487,7 +1487,244 @@
             }
           }
         }, 
-        "summary": "Register", 
+        "summary": "Add new user", 
+        "tags": [
+          "Auth"
+        ]
+      }, 
+      "put": {
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "group": {
+                  "description": "User group", 
+                  "example": "default", 
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "user": {
+                  "description": "User login", 
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Confirmation", 
+            "schema": {
+              "properties": {
+                "users": {
+                  "example": "user assigned", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "409": {
+            "description": "User/Group exists", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "user/group not exists", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Assign user to group", 
+        "tags": [
+          "Auth"
+        ]
+      }
+    }, 
+    "/api/users/groups": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "group": {
+                  "description": "Group name", 
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Success", 
+            "schema": {
+              "properties": {
+                "group": {
+                  "description": "Group deleted", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "400": {
+            "description": "Group not exists", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "description": "Group not exists", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Invalid credentials", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "invalid credentials", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Delete group", 
+        "tags": [
+          "Auth"
+        ]
+      }, 
+      "get": {
+        "parameters": [
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Token", 
+            "schema": {
+              "properties": {
+                "groups": {
+                  "items": {
+                    "type": "string"
+                  }, 
+                  "type": "array"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "invalid token", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get groups", 
+        "tags": [
+          "Auth"
+        ]
+      }, 
+      "post": {
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "group": {
+                  "description": "Group name", 
+                  "example": "test", 
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "201": {
+            "description": "Success", 
+            "schema": {
+              "properties": {
+                "group": {
+                  "description": "New group added", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "400": {
+            "description": "Group exists", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "description": "Group exists", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Invalid credentials", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "invalid credentials", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Add new group", 
         "tags": [
           "Auth"
         ]
