@@ -34,6 +34,8 @@ services:
       - PYTHONUNBUFFERED
       - FLASK_APP
       - DEFAULT_GROUPS
+      - DEFAULT_USER
+      - DEFAULT_PASS
     depends_on:
       - db
       - redis

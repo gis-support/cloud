@@ -1,8 +1,8 @@
-Register
+Assign user to group
 ---
 tags:
   - Auth
-summary: Register new user
+summary: Assign user to group
 produces:
   - application/json
 parameters:
@@ -17,25 +17,25 @@ parameters:
           description: User login
           example: "test"
           required: true
-        password:
+        group:
           type: string
-          description: User password
-          example: "test"
+          description: User group
+          example: "default"
           required: true
 responses:
-  201:
+  200:
     description: Confirmation
     schema:
       type: object
       properties:
-        register:
+        users:
           type: string
-          example: "user created"
+          example: "user assigned"
   409:
-    description: User exists
+    description: User/Group exists
     schema:
       type: object
       properties:
         error:
           type: string
-          example: "user exists"
+          example: "user/group not exists"

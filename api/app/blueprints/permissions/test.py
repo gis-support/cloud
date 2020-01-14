@@ -14,7 +14,7 @@ class TestPermissions(BaseTest):
     def test_permissions_all(self, client):
         test_user = self.get_token(client)
         token_admin = self.get_token(client)
-        user, password = self.register(client)
+        user, password = self.create_user(client)
         # Create 4 layers
         # First only for admin user
         lid1 = self.add_geojson_prg(client, token_admin)
@@ -91,7 +91,7 @@ class TestPermissions(BaseTest):
         # New layer
         lid = self.add_geojson_prg(client, token_admin)
         # New normal user
-        user, password = self.register(client)
+        user, password = self.create_user(client)
         # Grant permission for normal user by admin
         r = client.put(f'/api/permissions/{lid}?token={token_admin}',
                        data=json.dumps({'user': user, 'permission': 'read'}))
@@ -169,7 +169,7 @@ class TestPermissions(BaseTest):
         # New layer
         lid = self.add_geojson_prg(client, token_admin)
         # New normal user
-        user, password = self.register(client)
+        user, password = self.create_user(client)
         # Grant permission for normal user by admin
         r = client.put(f'/api/permissions/{lid}?token={token_admin}',
                        data=json.dumps({'user': user, 'permission': 'write'}))

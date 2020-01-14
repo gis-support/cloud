@@ -1,0 +1,41 @@
+Add new user
+---
+tags:
+  - Auth
+summary: Create new user
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        user:
+          type: string
+          description: User login
+          example: "test"
+          required: true
+        password:
+          type: string
+          description: User password
+          example: "test"
+          required: true
+responses:
+  201:
+    description: Confirmation
+    schema:
+      type: object
+      properties:
+        users:
+          type: string
+          example: "user created"
+  409:
+    description: User exists
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "user exists"

@@ -39,13 +39,13 @@ def user_exists(user):
     return cur.fetchone() != None
 
 
-def create_user(user, password):
+def create_user(user, password, group):
     current_app._db.execute_sql(SQL("CREATE USER {} WITH ENCRYPTED PASSWORD %s").format(
         Identifier(user)), (password,))
     current_app._db.execute_sql(SQL("GRANT CONNECT ON DATABASE {} TO {};").format(
         Identifier(current_app.config['DBNAME']), Identifier(user)))
     current_app._db.execute_sql(
-        SQL("""ALTER GROUP {} ADD USER {}""").format(Identifier(current_app.config['DEFAULT_GROUP']), Identifier(user)))
+        SQL("""ALTER GROUP {} ADD USER {}""").format(Identifier(group), Identifier(user)))
     if current_app.config['TESTING']:
         current_app._redis.lpush('user_list', user)
 

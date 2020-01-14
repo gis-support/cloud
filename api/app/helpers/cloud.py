@@ -109,6 +109,10 @@ class Cloud:
             DROP GROUP {};
         """).format(Identifier(group)))
 
+    def assign_user(self, user, group):
+        self.execute(SQL("""ALTER GROUP {} ADD USER {}""").format(
+            Identifier(group), Identifier(user)))
+
     # Get user groups
     def get_groups(self):
         groups = []
