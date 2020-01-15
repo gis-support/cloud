@@ -305,6 +305,7 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { Fill, Stroke, Style } from 'ol/style';
+import CircleStyle from 'ol/style/Circle';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
@@ -369,6 +370,31 @@ export default {
     },
   },
   methods: {
+    async createStyle() {
+      const styleResponse = await this.$store.dispatch(
+        'getLayerStyle', this.$route.params.layerId,
+      );
+      const fill = new Fill({
+        color: `rgba(${styleResponse.obj.style['fill-color']})`,
+      });
+      const stroke = new Stroke({
+        color: `rgba(${styleResponse.obj.style['stroke-color']})`,
+        width: `${styleResponse.obj.style['stroke-width']}`,
+      });
+      if (this.currentLayerType === 'point') {
+        return new Style({
+          image: new CircleStyle({
+            fill,
+            stroke,
+            radius: 4,
+          }),
+        });
+      }
+      return new Style({
+        fill,
+        stroke,
+      });
+    },
     async deleteFeature() {
       this.$alertify.confirm(this.$i18n.t('featureManager.deleteFeatureConfirm'), async () => {
         const r = await this.$store.dispatch('deleteFeature', {
@@ -689,19 +715,12 @@ export default {
     /* const ortofoto = await this.initOrtofoto();
     this.map.addLayer(ortofoto); */
 
-    const featureStyleResponse = await this.$store.dispatch(
-      'getLayerStyle', this.$route.params.layerId,
-    );
-    const featureStyle = featureStyleResponse.obj.style;
-    const featureStyleDef = new Style({
-      fill: new Fill({
-        color: `rgba(${featureStyle['fill-color']})`,
-      }),
-      stroke: new Stroke({
-        color: `rgba(${featureStyle['stroke-color']})`,
-        width: `${featureStyle['stroke-width']}`,
-      }),
-    });
+    const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
+    this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
+    this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
+
+    const featureStyleDef = await this.createStyle();
+
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
@@ -722,7 +741,6 @@ export default {
         style: featureStyleDef,
       }),
     );
-
     this.createSelectInteraction();
 
     const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
@@ -743,10 +761,6 @@ export default {
     } else {
       this.$alertify.error(this.$i18n.t('default.error'));
     }
-
-    const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
-    this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
-    this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
   },
 };
 </script>
