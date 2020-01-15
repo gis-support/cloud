@@ -145,8 +145,10 @@ export default {
   },
   mutations: {
     addAttachmentToFeature(state, params) {
-      const publicAtt = params.attachments.public.filter(el => el.group === 'public');
-      const defaultAtt = params.attachments.default.filter(el => el.group === 'default');
+      const pubIds = state.featureAttachments[params.lid][params.fid].public.map(el => el.id);
+      const defIds = state.featureAttachments[params.lid][params.fid].default.map(el => el.id);
+      const publicAtt = params.attachments.public.filter(el => el.group === 'public' && !pubIds.includes(el.id));
+      const defaultAtt = params.attachments.default.filter(el => el.group === 'default' && !defIds.includes(el.id));
       const defArr = [
         ...state.featureAttachments[params.lid][params.fid].default,
         ...defaultAtt,
