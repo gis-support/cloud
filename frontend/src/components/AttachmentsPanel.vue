@@ -6,8 +6,9 @@
     </button>
     <div v-for="mode in attachmentModes" :key="mode">
       <h4>{{$i18n.t(`featureManager.attachmentsTitle${mode}`)}}:</h4>
-      <div>
-        <div v-if="!featureAttachments[lid] || featureAttachments[lid][fid][mode].length === 0"
+      <div v-if="featureAttachments[lid][fid] &&
+        Object.keys(featureAttachments[lid][fid]).includes('public')">
+        <div v-if="featureAttachments[lid][fid][mode].length < 1"
           class="empty-sub-panel">
           <i class="fa fa-paperclip" aria-hidden="true"/>
           {{$i18n.t('default.noAttachments')}}
@@ -148,11 +149,16 @@ export default {
         },
       });
       if (r.status === 201) {
-        this.$store.commit('addSingleAttachment', {
+        if (!Object.keys(this.featureAttachments[this.lid]).includes(this.fid.toString())) {
+          this.$store.commit('setAttachmentsFeature', { lid: this.lid, fid: this.fid });
+        }
+        const tempAtt = this.isAttachmentPublic
+          ? { public: [r.obj.attachments], default: [] }
+          : { public: [], default: [r.obj.attachments] };
+        this.$store.commit('addAttachmentToFeature', {
           lid: this.lid,
           fid: this.fid,
-          attachType: this.isAttachmentPublic ? 'public' : 'default',
-          attachment: r.body.attachments,
+          attachments: tempAtt,
         });
         this.toggleAttachmentAdding(false);
       } else {

@@ -144,28 +144,38 @@ export default {
     },
   },
   mutations: {
-    addSingleAttachment(state, mutationData) {
-      state.featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
-        .push(mutationData.attachment);
+    addAttachmentToFeature(state, params) {
+      const publicAtt = params.attachments.public.filter(el => el.group === 'public');
+      const defaultAtt = params.attachments.default.filter(el => el.group === 'default');
+      const defArr = [
+        ...state.featureAttachments[params.lid][params.fid].default,
+        ...defaultAtt,
+      ];
+      const pubArr = [
+        ...state.featureAttachments[params.lid][params.fid].public,
+        ...publicAtt,
+      ];
+      Vue.set(state.featureAttachments[params.lid][params.fid], 'default', defArr);
+      Vue.set(state.featureAttachments[params.lid][params.fid], 'public', pubArr);
     },
-    deleteFeatureAttachment(state, mutationData) {
+    deleteFeatureAttachment(state, params) {
       const attachmentIdx = state
-        .featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
-        .findIndex(el => el.id === mutationData.aid);
-      state.featureAttachments[mutationData.lid][mutationData.fid][mutationData.attachType]
+        .featureAttachments[params.lid][params.fid][params.attachType]
+        .findIndex(el => el.id === params.aid);
+      state.featureAttachments[params.lid][params.fid][params.attachType]
         .splice(attachmentIdx, 1);
     },
     setActiveLayer(state, activeLayer) {
       state.activeLayer = activeLayer;
     },
+    setAttachmentsFeature(state, params) {
+      Vue.set(state.featureAttachments[params.lid], params.fid, { public: [], default: [] });
+    },
+    setAttachmentsLayer(state, lid) {
+      Vue.set(state.featureAttachments, lid, {});
+    },
     setCurrentFeaturesTypes(state, types) {
       state.currentFeaturesTypes = types;
-    },
-    setFeatureAttachments(state, mutationData) {
-      Vue.set(state.featureAttachments, mutationData.lid, {});
-      Vue.set(
-        state.featureAttachments[mutationData.lid], mutationData.fid, mutationData.attachments,
-      );
     },
   },
 };

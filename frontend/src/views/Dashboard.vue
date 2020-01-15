@@ -36,7 +36,9 @@
                       {
                         name: 'feature_manager',
                         params: { layerId: val.id, layerName: val.name}
-                      })">
+                      },
+                      setAttachmentsLayer(val.id)
+                      )">
                     {{ val.name }}
                   </span>
                   <span class="desc-sm">
@@ -285,6 +287,9 @@ export default {
     columnTypes() {
       return this.$store.getters.getColumnTypes;
     },
+    featureAttachments() {
+      return this.$store.getters.getFeatureAttachments;
+    },
     filteredListExternal() {
       if (!this.externalLayersList) {
         return false;
@@ -416,6 +421,11 @@ export default {
         return;
       }
       this.$refs.dropzoneUploadLayer.processQueue();
+    },
+    setAttachmentsLayer(lid) {
+      if (!Object.keys(this.featureAttachments).includes(lid)) {
+        this.$store.commit('setAttachmentsLayer', lid);
+      }
     },
     toggleColumnsSection(isVisible) {
       this.isColumnsVisible = isVisible;

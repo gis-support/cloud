@@ -208,14 +208,19 @@ export default {
   },
   methods: {
     async getAttachments(fid) {
-      if (!this.featureAttachments[this.layId]) {
-        const payload = { lid: this.layId, fid };
-        const r = await this.$store.dispatch('getFeatureAttachments', payload);
-        if (r.status === 200) {
-          this.$store.commit('setFeatureAttachments', { lid: this.layId, fid, attachments: r.body.attachments });
-        } else {
-          this.$alertify.error(this.$i18n.t('featureManager.errorAttachmentsFetch'));
+      const payload = { lid: this.layId, fid };
+      const r = await this.$store.dispatch('getFeatureAttachments', payload);
+      if (r.status === 200) {
+        if (!Object.keys(this.featureAttachments[this.layId]).includes(fid.toString())) {
+          this.$store.commit('setAttachmentsFeature', payload);
         }
+        this.$store.commit('addAttachmentToFeature', {
+          lid: this.layId,
+          fid,
+          attachments: r.obj.attachments,
+        });
+      } else {
+        this.$alertify.error(this.$i18n.t('featureManager.errorAttachmentsFetch'));
       }
     },
     filtrowanie(items) {
