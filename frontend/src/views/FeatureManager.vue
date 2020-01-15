@@ -546,12 +546,14 @@ export default {
         const vector = new VectorLayer({ source, name: 'newFeature' });
         this.map.addLayer(vector);
         let drawType;
-        if (this.currentLayerType === 'polygon' || this.currentLayerType === 'multipolygon') {
+        if (this.currentLayerType === 'polygon') {
           drawType = 'Polygon';
+        } else if (this.currentLayerType === 'multipolygon') {
+          drawType = 'MultiPolygon';
         } else if (this.currentLayerType === 'linestring') {
           drawType = 'LineString';
         } else {
-          drawType = 'Circle';
+          drawType = 'Point';
         }
 
         const draw = new Draw({
