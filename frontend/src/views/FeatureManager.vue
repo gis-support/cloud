@@ -16,7 +16,7 @@
             class="navbar-text"
             v-cloak
           >{{$i18n.t('featureManager.objectsNumber')}}
-            <span v-text="items.length"></span>
+            <span v-text="searchCount"></span>
           </p>
           <div class="navbar-form navbar-right">
             <div class="form-group">
@@ -60,6 +60,7 @@
           :layId="$route.params.layerId"
           :search="searchItemValue"
           @selectFeatureById="selectFeatureById"
+          @updateSearchCount="updateSearchCount"
         />
         <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
           <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
@@ -343,6 +344,7 @@ export default {
     isInfoDialogVisible: false,
     items: [],
     newFeatureProperties: {},
+    searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
   }),
@@ -695,6 +697,9 @@ export default {
       this.map.getView().fit(feature.getGeometry());
       this.indexActiveTab = 1; // change tab in sidepanel
     },
+    updateSearchCount(count) {
+      this.searchCount = count;
+    },
   },
   async mounted() {
     this.map = new Map({
@@ -763,6 +768,7 @@ export default {
     } else {
       this.$alertify.error(this.$i18n.t('default.error'));
     }
+    this.searchCount = this.items.length;
   },
 };
 </script>

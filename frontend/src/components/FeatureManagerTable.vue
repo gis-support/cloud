@@ -128,6 +128,7 @@ export default {
     searchedItems() {
       const self = this;
       if (!self.search) {
+        this.$emit('updateSearchCount', self.items.length);
         return self.items;
       }
       return self.wyszukaj(self.items, self.search);
@@ -136,6 +137,7 @@ export default {
       const self = this;
 
       if (_.isEmpty(self.columnFilters)) {
+        this.$emit('updateSearchCount', self.searchedItems.length);
         return self.searchedItems;
       }
       return self.filtrowanie(self.searchedItems);
@@ -227,6 +229,7 @@ export default {
       const self = this;
 
       if (!ValueFilterMap) {
+        this.$emit('updateSearchCount', items.length);
         return items;
       }
 
@@ -254,6 +257,7 @@ export default {
         });
         result.push(items2);
       });
+      this.$emit('updateSearchCount', _.concat(...result).length);
       return _.concat(...result);
     },
     updateSelectedItem(emit) {
@@ -310,9 +314,11 @@ export default {
       self.scrollEl.scrollTop = indexScroll * self.itemHeight;
     },
     wyszukaj(items, wartosc) {
-      return _.filter(items, item => _.some(
+      const filteredItems = _.filter(items, item => _.some(
         item, value => value && value.toString().indexOf(wartosc) !== -1,
       ));
+      this.$emit('updateSearchCount', filteredItems.length);
+      return filteredItems;
     },
 
     initVirtualTable() {
