@@ -26,6 +26,14 @@ export default {
         return err;
       }
     },
+    async assignUserToGroup(ctx, payload) {
+      try {
+        const response = await swagger.apis.Auth.put_api_users({ body: payload });
+        return response;
+      } catch (err) {
+        return err;
+      }
+    },
     async deleteGroup(ctx, payload) {
       try {
         const response = await swagger.apis.Auth.delete_api_users_groups({ body: payload });
