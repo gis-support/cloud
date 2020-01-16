@@ -4,6 +4,8 @@
 
 # Sklonuj ten plik z nazwą local_config.py żeby wprowadzić zmiany do konfiguracji aplikacji
 
+from os import environ
+
 
 class Config(object):
     DBNAME = 'cloud'
