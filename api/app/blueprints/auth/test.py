@@ -47,6 +47,16 @@ class TestAuth(BaseTest):
         assert r.json
         assert r.json['error'] == 'password required'
 
+    def test_uers_get_correct(self, client):
+        token = self.get_token(
+            client, user=os.environ['DEFAULT_USER'], password=os.environ['DEFAULT_PASS'])
+        r = client.get(f'/api/users?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['users']
+        assert r.json['users'][os.environ['DEFAULT_USER']
+                               ] == os.environ.get('DEFAULT_GROUP')
+
 
 @pytest.mark.auth
 class TestGroups(BaseTest):
@@ -90,7 +100,7 @@ class TestGroups(BaseTest):
         assert 'test' not in r.json['groups']
 
     def test_groups_exists_post(self, client):
-        default_group = (os.environ.get('DEFAULT_GROUPS', '').split(','))[0]
+        default_group = os.environ.get('DEFAULT_GROUP')
         token = self.get_token(client)
         r = client.post(
             f'/api/users/groups?token={token}', data=json.dumps({'group': default_group}))
@@ -99,7 +109,7 @@ class TestGroups(BaseTest):
         assert r.json['error'] == 'group exists'
 
     def test_groups_not_exists_delete(self, client):
-        default_group = (os.environ.get('DEFAULT_GROUPS', '').split(','))[0]
+        default_group = os.environ.get('DEFAULT_GROUP')
         token = self.get_token(client)
         r = client.delete(
             f'/api/users/groups?token={token}', data=json.dumps({'group': 'test'}))

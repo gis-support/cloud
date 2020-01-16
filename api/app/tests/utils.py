@@ -11,23 +11,29 @@ TEST_DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class BaseTest:
 
-    def create_user(self, client):
+    def create_user(self, client, default_group=True):
         DEFAULT_USER = os.environ.get('DEFAULT_USER')
         DEFAULT_PASS = os.environ.get('DEFAULT_PASS')
         token = self.get_token(client, user=DEFAULT_USER,
                                password=DEFAULT_PASS)
         user = str(uuid.uuid4())
         password = str(uuid.uuid4())
+        data = {"user": user, "password": password}
+        if not default_group:
+            not_default_group = [
+                i for i in os.environ['DEFAULT_GROUPS'].split(',') if i != os.environ['DEFAULT_GROUP']][0]
+            data['group'] = not_default_group
         r = client.post(f'/api/users?token={token}',
-                        data=json.dumps({"user": user, "password": password}))
+                        data=json.dumps(data))
         assert r.status_code == 201
         assert r.json
         assert r.json['users'] == 'user created'
         return user, password
 
-    def get_token(self, client, user="", password=""):
+    def get_token(self, client, user="", password="", default_group=True):
         if not user and not password:
-            user, password = self.create_user(client)
+            user, password = self.create_user(
+                client, default_group=default_group)
         r = client.post(
             '/api/login', data=json.dumps({"user": user, "password": password}))
         assert r.status_code == 200
@@ -63,7 +69,8 @@ class BaseTest:
             f'/api/layers/{lid}/features/{fid}/attachments?token={token}')
         assert r.status_code == 200
         assert r.json
-        assert r.json['attachments']['public'] == []
+        default_group = os.environ.get('DEFAULT_GROUP')
+        assert r.json['attachments'][default_group] == []
         new_attachment = {
             'public': public,
             'link': link,

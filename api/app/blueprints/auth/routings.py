@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, request, current_app
 from flasgger import swag_from
 from app.docs import path_by
 from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, cloud_decorator
+import os
 
 
 mod_auth = Blueprint("auth", __name__)
@@ -33,12 +34,15 @@ def check_token():
     return jsonify({"token": "valid"})
 
 
-@mod_auth.route('/users', methods=['POST', 'PUT'])
+@mod_auth.route('/users', methods=['GET', 'POST', 'PUT'])
+@swag_from(path_by(__file__, 'docs.users.get.yml'), methods=['GET'])
 @swag_from(path_by(__file__, 'docs.users.post.yml'), methods=['POST'])
 @swag_from(path_by(__file__, 'docs.users.put.yml'), methods=['PUT'])
 @token_required
 @cloud_decorator
 def users(cloud):
+    if request.method == 'GET':
+        return jsonify({"users": cloud.get_users_with_groups()})
     payload = request.get_json(force=True)
     user = payload.get("user")
     if not user:
@@ -49,7 +53,7 @@ def users(cloud):
         password = payload.get("password")
         if not user:
             return jsonify({"error": "password required"}), 400
-        group = payload.get("group", current_app.config['DEFAULT_GROUP'])
+        group = payload.get("group", os.environ['DEFAULT_GROUP'])
         create_user(user, password, group)
         return jsonify({"users": "user created"}), 201
     elif request.method == 'PUT':

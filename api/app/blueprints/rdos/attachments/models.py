@@ -1,6 +1,7 @@
 from app.db.general import BaseModel
 from peewee import TextField
 from playhouse.shortcuts import model_to_dict
+import os
 
 
 class Attachment(BaseModel):
@@ -12,14 +13,12 @@ class Attachment(BaseModel):
 
     @staticmethod
     def get_attachments(lid, fid, group):
+        groups = set([group, os.environ['DEFAULT_GROUP']])
         query = Attachment.select().where(
-            Attachment.group << [group, 'public'],
+            Attachment.group << groups,
             Attachment.lid == lid,
             Attachment.fid == fid).dicts()
-        data = {
-            'public': [],
-            'default': []  # temporary, wait for user groups
-        }
+        data = {key: [] for key in groups}
         for row in query:
             if row['group'] not in data:
                 data[row['group']] = []

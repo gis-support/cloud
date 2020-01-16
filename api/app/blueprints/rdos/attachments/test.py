@@ -4,6 +4,7 @@
 from app.tests.utils import BaseTest
 import pytest
 import json
+import os
 
 
 @pytest.mark.attachments
@@ -19,11 +20,11 @@ class TestAttachments(BaseTest):
             f'/api/layers/{lid}/features/{fid}/attachments?token={token}')
         assert r.status_code == 200
         assert r.json
-        assert len(r.json['attachments']['public']) == 1
-        assert len(r.json['attachments']['default']) == 0
+        default_group = os.environ.get('DEFAULT_GROUP')
+        assert len(r.json['attachments'][default_group]) == 1
 
     def test_attachments_post_correct_group(self, client):
-        token = self.get_token(client)
+        token = self.get_token(client, default_group=False)
         lid = self.add_geojson_prg(client, token)
         fid = 1
         aid = self.add_attachment_to_feature(
@@ -32,8 +33,11 @@ class TestAttachments(BaseTest):
             f'/api/layers/{lid}/features/{fid}/attachments?token={token}')
         assert r.status_code == 200
         assert r.json
-        assert len(r.json['attachments']['public']) == 0
-        assert len(r.json['attachments']['default']) == 1
+        default_group = os.environ.get('DEFAULT_GROUP')
+        not_default_group = [
+            i for i in r.json['attachments'].keys() if i != default_group][0]
+        assert len(r.json['attachments'][default_group]) == 0
+        assert len(r.json['attachments'][not_default_group]) == 1
 
     def test_attachments_change_layer_name(self, client):
         token = self.get_token(client)
@@ -50,8 +54,8 @@ class TestAttachments(BaseTest):
             f'/api/layers/{new_lid}/features/{fid}/attachments?token={token}')
         assert r.status_code == 200
         assert r.json
-        assert len(r.json['attachments']['public']) == 1
-        assert len(r.json['attachments']['default']) == 0
+        default_group = os.environ.get('DEFAULT_GROUP')
+        assert len(r.json['attachments'][default_group]) == 1
 
     def test_attachments_delete_public(self, client):
         token = self.get_token(client)
@@ -68,4 +72,5 @@ class TestAttachments(BaseTest):
             f'/api/layers/{lid}/features/{fid}/attachments?token={token}')
         assert r.status_code == 200
         assert r.json
-        assert r.json['attachments']['public'] == []
+        default_group = os.environ.get('DEFAULT_GROUP')
+        assert len(r.json['attachments'][default_group]) == 0

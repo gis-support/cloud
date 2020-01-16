@@ -7,6 +7,7 @@ from app.docs import path_by
 from app.db.general import token_required, layer_decorator
 from app.helpers.layer import Layer
 from app.blueprints.rdos.attachments.models import Attachment
+import os
 
 mod_attachments = Blueprint("attachments", __name__)
 
@@ -38,7 +39,7 @@ def attachments(lid, fid):
         """
         @layer_decorator(permission="write")
         def get(layer, lid=None, fid=None):
-            return jsonify({"attachments": Attachment.get_attachments(lid=lid, fid=fid, group='default')})
+            return jsonify({"attachments": Attachment.get_attachments(lid=lid, fid=fid, group=layer.get_user_group())})
         return get(lid=lid, fid=fid)
 
     elif request.method == 'POST':
@@ -49,11 +50,15 @@ def attachments(lid, fid):
         @layer_decorator(permission="write")
         def post(layer, lid=None, fid=None):
             data = request.get_json(force=True)
+            if 'public' in data and data['public'] == False:
+                group = layer.get_user_group()
+            else:
+                group = os.environ['DEFAULT_GROUP']
             model = {
                 'lid': lid,
                 'fid': fid,
                 # Domyślnie dodawany załącznik jest publiczny
-                'group': 'public' if data.get('public', True) else layer.get_user_group(),
+                'group': group,
                 # Domyślny link do GIS Support
                 'link': data.get('link', 'https://gis-support.pl/'),
                 # Domyślna nazwa załącznika to null

@@ -46,8 +46,7 @@ class Cloud:
     def execute(self, *args, **kwargs):
         return self.db.execute_sql(*args, **kwargs)
 
-    # Get permissions for layers
-    def get_permissions(self):
+    def get_users_with_layers(self):
         cursor = self.execute("""
             SELECT t1.rolname, t2.table_name, t2.privilege_type
             FROM pg_roles AS t1
@@ -72,6 +71,19 @@ class Cloud:
                 users[row[0]][row[1]] = 'read'
             else:
                 users[row[0]][row[1]] = 'write'
+        return users, layers
+
+    def get_users_with_groups(self):
+        cursor = self.execute("""
+            SELECT pg_user.usename, rolname FROM pg_user
+            JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
+            JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
+        """, (self.user,))
+        return dict([i for i in cursor.fetchall()])
+
+    # Get permissions for layers
+    def get_permissions(self):
+        users, layers = self.get_users_with_layers()
         permissions = []
         for layer in layers:
             perm = {

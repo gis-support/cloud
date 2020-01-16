@@ -37,7 +37,7 @@ else
             psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "CREATE GROUP \"$g\";"
         done;
         psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "CREATE USER $DEFAULT_USER WITH ENCRYPTED PASSWORD '$DEFAULT_PASS';"
-        psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "GRANT CONNECT ON DATABASE \"cloud\" TO $DEFAULT_USER;"
+        psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "GRANT CONNECT ON DATABASE \"$main_db\" TO $DEFAULT_USER;"
         psql ${main_db} -U ${POSTGRES_USER} -p 5432 -h localhost -c "ALTER GROUP \"$main_group\" ADD USER $DEFAULT_USER;"
         for db in "${db_list[@]}"
         do

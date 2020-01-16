@@ -22,6 +22,11 @@ parameters:
           description: User password
           example: "test"
           required: true
+        group:
+          type: string
+          description: User group
+          example: default
+          required: false
 responses:
   201:
     description: Confirmation

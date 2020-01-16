@@ -11,10 +11,11 @@ services:
       - ./docker/db/postgres_data:/var/lib/postgresql
     environment:
       - POSTGRES_DBNAME
+      - POSTGRES_PASS
+      - POSTGRES_USER
       - DEFAULT_COLLATION
       - DEFAULT_CTYPE
       - DEFAULT_ENCODING
-      - POSTGRES_PASS
       - DEFAULT_USER
       - DEFAULT_PASS
       - DEFAULT_GROUPS
@@ -36,6 +37,7 @@ services:
       - DEFAULT_GROUPS
       - DEFAULT_USER
       - DEFAULT_PASS
+      - DEFAULT_GROUP
     depends_on:
       - db
       - redis
