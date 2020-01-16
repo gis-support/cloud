@@ -145,7 +145,7 @@
             <button type="button"
               class="btn btn-success"
               @click="addGroup"
-              :disabled="newGroupName.length < 1"
+              :disabled="!newGroupName"
             >
               {{$i18n.t('default.add')}}
             </button>
@@ -226,7 +226,7 @@ export default {
       read: '#F9A122',
       '': '#EC3C36',
     },
-    newGroupName: '',
+    newGroupName: undefined,
     newUserGroup: undefined,
     password: undefined,
     permissions: undefined,
@@ -249,6 +249,9 @@ export default {
     },
     async addNewUser() {
       const payload = { user: this.email, password: this.password, group: this.newUserGroup };
+      if (!this.newUserGroup) {
+        delete payload.group;
+      }
       const r = await this.$store.dispatch('register', payload);
       if (r.status === 201) {
         this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
