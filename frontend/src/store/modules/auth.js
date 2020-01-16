@@ -20,7 +20,7 @@ export default {
   state: {
     logged: false,
     token: localStorage.getItem('token') === null ? '' : localStorage.getItem('token'),
-    user: '',
+    user: localStorage.getItem('user') === null ? '' : localStorage.getItem('user'),
   },
   mutations: {
     setToken(state, token) {
@@ -30,12 +30,14 @@ export default {
     setUser(state, email) {
       state.user = email;
       state.logged = true;
+      localStorage.setItem('user', email.slice());
     },
     logOut(state) {
       state.token = '';
       state.user = '';
       state.logged = false;
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
   },
   actions: {
@@ -67,11 +69,11 @@ export default {
     },
   },
   getters: {
-    getToken(state) {
-      return state.token;
+    getToken() {
+      return localStorage.getItem('token');
     },
-    getUser(state) {
-      return state.user;
+    getUser() {
+      return localStorage.getItem('user');
     },
     getLogged(state) {
       return state.logged;

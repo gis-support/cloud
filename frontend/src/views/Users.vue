@@ -248,7 +248,7 @@ export default {
       }
     },
     async addNewUser() {
-      const payload = { user: this.email, password: this.password };
+      const payload = { user: this.email, password: this.password, group: this.newUserGroup };
       const r = await this.$store.dispatch('register', payload);
       if (r.status === 201) {
         this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
