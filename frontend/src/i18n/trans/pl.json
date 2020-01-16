@@ -48,6 +48,7 @@
     "editSuccess": "Pomyślnie edytowano",
     "email": "Email",
     "error": "Wystąpił błąd",
+    "groupName": "Nazwa grupy",
     "loading": "Trwa ładowanie danych",
     "loginError": "Nieprawidłowa nazwa uzytkownika lub hasło",
     "loginSuccess": "Zalogowano",
@@ -67,7 +68,10 @@
     "settings": "Ustawienia",
     "startUpload": "Wyślij pliki",
     "stopUpload": "Zatrzymaj",
-    "users": "Użytkownicy"
+    "success": "Sukces",
+    "username": "Nazwa użytkownika",
+    "users": "Użytkownicy",
+    "yes": "Tak"
   },
   "featureManager": {
     "addAttachment": "Dodaj załącznik",
@@ -117,11 +121,15 @@
     "uploadSuccess": "Pomyślnie przesłano plik"
   },
   "users": {
+    "assignUser": "Przypisz użytkownika",
+    "assignUserConfirm": "Czy na pewno chcesz przypisać użytkownika do grupy?",
+    "deleteGroupConfirm": "Czy na pewno chcesz usunąć wybraną grupę?",
     "modal": {
       "changePermissions": "Zmiana uprawnień",
       "permissionType": "Rodzaj uprawnień"
     },
     "responses": {
+      "groupExists": "Grupa o podanej nazwie istnieje",
       "noEmailOrPassword": "Nie podano adresu email lub hasła",
       "permissionsChanged": "Pomyślnie zmieniono uprawnienia",
       "userCreated": "Utworzono użytkownika",
@@ -129,6 +137,13 @@
     },
     "title": {
       "addUser": "Dodawanie użytkownika",
+      "assignUser": "Przypisz użytkownia do grupy",
+      "assignUserTitle": "Przypisywanie użytkownia do grupy",
+      "chooseGroupToDelete": "Wybierz grupę do usunięcia",
+      "deleteGroupTitle": "Usuwanie grupy użytkowników",
+      "groupAdd": "Dodawanie grupy użytkowników",
+      "groupDelete": "Usuwanie grupy użytkowników",
+      "groups": "Grupy użytkowników",
       "permissions": "Uprawnienia użytkowników"
     }
   }

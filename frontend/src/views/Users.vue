@@ -12,7 +12,22 @@
           :placeholder="$i18n.t('default.email')">
         <input type="password" class="form-control container__input mr-5" v-model="password"
           :placeholder="$i18n.t('default.password')">
-        <button type="button" class="btn btn-success" @click="addNewUser">
+        <select class="form-control mr-5"
+          style="width: 300px"
+          v-model="newUserGroup">
+          <option value="undefined" disabled hidden>
+            {{$i18n.t('default.groupName')}}
+          </option>
+          <option v-for="group in groups"
+            v-text="group"
+            :key="`${group}_assign_user`"
+            :value="group"/>
+        </select>
+        <button type="button"
+          class="btn btn-success"
+          @click="addNewUser"
+          :disabled="!email || !password"
+        >
           {{$i18n.t('default.add')}}
         </button>
       </div>
@@ -68,6 +83,104 @@
         </table>
       </div>
     </div>
+    <div class="col-sm-12 pl-0 pr-0 section">
+      <h2 class="flex-center container__border--bottom container__border--grey">
+        <div class="p-0 container__border--bottom container__border--red section__header">
+          <i class="fa fa-group"></i>
+          <span> {{$i18n.t('users.title.groups')}}</span>
+        </div>
+      </h2>
+      <div class="section__content heading-block heading-block-main pt-10">
+        <span class="col-sm-12 pl-0">
+          <h4 class="flex-center mb-0">
+            <div class="p-0 container__border--bottom container__border--red section__header">
+              <span> {{$i18n.t('users.title.assignUser')}}</span>
+            </div>
+          </h4>
+          <span style="display: flex;">
+            <select class="form-control mr-5"
+              style="width: 300px"
+              v-model="userToAssign">
+              <option value="undefined" disabled hidden>
+                {{$i18n.t('default.username')}}
+              </option>
+              <option v-for="user in users"
+                v-text="user"
+                :key="`${user}_assign`"
+                :value="user"/>
+            </select>
+            <select class="form-control mr-5"
+              style="width: 300px"
+              v-model="groupToAssign">
+              <option value="undefined" disabled hidden>
+                {{$i18n.t('default.groupName')}}
+              </option>
+              <option v-for="group in groups"
+                v-text="group"
+                :key="`${group}_assign`"
+                :value="group"/>
+            </select>
+            <button
+              type="button"
+              class="btn btn-success"
+              :disabled="!groupToAssign || !userToAssign"
+              @click="assignUser"
+            >
+              {{$i18n.t('users.assignUser')}}
+            </button>
+          </span>
+        </span>
+      </div>
+      <div class="section__content heading-block heading-block-main pt-10">
+        <span class="col-sm-6 pl-0">
+          <h4 class="flex-center mb-0">
+            <div class="p-0 container__border--bottom container__border--red section__header">
+              <span> {{$i18n.t('users.title.groupAdd')}}</span>
+            </div>
+          </h4>
+          <span style="display: flex;">
+            <input type="text" class="form-control container__input mr-5"
+            :placeholder="$i18n.t('default.groupName')"
+            v-model="newGroupName">
+            <button type="button"
+              class="btn btn-success"
+              @click="addGroup"
+              :disabled="newGroupName.length < 1"
+            >
+              {{$i18n.t('default.add')}}
+            </button>
+          </span>
+        </span>
+        <span class="col-sm-6 pl-0">
+          <h4 class="flex-center mb-0">
+            <div class="p-0 container__border--bottom container__border--red section__header">
+              <span> {{$i18n.t('users.title.groupDelete')}}</span>
+            </div>
+          </h4>
+          <span style="display: flex;">
+            <select class="form-control mr-5"
+              style="width: 300px"
+              v-model="usersGroup">
+              <option value="undefined" disabled hidden>
+                {{$i18n.t('users.title.chooseGroupToDelete')}}
+              </option>
+              <option v-for="group in groups"
+                v-text="group"
+                :key="group"
+                :value="group"/>
+            </select>
+            <button
+              type="button"
+              class="btn btn-primary"
+              :disabled="!usersGroup"
+              @click="deleteGroup"
+            >
+              {{$i18n.t('default.delete')}}
+            </button>
+          </span>
+        </span>
+      </div>
+    </div>
 
     <!--MODAL UPRAWNIEŃ-->
     <div class="modal fade" data-backdrop="static" id="permissionsModal" tabindex="-1" role="dialog"
@@ -106,21 +219,35 @@ export default {
   data: () => ({
     currentPermissions: {},
     email: undefined,
+    groups: [],
+    groupToAssign: undefined,
     mapPermissionColors: {
       write: '#48B343',
       read: '#F9A122',
       '': '#EC3C36',
     },
+    newGroupName: '',
+    newUserGroup: undefined,
     password: undefined,
     permissions: undefined,
     users: undefined,
+    usersGroup: undefined,
+    userToAssign: undefined,
   }),
   methods: {
-    async addNewUser() {
-      if (!this.email || !this.password) {
-        this.$alertify.error(this.$i18n.t('users.responses.noEmailOrPassword'));
-        return;
+    async addGroup() {
+      const r = await this.$store.dispatch('addGroup', { group: this.newGroupName });
+      if (r.status === 201) {
+        this.$alertify.success(this.$i18n.t('default.success'));
+        this.groups.push(this.newGroupName);
+        this.newGroupName = '';
+      } else if (r.status === 400) {
+        this.$alertify.error(this.$i18n.t('users.responses.groupExists'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    async addNewUser() {
       const payload = { user: this.email, password: this.password };
       const r = await this.$store.dispatch('register', payload);
       if (r.status === 201) {
@@ -133,6 +260,36 @@ export default {
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    async assignUser() {
+      this.$alertify.confirm(this.$i18n.t('users.assignUserConfirm'), async () => {
+        const r = await this.$store.dispatch('assignUserToGroup', {
+          group: this.groupToAssign,
+          user: this.userToAssign,
+        });
+        if (r.status === 200) {
+          this.$alertify.success(this.$i18n.t('default.success'));
+          this.groupToAssign = undefined;
+          this.userToAssign = undefined;
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('users.title.assignUserTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.yes'), cancel: this.$i18n.t('default.cancel') } });
+    },
+    async deleteGroup() {
+      this.$alertify.confirm(this.$i18n.t('users.deleteGroupConfirm'), async () => {
+        const r = await this.$store.dispatch('deleteGroup', {
+          group: this.usersGroup,
+        });
+        if (r.status === 200) {
+          this.$alertify.success(this.$i18n.t('default.deleted'));
+          this.usersGroup = undefined;
+          const groupIdx = this.groups.findIndex(el => el === this.usersGroup);
+          this.groups.splice(groupIdx, 1);
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('users.title.deleteGroupTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
     async editPermissions() {
       const payload = {
@@ -153,6 +310,10 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+    async getGroups() {
+      const r = await this.$store.dispatch('getGroups');
+      this.groups = r.body.groups;
+    },
     async getPermissions() {
       const r = await this.$store.dispatch('getPermissions');
       this.permissions = r.obj.permissions;
@@ -166,6 +327,7 @@ export default {
   },
   mounted() {
     this.getPermissions();
+    this.getGroups();
   },
 };
 </script>
