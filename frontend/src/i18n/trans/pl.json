@@ -14,13 +14,16 @@
       "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
       "deleteColumnTitle": "Usuwanie kolumny",
       "deleteLayerTitle": "Usuwanie warstwy",
+      "fillColor": "Kolor wypełnienia",
       "hideColumns": "Ukryj kolumny warstwy",
       "layerColumns": "Kolumny warstwy",
       "layerName": "Nazwa warstwy",
       "layerNameChanged": "Zmieniono nazwę warstwy",
       "noNameOrType": "Brak nazwy lub typu kolumny",
       "settingsLayer": "Ustawienia warstwy",
-      "showColumns": "Pokaż kolumny warstwy"
+      "showColumns": "Pokaż kolumny warstwy",
+      "strokeColor": "Kolor obrysu",
+      "strokeWidth": "Grubość obrysu"
     },
     "placeholder": {
       "layersFilter": "Filtr warstw",
