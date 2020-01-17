@@ -129,6 +129,7 @@
               {{$i18n.t('users.assignUser')}}
             </button>
           </span>
+          <p v-if="userToAssign">Obecna grupa: {{usersWithGroups[userToAssign]}}</p>
         </span>
       </div>
       <div class="section__content heading-block heading-block-main pt-10">
@@ -234,6 +235,11 @@ export default {
     usersGroup: undefined,
     userToAssign: undefined,
   }),
+  computed: {
+    usersWithGroups() {
+      return this.$store.getters.getUsersWithGroups;
+    },
+  },
   methods: {
     async addGroup() {
       const r = await this.$store.dispatch('addGroup', { group: this.newGroupName });
@@ -258,6 +264,7 @@ export default {
         this.getPermissions(); // update permissions table
         this.email = undefined;
         this.password = undefined;
+        this.newUserGroup = undefined;
       } else if (r.status === 409) {
         this.$alertify.error(this.$i18n.t('users.responses.userExists'));
       } else {
@@ -322,6 +329,12 @@ export default {
       this.permissions = r.obj.permissions;
       this.users = r.obj.users;
     },
+    async getUsers() {
+      const r = await this.$store.dispatch('getUsers');
+      if (r.status === 200) {
+        this.$store.commit('setUsersWithGroups', r.obj.users);
+      }
+    },
     saveCurrentPermissions(permission, layerId, username) {
       this.$set(this.currentPermissions, 'permission', permission);
       this.$set(this.currentPermissions, 'layId', layerId);
@@ -331,6 +344,7 @@ export default {
   mounted() {
     this.getPermissions();
     this.getGroups();
+    this.getUsers();
   },
 };
 </script>
