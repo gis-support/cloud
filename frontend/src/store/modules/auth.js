@@ -20,7 +20,7 @@ export default {
   state: {
     logged: false,
     token: localStorage.getItem('token') === null ? '' : localStorage.getItem('token'),
-    user: localStorage.getItem('user') === null ? '' : localStorage.getItem('user'),
+    user: '',
   },
   mutations: {
     setToken(state, token) {
@@ -30,20 +30,19 @@ export default {
     setUser(state, email) {
       state.user = email;
       state.logged = true;
-      localStorage.setItem('user', email.slice());
     },
     logOut(state) {
       state.token = '';
       state.user = '';
       state.logged = false;
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
     },
   },
   actions: {
     async checkToken() {
       try {
-        return await swagger.apis.Auth.get_api_check_token();
+        const r = await swagger.apis.Auth.get_api_check_token();
+        return r;
       } catch (err) {
         return err.response;
       }
@@ -72,8 +71,8 @@ export default {
     getToken() {
       return localStorage.getItem('token');
     },
-    getUser() {
-      return localStorage.getItem('user');
+    getUser(state) {
+      return state.user;
     },
     getLogged(state) {
       return state.logged;
