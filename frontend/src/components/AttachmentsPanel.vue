@@ -139,6 +139,7 @@ export default {
   },
   methods: {
     async addAttachment() {
+      // TODO
       const r = await this.$store.dispatch('addAttachment', {
         lid: this.lid,
         fid: this.fid,
@@ -149,17 +150,10 @@ export default {
         },
       });
       if (r.status === 201) {
-        if (!Object.keys(this.featureAttachments[this.lid]).includes(this.fid.toString())) {
+        /* if (!Object.keys(this.featureAttachments[this.lid]).includes(this.fid.toString())) {
           this.$store.commit('setAttachmentsFeature', { lid: this.lid, fid: this.fid });
         }
-        const tempAtt = this.isAttachmentPublic
-          ? { public: [r.obj.attachments], default: [] }
-          : { public: [], default: [r.obj.attachments] };
-        this.$store.commit('addAttachmentToFeature', {
-          lid: this.lid,
-          fid: this.fid,
-          attachments: tempAtt,
-        });
+        this.$store.commit('addAttachmentToFeature', r.obj.attachments); */
         this.toggleAttachmentAdding(false);
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));

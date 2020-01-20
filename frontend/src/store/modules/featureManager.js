@@ -145,20 +145,14 @@ export default {
   },
   mutations: {
     addAttachmentToFeature(state, params) {
-      const pubIds = state.featureAttachments[params.lid][params.fid].public.map(el => el.id);
-      const defIds = state.featureAttachments[params.lid][params.fid].default.map(el => el.id);
-      const publicAtt = params.attachments.public.filter(el => el.group === 'public' && !pubIds.includes(el.id));
-      const defaultAtt = params.attachments.default.filter(el => el.group === 'default' && !defIds.includes(el.id));
-      const defArr = [
-        ...state.featureAttachments[params.lid][params.fid].default,
-        ...defaultAtt,
-      ];
-      const pubArr = [
-        ...state.featureAttachments[params.lid][params.fid].public,
-        ...publicAtt,
-      ];
-      Vue.set(state.featureAttachments[params.lid][params.fid], 'default', defArr);
-      Vue.set(state.featureAttachments[params.lid][params.fid], 'public', pubArr);
+      const groups = Object.keys(params.attachments);
+      groups.forEach((el) => {
+        const attachArr = [
+          ...state.featureAttachments[params.lid][params.fid][el],
+          ...params.attachments[el].filter(att => att.group === el),
+        ];
+        Vue.set(state.featureAttachments[params.lid][params.fid], el, attachArr);
+      });
     },
     deleteFeatureAttachment(state, params) {
       const attachmentIdx = state
