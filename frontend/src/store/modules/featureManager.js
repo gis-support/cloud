@@ -166,7 +166,10 @@ export default {
       state.activeLayer = activeLayer;
     },
     setAttachmentsFeature(state, params) {
-      Vue.set(state.featureAttachments[params.lid], params.fid, { public: [], default: [] });
+      Vue.set(state.featureAttachments[params.lid], params.fid, {});
+      params.groups.forEach((group) => {
+        Vue.set(state.featureAttachments[params.lid][params.fid], group, []);
+      });
     },
     setAttachmentsLayer(state, lid) {
       Vue.set(state.featureAttachments, lid, {});

@@ -4,43 +4,73 @@
       <i class="fa fa-plus-circle" aria-hidden="true"/>
       {{$i18n.t(`featureManager.addAttachment`)}}
     </button>
-    <div v-for="mode in attachmentModes" :key="mode">
-      <h4>{{$i18n.t(`featureManager.attachmentsTitle${mode}`)}}:</h4>
-      <div v-if="featureAttachments[lid][fid] &&
-        Object.keys(featureAttachments[lid][fid]).includes('public')">
-        <div v-if="featureAttachments[lid][fid][mode].length < 1"
-          class="empty-sub-panel">
-          <i class="fa fa-paperclip" aria-hidden="true"/>
-          {{$i18n.t('default.noAttachments')}}
-        </div>
-        <span v-else>
-          <template v-for="item in featureAttachments[lid][fid][mode]">
-            <div class="media" :key="item.link">
-              <div class="media-left">
-                <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
-              </div>
-              <div class="media-body">
-                <h5 class="media-heading">
-                  <a :href="item.link" target="_blank">
-                    <span>{{item.name}}</span>
-                  </a>
-                </h5>
-                <span style="opacity:0.4;">
-                  <button
-                    class="btn btn-link action"
-                    :title="$i18n.t('featureManager.deleteLink')"
-                    @click="deleteLink(item)"
-                  >
-                    <i class="fa fa-trash" aria-hidden="true"/>
-                  </button>
-                </span>
-              </div>
-            </div>
-          </template>
-        </span>
+    <div v-if="featureAttachments">
+      <h4>{{$i18n.t(`featureManager.attachmentsTitlepublic`)}}:</h4>
+      <div v-if="!Object.keys(featureAttachments).includes('public')"
+        class="empty-sub-panel">
+        <i class="fa fa-paperclip" aria-hidden="true"/>
+        {{$i18n.t('default.noAttachments')}}
       </div>
-      <hr/>
+      <span v-else>
+        <template v-for="item in featureAttachments[lid][fid]['public']">
+          <div class="media" :key="item.link">
+            <div class="media-left">
+              <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
+            </div>
+            <div class="media-body">
+              <h5 class="media-heading">
+                <a :href="item.link" target="_blank">
+                  <span>{{item.name}}</span>
+                </a>
+              </h5>
+              <span style="opacity:0.4;">
+                <button
+                  class="btn btn-link action"
+                  :title="$i18n.t('featureManager.deleteLink')"
+                  @click="deleteLink(item)"
+                >
+                  <i class="fa fa-trash" aria-hidden="true"/>
+                </button>
+              </span>
+            </div>
+          </div>
+        </template>
+      </span>
     </div>
+    <div>
+      <h4>{{$i18n.t(`featureManager.attachmentsTitledefault`)}}:</h4>
+      <div v-if="!Object.keys(featureAttachments).includes(usersGroup)"
+        class="empty-sub-panel">
+        <i class="fa fa-paperclip" aria-hidden="true"/>
+        {{$i18n.t('default.noAttachments')}}
+      </div>
+      <span v-else>
+        <template v-for="item in featureAttachments[usersGroup]">
+          <div class="media" :key="item.link">
+            <div class="media-left">
+              <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
+            </div>
+            <div class="media-body">
+              <h5 class="media-heading">
+                <a :href="item.link" target="_blank">
+                  <span>{{item.name}}</span>
+                </a>
+              </h5>
+              <span style="opacity:0.4;">
+                <button
+                  class="btn btn-link action"
+                  :title="$i18n.t('featureManager.deleteLink')"
+                  @click="deleteLink(item)"
+                >
+                  <i class="fa fa-trash" aria-hidden="true"/>
+                </button>
+              </span>
+            </div>
+          </div>
+        </template>
+      </span>
+    </div>
+    <hr/>
 
     <div class="modal-mask" v-if="isAttachmentAdding">
       <div class="modal-wrapper">
@@ -131,15 +161,21 @@ export default {
     attachmentName: undefined,
     isAttachmentAdding: false,
     isAttachmentPublic: '',
+    usersGroup: undefined,
   }),
   computed: {
     featureAttachments() {
-      return this.$store.getters.getFeatureAttachments;
+      return this.$store.getters.getFeatureAttachments[this.lid][this.fid];
+    },
+    user() {
+      return this.$store.getters.getUser;
+    },
+    usersWithGroups() {
+      return this.$store.getters.getUsersWithGroups;
     },
   },
   methods: {
     async addAttachment() {
-      // TODO
       const r = await this.$store.dispatch('addAttachment', {
         lid: this.lid,
         fid: this.fid,
@@ -150,13 +186,23 @@ export default {
         },
       });
       if (r.status === 201) {
-        /* if (!Object.keys(this.featureAttachments[this.lid]).includes(this.fid.toString())) {
-          this.$store.commit('setAttachmentsFeature', { lid: this.lid, fid: this.fid });
-        }
-        this.$store.commit('addAttachmentToFeature', r.obj.attachments); */
+        const { group } = r.obj.attachments;
+        const params = {};
+        params[group] = [r.obj.attachments];
+        this.$store.commit('addAttachmentToFeature', { lid: this.lid, fid: this.fid, attachments: params });
         this.toggleAttachmentAdding(false);
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async getUsers() {
+      if (Object.keys(this.usersWithGroups).length > 0) {
+        this.usersGroup = this.usersWithGroups[this.user];
+      } else {
+        const r = await this.$store.dispatch('getUsers');
+        if (r.status === 200) {
+          this.usersGroup = r.obj.users[this.user];
+        }
       }
     },
     deleteLink(item) {
@@ -185,6 +231,9 @@ export default {
       this.attachmentName = '';
       this.isAttachmentPublic = '';
     },
+  },
+  mounted() {
+    this.getUsers();
   },
 };
 </script>
