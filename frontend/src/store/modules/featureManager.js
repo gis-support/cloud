@@ -154,6 +154,7 @@ export default {
         ];
         Vue.set(state.featureAttachments[params.lid][params.fid], el, attachArr);
       });
+      console.log(state.featureAttachments);
     },
     deleteFeatureAttachment(state, params) {
       const attachmentIdx = state

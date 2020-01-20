@@ -1,5 +1,6 @@
 <template>
   <div class="attachments-panel right-sub-panel">
+    <hr/>
     <button class="btn btn-link" @click="toggleAttachmentAdding(true)">
       <i class="fa fa-plus-circle" aria-hidden="true"/>
       {{$i18n.t(`featureManager.addAttachment`)}}
@@ -39,7 +40,8 @@
     </div>
     <div>
       <h4>{{$i18n.t(`featureManager.attachmentsTitledefault`)}}:</h4>
-      <div v-if="!Object.keys(featureAttachments).includes(usersGroup)"
+      <div v-if="!Object.keys(featureAttachments).includes(usersGroup) ||
+        featureAttachments[usersGroup].length === 0"
         class="empty-sub-panel">
         <i class="fa fa-paperclip" aria-hidden="true"/>
         {{$i18n.t('default.noAttachments')}}
@@ -70,7 +72,6 @@
         </template>
       </span>
     </div>
-    <hr/>
 
     <div class="modal-mask" v-if="isAttachmentAdding">
       <div class="modal-wrapper">
