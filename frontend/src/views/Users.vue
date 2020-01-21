@@ -165,7 +165,7 @@
               <option value="undefined" disabled hidden>
                 {{$i18n.t('users.title.chooseGroupToDelete')}}
               </option>
-              <option v-for="group in groups"
+              <option v-for="group in groups.filter(el => el !== this.defaultGroup)"
                 v-text="group"
                 :key="group"
                 :value="group"/>
@@ -236,6 +236,9 @@ export default {
     userToAssign: undefined,
   }),
   computed: {
+    defaultGroup() {
+      return this.$store.getters.getDefaultGroup;
+    },
     usersWithGroups() {
       return this.$store.getters.getUsersWithGroups;
     },
