@@ -1,0 +1,41 @@
+Get services
+---
+tags:
+  - Services
+summary: Get all services
+produces:
+  - application/json
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    schema:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              url:
+                type: string
+              layers:
+                type: string
+              group:
+                type: string
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

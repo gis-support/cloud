@@ -195,7 +195,7 @@ def layers_settings(lid):
         Get layer settings by ID with owner permission
         Returns schema
         """
-        @layer_decorator(permission="owner")
+        @layer_decorator(permission="write")
         def get(layer, lid=None):
             return jsonify({"settings": layer.settings()})
         return get(lid=lid)

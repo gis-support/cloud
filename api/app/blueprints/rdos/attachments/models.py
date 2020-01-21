@@ -7,7 +7,7 @@ import os
 class Attachment(BaseModel):
     name = TextField(null=True)
     link = TextField(null=True)
-    group = TextField(null=True, default="default")
+    group = TextField(null=True, default=os.environ['DEFAULT_GROUP'])
     lid = TextField(null=True)
     fid = TextField(null=True)
 

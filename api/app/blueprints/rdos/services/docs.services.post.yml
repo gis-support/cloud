@@ -1,0 +1,55 @@
+Add new service
+---
+tags:
+  - Attachments
+summary: Add new attachment to feature
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        public:
+          type: boolean
+          required: false
+        name:
+          type: string
+          required: true
+        url:
+          type: string
+          required: true
+        layers:
+          type: string
+          required: true
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    description: Service
+    schema:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+        layers:
+          type: string
+        group:
+          type: string
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
