@@ -79,7 +79,7 @@ export default {
       this.$router.push({ name: 'login' });
     },
   },
-  mounted() {
+  async mounted() {
     this.changeLanguage('pl');
   },
 };

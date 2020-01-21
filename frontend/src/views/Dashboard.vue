@@ -541,9 +541,11 @@ export default {
       this.isColumnsVisible = isVisible;
     },
   },
-  mounted() {
+  async mounted() {
     // console.log(this.$swagger);
     this.getLayers();
+    const r = await this.$store.dispatch('getUserGroups');
+    this.$store.commit('setDefaultGroup', r.body.groups[0]);
   },
 };
 </script>

@@ -7,14 +7,14 @@
     </button>
     <div v-if="featureAttachments">
       <h4>{{$i18n.t(`featureManager.attachmentsTitlepublic`)}}:</h4>
-      <div v-if="!Object.keys(featureAttachments).includes('default') ||
-        featureAttachments['default'].length === 0"
+      <div v-if="!Object.keys(featureAttachments).includes(defaultGroup) ||
+        featureAttachments[defaultGroup].length === 0"
         class="empty-sub-panel">
         <i class="fa fa-paperclip" aria-hidden="true"/>
         {{$i18n.t('default.noAttachments')}}
       </div>
       <span v-else>
-        <template v-for="item in featureAttachments['default']">
+        <template v-for="item in featureAttachments[defaultGroup]">
           <div class="media" :key="item.link">
             <div class="media-left">
               <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
@@ -42,14 +42,14 @@
     <div>
       <h4>{{$i18n.t(`featureManager.attachmentsTitleGroup`)}}{{usersGroup}}:</h4>
       <div v-if="!Object.keys(featureAttachments).includes(usersGroup) ||
-      featureAttachments[usersGroup].filter(el => el.group !== 'default').length === 0"
+      featureAttachments[usersGroup].filter(el => el.group !== defaultGroup).length === 0"
         class="empty-sub-panel">
         <i class="fa fa-paperclip" aria-hidden="true"/>
         {{$i18n.t('default.noAttachments')}}
       </div>
       <span v-else>
         <template v-for="item in featureAttachments[usersGroup]
-          .filter(el => el.group !== 'default')">
+          .filter(el => el.group !== defaultGroup)">
           <div class="media" :key="item.link">
             <div class="media-left">
               <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
@@ -102,10 +102,10 @@
                     <select
                       class="form-control"
                       v-model="isAttachmentPublic">
-                      <option v-if="usersGroup !== 'default'" :value="false">
+                      <option v-if="usersGroup !== defaultGroup" :value="false">
                         {{this.usersGroup}}
                       </option>
-                      <option :value="true">default</option>
+                      <option :value="true">{{defaultGroup}}</option>
                     </select>
                   </div>
                 </div>
@@ -162,13 +162,16 @@ export default {
   },
   data: () => ({
     attachmentLink: undefined,
-    attachmentModes: ['public', 'default'],
+    // attachmentModes: ['public', 'default'],
     attachmentName: undefined,
     isAttachmentAdding: false,
     isAttachmentPublic: '',
     usersGroup: undefined,
   }),
   computed: {
+    defaultGroup() {
+      return this.$store.getters.getDefaultGroup;
+    },
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments[this.lid][this.fid];
     },

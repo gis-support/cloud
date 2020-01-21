@@ -18,6 +18,7 @@ const swagger = new Swagger({
 
 export default {
   state: {
+    defaultGroup: '',
     token: localStorage.getItem('token') === null ? '' : localStorage.getItem('token'),
     user: '',
   },
@@ -34,12 +35,23 @@ export default {
       state.user = '';
       localStorage.removeItem('token');
     },
+    setDefaultGroup(state, group) {
+      state.defaultGroup = group;
+    },
   },
   actions: {
     async checkToken() {
       try {
         const r = await swagger.apis.Auth.get_api_check_token();
         return r;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async getUserGroups() {
+      try {
+        const response = await swagger.apis.Auth.get_api_users_groups();
+        return response;
       } catch (err) {
         return err.response;
       }
@@ -65,6 +77,9 @@ export default {
     },
   },
   getters: {
+    getDefaultGroup(state) {
+      return state.defaultGroup;
+    },
     getToken() {
       return localStorage.getItem('token');
     },
