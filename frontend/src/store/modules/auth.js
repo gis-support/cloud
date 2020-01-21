@@ -18,7 +18,6 @@ const swagger = new Swagger({
 
 export default {
   state: {
-    logged: false,
     token: localStorage.getItem('token') === null ? '' : localStorage.getItem('token'),
     user: '',
   },
@@ -29,12 +28,10 @@ export default {
     },
     setUser(state, email) {
       state.user = email;
-      state.logged = true;
     },
     logOut(state) {
       state.token = '';
       state.user = '';
-      state.logged = false;
       localStorage.removeItem('token');
     },
   },
@@ -73,9 +70,6 @@ export default {
     },
     getUser(state) {
       return state.user;
-    },
-    getLogged(state) {
-      return state.logged;
     },
   },
 };
