@@ -42,10 +42,6 @@
               :title="$i18n.t('featureManager.cancelFeatureAdding')" @click="clearFeatureAdding">
               <i class="fa fa-times-circle"></i>
             </button>
-            <button type="button" class="btn navbar-btn btn-default"
-              :title="$i18n.t('featureManager.addFeatureEnd')" @click="drawFeatureEnd">
-              <i class="fa fa-check-circle"></i>
-            </button>
           </span>
         </div>
       </nav>
@@ -461,7 +457,7 @@ export default {
         lid: this.$route.params.layerId,
         body: {
           geometry: {
-            coordinates: [coords],
+            coordinates: coords,
             type: this.currentLayerType,
           },
           properties: this.newFeatureProperties,
@@ -564,6 +560,9 @@ export default {
         });
         draw.set('name', 'drawInteraction');
         this.map.addInteraction(draw);
+        draw.on('drawend', () => {
+          this.$nextTick(() => this.drawFeatureEnd());
+        });
       } else {
         this.getInteractionByName('drawInteraction').setActive(true);
       }

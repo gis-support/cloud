@@ -7,13 +7,14 @@
     </button>
     <div v-if="featureAttachments">
       <h4>{{$i18n.t(`featureManager.attachmentsTitlepublic`)}}:</h4>
-      <div v-if="!Object.keys(featureAttachments).includes('public')"
+      <div v-if="!Object.keys(featureAttachments).includes('default') ||
+        featureAttachments['default'].length === 0"
         class="empty-sub-panel">
         <i class="fa fa-paperclip" aria-hidden="true"/>
         {{$i18n.t('default.noAttachments')}}
       </div>
       <span v-else>
-        <template v-for="item in featureAttachments[lid][fid]['public']">
+        <template v-for="item in featureAttachments['default']">
           <div class="media" :key="item.link">
             <div class="media-left">
               <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
@@ -41,13 +42,14 @@
     <div>
       <h4>{{$i18n.t(`featureManager.attachmentsTitledefault`)}}:</h4>
       <div v-if="!Object.keys(featureAttachments).includes(usersGroup) ||
-        featureAttachments[usersGroup].length === 0"
+      featureAttachments[usersGroup].filter(el => el.group !== 'default').length === 0"
         class="empty-sub-panel">
         <i class="fa fa-paperclip" aria-hidden="true"/>
         {{$i18n.t('default.noAttachments')}}
       </div>
       <span v-else>
-        <template v-for="item in featureAttachments[usersGroup]">
+        <template v-for="item in featureAttachments[usersGroup]
+          .filter(el => el.group !== 'default')">
           <div class="media" :key="item.link">
             <div class="media-left">
               <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
