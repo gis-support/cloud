@@ -40,7 +40,7 @@
       </span>
     </div>
     <div>
-      <h4>{{$i18n.t(`featureManager.attachmentsTitledefault`)}}:</h4>
+      <h4>{{$i18n.t(`featureManager.attachmentsTitleGroup`)}}{{usersGroup}}:</h4>
       <div v-if="!Object.keys(featureAttachments).includes(usersGroup) ||
       featureAttachments[usersGroup].filter(el => el.group !== 'default').length === 0"
         class="empty-sub-panel">
@@ -97,13 +97,15 @@
 
                 <div class="full-width pb-10">
                   <label class="control-label col-sm-4">
-                    {{$i18n.t('featureManager.attachmentType')}}</label>
+                    {{$i18n.t('featureManager.attachmentGroup')}}</label>
                   <div class="col-sm-8">
                     <select
                       class="form-control"
                       v-model="isAttachmentPublic">
-                      <option :value="false">{{$i18n.t('default.private')}}</option>
-                      <option :value="true">{{$i18n.t('default.public')}}</option>
+                      <option v-if="usersGroup !== 'default'" :value="false">
+                        {{this.usersGroup}}
+                      </option>
+                      <option :value="true">default</option>
                     </select>
                   </div>
                 </div>
