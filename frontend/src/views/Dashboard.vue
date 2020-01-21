@@ -247,7 +247,11 @@
                     style="width: 50px; position: relative; top: -5px"
                     v-model="styles[currentEditedLayer.id]['stroke-width']">
                 </div>
-                <button type="button" class="btn btn-success" @click="saveStyle">
+                <button type="button"
+                  class="btn btn-success"
+                  @click="saveStyle"
+                  style="position: relative;top: -6px;right: -13px;"
+                >
                   {{$i18n.t('default.save')}}
                 </button>
               </div>
