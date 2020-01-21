@@ -220,6 +220,42 @@
                 </button>
               </div>
             </div>
+            <div class="pt-10">
+              <h4 class="text-left">Styl warstwy</h4>
+              <div style="display: flex; justify-content: space-around;">
+                <div style="display: flex;">
+                  <label class="color-picker__label">
+                    {{$i18n.t('dashboard.modal.strokeColor')}}
+                  </label>
+                  <div class="color-picker--stroke" style="height:50px; width:50px"></div>
+                </div>
+                <div style="display: flex;">
+                  <label class="color-picker__label">
+                    {{$i18n.t('dashboard.modal.fillColor')}}
+                  </label>
+                  <div class="color-picker--fill" style="height:50px; width:50px"></div>
+                </div>
+                <div
+                  style="display: flex;"
+                  v-if="Object.keys(styles).includes(currentEditedLayer.id)"
+                >
+                  <label class="color-picker__label">
+                    {{$i18n.t('dashboard.modal.strokeWidth')}}
+                  </label>
+                  <input type="number" class="form-control"
+                    min="1" max="9" step="1"
+                    style="width: 50px; position: relative; top: -5px"
+                    v-model="styles[currentEditedLayer.id]['stroke-width']">
+                </div>
+                <button type="button"
+                  class="btn btn-success"
+                  @click="saveStyle"
+                  style="position: relative;top: -6px;right: -13px;"
+                >
+                  {{$i18n.t('default.save')}}
+                </button>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -237,6 +273,8 @@
 <script>
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
+import Pickr from '@simonwep/pickr';
+import '@simonwep/pickr/dist/themes/nano.min.css';
 
 export default {
   name: 'dashboard',
@@ -246,8 +284,24 @@ export default {
     isColumnsVisible: true,
     newColumnName: undefined,
     newColumnType: '',
+    pickrComponents: {
+      preview: true,
+      opacity: true,
+      hue: true,
+      interaction: {
+        hex: false,
+        rgba: false,
+        hsla: false,
+        hsva: false,
+        cmyk: false,
+        input: false,
+        clear: false,
+        save: true,
+      },
+    },
     searchExtSources: '',
     searchVector: '',
+    styles: {},
     vectorLayerName: '',
     vectorLayersList: undefined,
     externalLayersList: [
@@ -383,12 +437,67 @@ export default {
         this.$i18n.t('default.error');
       }
     },
+    async saveStyle() {
+      const r = await this.$store.dispatch('saveStyle', {
+        lid: this.currentEditedLayer.id,
+        body: this.styles[this.currentEditedLayer.id],
+      });
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('default.success'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
     async setEditedLayer(layType, key) {
       if (layType === 'vector') {
         this.currentEditedLayer = Object.assign({}, this.vectorLayersList[key]);
       }
       const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
       this.currentLayerSettings = r.body.settings;
+
+      const styleResponse = await this.$store.dispatch(
+        'getLayerStyle', this.currentEditedLayer.id,
+      );
+      this.$set(this.styles, this.currentEditedLayer.id, styleResponse.body.style);
+
+      this.$nextTick(() => {
+        if (!document.querySelector('.color-picker--fill')) return;
+        const pickrFill = Pickr.create({
+          el: '.color-picker--fill',
+          container: 'body',
+          theme: 'nano',
+          default: `rgba(${this.styles[this.currentEditedLayer.id]['fill-color']})`,
+          defaultRepresentation: 'RGBA',
+          position: 'top-start',
+          components: this.pickrComponents,
+          strings: {
+            save: 'Zapisz',
+          },
+        });
+
+        const pickrStroke = Pickr.create({
+          el: '.color-picker--stroke',
+          container: 'body',
+          theme: 'nano',
+          default: `rgba(${this.styles[this.currentEditedLayer.id]['stroke-color']})`,
+          defaultRepresentation: 'RGBA',
+          position: 'top-start',
+          components: this.pickrComponents,
+          strings: {
+            save: 'Zapisz',
+          },
+        });
+
+        pickrFill.on('save', (color) => {
+          const col = color.toRGBA().map(el => parseInt(el, 10));
+          this.$set(this.styles[this.currentEditedLayer.id], 'fill-color', col.join(','));
+        });
+
+        pickrStroke.on('save', (color) => {
+          const col = color.toRGBA().map(el => parseInt(el, 10));
+          this.$set(this.styles[this.currentEditedLayer.id], 'stroke-color', col.join(','));
+        });
+      });
     },
     clearUploadFiles() {
       this.$refs.dropzoneUploadLayer.removeAllFiles();
@@ -432,9 +541,11 @@ export default {
       this.isColumnsVisible = isVisible;
     },
   },
-  mounted() {
+  async mounted() {
     // console.log(this.$swagger);
     this.getLayers();
+    const r = await this.$store.dispatch('getUserGroups');
+    this.$store.commit('setDefaultGroup', r.body.groups[0]);
   },
 };
 </script>
@@ -442,6 +553,11 @@ export default {
 <style scoped>
 .btn-upload {
   margin-right: 20px;
+}
+.color-picker__label {
+  position: relative;
+  top: 2px;
+  right: 10px;
 }
 .container {
   top: 20px;

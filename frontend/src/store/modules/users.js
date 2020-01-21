@@ -17,6 +17,9 @@ const swagger = new Swagger({
 }).client;
 
 export default {
+  state: {
+    usersWithGroups: {},
+  },
   actions: {
     async addGroup(ctx, payload) {
       try {
@@ -68,6 +71,25 @@ export default {
       } catch (err) {
         return err;
       }
+    },
+    async getUsers() {
+      try {
+        const response = await swagger.apis.Auth
+          .get_api_users();
+        return response;
+      } catch (err) {
+        return err;
+      }
+    },
+  },
+  getters: {
+    getUsersWithGroups(state) {
+      return state.usersWithGroups;
+    },
+  },
+  mutations: {
+    setUsersWithGroups(state, users) {
+      state.usersWithGroups = users;
     },
   },
 };

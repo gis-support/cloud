@@ -13,7 +13,7 @@
               <img id="logo" alt="GIS Support logo" src="@/assets/logo.png">
             </a>
           </div>
-          <nav v-if="user" class="collapse navbar-collapse" role="navigation">
+          <nav v-if="user.length > 0" class="collapse navbar-collapse" role="navigation">
             <ul class="nav navbar-nav navbar-right">
               <!-- <li class="navbar-profile" :disabled="$i18n.locale == 'en'"
                 :class="{ btnActive: $i18n.locale == 'en'}" @click="changeLanguage('en')">
@@ -79,7 +79,7 @@ export default {
       this.$router.push({ name: 'login' });
     },
   },
-  mounted() {
+  async mounted() {
     this.changeLanguage('pl');
   },
 };

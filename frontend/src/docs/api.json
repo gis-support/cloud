@@ -1433,6 +1433,55 @@
       }
     }, 
     "/api/users": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Token", 
+            "schema": {
+              "properties": {
+                "users": {
+                  "properties": {
+                    "user": {
+                      "example": "group", 
+                      "type": "string"
+                    }
+                  }, 
+                  "type": "object"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "invalid token", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get users", 
+        "tags": [
+          "Auth"
+        ]
+      }, 
       "post": {
         "parameters": [
           {
@@ -1441,6 +1490,12 @@
             "required": true, 
             "schema": {
               "properties": {
+                "group": {
+                  "description": "User group", 
+                  "example": "default", 
+                  "required": false, 
+                  "type": "string"
+                }, 
                 "password": {
                   "description": "User password", 
                   "example": "test", 

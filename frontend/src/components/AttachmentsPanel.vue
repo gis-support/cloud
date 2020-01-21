@@ -1,45 +1,78 @@
 <template>
   <div class="attachments-panel right-sub-panel">
+    <hr/>
     <button class="btn btn-link" @click="toggleAttachmentAdding(true)">
       <i class="fa fa-plus-circle" aria-hidden="true"/>
       {{$i18n.t(`featureManager.addAttachment`)}}
     </button>
-    <div v-for="mode in attachmentModes" :key="mode">
-      <h4>{{$i18n.t(`featureManager.attachmentsTitle${mode}`)}}:</h4>
-      <div v-if="featureAttachments[lid][fid] &&
-        Object.keys(featureAttachments[lid][fid]).includes('public')">
-        <div v-if="featureAttachments[lid][fid][mode].length < 1"
-          class="empty-sub-panel">
-          <i class="fa fa-paperclip" aria-hidden="true"/>
-          {{$i18n.t('default.noAttachments')}}
-        </div>
-        <span v-else>
-          <template v-for="item in featureAttachments[lid][fid][mode]">
-            <div class="media" :key="item.link">
-              <div class="media-left">
-                <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
-              </div>
-              <div class="media-body">
-                <h5 class="media-heading">
-                  <a :href="item.link" target="_blank">
-                    <span>{{item.name}}</span>
-                  </a>
-                </h5>
-                <span style="opacity:0.4;">
-                  <button
-                    class="btn btn-link action"
-                    :title="$i18n.t('featureManager.deleteLink')"
-                    @click="deleteLink(item)"
-                  >
-                    <i class="fa fa-trash" aria-hidden="true"/>
-                  </button>
-                </span>
-              </div>
-            </div>
-          </template>
-        </span>
+    <div v-if="featureAttachments">
+      <h4>{{$i18n.t(`featureManager.attachmentsTitlepublic`)}}:</h4>
+      <div v-if="!Object.keys(featureAttachments).includes(defaultGroup) ||
+        featureAttachments[defaultGroup].length === 0"
+        class="empty-sub-panel">
+        <i class="fa fa-paperclip" aria-hidden="true"/>
+        {{$i18n.t('default.noAttachments')}}
       </div>
-      <hr/>
+      <span v-else>
+        <template v-for="item in featureAttachments[defaultGroup]">
+          <div class="media" :key="item.link">
+            <div class="media-left">
+              <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
+            </div>
+            <div class="media-body">
+              <h5 class="media-heading">
+                <a :href="item.link" target="_blank">
+                  <span>{{item.name}}</span>
+                </a>
+              </h5>
+              <span style="opacity:0.4;">
+                <button
+                  class="btn btn-link action"
+                  :title="$i18n.t('featureManager.deleteLink')"
+                  @click="deleteLink(item)"
+                >
+                  <i class="fa fa-trash" aria-hidden="true"/>
+                </button>
+              </span>
+            </div>
+          </div>
+        </template>
+      </span>
+    </div>
+    <div>
+      <h4>{{$i18n.t(`featureManager.attachmentsTitleGroup`)}}{{usersGroup}}:</h4>
+      <div v-if="!Object.keys(featureAttachments).includes(usersGroup) ||
+      featureAttachments[usersGroup].filter(el => el.group !== defaultGroup).length === 0"
+        class="empty-sub-panel">
+        <i class="fa fa-paperclip" aria-hidden="true"/>
+        {{$i18n.t('default.noAttachments')}}
+      </div>
+      <span v-else>
+        <template v-for="item in featureAttachments[usersGroup]
+          .filter(el => el.group !== defaultGroup)">
+          <div class="media" :key="item.link">
+            <div class="media-left">
+              <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
+            </div>
+            <div class="media-body">
+              <h5 class="media-heading">
+                <a :href="item.link" target="_blank">
+                  <span>{{item.name}}</span>
+                </a>
+              </h5>
+              <span style="opacity:0.4;">
+                <button
+                  class="btn btn-link action"
+                  :title="$i18n.t('featureManager.deleteLink')"
+                  @click="deleteLink(item)"
+                >
+                  <i class="fa fa-trash" aria-hidden="true"/>
+                </button>
+              </span>
+            </div>
+          </div>
+        </template>
+      </span>
     </div>
 
     <div class="modal-mask" v-if="isAttachmentAdding">
@@ -64,13 +97,15 @@
 
                 <div class="full-width pb-10">
                   <label class="control-label col-sm-4">
-                    {{$i18n.t('featureManager.attachmentType')}}</label>
+                    {{$i18n.t('featureManager.attachmentGroup')}}</label>
                   <div class="col-sm-8">
                     <select
                       class="form-control"
                       v-model="isAttachmentPublic">
-                      <option :value="false">{{$i18n.t('default.private')}}</option>
-                      <option :value="true">{{$i18n.t('default.public')}}</option>
+                      <option v-if="usersGroup !== defaultGroup" :value="false">
+                        {{this.usersGroup}}
+                      </option>
+                      <option :value="true">{{defaultGroup}}</option>
                     </select>
                   </div>
                 </div>
@@ -127,14 +162,24 @@ export default {
   },
   data: () => ({
     attachmentLink: undefined,
-    attachmentModes: ['public', 'default'],
+    // attachmentModes: ['public', 'default'],
     attachmentName: undefined,
     isAttachmentAdding: false,
     isAttachmentPublic: '',
+    usersGroup: undefined,
   }),
   computed: {
+    defaultGroup() {
+      return this.$store.getters.getDefaultGroup;
+    },
     featureAttachments() {
-      return this.$store.getters.getFeatureAttachments;
+      return this.$store.getters.getFeatureAttachments[this.lid][this.fid];
+    },
+    user() {
+      return this.$store.getters.getUser;
+    },
+    usersWithGroups() {
+      return this.$store.getters.getUsersWithGroups;
     },
   },
   methods: {
@@ -149,20 +194,23 @@ export default {
         },
       });
       if (r.status === 201) {
-        if (!Object.keys(this.featureAttachments[this.lid]).includes(this.fid.toString())) {
-          this.$store.commit('setAttachmentsFeature', { lid: this.lid, fid: this.fid });
-        }
-        const tempAtt = this.isAttachmentPublic
-          ? { public: [r.obj.attachments], default: [] }
-          : { public: [], default: [r.obj.attachments] };
-        this.$store.commit('addAttachmentToFeature', {
-          lid: this.lid,
-          fid: this.fid,
-          attachments: tempAtt,
-        });
+        const { group } = r.obj.attachments;
+        const params = {};
+        params[group] = [r.obj.attachments];
+        this.$store.commit('addAttachmentToFeature', { lid: this.lid, fid: this.fid, attachments: params });
         this.toggleAttachmentAdding(false);
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async getUsers() {
+      if (Object.keys(this.usersWithGroups).length > 0) {
+        this.usersGroup = this.usersWithGroups[this.user];
+      } else {
+        const r = await this.$store.dispatch('getUsers');
+        if (r.status === 200) {
+          this.usersGroup = r.obj.users[this.user];
+        }
       }
     },
     deleteLink(item) {
@@ -191,6 +239,9 @@ export default {
       this.attachmentName = '';
       this.isAttachmentPublic = '';
     },
+  },
+  mounted() {
+    this.getUsers();
   },
 };
 </script>

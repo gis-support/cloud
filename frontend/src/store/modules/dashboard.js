@@ -74,6 +74,17 @@ export default {
         return err.response;
       }
     },
+    async saveStyle(ctx, payload) {
+      try {
+        const response = await swagger.apis.Layers.put_api_layers__lid__style({
+          lid: payload.lid,
+          body: payload.body,
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
   },
   getters: {
     getApiUrl(state) {

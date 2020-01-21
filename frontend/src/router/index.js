@@ -49,6 +49,7 @@ router.beforeEach((to, from, next) => {
       if (r && r.body.token === 'valid') {
         next();
       } else {
+        store.commit('logOut');
         next({
           name: 'login',
         });
