@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, jsonify, request, current_app, make_response
+from flask import Blueprint, jsonify, request, current_app, make_response, Response, send_file
 from flasgger import swag_from
 from app.docs import path_by
 from app.db.general import token_required, cloud_decorator, layer_decorator
@@ -15,6 +15,8 @@ from osgeo import ogr
 from app.blueprints.rdos.attachments.models import Attachment
 import tempfile
 import os.path as op
+from io import BytesIO
+import json
 
 mod_layers = Blueprint("layers", __name__)
 
@@ -262,3 +264,24 @@ def create_mvt_tile(z, x, y, name):
     cur.execute(query, (z, x, y))
     tile = cur.fetchone()[0]
     return tile.tobytes()
+
+
+@mod_layers.route('/layers/<lid>/export/geojson', methods=['POST'])
+@swag_from(path_by(__file__, 'docs.export.geojson.post.yml'), methods=['POST'])
+@token_required
+def layers_export_geojson(lid):
+    if request.method == 'POST':
+        """
+        Export layer to file
+        Returns GeoJSON
+        """
+        @layer_decorator(permission="read")
+        def post(layer, lid=None):
+            data = request.get_json(force=True)
+            exported_json = layer.export_geojson(
+                filter_ids=data.get('filter_ids'))
+            mem = BytesIO()
+            mem.write(json.dumps(exported_json, indent=4).encode('utf-8'))
+            mem.seek(0)
+            return send_file(mem, mimetype='text/plain', as_attachment=True, attachment_filename='export.geojson')
+        return post(lid=lid)

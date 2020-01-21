@@ -332,3 +332,23 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
         # TODO validate color values + width
+
+
+@pytest.mark.export
+class TestLayersExport(BaseTest):
+
+    def test_export_geojson(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        fid = self.add_feature_to_layer(client, token, lid)
+        data = {
+            'filter_ids': [fid]
+        }
+        r = client.post(
+            f'/api/layers/{lid}/export/geojson?token={token}', data=json.dumps(data))
+        data = json.loads(BytesIO(r.data).read())
+        assert len(data['features']) == 1
+        r = client.post(
+            f'/api/layers/{lid}/export/geojson?token={token}', data=json.dumps({}))
+        data = json.loads(BytesIO(r.data).read())
+        assert len(data['features']) == 2

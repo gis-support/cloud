@@ -4,6 +4,7 @@
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from app.helpers.style import create_qml
+import os
 
 
 DB_RESTRICTED_USERS = (
@@ -78,8 +79,17 @@ class Cloud:
             SELECT pg_user.usename, rolname FROM pg_user
             JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
             JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
-        """, (self.user,))
+        """)
         return dict([i for i in cursor.fetchall()])
+
+    def get_users_for_group(self, group):
+        cursor = self.execute("""
+            SELECT pg_user.usename, rolname FROM pg_user
+            JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
+            JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
+            WHERE rolname = %s
+        """, (group,))
+        return [i[0] for i in cursor.fetchall()]
 
     # Get permissions for layers
     def get_permissions(self):
@@ -117,6 +127,10 @@ class Cloud:
     def delete_group(self, group):
         if not self.group_exists(group):
             raise ValueError("group not exists")
+        if group == os.environ['DEFAULT_GROUP']:
+            raise ValueError("group restricted")
+        for user in self.get_users_for_group(group):
+            self.assign_user(user, os.environ['DEFAULT_GROUP'])
         self.execute(SQL("""
             DROP GROUP {};
         """).format(Identifier(group)))

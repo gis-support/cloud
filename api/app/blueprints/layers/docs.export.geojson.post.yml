@@ -1,0 +1,40 @@
+Export to GeoJSON
+---
+tags:
+  - Export
+summary: Export layer with optional filter
+produces:
+  - text/plain
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - in: body
+    name: body
+    required: false
+    schema:
+      type: object
+      properties:
+        filter_ids:
+          type: array
+          items:
+            type: integer
+            description: Feature ID
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    description: File
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

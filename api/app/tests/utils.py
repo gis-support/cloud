@@ -63,6 +63,7 @@ class BaseTest:
         assert r.status_code == 201
         assert r.json
         assert r.json['type'] == 'Feature'
+        return r.json['properties']['id']
 
     def add_attachment_to_feature(self, client, token, lid, fid, public=True, name='test', link='https://gis-support.pl/'):
         r = client.get(
