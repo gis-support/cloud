@@ -39,7 +39,7 @@
         </template>
       </span>
     </div>
-    <div>
+    <div v-if="usersGroup !== 'default'">
       <h4>{{$i18n.t(`featureManager.attachmentsTitleGroup`)}}{{usersGroup}}:</h4>
       <div v-if="!Object.keys(featureAttachments).includes(usersGroup) ||
       featureAttachments[usersGroup].filter(el => el.group !== defaultGroup).length === 0"
@@ -103,7 +103,7 @@
                       class="form-control"
                       v-model="isAttachmentPublic">
                       <option v-if="usersGroup !== defaultGroup" :value="false">
-                        {{this.usersGroup}}
+                        {{usersGroup}}
                       </option>
                       <option :value="true">{{defaultGroup}}</option>
                     </select>
@@ -212,6 +212,7 @@ export default {
           this.usersGroup = r.obj.users[this.user];
         }
       }
+      console.log(this.usersGroup);
     },
     deleteLink(item) {
       this.$alertify.confirm(this.$i18n.t('featureManager.deleteAttachmentConfirm'), async () => {

@@ -135,6 +135,7 @@
   "users": {
     "assignUser": "Przypisz użytkownika",
     "assignUserConfirm": "Czy na pewno chcesz przypisać użytkownika do grupy?",
+    "deleteDefaultGroup": "Nie można usunąć domyślnej grupy",
     "deleteGroupConfirm": "Czy na pewno chcesz usunąć wybraną grupę?",
     "modal": {
       "changePermissions": "Zmiana uprawnień",

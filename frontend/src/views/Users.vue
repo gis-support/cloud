@@ -165,7 +165,7 @@
               <option value="undefined" disabled hidden>
                 {{$i18n.t('users.title.chooseGroupToDelete')}}
               </option>
-              <option v-for="group in groups.filter(el => el !== this.defaultGroup)"
+              <option v-for="group in groups"
                 v-text="group"
                 :key="group"
                 :value="group"/>
@@ -299,6 +299,8 @@ export default {
           this.usersGroup = undefined;
           const groupIdx = this.groups.findIndex(el => el === this.usersGroup);
           this.groups.splice(groupIdx, 1);
+        } else if (r.status === 400) {
+          this.$alertify.error(this.$i18n.t('users.deleteDefaultGroup'));
         }
       }, () => {})
         .set({ title: this.$i18n.t('users.title.deleteGroupTitle') })

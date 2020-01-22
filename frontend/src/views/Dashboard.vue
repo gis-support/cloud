@@ -684,8 +684,7 @@ export default {
     // console.log(this.$swagger);
     this.getLayers();
     this.getServices();
-    const r = await this.$store.dispatch('getUserGroups');
-    this.$store.commit('setDefaultGroup', r.body.groups[0]);
+    this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
   },
 };
 </script>
