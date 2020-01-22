@@ -74,6 +74,20 @@ export default {
         return err.response;
       }
     },
+    async getWMSCapabilities(ctx, payload) {
+      try {
+        const url = `https://divi.io/wms_proxy/${payload}?request=GetCapabilities&service=WMS`;
+        const r = await fetch(url);
+        console.log(r);
+        if (r) {
+          console.log(r);
+          return r;
+        }
+        return false;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async saveStyle(ctx, payload) {
       try {
         const response = await swagger.apis.Layers.put_api_layers__lid__style({

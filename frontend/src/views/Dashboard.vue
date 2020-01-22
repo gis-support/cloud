@@ -74,7 +74,7 @@
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main">
-        <span data-toggle="modal" data-target="#addLayerModal" data-type="externalLayer">
+        <span data-toggle="modal" data-target="#addLayerWmsModal" data-type="externalLayer">
           <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
           <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
         </span>
@@ -144,6 +144,46 @@
               {{$i18n.t('default.cancel')}}
             </button>
             <button type="button" class="btn btn-success" @click="sendVectorLayer">
+              {{$i18n.t('default.save')}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--KONIEC MODALA-->
+
+    <!--MODAL DODAWANIA USŁUG-->
+    <div class="modal fade" data-backdrop="static" id="addLayerWmsModal" tabindex="-1" role="dialog"
+      aria-hidden="true" ref="addLayerWmsModal">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{{$i18n.t('dashboard.modal.addLayerWms')}}</h4>
+          </div>
+          <div class="modal-body">
+            <div style="display: flex">
+              <label class="control-label col-sm-4">
+                {{$i18n.t('dashboard.modal.layerAddress')}}
+              </label>
+              <input type="text" class="form-control" v-model="wmsAddress">
+              <i
+                class="fa fa-cloud-download fetch-wms-icon"
+                :class="{disabled: wmsAddress.length < 1}"
+                :title="$i18n.t('default.downloadAvailableLayers')"
+                aria-hidden="true"
+                @click="fetchWms">
+              </i>
+            </div>
+            <div class="pt-10">
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"
+              ref="closeModalBtn">
+              {{$i18n.t('default.cancel')}}
+            </button>
+            <button type="button" class="btn btn-success">
               {{$i18n.t('default.save')}}
             </button>
           </div>
@@ -275,6 +315,7 @@ import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import Pickr from '@simonwep/pickr';
 import '@simonwep/pickr/dist/themes/nano.min.css';
+import WMSCapabilities from 'ol/format/WMSCapabilities';
 
 export default {
   name: 'dashboard',
@@ -304,6 +345,7 @@ export default {
     styles: {},
     vectorLayerName: '',
     vectorLayersList: undefined,
+    wmsAddress: '',
     externalLayersList: [
       { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
       { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
@@ -406,6 +448,14 @@ export default {
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
+    },
+    async fetchWms() {
+      const parser = new WMSCapabilities();
+      const url = `https://divi.io/wms_proxy/${this.wmsAddress}?request=GetCapabilities&service=WMS`;
+      fetch(url).then(response => response.text()).then((text) => {
+        const result = parser.read(text);
+        console.log(result);
+      });
     },
     async saveLayerName() {
       const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
@@ -581,6 +631,16 @@ export default {
   letter-spacing: -1px;
   line-height: 1.75em;
   margin-left: 5px;
+}
+.fetch-wms-icon {
+  font-size:26px;
+  padding-left: 6px;
+  padding-top: 6px;
+  cursor: pointer;
+}
+.disabled {
+  cursor: not-allowed;
+  color: lightgrey;
 }
 .files-list li {
   width: 120px;
