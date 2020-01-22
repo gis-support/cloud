@@ -146,3 +146,12 @@ class TestGroups(BaseTest):
         assert r.status_code == 409
         assert r.json
         assert r.json['error'] == 'group not exists'
+
+    def test_groups_restricted_group_delete(self, client):
+        default_group = os.environ.get('DEFAULT_GROUP')
+        token = self.get_token(client)
+        r = client.delete(
+            f'/api/users/groups?token={token}', data=json.dumps({'group': os.environ['DEFAULT_GROUP']}))
+        assert r.status_code == 400
+        assert r.json
+        assert r.json['error'] == 'group restricted'

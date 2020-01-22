@@ -63,6 +63,7 @@ class BaseTest:
         assert r.status_code == 201
         assert r.json
         assert r.json['type'] == 'Feature'
+        return r.json['properties']['id']
 
     def add_attachment_to_feature(self, client, token, lid, fid, public=True, name='test', link='https://gis-support.pl/'):
         r = client.get(
@@ -81,3 +82,19 @@ class BaseTest:
         assert r.status_code == 201
         assert r.json
         return r.json['attachments']['id']
+
+    def add_service(self, client, token, public=True):
+        request = {
+            'name': 'geoportal prg',
+            'url': 'https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaNumeracjiAdresowej',
+            'layers': 'prg-adresy,prg-ulice,prg-place',
+            'public': public
+        }
+        r = client.post(
+            f'/api/services?token={token}', data=json.dumps(request))
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['services']['name'] == request['name']
+        assert r.json['services']['url'] == request['url']
+        assert r.json['services']['layers'] == request['layers']
+        return r.json['services']['id']

@@ -224,3 +224,29 @@ class Layer(Cloud):
         query_string = SQL("DELETE FROM {} WHERE id=%s;").format(
             Identifier(self.name))
         self.execute(query_string, (fid,))
+
+    # Export fo GeoJSON file
+    def export_geojson(self, filter_ids=None):
+        if not filter_ids:
+            query = """
+                SELECT json_build_object(
+                    'type', 'FeatureCollection',
+                    'features', json_agg(ST_AsGeoJSON(t.*)::json)
+                )
+                FROM (SELECT * from {}) as t;
+            """
+            cursor = self.execute(SQL(query).format(Identifier(self.name)))
+        else:
+            query = """
+                SELECT json_build_object(
+                    'type', 'FeatureCollection',
+                    'features', json_agg(ST_AsGeoJSON(t.*)::json)
+                )
+                FROM (SELECT * from {} WHERE id = ANY (%s) ) as t;
+            """
+            cursor = self.execute(SQL(query).format(
+                Identifier(self.name)), (filter_ids,))
+        feature_collection = cursor.fetchone()[0]
+        if not feature_collection['features']:
+            feature_collection['features'] = []
+        return feature_collection
