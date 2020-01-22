@@ -20,8 +20,18 @@ export default {
   state: {
     apiUrl: 'https://cloud.gis.support/api',
     columnTypes: ['character varying', 'real', 'integer', 'timestamp without time zone'],
+    services: [],
   },
   actions: {
+    async addService(ctx, payload) {
+      try {
+        const response = await swagger.apis.Attachments
+          .post_api_services({ body: payload });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async changeLayer(ctx, payload) {
       try {
         const response = await swagger.apis.Layers
@@ -44,6 +54,16 @@ export default {
       try {
         // eslint-disable-next-line no-underscore-dangle
         const response = await swagger.apis.Layers.delete_api_layers__lid_({ lid });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async deleteService(ctx, sid) {
+      try {
+        // eslint-disable-next-line no-underscore-dangle
+        const response = await swagger.apis.Services
+          .delete_api_services__sid_({ sid });
         return response;
       } catch (err) {
         return err.response;
@@ -74,16 +94,10 @@ export default {
         return err.response;
       }
     },
-    async getWMSCapabilities(ctx, payload) {
+    async getServices() {
       try {
-        const url = `https://divi.io/wms_proxy/${payload}?request=GetCapabilities&service=WMS`;
-        const r = await fetch(url);
-        console.log(r);
-        if (r) {
-          console.log(r);
-          return r;
-        }
-        return false;
+        const response = await swagger.apis.Services.get_api_services();
+        return response;
       } catch (err) {
         return err.response;
       }
@@ -100,12 +114,27 @@ export default {
       }
     },
   },
+  mutations: {
+    addService(state, service) {
+      state.services.push(service);
+    },
+    deleteService(state, sid) {
+      const serviceIdx = state.services.findIndex(el => el.id === sid);
+      state.services.splice(serviceIdx, 1);
+    },
+    setServices(state, service) {
+      state.services = service;
+    },
+  },
   getters: {
     getApiUrl(state) {
       return state.apiUrl;
     },
     getColumnTypes(state) {
       return state.columnTypes;
+    },
+    getServices(state) {
+      return state.services;
     },
   },
 };

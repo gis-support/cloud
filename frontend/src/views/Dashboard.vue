@@ -79,15 +79,15 @@
           <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
         </span>
 
-        <div class="loading-overlay pt-10 pb-10" v-if="!externalLayersList">
+        <div class="loading-overlay pt-10 pb-10" v-if="!servicesList">
           <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
           <i class="fa fa-lg fa-spin fa-spinner"></i></div>
         </div>
 
-        <div v-if="filteredListExternal.length == 0" class="pt-10 pb-10">
+        <div v-if="filteredServicesList.length == 0" class="pt-10 pb-10">
           {{$i18n.t('default.noLayers')}}
         </div>
-        <template v-else v-for="(val, key) in filteredListExternal">
+        <template v-else v-for="(val, key) in filteredServicesList">
           <div class="mb-0" :key="key">
             <div class="panel-heading pl-0 pr-0">
               <h4 class="panel-title flex-center">
@@ -97,17 +97,21 @@
                     {{ val.name }}
                   </span>
                   <span class="desc-sm">
-                    {{ val.layType }}
+                    {{ val.url }}
                   </span>
                   <span class="desc-sm">
-                    {{ val.url }}
+                    {{ val.group }}
+                  </span>
+                  <span class="desc-sm">
+                    {{ val.layers }}
                   </span>
                 </span>
                 <span class="panel-title__tools">
-                  <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                    data-placement="top" :title="$i18n.t('default.settings')"></i>
+                  <!-- <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
+                    data-placement="top" :title="$i18n.t('default.settings')"></i> -->
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" :title="$i18n.t('default.delete')"></i>
+                    data-placement="top" :title="$i18n.t('default.delete')"
+                    @click="deleteService(val.id)"></i>
                 </span>
               </h4>
             </div>
@@ -153,7 +157,7 @@
     <!--KONIEC MODALA-->
 
     <!--MODAL DODAWANIA USŁUG-->
-    <div class="modal fade" data-backdrop="static" id="addLayerWmsModal" tabindex="-1" role="dialog"
+    <div class="modal fade" data-backdrop="static" id="addLayerWmsModal" tabindex="-2" role="dialog"
       aria-hidden="true" ref="addLayerWmsModal">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -162,28 +166,62 @@
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label class="control-label col-sm-4">
+              <label class="control-label col-sm-4" style="width: 150px">
+                {{$i18n.t('dashboard.modal.serviceName')}}
+              </label>
+              <input type="text" class="form-control" v-model="serviceName">
+            </div>
+            <div class="pt-10" style="display: flex;">
+              <label class="control-label col-sm-4" style="width: 160px">
                 {{$i18n.t('dashboard.modal.layerAddress')}}
               </label>
-              <input type="text" class="form-control" v-model="wmsAddress">
+              <input type="text" class="form-control" v-model="serviceUrl">
               <i
                 class="fa fa-cloud-download fetch-wms-icon"
-                :class="{disabled: wmsAddress.length < 1}"
+                :class="{disabled: serviceUrl.length < 1}"
                 :title="$i18n.t('default.downloadAvailableLayers')"
                 aria-hidden="true"
                 @click="fetchWms">
               </i>
             </div>
-            <div class="pt-10">
-
+            <div class="pt-10" v-if="fetchedLayers.length > 0">
+              <ul class="select-layer-list">
+                <li v-for="layer in fetchedLayers" :key="layer">
+                  <label class="checkbox-inline">
+                    <input type="checkbox" id="checkbox" :value="layer" v-model="selectedLayers">
+                    {{layer}}
+                  </label>
+                </li>
+              </ul>
+            </div>
+            <div class="loading-overlay pt-10 pb-10" style="text-align: center;"
+              v-if="fetchedLayers.length === 0 && isFetching">
+              <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
+              <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+            </div>
+            <hr/>
+            <div class="pt-10" v-if="fetchedLayers.length > 0">
+              <label class="checkbox-inline">
+                <input type="checkbox" id="checkbox" v-model="isServicePublic">
+                {{$i18n.t('dashboard.modal.servicePublic')}}
+              </label>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal"
-              ref="closeModalBtn">
+            <button type="button" class="btn btn-default"
+              data-dismiss="modal"
+              ref="closeModalWmsBtn"
+              @click="clearServicesModal"
+            >
               {{$i18n.t('default.cancel')}}
             </button>
-            <button type="button" class="btn btn-success">
+            <button type="button"
+              class="btn btn-success"
+              :disabled="selectedLayers.length === 0 ||
+                serviceName.length === 0 ||
+                selectedLayers.length === 0"
+              @click="addService"
+            >
               {{$i18n.t('default.save')}}
             </button>
           </div>
@@ -322,7 +360,10 @@ export default {
   data: vm => ({
     currentEditedLayer: undefined,
     currentLayerSettings: [],
+    fetchedLayers: [],
     isColumnsVisible: true,
+    isFetching: false,
+    isServicePublic: false,
     newColumnName: undefined,
     newColumnType: '',
     pickrComponents: {
@@ -342,14 +383,17 @@ export default {
     },
     searchExtSources: '',
     searchVector: '',
+    serviceUrl: '',
+    serviceName: '',
+    selectedLayers: [],
     styles: {},
     vectorLayerName: '',
     vectorLayersList: undefined,
-    wmsAddress: '',
-    externalLayersList: [
-      { name: 'Nadleśnictwa', layType: 'WMS', url: 'www.url.pl/wms' },
-      { name: 'Podtopienia', layType: 'WMTS', url: 'www.url.pl/wmts' },
-    ],
+    /* servicesList: [
+      {
+        group: '', layers: '', url: '', name: '',
+      },
+    ], */
     dropzoneOptions: {
       url: `${vm.$store.getters.getApiUrl}/layers?token=${vm.$store.getters.getToken}`,
       addRemoveLinks: true,
@@ -387,11 +431,11 @@ export default {
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
     },
-    filteredListExternal() {
-      if (!this.externalLayersList) {
+    filteredServicesList() {
+      if (!this.servicesList) {
         return false;
       }
-      return this.externalLayersList.filter(
+      return this.servicesList.filter(
         layer => layer.name.toLowerCase().includes(this.searchExtSources.toLowerCase()),
       );
     },
@@ -402,6 +446,9 @@ export default {
       return this.vectorLayersList.filter(
         layer => layer.name.toLowerCase().includes(this.searchVector.toLowerCase()),
       );
+    },
+    servicesList() {
+      return this.$store.getters.getServices;
     },
   },
   methods: {
@@ -427,6 +474,21 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+    async addService() {
+      const r = await this.$store.dispatch('addService', {
+        layers: this.selectedLayers.join(','),
+        name: this.serviceName,
+        public: this.isServicePublic,
+        url: this.serviceUrl,
+      });
+      if (r.status === 201) {
+        this.$alertify.success(this.$i18n.t('default.success'));
+        this.clearServicesModal();
+        this.$store.commit('addService', r.body.services);
+      } else {
+        this.$i18n.t('default.error');
+      }
+    },
     async deleteColumn(colName) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerColumn'), async () => {
         const payload = {
@@ -445,16 +507,35 @@ export default {
         .set({ title: this.$i18n.t('dashboard.modal.deleteColumnTitle') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
+    async deleteService(sid) {
+      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteService'), async () => {
+        const r = await this.$store.dispatch('deleteService', sid);
+        if (r.status === 200) {
+          this.$alertify.success(this.$i18n.t('default.deleted'));
+          this.$store.commit('deleteService', sid);
+        } else {
+          this.$i18n.t('default.error');
+        }
+      }, () => {})
+        .set({ title: this.$i18n.t('dashboard.modal.deleteServiceTitle') })
+        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
     },
+    async getServices() {
+      const r = await this.$store.dispatch('getServices');
+      this.$store.commit('setServices', r.body.services);
+    },
     async fetchWms() {
+      this.isFetching = true;
       const parser = new WMSCapabilities();
-      const url = `https://divi.io/wms_proxy/${this.wmsAddress}?request=GetCapabilities&service=WMS`;
+      const url = `https://divi.io/wms_proxy/${this.serviceUrl}?request=GetCapabilities&service=WMS`;
       fetch(url).then(response => response.text()).then((text) => {
         const result = parser.read(text);
-        console.log(result);
+        this.fetchedLayers = result.Capability.Layer.Layer.map(el => el.Name);
+        this.isFetching = false;
       });
     },
     async saveLayerName() {
@@ -549,6 +630,14 @@ export default {
         });
       });
     },
+    clearServicesModal() {
+      document.querySelector('#addLayerWmsModal button.btn.btn-default').click();
+      this.fetchedLayers = [];
+      this.selectedLayers = [];
+      this.serviceName = '';
+      this.isServicePublic = false;
+      this.serviceUrl = '';
+    },
     clearUploadFiles() {
       this.$refs.dropzoneUploadLayer.removeAllFiles();
       this.vectorLayerName = '';
@@ -594,6 +683,7 @@ export default {
   async mounted() {
     // console.log(this.$swagger);
     this.getLayers();
+    this.getServices();
     const r = await this.$store.dispatch('getUserGroups');
     this.$store.commit('setDefaultGroup', r.body.groups[0]);
   },
@@ -672,6 +762,14 @@ export default {
 .section__header {
   padding-bottom: 15px;
   margin-bottom: -1px;
+}
+.select-layer-list {
+  list-style-type: none;
+  padding-left: 32px;
+  text-align: left;
+  text-decoration: none;
+  max-height: 50vh;
+  overflow-y: auto;
 }
 .text-centered {
   text-align: center;
