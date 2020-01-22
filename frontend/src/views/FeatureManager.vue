@@ -179,9 +179,9 @@
                       <i class="fa fa-download green icon-hover"></i> <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a>SHP</a></li>
-                      <li><a>GEOJSON</a></li>
-                      <li><a>XLSX</a></li>
+                      <!-- <li><a>SHP</a></li> -->
+                      <li @click="downloadLayer"><a>GEOJSON</a></li>
+                      <!-- <li><a>XLSX</a></li> -->
                     </ul>
                   </div>
                   <a class="btn btn-default">
@@ -446,6 +446,18 @@ export default {
       }, () => {})
         .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
+    async downloadLayer() {
+      const r = await this.$store.dispatch('downloadLayer', {
+        lid: this.$route.params.layerId,
+        body: {},
+      });
+      if (r.status === 200) {
+        this.$i18n.t('default.success');
+        this.saveFile(r);
+      } else {
+        this.$i18n.t('featureManager.downloadError');
+      }
     },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
@@ -721,6 +733,17 @@ export default {
       source.tileCache.clear();
       source.refresh();
       layer.changed();
+    },
+    saveFile(r) {
+      const data = JSON.stringify(r.body);
+      const blob = new Blob([data], { type: 'text/plain' });
+      const e = document.createEvent('MouseEvents');
+      const a = document.createElement('a');
+      a.download = `${this.$route.params.layerId}.geojson`;
+      a.href = window.URL.createObjectURL(blob);
+      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      a.dispatchEvent(e);
     },
     selectFeature(feature) {
       if (feature) {

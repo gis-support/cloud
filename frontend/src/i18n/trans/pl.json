@@ -108,6 +108,7 @@
     "deleteFeatureConfirm": "Czy na pewno chcesz usunąć wybrany obiekt?",
     "deleteFeatureHeader": "Usuwanie obiektu",
     "deleteLink": "Usuń link",
+    "downloadError": "Błąd podczas pobierania warstwy",
     "errorAttachmentsFetch": "Błąd pobierania załączników",
     "informations": "Informacje",
     "legend": "Legenda",
