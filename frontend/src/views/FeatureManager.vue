@@ -188,7 +188,7 @@
                     </button>
                     <ul class="dropdown-menu">
                       <!-- <li><a>SHP</a></li> -->
-                      <li @click="downloadLayer"><a>GEOJSON</a></li>
+                      <li @click="downloadLayer([])"><a>GEOJSON</a></li>
                       <!-- <li><a>XLSX</a></li> -->
                     </ul>
                   </div>
@@ -456,7 +456,7 @@ export default {
         .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
-    async downloadLayer(rows = []) {
+    async downloadLayer(rows) {
       let filteredIds;
       if (rows.length === 0) {
         filteredIds = {};
