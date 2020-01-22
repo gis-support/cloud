@@ -225,6 +225,25 @@
                       </li>
                     </ul>
                   </div>
+                  <div class="services">
+                    <h4>{{$i18n.t('default.services')}}:</h4>
+                    <ul class="list-group">
+                      <li class="list-group-item"
+                        v-for="service in services"
+                        :key="service.name"
+                        :class="{'activeLayer' : activeServices.includes(service.name)}"
+                      >
+                      <label class="checkbox-inline mb-0">
+                        <input type="checkbox"
+                          @click="setServiceVisibility(service.name)"
+                          :value="service.name"
+                          v-model="activeServices"
+                        >
+                        {{ service.name }} ({{ service.layers }})
+                      </label>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -301,6 +320,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
+import TileWMS from 'ol/source/TileWMS';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
@@ -322,6 +342,7 @@ export default {
     FiltersPanel,
   },
   data: () => ({
+    activeServices: [],
     addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
     columnFilterDecisionDialogView: false,
@@ -362,6 +383,9 @@ export default {
     },
     mapZoom() {
       return this.$store.getters.getMapZoom;
+    },
+    services() {
+      return this.$store.getters.getServices;
     },
     token() {
       return this.$store.getters.getToken;
@@ -642,6 +666,24 @@ export default {
       }
       return false;
     },
+    loadServices() {
+      this.services.forEach((service) => {
+        this.map.addLayer(
+          new TileLayer({
+            name: service.name,
+            visible: false,
+            source: new TileWMS({
+              url: service.url,
+              params: {
+                LAYERS: service.layers,
+                TILED: true,
+                SRS: 'EPSG:2180',
+              },
+            }),
+          }),
+        );
+      });
+    },
     openColumnFilterDecision() {
       const self = this;
 
@@ -696,6 +738,13 @@ export default {
       this.map.getView().fit(feature.getGeometry());
       this.indexActiveTab = 1; // change tab in sidepanel
     },
+    setServiceVisibility(serviceName) {
+      if (this.getLayerByName(serviceName).getVisible()) {
+        this.getLayerByName(serviceName).setVisible(false);
+      } else {
+        this.getLayerByName(serviceName).setVisible(true);
+      }
+    },
     updateSearchCount(count) {
       this.searchCount = count;
     },
@@ -748,6 +797,7 @@ export default {
       }),
     );
     this.createSelectInteraction();
+    this.loadServices();
 
     const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
     if (r.status === 200) {
