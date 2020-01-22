@@ -62,8 +62,12 @@
                     v-else
                     v-text="item[column.key]"
                     :key="idx2 + 'item'"
-                    :class="{'active-cell' : selectedIndex == indexFirstItem + index}"
-                    @click="selectItemIndex(indexFirstItem + index, item)"
+                    :class="{
+                      'active-cell' : selectedIndex == indexFirstItem + index,
+                      'cell-to-download' : rowsToDownload.map(el => el.id).includes(item.id)
+                    }"
+                    @click.exact="selectItemIndex(indexFirstItem + index, item)"
+                    @click.ctrl="selectToDownloadCtrl(index, item)"
                   />
                 </template>
               </tr>
@@ -112,6 +116,9 @@ export default {
     layId: {
       type: String,
     },
+    rowsToDownload: {
+      type: Array,
+    },
   },
   data: () => ({
     arenaHeight: 0,
@@ -119,10 +126,9 @@ export default {
     maxItems: 0,
     indexFirstItem: 0,
     itemHeight: 0,
+    selectedIndex: -1,
     sortedColumn: false,
     sortedColumnType: 'asc',
-
-    selectedIndex: -1,
   }),
   computed: {
     searchedItems() {
@@ -276,6 +282,10 @@ export default {
       if (this.editing) {
         return;
       }
+      if (this.rowsToDownload.length > 0) {
+        this.rowsToDownload = [];
+        this.$emit('updateSelectedRows', this.rowsToDownload);
+      }
       this.getAttachments(prop.id);
       this.selectedIndex = index;
       this.updateSelectedItem(true);
@@ -295,6 +305,15 @@ export default {
       if (this.selectedIndex !== -1) {
         this.scrollTo(this.selectedIndex);
       }
+    },
+    selectToDownloadCtrl(idx, item) {
+      const isFound = this.rowsToDownload.some(el => el.id === item.id);
+      if (isFound) {
+        this.rowsToDownload.splice(idx, 1);
+      } else {
+        this.rowsToDownload.push(item);
+      }
+      this.$emit('updateSelectedRows', this.rowsToDownload);
     },
     scrollTo(index) {
       const self = this;

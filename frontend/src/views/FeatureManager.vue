@@ -43,6 +43,12 @@
               <i class="fa fa-times-circle"></i>
             </button>
           </span>
+          <button type="button" class="btn navbar-btn navbar-right btn-default"
+            v-if="selectedRows.length > 0"
+            @click="downloadLayer(selectedRows)"
+          >
+            <i class="fa fa-download"></i>
+          </button>
         </div>
       </nav>
         <!-- {{ $route.params.layerId }} -->
@@ -54,9 +60,11 @@
           :editing="false"
           :items="items"
           :layId="$route.params.layerId"
+          :rowsToDownload="selectedRows"
           :search="searchItemValue"
           @selectFeatureById="selectFeatureById"
           @updateSearchCount="updateSearchCount"
+          @updateSelectedRows="updateSelectedRows"
         />
         <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
           <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
@@ -364,6 +372,7 @@ export default {
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
+    selectedRows: [],
   }),
   computed: {
     activeLayer() {
@@ -447,14 +456,23 @@ export default {
         .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
-    async downloadLayer() {
+    async downloadLayer(rows = []) {
+      let filteredIds;
+      if (rows.length === 0) {
+        filteredIds = {};
+      } else {
+        filteredIds = {
+          filter_ids: rows.map(el => el.id),
+        };
+      }
       const r = await this.$store.dispatch('downloadLayer', {
         lid: this.$route.params.layerId,
-        body: {},
+        body: filteredIds,
       });
       if (r.status === 200) {
         this.$i18n.t('default.success');
         this.saveFile(r);
+        this.selectedRows = [];
       } else {
         this.$i18n.t('featureManager.downloadError');
       }
@@ -778,6 +796,9 @@ export default {
     },
     updateSearchCount(count) {
       this.searchCount = count;
+    },
+    updateSelectedRows(rows) {
+      this.selectedRows = rows;
     },
   },
   async mounted() {
