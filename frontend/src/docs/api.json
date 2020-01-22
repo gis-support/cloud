@@ -334,6 +334,67 @@
         ]
       }
     }, 
+    "/api/layers/{lid}/export/geojson": {
+      "post": {
+        "parameters": [
+          {
+            "description": "Layer ID", 
+            "in": "path", 
+            "name": "lid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "properties": {
+                "filter_ids": {
+                  "items": {
+                    "description": "Feature ID", 
+                    "type": "integer"
+                  }, 
+                  "type": "array"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "text/plain"
+        ], 
+        "responses": {
+          "200": {
+            "description": "File"
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Export to GeoJSON", 
+        "tags": [
+          "Export"
+        ]
+      }
+    }, 
     "/api/layers/{lid}/features": {
       "post": {
         "parameters": [
@@ -1429,6 +1490,202 @@
         "summary": "Edit permissions", 
         "tags": [
           "Permissions"
+        ]
+      }
+    }, 
+    "/api/services": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "services": {
+                  "items": {
+                    "properties": {
+                      "group": {
+                        "type": "string"
+                      }, 
+                      "id": {
+                        "type": "string"
+                      }, 
+                      "layers": {
+                        "type": "string"
+                      }, 
+                      "name": {
+                        "type": "string"
+                      }, 
+                      "url": {
+                        "type": "string"
+                      }
+                    }, 
+                    "type": "object"
+                  }, 
+                  "type": "array"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Get services", 
+        "tags": [
+          "Services"
+        ]
+      }, 
+      "post": {
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": true, 
+            "schema": {
+              "properties": {
+                "layers": {
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "name": {
+                  "required": true, 
+                  "type": "string"
+                }, 
+                "public": {
+                  "required": false, 
+                  "type": "boolean"
+                }, 
+                "url": {
+                  "required": true, 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "description": "Service", 
+            "schema": {
+              "properties": {
+                "group": {
+                  "type": "string"
+                }, 
+                "id": {
+                  "type": "string"
+                }, 
+                "layers": {
+                  "type": "string"
+                }, 
+                "name": {
+                  "type": "string"
+                }, 
+                "url": {
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Add new service", 
+        "tags": [
+          "Attachments"
+        ]
+      }
+    }, 
+    "/api/services/{sid}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Service ID", 
+            "in": "path", 
+            "name": "sid", 
+            "required": true, 
+            "type": "string"
+          }, 
+          {
+            "description": "Token", 
+            "in": "query", 
+            "name": "token", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "produces": [
+          "application/json"
+        ], 
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "aid": {
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }, 
+          "403": {
+            "description": "Token required", 
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": "token required", 
+                  "type": "string"
+                }
+              }, 
+              "type": "object"
+            }
+          }
+        }, 
+        "summary": "Delete service", 
+        "tags": [
+          "Services"
         ]
       }
     }, 
