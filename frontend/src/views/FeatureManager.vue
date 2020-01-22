@@ -233,13 +233,13 @@
                         :key="service.name"
                         :class="{'activeLayer' : activeServices.includes(service.name)}"
                       >
-                      <label class="checkbox-inline mb-0">
+                      <label class="checkbox-inline mb-0" :title="service.layers">
                         <input type="checkbox"
                           @click="setServiceVisibility(service.name)"
                           :value="service.name"
                           v-model="activeServices"
                         >
-                        {{ service.name }} ({{ service.layers }})
+                        {{ service.name }} ({{ service.layers | maxLength }})
                       </label>
                       </li>
                     </ul>
@@ -389,6 +389,14 @@ export default {
     },
     token() {
       return this.$store.getters.getToken;
+    },
+  },
+  filters: {
+    maxLength: (val) => {
+      if (val.length > 30) {
+        return `${val.slice(0, 30)}...`;
+      }
+      return val;
     },
   },
   methods: {
