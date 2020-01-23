@@ -14,7 +14,7 @@
       <div class="section__content heading-block heading-block-main">
         <span data-toggle="modal" data-target="#addLayerModal" data-type="vectorLayer">
           <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
-          <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
+          <a class="green section__content--add">{{$i18n.t('dashboard.list.addLayer')}}</a>
         </span>
 
         <div class="loading-overlay pt-10 pb-10" v-if="!vectorLayersList">
@@ -76,7 +76,7 @@
       <div class="section__content heading-block heading-block-main">
         <span data-toggle="modal" data-target="#addLayerWmsModal" data-type="externalLayer">
           <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
-          <a class="green">{{$i18n.t('dashboard.list.addLayer')}}</a>
+          <a class="green section__content--add">{{$i18n.t('dashboard.list.addService')}}</a>
         </span>
 
         <div class="loading-overlay pt-10 pb-10" v-if="!servicesList">
@@ -96,14 +96,14 @@
                   <span class="bold" href="#">
                     {{ val.name }}
                   </span>
-                  <span class="desc-sm">
-                    {{ val.url }}
+                  <span class="desc-sm" :title="val.url">
+                    <strong>URL</strong>: {{ val.url | maxLength }}
                   </span>
-                  <span class="desc-sm">
-                    {{ val.group }}
+                  <span class="desc-sm" :title="val.group">
+                    <strong>{{$i18n.t('default.group')}}</strong>: {{ val.group }}
                   </span>
-                  <span class="desc-sm">
-                    {{ val.layers }}
+                  <span class="desc-sm" :title="val.layers">
+                    <strong>{{$i18n.t('default.layers')}}</strong>: {{ val.layers | maxLength }}
                   </span>
                 </span>
                 <span class="panel-title__tools">
@@ -451,6 +451,14 @@ export default {
       return this.$store.getters.getServices;
     },
   },
+  filters: {
+    maxLength: (val) => {
+      if (val.length > 50) {
+        return `${val.slice(0, 50)}...`;
+      }
+      return val;
+    },
+  },
   methods: {
     async addNewColumn() {
       if (!this.newColumnName || !this.newColumnType) {
@@ -753,6 +761,9 @@ export default {
 }
 .section {
   height: 50%;
+}
+.section__content--add:hover {
+  cursor: pointer;
 }
 .section__content.heading-block.heading-block-main {
   overflow-y: auto;

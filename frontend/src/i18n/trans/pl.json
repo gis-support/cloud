@@ -1,7 +1,8 @@
 {
   "dashboard": {
     "list": {
-      "addLayer": "Dodaj nową warstwę"
+      "addLayer": "Dodaj nową warstwę",
+      "addService": "Dodaj źródło zewnętrzne"
     },
     "modal":  {
       "addLayer": "Dodawanie nowej warstwy",
@@ -37,7 +38,7 @@
     },
     "title": {
       "vectorLayersList": "Lista warstw wektorowych",
-      "externalSourcesList": "Lista warstw ze źródeł zewnętrznych"
+      "externalSourcesList": "Lista źródeł zewnętrznych"
     }
   },
   "default": {
@@ -59,7 +60,9 @@
     "editSuccess": "Pomyślnie edytowano",
     "email": "Email",
     "error": "Wystąpił błąd",
+    "group": "Grupa",
     "groupName": "Nazwa grupy",
+    "layers": "Warstwy",
     "loading": "Trwa ładowanie danych",
     "loginError": "Nieprawidłowa nazwa uzytkownika lub hasło",
     "loginSuccess": "Zalogowano",
