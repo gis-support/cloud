@@ -93,7 +93,7 @@
               <h4 class="panel-title flex-center">
                 <span class="panel-title__names">
                   <i class="icon-li fa fa-map-o fa-lg mr-5"></i>
-                  <span class="bold" href="#">
+                  <span class="bold panel-title__wms">
                     {{ val.name }}
                   </span>
                   <span class="desc-sm" :title="val.url">
@@ -395,7 +395,7 @@ export default {
       },
     ], */
     dropzoneOptions: {
-      url: `${vm.$store.getters.getApiUrl}/layers?token=${vm.$store.getters.getToken}`,
+      url: `${vm.$store.getters.getApiUrl}/layers?token=${localStorage.getItem('token')}`,
       addRemoveLinks: true,
       autoProcessQueue: false,
       dictCancelUpload: vm.$i18n.t('upload.cancelUpload'),
@@ -753,8 +753,8 @@ export default {
 .panel-title__names {
   font-size: 14px;
 }
-.panel-title__names .bold:hover {
-  cursor: pointer !important;
+.panel-title__names .bold:not(.panel-title__wms):hover {
+  cursor: pointer;
 }
 .panel-title__tools i:not(:last-child) {
   margin-right: 5px;
