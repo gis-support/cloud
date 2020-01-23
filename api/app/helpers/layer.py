@@ -99,9 +99,13 @@ class Layer(Cloud):
         if self.layer_exists(layer_name):
             raise ValueError("layer exists")
         old_lid = self.lid
-        self.execute(
-            SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(self.name), Identifier(layer_name)))
+        old_name = self.name
         self.name = layer_name
+        self.execute(
+            SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
+        self.execute("""
+            UPDATE layer_styles SET f_table_name = %s
+        """, (self.name,))
         self.lid = self.hash_name(self.name)
         callback(old_lid, self.lid)
 
