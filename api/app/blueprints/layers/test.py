@@ -41,8 +41,6 @@ class TestLayers(BaseTest):
         assert r.json
         assert r.json['layers']['features'] == 1
         assert r.json['layers']['name'] == 'wojewodztwa'
-        return r.json['layers']['id']
-        r = client.get('/api/layers?token={}'.format(token))
 
     def test_layers_post_shapefile(self, client):
         token = self.get_token(client)

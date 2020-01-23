@@ -85,7 +85,7 @@ def layers(cloud):
         layer.ResetReading()
         fields = [{
             "name": "geometry",
-            "type": f"geometry({geom_type}, 4326)"
+            "type": "geometry"  # Mixed content for shapefiles if geom_type set
         }]
         for n in range(ldefn.GetFieldCount()):
             fdefn = ldefn.GetFieldDefn(n)
