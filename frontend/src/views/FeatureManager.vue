@@ -43,6 +43,12 @@
               <i class="fa fa-times-circle"></i>
             </button>
           </span>
+          <button type="button" class="btn navbar-btn navbar-right btn-default"
+            v-if="selectedRows.length > 0"
+            @click="downloadLayer(selectedRows)"
+          >
+            <i class="fa fa-download"></i>
+          </button>
         </div>
       </nav>
         <!-- {{ $route.params.layerId }} -->
@@ -54,9 +60,11 @@
           :editing="false"
           :items="items"
           :layId="$route.params.layerId"
+          :rowsToDownload="selectedRows"
           :search="searchItemValue"
           @selectFeatureById="selectFeatureById"
           @updateSearchCount="updateSearchCount"
+          @updateSelectedRows="updateSelectedRows"
         />
         <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
           <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
@@ -179,9 +187,9 @@
                       <i class="fa fa-download green icon-hover"></i> <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a>SHP</a></li>
-                      <li><a>GEOJSON</a></li>
-                      <li><a>XLSX</a></li>
+                      <!-- <li><a>SHP</a></li> -->
+                      <li @click="downloadLayer([])"><a>GEOJSON</a></li>
+                      <!-- <li><a>XLSX</a></li> -->
                     </ul>
                   </div>
                   <a class="btn btn-default">
@@ -222,6 +230,25 @@
                         @click="changeBaseLayer(name)"
                       >
                       {{ name }}
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="services">
+                    <h4>{{$i18n.t('default.services')}}:</h4>
+                    <ul class="list-group">
+                      <li class="list-group-item"
+                        v-for="service in services"
+                        :key="service.name"
+                        :class="{'activeLayer' : activeServices.includes(service.name)}"
+                      >
+                      <label class="checkbox-inline mb-0" :title="service.layers">
+                        <input type="checkbox"
+                          @click="setServiceVisibility(service.name)"
+                          :value="service.name"
+                          v-model="activeServices"
+                        >
+                        {{ service.name }} ({{ service.layers | maxLength }})
+                      </label>
                       </li>
                     </ul>
                   </div>
@@ -301,6 +328,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
+import TileWMS from 'ol/source/TileWMS';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
@@ -322,6 +350,7 @@ export default {
     FiltersPanel,
   },
   data: () => ({
+    activeServices: [],
     addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
     columnFilterDecisionDialogView: false,
@@ -343,6 +372,7 @@ export default {
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
+    selectedRows: [],
   }),
   computed: {
     activeLayer() {
@@ -363,8 +393,19 @@ export default {
     mapZoom() {
       return this.$store.getters.getMapZoom;
     },
+    services() {
+      return this.$store.getters.getServices;
+    },
     token() {
       return this.$store.getters.getToken;
+    },
+  },
+  filters: {
+    maxLength: (val) => {
+      if (val.length > 30) {
+        return `${val.slice(0, 30)}...`;
+      }
+      return val;
     },
   },
   methods: {
@@ -414,6 +455,27 @@ export default {
       }, () => {})
         .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
+    async downloadLayer(rows) {
+      let filteredIds;
+      if (rows.length === 0) {
+        filteredIds = {};
+      } else {
+        filteredIds = {
+          filter_ids: rows.map(el => el.id),
+        };
+      }
+      const r = await this.$store.dispatch('downloadLayer', {
+        lid: this.$route.params.layerId,
+        body: filteredIds,
+      });
+      if (r.status === 200) {
+        this.$i18n.t('default.success');
+        this.saveFile(r);
+        this.selectedRows = [];
+      } else {
+        this.$i18n.t('featureManager.downloadError');
+      }
     },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
@@ -642,6 +704,24 @@ export default {
       }
       return false;
     },
+    loadServices() {
+      this.services.forEach((service) => {
+        this.map.addLayer(
+          new TileLayer({
+            name: service.name,
+            visible: false,
+            source: new TileWMS({
+              url: service.url,
+              params: {
+                LAYERS: service.layers,
+                TILED: true,
+                SRS: 'EPSG:2180',
+              },
+            }),
+          }),
+        );
+      });
+    },
     openColumnFilterDecision() {
       const self = this;
 
@@ -672,6 +752,17 @@ export default {
       source.refresh();
       layer.changed();
     },
+    saveFile(r) {
+      const data = JSON.stringify(r.body);
+      const blob = new Blob([data], { type: 'text/plain' });
+      const e = document.createEvent('MouseEvents');
+      const a = document.createElement('a');
+      a.download = `${this.$route.params.layerId}.geojson`;
+      a.href = window.URL.createObjectURL(blob);
+      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      a.dispatchEvent(e);
+    },
     selectFeature(feature) {
       if (feature) {
         // eslint-disable-next-line no-underscore-dangle
@@ -696,8 +787,18 @@ export default {
       this.map.getView().fit(feature.getGeometry());
       this.indexActiveTab = 1; // change tab in sidepanel
     },
+    setServiceVisibility(serviceName) {
+      if (this.getLayerByName(serviceName).getVisible()) {
+        this.getLayerByName(serviceName).setVisible(false);
+      } else {
+        this.getLayerByName(serviceName).setVisible(true);
+      }
+    },
     updateSearchCount(count) {
       this.searchCount = count;
+    },
+    updateSelectedRows(rows) {
+      this.selectedRows = rows;
     },
   },
   async mounted() {
@@ -748,6 +849,7 @@ export default {
       }),
     );
     this.createSelectInteraction();
+    this.loadServices();
 
     const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
     if (r.status === 200) {

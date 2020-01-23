@@ -82,6 +82,15 @@ export default {
         return err.response;
       }
     },
+    async downloadLayer(ctx, payload) {
+      try {
+        const response = await swagger.apis.Export
+          .post_api_layers__lid__export_geojson({ lid: payload.lid, body: payload.body });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async editFeature(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle

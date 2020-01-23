@@ -152,6 +152,9 @@
 .active-cell {
   background-color: #2b3d4c52;
 }
+.cell-to-download {
+  background-color: #faa84b52;
+}
 .table-content {
   height: calc(40% - 54px);
   max-height: 100%;

@@ -62,8 +62,13 @@
                     v-else
                     v-text="item[column.key]"
                     :key="idx2 + 'item'"
-                    :class="{'active-cell' : selectedIndex == indexFirstItem + index}"
-                    @click="selectItemIndex(indexFirstItem + index, item)"
+                    :class="{
+                      'active-cell' : selectedIndex == indexFirstItem + index,
+                      'cell-to-download' : rowsToDownloadCopy.map(el => el.id).includes(item.id)
+                    }"
+                    @click.exact="selectItemIndex(indexFirstItem + index, item)"
+                    @click.ctrl="selectToDownloadCtrl(index, item)"
+                    @click.shift="selectToDownloadShift(index, item)"
                   />
                 </template>
               </tr>
@@ -112,18 +117,24 @@ export default {
     layId: {
       type: String,
     },
+    rowsToDownload: {
+      type: Array,
+    },
   },
-  data: () => ({
-    arenaHeight: 0,
-    currentFeatureId: undefined,
-    maxItems: 0,
-    indexFirstItem: 0,
-    itemHeight: 0,
-    sortedColumn: false,
-    sortedColumnType: 'asc',
-
-    selectedIndex: -1,
-  }),
+  data() {
+    return {
+      arenaHeight: 0,
+      currentFeatureId: undefined,
+      maxItems: 0,
+      indexFirstItem: 0,
+      itemHeight: 0,
+      lastSelectedIndex: 0,
+      rowsToDownloadCopy: this.rowsToDownload,
+      selectedIndex: -1,
+      sortedColumn: false,
+      sortedColumnType: 'asc',
+    };
+  },
   computed: {
     searchedItems() {
       const self = this;
@@ -276,6 +287,10 @@ export default {
       if (this.editing) {
         return;
       }
+      if (this.rowsToDownloadCopy.length > 0) {
+        this.rowsToDownloadCopy = [];
+        this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
+      }
       this.getAttachments(prop.id);
       this.selectedIndex = index;
       this.updateSelectedItem(true);
@@ -295,6 +310,25 @@ export default {
       if (this.selectedIndex !== -1) {
         this.scrollTo(this.selectedIndex);
       }
+    },
+    selectToDownloadCtrl(idx, item) {
+      const isFound = this.rowsToDownloadCopy.some(el => el.id === item.id);
+      if (isFound) {
+        const delIdx = this.rowsToDownloadCopy.findIndex(el => el.id === item.id);
+        this.rowsToDownloadCopy.splice(delIdx, 1);
+      } else {
+        this.rowsToDownloadCopy.push(item);
+      }
+      this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
+    },
+    selectToDownloadShift(index) {
+      document.getSelection().removeAllRanges();
+      if (this.selectedIndex < index + 1) {
+        this.rowsToDownloadCopy = this.items.slice(this.selectedIndex, index + 1);
+      } else {
+        this.rowsToDownloadCopy = this.items.slice(index, this.selectedIndex);
+      }
+      this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
     },
     scrollTo(index) {
       const self = this;
