@@ -14,7 +14,20 @@
           v-model="attributes.properties[key]"
           disabled
           v-if="key === 'id'"/>
-        <input class="form-control" type="text" v-model="attributes.properties[key]" v-else/>
+          <span v-else>
+            <input class="form-control col-sm-7"
+              v-model="attributes.properties[key]"
+              v-if="featureTypes[key] === 'real' || featureTypes[key] === 'integer'"
+              type="number"/>
+            <input class="form-control col-sm-7"
+              v-model="attributes.properties[key]"
+              v-else-if="featureTypes[key] === 'character varying'"
+              type="text"/>
+            <input class="form-control col-sm-7"
+              v-model="attributes.properties[key]"
+              v-else-if="featureTypes[key] === 'timestamp without time zone'"
+              type="datetime-local"/>
+          </span>
       </template>
       <hr/>
     </div>
@@ -36,6 +49,9 @@ export default {
   computed: {
     attributes() {
       return this.fields;
+    },
+    featureTypes() {
+      return this.$store.getters.getCurrentFeaturesTypes;
     },
   },
 };

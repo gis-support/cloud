@@ -61,7 +61,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr role="row" v-for="user of users" :key="user">
+            <tr role="row" v-for="user of usersPerm" :key="user">
               <td class="text-centered">{{user}}</td>
               <td
                 class="text-centered"
@@ -233,6 +233,7 @@ export default {
     permissions: undefined,
     users: undefined,
     usersGroup: undefined,
+    usersPerm: [],
     userToAssign: undefined,
   }),
   computed: {
@@ -332,12 +333,13 @@ export default {
     async getPermissions() {
       const r = await this.$store.dispatch('getPermissions');
       this.permissions = r.obj.permissions;
-      this.users = r.obj.users;
+      this.usersPerm = r.obj.users;
     },
     async getUsers() {
       const r = await this.$store.dispatch('getUsers');
       if (r.status === 200) {
         this.$store.commit('setUsersWithGroups', r.obj.users);
+        this.users = r.obj.users;
       }
     },
     saveCurrentPermissions(permission, layerId, username) {

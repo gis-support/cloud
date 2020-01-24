@@ -212,7 +212,6 @@ export default {
           this.usersGroup = r.obj.users[this.user];
         }
       }
-      console.log(this.usersGroup);
     },
     deleteLink(item) {
       this.$alertify.confirm(this.$i18n.t('featureManager.deleteAttachmentConfirm'), async () => {

@@ -324,9 +324,9 @@ export default {
     selectToDownloadShift(index) {
       document.getSelection().removeAllRanges();
       if (this.selectedIndex < index + 1) {
-        this.rowsToDownloadCopy = this.items.slice(this.selectedIndex, index + 1);
+        this.rowsToDownloadCopy = this.items.slice(this.selectedIndex, index);
       } else {
-        this.rowsToDownloadCopy = this.items.slice(index, this.selectedIndex);
+        this.rowsToDownloadCopy = this.items.slice(index, this.selectedIndex + 1);
       }
       this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
     },

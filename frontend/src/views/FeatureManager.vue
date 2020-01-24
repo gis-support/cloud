@@ -495,6 +495,9 @@ export default {
         const itemsIdx = this.items.findIndex(el => el.id === fid);
         this.items[itemsIdx] = r.obj.properties;
         this.$refs['table-data'].$recompute('windowItems'); // update table data
+        this.$refs['table-data'].$recompute('filteredItems'); // update table data
+        this.$refs['table-data'].$recompute('searchedItems'); // update table data
+        this.$refs['table-data'].$recompute('sortedItems');
         this.$alertify.success(this.$i18n.t('default.editSuccess'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
