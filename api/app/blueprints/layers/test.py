@@ -41,8 +41,6 @@ class TestLayers(BaseTest):
         assert r.json
         assert r.json['layers']['features'] == 1
         assert r.json['layers']['name'] == 'wojewodztwa'
-        return r.json['layers']['id']
-        r = client.get('/api/layers?token={}'.format(token))
 
     def test_layers_post_shapefile(self, client):
         token = self.get_token(client)
@@ -276,6 +274,27 @@ class TestLayersSettings(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['settings']['name'] == new_column['layer_name']
+
+    def test_settings_change_name_styles_bug_1(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        new_column = {
+            "layer_name": "test"
+        }
+        r = client.post(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        new_lid = r.json['settings']
+        r = client.get(f'/api/layers/{lid}/settings?token={token}')
+        """
+        Bug description:
+        401 - TypeError: 'NoneType' object is not subscriptable
+        """
+        r = client.get(f'/api/layers/{new_lid}/style?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['fill-color'] == '255,255,255,0.4'
+        assert r.json['style']['stroke-color'] == '51,153,204,1'
+        assert r.json['style']['stroke-width'] == '2'
 
 
 @pytest.mark.styles
