@@ -321,12 +321,13 @@ export default {
       }
       this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
     },
-    selectToDownloadShift(index) {
+    selectToDownloadShift(index, item) {
       document.getSelection().removeAllRanges();
-      if (this.selectedIndex < index + 1) {
-        this.rowsToDownloadCopy = this.items.slice(this.selectedIndex, index);
+      const tableIndex = this.filteredItems.findIndex(el => el.id === item.id);
+      if (this.selectedIndex < tableIndex + 1) {
+        this.rowsToDownloadCopy = this.filteredItems.slice(this.selectedIndex, tableIndex + 1);
       } else {
-        this.rowsToDownloadCopy = this.items.slice(index, this.selectedIndex + 1);
+        this.rowsToDownloadCopy = this.filteredItems.slice(tableIndex, this.selectedIndex + 1);
       }
       this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
     },

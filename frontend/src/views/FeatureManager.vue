@@ -192,9 +192,9 @@
                       <!-- <li><a>XLSX</a></li> -->
                     </ul>
                   </div>
-                  <a class="btn btn-default">
+                  <!-- <a class="btn btn-default">
                     <i class="fa fa-cog yellow icon-hover"></i>
-                  </a>
+                  </a> -->
                 </div>
               </div>
             </div>
@@ -236,20 +236,27 @@
                   <div class="services">
                     <h4>{{$i18n.t('default.services')}}:</h4>
                     <ul class="list-group">
-                      <li class="list-group-item"
-                        v-for="service in services"
-                        :key="service.name"
-                        :class="{'activeLayer' : activeServices.includes(service.name)}"
-                      >
-                      <label class="checkbox-inline mb-0" :title="service.layers">
-                        <input type="checkbox"
-                          @click="setServiceVisibility(service.name)"
-                          :value="service.name"
-                          v-model="activeServices"
+                      <span v-if="services.length > 0">
+                        <li class="list-group-item"
+                          v-for="service in services"
+                          :key="service.name"
+                          :class="{'activeLayer' : activeServices.includes(service.name)}"
                         >
-                        {{ service.name }} ({{ service.layers | maxLength }})
-                      </label>
-                      </li>
+                        <label class="checkbox-inline mb-0" :title="service.layers">
+                          <input type="checkbox"
+                            @click="setServiceVisibility(service.name)"
+                            :value="service.name"
+                            v-model="activeServices"
+                          >
+                          {{ service.name }} ({{ service.layers | maxLength }})
+                        </label>
+                        </li>
+                      </span>
+                      <span v-else>
+                        <li class="list-group-item no-item">
+                          {{$i18n.t('default.noServices')}}
+                        </li>
+                      </span>
                     </ul>
                   </div>
                 </div>
@@ -822,8 +829,8 @@ export default {
       }),
     });
 
-    /* const ortofoto = await this.initOrtofoto();
-    this.map.addLayer(ortofoto); */
+    const ortofoto = await this.initOrtofoto();
+    this.map.addLayer(ortofoto);
 
     const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
     this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
@@ -838,7 +845,7 @@ export default {
         source: new VectorTileSource({
           cacheSize: 1,
           format: new MVT(),
-          url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${this.token}`,
+          url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`,
         }),
         style: featureStyleDef,
       }),
@@ -878,8 +885,14 @@ export default {
 </script>
 
 <style scoped>
+.dropdown-menu {
+  left: -110px;
+}
 .modal-new-feature .modal-body {
   height: 70vh;
   overflow-y: auto;
+}
+.list-group-item:not(.no-item):hover {
+  cursor: pointer;
 }
 </style>

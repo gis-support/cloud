@@ -339,7 +339,7 @@ export default {
       const r = await this.$store.dispatch('getUsers');
       if (r.status === 200) {
         this.$store.commit('setUsersWithGroups', r.obj.users);
-        this.users = r.obj.users;
+        this.users = Object.keys(r.obj.users);
       }
     },
     saveCurrentPermissions(permission, layerId, username) {
