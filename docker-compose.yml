@@ -19,6 +19,7 @@ services:
       - DEFAULT_USER
       - DEFAULT_PASS
       - DEFAULT_GROUPS
+      - DEFAULT_GROUP
   api:
     container_name: cloud-api
     restart: always

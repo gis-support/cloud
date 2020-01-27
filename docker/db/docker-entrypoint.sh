@@ -28,7 +28,7 @@ else
         export PGPASSWORD=${POSTGRES_PASS}
         groups_list=(`echo ${DEFAULT_GROUPS} | tr ',' ' '`)
         db_list=(`echo ${POSTGRES_DBNAME} | tr ',' ' '`)
-        main_group="${groups_list[0]}"
+        main_group="${DEFAULT_GROUP}"
         main_db="${db_list[0]}"
         testing_db="${db_list[1]}"
         for g in "${groups_list[@]}"
