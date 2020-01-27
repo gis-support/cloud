@@ -675,7 +675,7 @@ export default {
     initOrtofoto() {
       return new Promise((resolve, reject) => {
         const parser = new WMTSCapabilities();
-        fetch('http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO?SERVICE=WMTS&REQUEST=GetCapabilities').then(response => response.text()).then((text) => {
+        fetch('https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO?SERVICE=WMTS&REQUEST=GetCapabilities').then(response => response.text()).then((text) => {
           const result = parser.read(text);
           const options = optionsFromCapabilities(result, {
             layer: 'ORTOFOTOMAPA',
@@ -688,7 +688,7 @@ export default {
               name: 'Ortofotomapa',
               group: 'baselayers',
               source: new WMTS({
-                url: 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
+                url: 'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
                 matrixSet: 'EPSG:4326',
                 format: 'image/png',
                 projection: getProjection('EPSG:4326'),
