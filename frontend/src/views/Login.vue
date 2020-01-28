@@ -1,12 +1,13 @@
 <template>
-  <div class="content content-login">
+  <div class="content content-login" v-on:keyup.enter="loginRequest">
       <div class="container">
         <div class="account-wrapper">
           <div class="account-body">
             <h3 class="text-center">{{$i18n.t('login.loginTitle')}}</h3>
               <div class="form-group">
                 <input type="text" name="email" class="form-control" id="login-username"
-                :placeholder="$i18n.t('default.email')" tabindex="1" v-model="email">
+                :placeholder="$i18n.t('default.email')" tabindex="1" v-model="email"
+                ref="login-username">
               </div>
               <div class="form-group">
                 <input type="password" name="password" class="form-control"
@@ -44,6 +45,9 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+  },
+  mounted() {
+    this.$refs['login-username'].focus();
   },
 };
 </script>
