@@ -48,16 +48,18 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    store.dispatch('checkToken').then((r) => {
-      if (r && r.body.token === 'valid') {
-        next();
-      } else {
-        store.commit('logOut');
-        next({
-          name: 'login',
-        });
-      }
-    });
+    setTimeout(() => {
+      store.dispatch('checkToken').then((r) => {
+        if (r.body.token === 'valid') {
+          next();
+        } else {
+          store.commit('logOut');
+          next({
+            name: 'login',
+          });
+        }
+      });
+    }, 0);
   } else {
     next();
   }

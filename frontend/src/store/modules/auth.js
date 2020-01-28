@@ -19,13 +19,12 @@ const swagger = new Swagger({
 export default {
   state: {
     defaultGroup: '',
-    token: localStorage.getItem('token') === null ? '' : localStorage.getItem('token'),
-    user: '',
+    token: localStorage.getItem('token') || '',
+    user: localStorage.getItem('user') || '',
   },
   mutations: {
     setToken(state, token) {
-      state.token = token.slice();
-      localStorage.setItem('token', token.slice());
+      state.token = token;
     },
     setUser(state, email) {
       state.user = email;
@@ -33,16 +32,17 @@ export default {
     logOut(state) {
       state.token = '';
       state.user = '';
-      localStorage.removeItem('token');
     },
     setDefaultGroup(state, group) {
       state.defaultGroup = group;
     },
   },
   actions: {
-    async checkToken() {
+    async checkToken(ctx) {
       try {
         const r = await swagger.apis.Auth.get_api_check_token();
+        ctx.commit('setToken', localStorage.getItem('token'));
+        ctx.commit('setUser', localStorage.getItem('user'));
         return r;
       } catch (err) {
         return err.response;
@@ -62,8 +62,14 @@ export default {
         const { token } = response.obj;
         ctx.commit('setToken', token);
         ctx.commit('setUser', payload.user);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', payload.user);
         return response;
       } catch (err) {
+        ctx.commit('setToken', '');
+        ctx.commit('setUser', '');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         return err.response;
       }
     },
@@ -80,8 +86,8 @@ export default {
     getDefaultGroup(state) {
       return state.defaultGroup;
     },
-    getToken() {
-      return localStorage.getItem('token');
+    getToken(state) {
+      return state.token;
     },
     getUser(state) {
       return state.user;
