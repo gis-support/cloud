@@ -25,7 +25,8 @@
                     <div>
                       <span v-text="column.name" />
                       <span
-                        v-show="!editing"
+                        v-show="!editing && isFiltredColumn(column)"
+                        :title="$i18n.t('default.isFiltered')"
                         :class="{
                         'filter' : column.filter,
                         'filtered' : isFiltredColumn(column),

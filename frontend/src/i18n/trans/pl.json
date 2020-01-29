@@ -62,6 +62,7 @@
     "error": "Wystąpił błąd",
     "group": "Grupa",
     "groupName": "Nazwa grupy",
+    "isFiltered": "Filtrowanie włączone dla tej kolumny",
     "layers": "Warstwy",
     "loading": "Trwa ładowanie danych",
     "loginError": "Nieprawidłowa nazwa uzytkownika lub hasło",

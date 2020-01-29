@@ -228,7 +228,6 @@
 }
 .vscroll .table-data table thead .filter,
 .vscroll .table-data table thead .filtered{
-    cursor: pointer;
     position: relative;
     flex: 1;
 }
