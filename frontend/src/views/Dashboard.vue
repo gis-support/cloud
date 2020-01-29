@@ -477,7 +477,7 @@ export default {
         this.currentLayerSettings.columns[this.newColumnName] = this.newColumnType;
         this.newColumnName = undefined;
         this.newColumnType = '';
-        this.$alertify.success(this.$i18n.t('dashbaord.modal.columnAdded'));
+        this.$alertify.success(this.$i18n.t('dashboard.modal.columnAdded'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
