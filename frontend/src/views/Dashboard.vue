@@ -407,7 +407,7 @@ export default {
       uploadMultiple: true,
       parallelUploads: 10,
       methods: 'post',
-      acceptedFiles: '.shp,.shx,.dbf,.prj,.geojson,.cpg,.qpj',
+      acceptedFiles: '*',
       success(file, response) {
         vm.$alertify.success(vm.$i18n.t('upload.uploadSuccess'));
         const newLayer = { id: response.layers.id, name: response.layers.name };
