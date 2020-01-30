@@ -161,7 +161,17 @@ export default {
         return self.filteredItems;
       }
 
-      return _.orderBy(self.filteredItems, [self.sortedColumn], [self.sortedColumnType]);
+      return _.orderBy(
+        self.filteredItems,
+        [(item) => {
+          if (typeof (item[self.sortedColumn]) === 'string') {
+            const value = _.deburr(item[self.sortedColumn]);
+            return value ? value.toLowerCase() : '';
+          }
+          return item[self.sortedColumn];
+        }],
+        [self.sortedColumnType],
+      );
     },
     windowItems() {
       const self = this;
