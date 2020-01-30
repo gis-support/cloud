@@ -89,6 +89,9 @@ def layers(cloud):
         }]
         for n in range(ldefn.GetFieldCount()):
             fdefn = ldefn.GetFieldDefn(n)
+            # RL-38 double id column
+            if fdefn.name in list(map(lambda x: x['name'], fields)) + ['id']:
+                fdefn.name = f'_{fdefn.name}'
             fields.append({
                 'name': fdefn.name,
                 'type': GDAL_TO_PG[fdefn.GetTypeName()],

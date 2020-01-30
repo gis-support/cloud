@@ -147,6 +147,20 @@ class TestLayers(BaseTest):
         assert r.status_code == 403
         assert r.json
         assert r.json['error'] == 'access denied'
+    
+    def test_layers_post_geojson_RL_38(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'RL-38.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'RL-38.geojson'),
+            'name': 'RL-38'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['name'] == 'RL-38'
+        assert r.json['layers']['features'] == 3
 
 
 @pytest.mark.layerssettings
