@@ -836,8 +836,10 @@ export default {
     this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
     this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
 
-    const featureStyleDef = await this.createStyle();
+    this.createSelectInteraction();
+    this.loadServices();
 
+    const featureStyleDef = await this.createStyle();
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
@@ -858,8 +860,6 @@ export default {
         style: featureStyleDef,
       }),
     );
-    this.createSelectInteraction();
-    this.loadServices();
 
     const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
     if (r.status === 200) {
