@@ -75,8 +75,11 @@ def layers(cloud):
         if epsg != "4326":
             inSpatialRef = osr.SpatialReference()
             inSpatialRef.ImportFromEPSG(int(epsg))
+            inSpatialRef.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
             outSpatialRef = osr.SpatialReference()
             outSpatialRef.ImportFromEPSG(4326)
+            outSpatialRef.SetAxisMappingStrategy(
+                osr.OAMS_TRADITIONAL_GIS_ORDER)
             transform = osr.CoordinateTransformation(
                 inSpatialRef, outSpatialRef)
         ldefn = layer.GetLayerDefn()
@@ -90,13 +93,13 @@ def layers(cloud):
         for n in range(ldefn.GetFieldCount()):
             fdefn = ldefn.GetFieldDefn(n)
             # RL-38 double id column
-            if fdefn.name in list(map(lambda x: x['name'], fields)) + ['id']:
+            if fdefn.name in set(map(lambda x: x['name'], fields)).union(set(['id'])):
                 fdefn.name = f'_{fdefn.name}'
             fields.append({
                 'name': fdefn.name,
                 'type': GDAL_TO_PG[fdefn.GetTypeName()],
             })
-        with current_app._db.atomic() as transaction:
+        with current_app._db.atomic():
             cloud = Cloud({"app": current_app, "user": request.user})
             cloud.create_layer(name, fields, geom_type)
             with tempfile.SpooledTemporaryFile(mode='w') as tfile:
