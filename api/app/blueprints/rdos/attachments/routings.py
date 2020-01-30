@@ -37,7 +37,7 @@ def attachments(lid, fid):
         Get attachments for feature
         Returns attachments list
         """
-        @layer_decorator(permission="write")
+        @layer_decorator(permission="read")
         def get(layer, lid=None, fid=None):
             return jsonify({"attachments": Attachment.get_attachments(lid=lid, fid=fid, group=layer.get_user_group())})
         return get(lid=lid, fid=fid)

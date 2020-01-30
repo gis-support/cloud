@@ -234,3 +234,34 @@ class TestPermissions(BaseTest):
         assert r.status_code == 403
         assert r.json
         assert r.json['error'] == 'access denied'
+
+    def test_permissions_RL_43(self, client):
+        # New admin user
+        token_admin = self.get_token(client)
+        # New layer
+        lid = self.add_geojson_prg(client, token_admin)
+        # New normal user
+        user, password = self.create_user(client)
+        # Grant permission for normal user by admin
+        r = client.put(f'/api/permissions/{lid}?token={token_admin}',
+                       data=json.dumps({'user': user, 'permission': 'read'}))
+        fid = 1
+        aid = self.add_attachment_to_feature(
+            client, token_admin, lid, fid, public=True)
+        r = client.get(
+            f'/api/layers/{lid}/features/{fid}/attachments?token={token_admin}')
+        # Normal user log in
+        token = self.get_token(client, user=user, password=password)
+        # Get settings for normal user
+        r = client.get(f'/api/layers/{lid}/settings?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['settings']['id'] == lid
+        assert len(r.json['settings']['columns'].keys()) == 30
+        # Get settings for normal user
+        r = client.get(
+            f'/api/layers/{lid}/features/{1}/attachments?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        default_group = os.environ.get('DEFAULT_GROUP')
+        assert len(r.json['attachments'][default_group]) == 1
