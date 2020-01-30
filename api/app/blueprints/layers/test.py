@@ -20,13 +20,17 @@ class TestLayers(BaseTest):
 
     def test_layers_post_geojson_prg(self, client):
         token = self.get_token(client)
-        self.add_geojson_prg(client, token)
+        lid = self.add_geojson_prg(client, token)
         r = client.get('/api/layers?token={}'.format(token))
         assert r.status_code == 200
         assert r.json
         assert r.json['layers']
         assert len(r.json['layers']) == 1
         assert r.json['layers'][0]['name'] == 'wojewodztwa'
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [
+            16.714467009, 53.299132461]
 
     def test_layers_post_geojson_prg_transform(self, client):
         token = self.get_token(client)
@@ -41,6 +45,11 @@ class TestLayers(BaseTest):
         assert r.json
         assert r.json['layers']['features'] == 1
         assert r.json['layers']['name'] == 'wojewodztwa'
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [
+            16.714467009, 53.299132461]
 
     def test_layers_post_shapefile(self, client):
         token = self.get_token(client)
@@ -58,7 +67,11 @@ class TestLayers(BaseTest):
         assert r.json
         assert r.json['layers']['features'] == 1
         assert r.json['layers']['name'] == 'wojewodztwa'
-        return r.json['layers']['id']
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0] == [
+            16.714467009, 53.299132461]
 
     def test_layers_post_shapefile_no_attrs(self, client):
         token = self.get_token(client)
@@ -75,7 +88,11 @@ class TestLayers(BaseTest):
         assert r.json
         assert r.json['layers']['features'] == 1
         assert r.json['layers']['name'] == 'wojewodztwa'
-        return r.json['layers']['id']
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0] == [
+            16.714467009, 53.299132461]
 
     def test_layers_post_shapefile_invalid_file(self, client):
         token = self.get_token(client)
@@ -125,8 +142,8 @@ class TestLayers(BaseTest):
 
     def test_layers_delete_invalid_id(self, client):
         token = self.get_token(client)
-        lid = self.add_geojson_prg(client, token)
-        r = client.delete('/api/layers/1?token={}'.format(token))
+        self.add_geojson_prg(client, token)
+        r = client.delete(f'/api/layers/test?token={token}')
         assert r.status_code == 401
         assert r.json
         assert r.json['error'] == 'invalid layer id'
@@ -147,6 +164,43 @@ class TestLayers(BaseTest):
         assert r.status_code == 403
         assert r.json
         assert r.json['error'] == 'access denied'
+
+    def test_layers_post_geojson_RL_38(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'RL-38.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'RL-38.geojson'),
+            'name': 'RL-38'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['name'] == 'RL-38'
+        assert r.json['layers']['features'] == 3
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [18.878488648, 53.164468287]
+
+    def test_layers_post_geojson_RL_37(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'RL-37.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'RL-37.geojson'),
+            'name': 'RL-37'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['name'] == 'RL-37'
+        assert r.json['layers']['features'] == 1
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [
+            17.028306997, 52.205571184]
 
 
 @pytest.mark.layerssettings
