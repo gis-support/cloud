@@ -174,11 +174,14 @@
       <div class="right-panel padding-0">
         <div class="col-sm-12">
           <div style="display: inline-block; width: 100%;">
-            <h4 class="col-sm-7 right-panel__title" v-if="$route.params.layerName">
+            <h4 class="col-sm-10 right-panel__title" v-if="$route.params.layerName">
               <i class="fa fa-map-o title__icon"></i>
-              <span class="mvp-red right-panel__name">{{$route.params.layerName}}</span>
+              <span
+                class="mvp-red right-panel__name"
+                :title="$route.params.layerName"
+              >{{$route.params.layerName | maxLength}}</span>
             </h4>
-            <div class="col-sm-5" style="margin-top: 6px;" v-if="permission === 'write'">
+            <div class="col-sm-2" style="margin-top: 6px;" v-if="permission === 'write'">
               <div class="btn-group btn-group-sm" role="group"
                 style="float: right; margin-right: -15px;">
                 <div class="btn-group btn-group-sm" role="group">

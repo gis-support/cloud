@@ -14,6 +14,12 @@
           &nbsp;&nbsp;<span>{{$i18n.t('settings.symbolization')}}</span>
           </a>
         </li>
+        <li class="disabled">
+          <a href="#labels-tab" data-toggle="tab" @click.prevent.stop>
+          <i class="fa fa-map-pin"></i>
+          &nbsp;&nbsp;<span>{{$i18n.t('settings.labels')}}</span>
+          </a>
+        </li>
       </ul>
     </div>
     <div class="col-md-9 col-sm-8 layout-main">
@@ -143,6 +149,9 @@
         </div>
         <div class="tab-pane fade in active" id="style-tab">
           <p>styles</p>
+        </div>
+        <div class="tab-pane fade in active" id="labels-tab">
+          <p>labels</p>
         </div>
       </div>
     </div>
@@ -294,6 +303,9 @@ export default {
 </script>
 
 <style scoped>
+  .disabled {
+    cursor: not-allowed !important;
+  }
   .text-centered {
     text-align: center;
   }
