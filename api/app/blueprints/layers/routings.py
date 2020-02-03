@@ -78,7 +78,7 @@ def layers(cloud):
         transform = None
         if epsg != "4326":
             if not epsg:
-                return jsonify({"error": "epsg not recognized"}), 401
+                return jsonify({"error": "epsg not recognized"}), 400
             inSpatialRef = osr.SpatialReference()
             inSpatialRef.ImportFromEPSG(int(epsg))
             inSpatialRef.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)

@@ -130,15 +130,31 @@
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
+              <label class="control-label col-sm-4 pl-0">
+                {{$i18n.t('dashboard.modal.layerName')}}
+              </label>
               <input type="text" class="form-control" v-model="vectorLayerName">
+            </div>
+            <div style="display: flex" class="pt-10">
+              <label class="control-label col-sm-4 pl-0">
+                {{$i18n.t('dashboard.modal.epsg')}}
+              </label>
+              <input
+                class="form-control"
+                v-model="epsg"
+                @keypress="isNumber($event)"
+                :disabled="isEpsgAutomatic"
+                :title="isEpsgAutomatic ? $i18n.t('upload.automaticEpsg') : null"
+              >
             </div>
             <div class="pt-10">
               <vue-dropzone
                 ref="dropzoneUploadLayer"
                 id="dropzone"
                 :options="dropzoneOptions"
+                @vdropzone-error="sendingError"
                 @vdropzone-sending-multiple="sendingEvent"
+                @vdropzone-success-multiple="sendingSuccess"
               />
             </div>
           </div>
@@ -147,7 +163,9 @@
               @click="clearUploadFiles" ref="closeModalBtn">
               {{$i18n.t('default.cancel')}}
             </button>
-            <button type="button" class="btn btn-success" @click="sendVectorLayer">
+            <button type="button" class="btn btn-success" @click="sendVectorLayer"
+              :disabled="!vectorLayerName"
+            >
               {{$i18n.t('default.save')}}
             </button>
           </div>
@@ -229,129 +247,12 @@
       </div>
     </div>
     <!--KONIEC MODALA-->
-
-    <!--MODAL USTAWIENIA WARSTWY-->
-    <div class="modal fade" data-backdrop="static" id="layerSettingsModal" tabindex="-1"
-      role="dialog" aria-hidden="true" ref="layerSettingsModal">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content" v-if="currentEditedLayer">
-          <div class="modal-header">
-            <h4 class="modal-title">
-              {{$i18n.t('dashboard.modal.settingsLayer')}}
-            </h4>
-          </div>
-          <div class="modal-body">
-            <h4 class="text-left">{{$i18n.t('dashboard.modal.layerName')}}</h4>
-            <div style="display: flex">
-              <input type="text" class="form-control mr-5"
-                v-model="currentEditedLayer.name">
-              <button type="button" class="btn btn-success" @click="saveLayerName">
-                {{$i18n.t('default.saveName')}}
-              </button>
-            </div>
-            <div class="pt-10">
-              <h4 class="text-left">
-                {{$i18n.t('dashboard.modal.layerColumns')}}
-                <i class="fa fa-chevron-up" @click="toggleColumnsSection(false)"
-                  v-if="isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
-                  :title="$i18n.t('dashboard.modal.hideColumns')"
-                ></i>
-                <i class="fa fa-chevron-down" @click="toggleColumnsSection(true)"
-                  v-if="!isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
-                  :title="$i18n.t('dashboard.modal.showColumns')"
-                ></i>
-              </h4>
-              <table v-if="isColumnsVisible" class="table table-striped table-bordered table-hover">
-                <thead>
-                  <tr role="row">
-                    <th class="text-centered">{{$i18n.t('default.name')}}</th>
-                    <th class="text-centered">{{$i18n.t('default.dataType')}}</th>
-                    <th class="text-centered">{{$i18n.t('default.actions')}}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(value, name, index) in currentLayerSettings.columns" :key="index">
-                    <td>{{name}}</td>
-                    <td>{{value}}</td>
-                    <td>
-                      <i class="fa fa-trash fa-lg red icon-hover" :title="$i18n.t('default.delete')"
-                        @click="deleteColumn(name)"></i>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="pt-10">
-              <h4 class="text-left">{{$i18n.t('dashboard.modal.addColumn')}}</h4>
-              <div style="display: flex">
-                <input type="text" class="form-control mr-5"
-                 placeholder="Nazwa kolumny" v-model="newColumnName">
-                <select class="form-control mr-5" name="column-types-select"
-                  v-model="newColumnType">
-                  <option value="" selected>{{$i18n.t('dashboard.modal.chooseColumnType')}}</option>
-                  <option v-for="colType in columnTypes" :key="colType" :value="colType">
-                    {{colType}}
-                  </option>
-                </select>
-                <button type="button" class="btn btn-success" @click="addNewColumn">
-                  {{$i18n.t('default.add')}}
-                </button>
-              </div>
-            </div>
-            <div class="pt-10">
-              <h4 class="text-left">Styl warstwy</h4>
-              <div style="display: flex; justify-content: space-around;">
-                <div style="display: flex;">
-                  <label class="color-picker__label">
-                    {{$i18n.t('dashboard.modal.strokeColor')}}
-                  </label>
-                  <div class="color-picker--stroke" style="height:50px; width:50px"></div>
-                </div>
-                <div style="display: flex;">
-                  <label class="color-picker__label">
-                    {{$i18n.t('dashboard.modal.fillColor')}}
-                  </label>
-                  <div class="color-picker--fill" style="height:50px; width:50px"></div>
-                </div>
-                <div
-                  style="display: flex;"
-                  v-if="Object.keys(styles).includes(currentEditedLayer.id)"
-                >
-                  <label class="color-picker__label">
-                    {{$i18n.t('dashboard.modal.strokeWidth')}}
-                  </label>
-                  <input type="number" class="form-control"
-                    min="1" max="9" step="1"
-                    style="width: 50px; position: relative; top: -5px"
-                    v-model="styles[currentEditedLayer.id]['stroke-width']">
-                </div>
-                <button type="button"
-                  class="btn btn-success"
-                  @click="saveStyle"
-                  style="position: relative;top: -6px;right: -13px;"
-                >
-                  {{$i18n.t('default.save')}}
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal"
-              @click="closeSettingsModal">
-              {{$i18n.t('default.close')}}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!--KONIEC MODALA-->
   </div>
 </template>
 
 <script>
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
-import Pickr from '@simonwep/pickr';
 import '@simonwep/pickr/dist/themes/nano.min.css';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
@@ -359,13 +260,12 @@ export default {
   name: 'dashboard',
   data: vm => ({
     currentEditedLayer: undefined,
-    currentLayerSettings: [],
+    epsg: undefined,
     fetchedLayers: [],
-    isColumnsVisible: true,
+    isEpsgAutomatic: true,
     isFetching: false,
+    isSendingError: false,
     isServicePublic: false,
-    newColumnName: undefined,
-    newColumnType: '',
     pickrComponents: {
       preview: true,
       opacity: true,
@@ -386,14 +286,8 @@ export default {
     serviceUrl: '',
     serviceName: '',
     selectedLayers: [],
-    styles: {},
     vectorLayerName: '',
     vectorLayersList: undefined,
-    /* servicesList: [
-      {
-        group: '', layers: '', url: '', name: '',
-      },
-    ], */
     dropzoneOptions: {
       url: `${vm.$store.getters.getApiUrl}/layers?token=${localStorage.getItem('token')}`,
       addRemoveLinks: true,
@@ -415,18 +309,12 @@ export default {
         }
         vm.$refs.closeModalBtn.click();
       },
-      error() {
-        vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
-      },
     },
   }),
   components: {
     vueDropzone: vue2Dropzone,
   },
   computed: {
-    columnTypes() {
-      return this.$store.getters.getColumnTypes;
-    },
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
     },
@@ -459,28 +347,6 @@ export default {
     },
   },
   methods: {
-    async addNewColumn() {
-      if (!this.newColumnName || !this.newColumnType) {
-        this.$alertify.error(this.$i18n.t('dashboard.modal.noNameOrType'));
-        return;
-      }
-      const payload = {
-        body: {
-          column_name: this.newColumnName,
-          column_type: this.newColumnType,
-        },
-        lid: this.currentLayerSettings.id,
-      };
-      const r = await this.$store.dispatch('changeLayer', payload);
-      if (r.status === 200) {
-        this.currentLayerSettings.columns[this.newColumnName] = this.newColumnType;
-        this.newColumnName = undefined;
-        this.newColumnType = '';
-        this.$alertify.success(this.$i18n.t('dashboard.modal.columnAdded'));
-      } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
-      }
-    },
     async addService() {
       const r = await this.$store.dispatch('addService', {
         layers: this.selectedLayers.join(','),
@@ -495,24 +361,6 @@ export default {
       } else {
         this.$i18n.t('default.error');
       }
-    },
-    async deleteColumn(colName) {
-      this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerColumn'), async () => {
-        const payload = {
-          body: { column_name: colName },
-          lid: this.currentEditedLayer.id,
-        };
-
-        const r = await this.$store.dispatch('deleteColumn', payload);
-        if (r.status === 200) {
-          this.$alertify.success(this.$i18n.t('default.deleted'));
-          this.$delete(this.currentLayerSettings.columns, colName);
-        } else {
-          this.$i18n.t('default.error');
-        }
-      }, () => {})
-        .set({ title: this.$i18n.t('dashboard.modal.deleteColumnTitle') })
-        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
     async deleteService(sid) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteService'), async () => {
@@ -545,96 +393,17 @@ export default {
         this.isFetching = false;
       });
     },
-    async saveLayerName() {
-      const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
-      const payload = {
-        body: {
-          layer_name: this.currentEditedLayer.name,
-        },
-        lid: this.currentEditedLayer.id,
-      };
-
-      const r = await this.$store.dispatch('changeLayer', payload);
-      if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('dashboard.modal.layerNameChanged'));
-        // zmiana id
-        this.$set(
-          this.vectorLayersList[layIndex], 'id', r.obj.settings,
-        );
-        this.$set(
-          this.currentLayerSettings, 'id', r.obj.settings,
-        );
-        // zmiana nazwy
-        this.$set(
-          this.vectorLayersList[layIndex], 'name', this.currentEditedLayer.name,
-        );
-        this.$set(
-          this.currentLayerSettings, 'name', this.currentEditedLayer.name,
-        );
-      } else {
-        this.$i18n.t('default.error');
-      }
-    },
-    async saveStyle() {
-      const r = await this.$store.dispatch('saveStyle', {
-        lid: this.currentEditedLayer.id,
-        body: this.styles[this.currentEditedLayer.id],
-      });
-      if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('default.success'));
-      } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
-      }
-    },
     async setEditedLayer(layType, key) {
       if (layType === 'vector') {
         this.currentEditedLayer = Object.assign({}, this.vectorLayersList[key]);
       }
-      const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
-      this.currentLayerSettings = r.body.settings;
-
-      const styleResponse = await this.$store.dispatch(
-        'getLayerStyle', this.currentEditedLayer.id,
-      );
-      this.$set(this.styles, this.currentEditedLayer.id, styleResponse.body.style);
-
-      this.$nextTick(() => {
-        if (!document.querySelector('.color-picker--fill')) return;
-        const pickrFill = Pickr.create({
-          el: '.color-picker--fill',
-          container: 'body',
-          theme: 'nano',
-          default: `rgba(${this.styles[this.currentEditedLayer.id]['fill-color']})`,
-          defaultRepresentation: 'RGBA',
-          position: 'top-start',
-          components: this.pickrComponents,
-          strings: {
-            save: 'Zapisz',
-          },
-        });
-
-        const pickrStroke = Pickr.create({
-          el: '.color-picker--stroke',
-          container: 'body',
-          theme: 'nano',
-          default: `rgba(${this.styles[this.currentEditedLayer.id]['stroke-color']})`,
-          defaultRepresentation: 'RGBA',
-          position: 'top-start',
-          components: this.pickrComponents,
-          strings: {
-            save: 'Zapisz',
-          },
-        });
-
-        pickrFill.on('save', (color) => {
-          const col = color.toRGBA().map(el => parseInt(el, 10));
-          this.$set(this.styles[this.currentEditedLayer.id], 'fill-color', col.join(','));
-        });
-
-        pickrStroke.on('save', (color) => {
-          const col = color.toRGBA().map(el => parseInt(el, 10));
-          this.$set(this.styles[this.currentEditedLayer.id], 'stroke-color', col.join(','));
-        });
+      this.$router.push({
+        name: 'settings',
+        params: {
+          layerId: this.currentEditedLayer.id,
+          layer: this.currentEditedLayer,
+          vectorLayersList: this.vectorLayersList,
+        },
       });
     },
     clearServicesModal() {
@@ -648,11 +417,7 @@ export default {
     clearUploadFiles() {
       this.$refs.dropzoneUploadLayer.removeAllFiles();
       this.vectorLayerName = '';
-    },
-    closeSettingsModal() {
-      this.currentEditedLayer = {};
-      this.newColumnName = undefined;
-      this.newColumnType = '';
+      this.isEpsgAutomatic = true;
     },
     deleteLayer(el) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
@@ -667,24 +432,45 @@ export default {
         .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
+    isNumber(evt) {
+      const e = (evt) || window.event;
+      const charCode = (e.which) ? e.which : e.keyCode;
+      if ((charCode > 31 && (charCode < 48 || charCode > 57))) {
+        e.preventDefault();
+        return false;
+      }
+      return true;
+    },
+    sendingError(file) {
+      if (!this.isSendingError) {
+        this.$alertify.error(this.$i18n.t('upload.uploadError'));
+      }
+      if (file.xhr.status === 400) {
+        this.isEpsgAutomatic = false;
+        if (!this.isSendingError) this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
+      }
+      // eslint-disable-next-line no-param-reassign
+      file.status = 'queued';
+      this.isSendingError = true;
+    },
     sendingEvent(files, xhr, formData) {
+      this.isSendingError = false;
       formData.append('name', this.vectorLayerName);
+      if (!this.isEpsgAutomatic) {
+        formData.append('epsg', this.epsg);
+      }
+    },
+    sendingSuccess() {
+      this.isEpsgAutomatic = true;
+      this.isSendingError = false;
     },
     sendVectorLayer() {
-      if (this.vectorLayerName === '') {
-        const msg = this.$i18n.t('upload.noLayerNameError');
-        this.$alertify.error(msg);
-        return;
-      }
       this.$refs.dropzoneUploadLayer.processQueue();
     },
     setAttachmentsLayer(lid) {
       if (!Object.keys(this.featureAttachments).includes(lid)) {
         this.$store.commit('setAttachmentsLayer', lid);
       }
-    },
-    toggleColumnsSection(isVisible) {
-      this.isColumnsVisible = isVisible;
     },
   },
   async mounted() {
@@ -779,11 +565,5 @@ export default {
   text-decoration: none;
   max-height: 50vh;
   overflow-y: auto;
-}
-.text-centered {
-  text-align: center;
-}
-.text-left {
-  text-align: left;
 }
 </style>

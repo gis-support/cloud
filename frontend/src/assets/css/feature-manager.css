@@ -288,6 +288,7 @@
 
 #root .right-panel {
     flex-grow: 1;
+    max-width: 25%;
 }
 .padding-0 {
     padding-left: 0px;
