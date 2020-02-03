@@ -50,7 +50,7 @@
     <div v-if="usersGroup !== 'default'">
       <h4>{{ $i18n.t(`featureManager.attachmentsTitleGroup`) }}{{ usersGroup }}:</h4>
       <div
-        v-if="
+        v-if="featureAttachments &&
           !Object.keys(featureAttachments).includes(usersGroup) ||
             featureAttachments[usersGroup].filter(el => el.group !== defaultGroup).length === 0
         "

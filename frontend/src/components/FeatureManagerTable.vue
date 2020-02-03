@@ -236,7 +236,8 @@ export default {
       const r = await this.$store.dispatch('getFeatureAttachments', payload);
       const groups = Object.keys(r.body.attachments);
       if (r.status === 200) {
-        if (!Object.keys(this.featureAttachments[this.layId]).includes(fid.toString())) {
+        if (this.featureAttachments[this.layId]
+        && !Object.keys(this.featureAttachments[this.layId]).includes(fid.toString())) {
           this.$store.commit('setAttachmentsFeature', { lid: this.layId, fid, groups });
         }
         this.$store.commit('addAttachmentToFeature', {
