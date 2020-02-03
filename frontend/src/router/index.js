@@ -39,6 +39,14 @@ const routes = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/settings/:layerId',
+    name: 'settings',
+    component: () => import(/* webpackChunkName: "settings" */ '../views/Settings.vue'),
+    meta: {
+      requiresAuth: true,
+    },
+  },
 ];
 
 const router = new VueRouter({
