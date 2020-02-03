@@ -242,7 +242,7 @@ class TestLayers(BaseTest):
         }
         r = client.post('/api/layers?token={}'.format(token), data=file_request,
                         follow_redirects=True, content_type='multipart/form-data')
-        assert r.status_code == 401
+        assert r.status_code == 400
         assert r.json
         assert r.json['error'] == 'epsg not recognized'
         file_request_2 = {

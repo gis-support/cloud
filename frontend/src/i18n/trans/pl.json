@@ -18,6 +18,7 @@
       "deleteLayerTitle": "Usuwanie warstwy",
       "deleteService": "Czy na pewno chcesz usunąć wybrane źródło?",
       "deleteServiceTitle": "Usuwanie źródła zewnętrznego",
+      "epsg": "Układ współrzędnych",
       "fillColor": "Kolor wypełnienia",
       "hideColumns": "Ukryj kolumny warstwy",
       "layerAddress": "Adres usługi",
@@ -133,8 +134,10 @@
     "register": "Zarejestruj"
   },
   "upload": {
+    "automaticEpsg": "Układ współrzędnych określany jest automatycznie",
     "cancelUpload": "Anuluj wysyłanie",
     "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",
+    "noEpsg": "Nie rozpoznano układu współrzędnych. Wprowadź go ręcznie",
     "noLayerNameError": "Nazwa warstwy jest wymagana",
     "removeFile": "Usuń plik",
     "uploadError": "Błąd podczas przesyłania pliku",

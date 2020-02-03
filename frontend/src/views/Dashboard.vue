@@ -130,15 +130,31 @@
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label class="control-label col-sm-4">{{$i18n.t('dashboard.modal.layerName')}}</label>
+              <label class="control-label col-sm-4 pl-0">
+                {{$i18n.t('dashboard.modal.layerName')}}
+              </label>
               <input type="text" class="form-control" v-model="vectorLayerName">
+            </div>
+            <div style="display: flex" class="pt-10">
+              <label class="control-label col-sm-4 pl-0">
+                {{$i18n.t('dashboard.modal.epsg')}}
+              </label>
+              <input
+                class="form-control"
+                v-model="epsg"
+                @keypress="isNumber($event)"
+                :disabled="isEpsgAutomatic"
+                :title="isEpsgAutomatic ? $i18n.t('upload.automaticEpsg') : null"
+              >
             </div>
             <div class="pt-10">
               <vue-dropzone
                 ref="dropzoneUploadLayer"
                 id="dropzone"
                 :options="dropzoneOptions"
+                @vdropzone-error="sendingError"
                 @vdropzone-sending-multiple="sendingEvent"
+                @vdropzone-success-multiple="sendingSuccess"
               />
             </div>
           </div>
@@ -147,7 +163,9 @@
               @click="clearUploadFiles" ref="closeModalBtn">
               {{$i18n.t('default.cancel')}}
             </button>
-            <button type="button" class="btn btn-success" @click="sendVectorLayer">
+            <button type="button" class="btn btn-success" @click="sendVectorLayer"
+              :disabled="!vectorLayerName"
+            >
               {{$i18n.t('default.save')}}
             </button>
           </div>
@@ -242,8 +260,11 @@ export default {
   name: 'dashboard',
   data: vm => ({
     currentEditedLayer: undefined,
+    epsg: undefined,
     fetchedLayers: [],
+    isEpsgAutomatic: true,
     isFetching: false,
+    isSendingError: false,
     isServicePublic: false,
     pickrComponents: {
       preview: true,
@@ -287,9 +308,6 @@ export default {
           vm.vectorLayersList.push(newLayer);
         }
         vm.$refs.closeModalBtn.click();
-      },
-      error() {
-        vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
       },
     },
   }),
@@ -399,6 +417,7 @@ export default {
     clearUploadFiles() {
       this.$refs.dropzoneUploadLayer.removeAllFiles();
       this.vectorLayerName = '';
+      this.isEpsgAutomatic = true;
     },
     deleteLayer(el) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerContent'), async () => {
@@ -413,15 +432,39 @@ export default {
         .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
     },
+    isNumber(evt) {
+      const e = (evt) || window.event;
+      const charCode = (e.which) ? e.which : e.keyCode;
+      if ((charCode > 31 && (charCode < 48 || charCode > 57))) {
+        e.preventDefault();
+        return false;
+      }
+      return true;
+    },
+    sendingError(file) {
+      if (!this.isSendingError) {
+        this.$alertify.error(this.$i18n.t('upload.uploadError'));
+      }
+      if (file.xhr.status === 400) {
+        this.isEpsgAutomatic = false;
+        if (!this.isSendingError) this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
+      }
+      // eslint-disable-next-line no-param-reassign
+      file.status = 'queued';
+      this.isSendingError = true;
+    },
     sendingEvent(files, xhr, formData) {
+      this.isSendingError = false;
       formData.append('name', this.vectorLayerName);
+      if (!this.isEpsgAutomatic) {
+        formData.append('epsg', this.epsg);
+      }
+    },
+    sendingSuccess() {
+      this.isEpsgAutomatic = true;
+      this.isSendingError = false;
     },
     sendVectorLayer() {
-      if (this.vectorLayerName === '') {
-        const msg = this.$i18n.t('upload.noLayerNameError');
-        this.$alertify.error(msg);
-        return;
-      }
       this.$refs.dropzoneUploadLayer.processQueue();
     },
     setAttachmentsLayer(lid) {
