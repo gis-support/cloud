@@ -119,7 +119,8 @@ class TestLayers(BaseTest):
             'file[0]': (BytesIO((open(os.path.join(path, 'correct.dbf'), 'rb').read())), 'correct.dbf'),
             'file[2]': (BytesIO((open(os.path.join(path, 'correct.shp'), 'rb').read())), 'correct.shp'),
             'file[3]': (BytesIO((open(os.path.join(path, 'correct.shx'), 'rb').read())), 'correct.shx'),
-            'name': 'wojewodztwa'
+            'name': 'wojewodztwa',
+            'epsg': '4326'
         }
         from osgeo import gdal
         gdal.PushErrorHandler('CPLQuietErrorHandler')
@@ -181,7 +182,8 @@ class TestLayers(BaseTest):
         lid = r.json['layers']['id']
         r = client.get(f'/api/layers/{lid}?token={token}')
         assert r.status_code == 200
-        assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [18.878488648, 53.164468287]
+        assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [
+            18.878488648, 53.164468287]
 
     def test_layers_post_geojson_RL_37(self, client):
         token = self.get_token(client)
@@ -201,6 +203,68 @@ class TestLayers(BaseTest):
         assert r.status_code == 200
         assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [
             17.028306997, 52.205571184]
+
+    def test_layers_post_shp_correct_tranfsform(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers')
+        file_request = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'correct_3857.dbf'), 'rb').read())), 'correct_3857.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'correct_3857.prj'), 'rb').read())), 'correct_3857.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'correct_3857.shp'), 'rb').read())), 'correct_3857.shp'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'correct_3857.shx'), 'rb').read())), 'correct_3857.shx'),
+            'file[4]': (BytesIO((open(os.path.join(path, 'correct_3857.cpg'), 'rb').read())), 'correct_3857.cpg'),
+            'file[5]': (BytesIO((open(os.path.join(path, 'correct_3857.qpj'), 'rb').read())), 'correct_3857.qpj'),
+            'name': 'wojewodztwa'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['features'] == 1
+        assert r.json['layers']['name'] == 'wojewodztwa'
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0] == [
+            16.714467009, 53.299132461]
+
+    def test_layers_post_geojson_RL_48_error(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers')
+        file_request = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'RL-48.dbf'), 'rb').read())), 'RL-48.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'RL-48.prj'), 'rb').read())), 'RL-48.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'RL-48.shp'), 'rb').read())), 'RL-48.shp'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'RL-48.shx'), 'rb').read())), 'RL-48.shx'),
+            'file[4]': (BytesIO((open(os.path.join(path, 'RL-48.cpg'), 'rb').read())), 'RL-48.cpg'),
+            'file[5]': (BytesIO((open(os.path.join(path, 'RL-48.qpj'), 'rb').read())), 'RL-48.qpj'),
+            'name': 'RL-48'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 401
+        assert r.json
+        assert r.json['error'] == 'epsg not recognized'
+        file_request_2 = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'RL-48.dbf'), 'rb').read())), 'RL-48.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'RL-48.prj'), 'rb').read())), 'RL-48.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'RL-48.shp'), 'rb').read())), 'RL-48.shp'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'RL-48.shx'), 'rb').read())), 'RL-48.shx'),
+            'file[4]': (BytesIO((open(os.path.join(path, 'RL-48.cpg'), 'rb').read())), 'RL-48.cpg'),
+            'file[5]': (BytesIO((open(os.path.join(path, 'RL-48.qpj'), 'rb').read())), 'RL-48.qpj'),
+            'name': 'RL-48',
+            'epsg': '2180'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request_2,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['name'] == 'RL-48'
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0] == [
+            23.473214359, 52.080550359]
 
 
 @pytest.mark.layerssettings

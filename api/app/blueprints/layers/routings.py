@@ -67,12 +67,18 @@ def layers(cloud):
             else:
                 return jsonify({"error": "file is invalid"}), 401
         layer = source.GetLayer()
-        try:
-            epsg = layer.GetSpatialRef().GetAuthorityCode(None)
-        except:
-            epsg = request.form.get("epsg", "4326")
+        sref = layer.GetSpatialRef()
+        epsg = None
+        if sref:
+            # Autodetect
+            epsg = sref.GetAuthorityCode(None)
+        if not epsg:
+            # Get from request
+            epsg = request.form.get("epsg", None)
         transform = None
         if epsg != "4326":
+            if not epsg:
+                return jsonify({"error": "epsg not recognized"}), 401
             inSpatialRef = osr.SpatialReference()
             inSpatialRef.ImportFromEPSG(int(epsg))
             inSpatialRef.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
