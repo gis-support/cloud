@@ -34,11 +34,11 @@
           </button>
           <button type="button" class="btn navbar-btn navbar-right btn-default"
             :title="$i18n.t('featureManager.addFeature')" @click="drawNewFeature"
-            v-if="!isDrawing">
+            v-if="!isDrawing && permission === 'write'">
             <i class="fa fa-plus"></i>
           </button>
           <span class="navbar-right" v-else>
-            <button type="button" class="btn navbar-btn btn-default"
+            <button type="button" class="btn navbar-btn btn-default" v-if="permission === 'write'"
               :title="$i18n.t('featureManager.cancelFeatureAdding')" @click="clearFeatureAdding">
               <i class="fa fa-times-circle"></i>
             </button>
@@ -174,30 +174,30 @@
       <div class="right-panel padding-0">
         <div class="col-sm-12">
           <div style="display: inline-block; width: 100%;">
-              <h4 class="col-sm-7 right-panel__title" v-if="$route.params.layerName">
-                <i class="fa fa-map-o title__icon"></i>
-                <span class="mvp-red right-panel__name">{{$route.params.layerName}}</span>
-              </h4>
-              <div class="col-sm-5" style="margin-top: 6px;">
-                <div class="btn-group btn-group-sm" role="group"
-                  style="float: right; margin-right: -15px;">
-                  <div class="btn-group btn-group-sm" role="group">
-                    <button type="button" class="btn btn-default dropdown-toggle"
-                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="fa fa-download green icon-hover"></i> <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu">
-                      <!-- <li><a>SHP</a></li> -->
-                      <li @click="downloadLayer([])"><a>GEOJSON</a></li>
-                      <!-- <li><a>XLSX</a></li> -->
-                    </ul>
-                  </div>
-                  <!-- <a class="btn btn-default">
-                    <i class="fa fa-cog yellow icon-hover"></i>
-                  </a> -->
+            <h4 class="col-sm-7 right-panel__title" v-if="$route.params.layerName">
+              <i class="fa fa-map-o title__icon"></i>
+              <span class="mvp-red right-panel__name">{{$route.params.layerName}}</span>
+            </h4>
+            <div class="col-sm-5" style="margin-top: 6px;" v-if="permission === 'write'">
+              <div class="btn-group btn-group-sm" role="group"
+                style="float: right; margin-right: -15px;">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-default dropdown-toggle"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-download green icon-hover"></i> <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <!-- <li><a>SHP</a></li> -->
+                    <li @click="downloadLayer([])"><a>GEOJSON</a></li>
+                    <!-- <li><a>XLSX</a></li> -->
+                  </ul>
                 </div>
+                <!-- <a class="btn btn-default">
+                  <i class="fa fa-cog yellow icon-hover"></i>
+                </a> -->
               </div>
             </div>
+          </div>
 
             <ul class="nav nav-tabs nav-justified"
               style="margin-left: -15px; width: calc(100% + 30px);">
@@ -263,35 +263,37 @@
               </div>
 
               <div v-show="indexActiveTab == 1">
-                <template v-if="!editing">
-                  <div class="btn-group btn-group-edit" role="group">
-                    <button
-                      type="button"
-                      class="btn btn-success btn-group-justified"
-                      @click="editAttributes"
-                    >{{$i18n.t('default.edit')}}</button>
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="btn-group btn-group-action btn-group-edit" role="group">
-                    <button
-                      type="button"
-                      class="btn btn-success"
-                      @click="saveEditing"
-                    >{{$i18n.t('default.save')}}</button>
-                  </div>
-                  <div class="btn-group btn-group-action btn-group-edit" role="group">
-                    <button
-                      type="button"
-                      class="btn btn-default"
-                      @click="cancelEditing"
-                    >{{$i18n.t('default.cancel')}}</button>
-                  </div>
-                  <div class="btn-group btn-group-action btn-group-edit" role="group">
-                    <button type="button" class="btn btn-danger" @click="deleteFeature">
-                      {{$i18n.t('default.delete')}}
-                    </button>
-                  </div>
+                <template v-if="permission === 'write'">
+                  <template v-if="!editing">
+                    <div class="btn-group btn-group-edit" role="group">
+                      <button
+                        type="button"
+                        class="btn btn-success btn-group-justified"
+                        @click="editAttributes"
+                      >{{$i18n.t('default.edit')}}</button>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="btn-group btn-group-action btn-group-edit" role="group">
+                      <button
+                        type="button"
+                        class="btn btn-success"
+                        @click="saveEditing"
+                      >{{$i18n.t('default.save')}}</button>
+                    </div>
+                    <div class="btn-group btn-group-action btn-group-edit" role="group">
+                      <button
+                        type="button"
+                        class="btn btn-default"
+                        @click="cancelEditing"
+                      >{{$i18n.t('default.cancel')}}</button>
+                    </div>
+                    <div class="btn-group btn-group-action btn-group-edit" role="group">
+                      <button type="button" class="btn btn-danger" @click="deleteFeature">
+                        {{$i18n.t('default.delete')}}
+                      </button>
+                    </div>
+                  </template>
                 </template>
 
                 <div class="scroll-tab">
@@ -312,7 +314,8 @@
                   ref="attachments-panel"
                   v-if="currentFeature && Object.keys(featureAttachments).length > 0"
                   :lid="$route.params.layerId"
-                  :fid="currentFeature.properties.id" />
+                  :fid="currentFeature.properties.id"
+                  :permission="permission" />
               </div>
             </div>
           </div>
@@ -376,6 +379,7 @@ export default {
     isInfoDialogVisible: false,
     items: [],
     newFeatureProperties: {},
+    permission: [],
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
@@ -405,6 +409,9 @@ export default {
     },
     token() {
       return this.$store.getters.getToken;
+    },
+    user() {
+      return this.$store.getters.getUser;
     },
   },
   filters: {
@@ -483,6 +490,18 @@ export default {
       } else {
         this.$i18n.t('featureManager.downloadError');
       }
+    },
+    async getPermissions() {
+      const r = await this.$store.dispatch('getPermissions');
+      const usersPerms = r.obj.permissions.find(
+        el => el.id === this.$route.params.layerId,
+      );
+      this.permission = usersPerms.users[this.user];
+    },
+    async getSettings() {
+      const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
+      this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
+      this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
@@ -832,9 +851,8 @@ export default {
     const ortofoto = await this.initOrtofoto();
     this.map.addLayer(ortofoto);
 
-    const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
-    this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
-    this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
+    this.getPermissions();
+    this.getSettings();
 
     this.createSelectInteraction();
     this.loadServices();

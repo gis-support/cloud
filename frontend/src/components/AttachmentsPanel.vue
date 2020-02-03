@@ -1,37 +1,45 @@
 <template>
   <div class="attachments-panel right-sub-panel">
-    <hr/>
-    <button class="btn btn-link" @click="toggleAttachmentAdding(true)">
-      <i class="fa fa-plus-circle" aria-hidden="true"/>
-      {{$i18n.t(`featureManager.addAttachment`)}}
+    <hr />
+    <button
+      class="btn btn-link"
+      @click="toggleAttachmentAdding(true)"
+      v-if="permission === 'write'"
+    >
+      <i class="fa fa-plus-circle" aria-hidden="true" />
+      {{ $i18n.t(`featureManager.addAttachment`) }}
     </button>
     <div v-if="featureAttachments">
-      <h4>{{$i18n.t(`featureManager.attachmentsTitlepublic`)}}:</h4>
-      <div v-if="!Object.keys(featureAttachments).includes(defaultGroup) ||
-        featureAttachments[defaultGroup].length === 0"
-        class="empty-sub-panel">
-        <i class="fa fa-paperclip" aria-hidden="true"/>
-        {{$i18n.t('default.noAttachments')}}
+      <h4>{{ $i18n.t(`featureManager.attachmentsTitlepublic`) }}:</h4>
+      <div
+        v-if="
+          !Object.keys(featureAttachments).includes(defaultGroup) ||
+            featureAttachments[defaultGroup].length === 0
+        "
+        class="empty-sub-panel"
+      >
+        <i class="fa fa-paperclip" aria-hidden="true" />
+        {{ $i18n.t("default.noAttachments") }}
       </div>
       <span v-else>
         <template v-for="item in featureAttachments[defaultGroup]">
           <div class="media" :key="item.link">
             <div class="media-left">
-              <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
+              <h3><i class="fa fa-paperclip" aria-hidden="true" /></h3>
             </div>
             <div class="media-body">
               <h5 class="media-heading">
                 <a :href="item.link" target="_blank">
-                  <span>{{item.name}}</span>
+                  <span>{{ item.name }}</span>
                 </a>
               </h5>
-              <span style="opacity:0.4;">
+              <span style="opacity:0.4;" v-if="permission === 'write'">
                 <button
                   class="btn btn-link action"
                   :title="$i18n.t('featureManager.deleteLink')"
                   @click="deleteLink(item)"
                 >
-                  <i class="fa fa-trash" aria-hidden="true"/>
+                  <i class="fa fa-trash" aria-hidden="true" />
                 </button>
               </span>
             </div>
@@ -40,24 +48,29 @@
       </span>
     </div>
     <div v-if="usersGroup !== 'default'">
-      <h4>{{$i18n.t(`featureManager.attachmentsTitleGroup`)}}{{usersGroup}}:</h4>
-      <div v-if="!Object.keys(featureAttachments).includes(usersGroup) ||
-      featureAttachments[usersGroup].filter(el => el.group !== defaultGroup).length === 0"
-        class="empty-sub-panel">
-        <i class="fa fa-paperclip" aria-hidden="true"/>
-        {{$i18n.t('default.noAttachments')}}
+      <h4>{{ $i18n.t(`featureManager.attachmentsTitleGroup`) }}{{ usersGroup }}:</h4>
+      <div
+        v-if="featureAttachments &&
+          !Object.keys(featureAttachments).includes(usersGroup) ||
+            featureAttachments[usersGroup].filter(el => el.group !== defaultGroup).length === 0
+        "
+        class="empty-sub-panel"
+      >
+        <i class="fa fa-paperclip" aria-hidden="true" />
+        {{ $i18n.t("default.noAttachments") }}
       </div>
       <span v-else>
-        <template v-for="item in featureAttachments[usersGroup]
-          .filter(el => el.group !== defaultGroup)">
+        <template
+          v-for="item in featureAttachments[usersGroup].filter(el => el.group !== defaultGroup)"
+        >
           <div class="media" :key="item.link">
             <div class="media-left">
-              <h3><i class="fa fa-paperclip" aria-hidden="true"/></h3>
+              <h3><i class="fa fa-paperclip" aria-hidden="true" /></h3>
             </div>
             <div class="media-body">
               <h5 class="media-heading">
                 <a :href="item.link" target="_blank">
-                  <span>{{item.name}}</span>
+                  <span>{{ item.name }}</span>
                 </a>
               </h5>
               <span style="opacity:0.4;">
@@ -66,7 +79,7 @@
                   :title="$i18n.t('featureManager.deleteLink')"
                   @click="deleteLink(item)"
                 >
-                  <i class="fa fa-trash" aria-hidden="true"/>
+                  <i class="fa fa-trash" aria-hidden="true" />
                 </button>
               </span>
             </div>
@@ -81,42 +94,38 @@
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">
-                {{$i18n.t('featureManager.addAttachmentTitle')}}
+                {{ $i18n.t("featureManager.addAttachmentTitle") }}
               </h4>
             </div>
             <div class="modal-body">
               <div class="form-group d-flex" style="flex-direction: column; margin-bottom: 0">
                 <div class="full-width pb-10">
-                  <label class="control-label col-sm-4">{{$i18n.t('default.name')}}</label>
+                  <label class="control-label col-sm-4">{{ $i18n.t("default.name") }}</label>
                   <div class="col-sm-8">
-                    <input class="full-width form-control"
-                    type="text"
-                    v-model="attachmentName">
+                    <input class="full-width form-control" type="text" v-model="attachmentName" />
                   </div>
                 </div>
 
                 <div class="full-width pb-10">
                   <label class="control-label col-sm-4">
-                    {{$i18n.t('featureManager.attachmentGroup')}}</label>
+                    {{ $i18n.t("featureManager.attachmentGroup") }}</label
+                  >
                   <div class="col-sm-8">
-                    <select
-                      class="form-control"
-                      v-model="isAttachmentPublic">
+                    <select class="form-control" v-model="isAttachmentPublic">
                       <option v-if="usersGroup !== defaultGroup" :value="false">
-                        {{usersGroup}}
+                        {{ usersGroup }}
                       </option>
-                      <option :value="true">{{defaultGroup}}</option>
+                      <option :value="true">{{ defaultGroup }}</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="full-width pb-10">
                   <label class="control-label col-sm-4">
-                    {{$i18n.t('featureManager.attachmentLink')}}</label>
+                    {{ $i18n.t("featureManager.attachmentLink") }}</label
+                  >
                   <div class="col-sm-8">
-                    <input class="full-width form-control"
-                    type="text"
-                    v-model="attachmentLink">
+                    <input class="full-width form-control" type="text" v-model="attachmentLink" />
                   </div>
                 </div>
               </div>
@@ -130,15 +139,16 @@
                     :disabled="!attachmentName || !attachmentLink"
                     @click="addAttachment"
                   >
-                    {{$i18n.t('default.save')}}
+                    {{ $i18n.t("default.save") }}
                   </button>
                 </div>
                 <div class="btn-group" role="group">
-                  <button type="button"
+                  <button
+                    type="button"
                     class="btn btn-primary"
                     @click="toggleAttachmentAdding(false)"
                   >
-                    {{$i18n.t('default.cancel')}}
+                    {{ $i18n.t("default.cancel") }}
                   </button>
                 </div>
               </div>
@@ -158,6 +168,9 @@ export default {
     },
     fid: {
       type: Number,
+    },
+    permission: {
+      type: String,
     },
   },
   data: () => ({
@@ -197,7 +210,11 @@ export default {
         const { group } = r.obj.attachments;
         const params = {};
         params[group] = [r.obj.attachments];
-        this.$store.commit('addAttachmentToFeature', { lid: this.lid, fid: this.fid, attachments: params });
+        this.$store.commit('addAttachmentToFeature', {
+          lid: this.lid,
+          fid: this.fid,
+          attachments: params,
+        });
         this.toggleAttachmentAdding(false);
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -214,23 +231,30 @@ export default {
       }
     },
     deleteLink(item) {
-      this.$alertify.confirm(this.$i18n.t('featureManager.deleteAttachmentConfirm'), async () => {
-        const r = await this.$store.dispatch('deleteAttachment', {
-          lid: this.lid,
-          fid: this.fid,
-          aid: item.id,
-        });
-        if (r.status === 200) {
-          this.$store.commit('deleteFeatureAttachment', {
-            lid: this.lid,
-            fid: this.fid,
-            aid: item.id,
-            attachType: item.group,
-          });
-        }
-      }, () => {})
+      this.$alertify
+        .confirm(
+          this.$i18n.t('featureManager.deleteAttachmentConfirm'),
+          async () => {
+            const r = await this.$store.dispatch('deleteAttachment', {
+              lid: this.lid,
+              fid: this.fid,
+              aid: item.id,
+            });
+            if (r.status === 200) {
+              this.$store.commit('deleteFeatureAttachment', {
+                lid: this.lid,
+                fid: this.fid,
+                aid: item.id,
+                attachType: item.group,
+              });
+            }
+          },
+          () => {},
+        )
         .set({ title: this.$i18n.t('featureManager.deleteAttachmentHeader') })
-        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+        .set({
+          labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') },
+        });
     },
     toggleAttachmentAdding(vis) {
       this.isAttachmentAdding = vis;
