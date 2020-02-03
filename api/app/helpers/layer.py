@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from app.helpers.cloud import Cloud
-from app.helpers.style import create_qml, QML_TO_OL
+from app.helpers.style import QML_TO_OL, LayerStyle
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from xml.dom import minidom
@@ -66,33 +66,31 @@ class Layer(Cloud):
         cursor = self.execute(SQL("""
             SELECT GeometryType(geometry) FROM {} LIMIT 1
         """).format(Identifier(self.name)))
-        return cursor.fetchone()[0]
+        geom = cursor.fetchone()[0]
+        if 'point' in geom.lower():
+            geom = 'point'
+        elif 'line' in geom.lower():
+            geom = 'line'
+        else:
+            geom = 'polygon'
+        return geom
 
     def set_style(self, data):
-        style = self.get_style()
-        style['fill-color'] = data.get('fill-color', style['fill-color'])
-        style['stroke-color'] = data.get('stroke-color', style['stroke-color'])
-        style['stroke-width'] = data.get('stroke-width', style['stroke-width'])
+        #TODO: self.syncQML()
+        style = LayerStyle(data, self.geom_type()).style
         self.execute("""
-            UPDATE layer_styles SET styleqml = %s
-        """, (create_qml(self.geom_type(), style), ))
+            UPDATE layer_styles SET stylejson=%s WHERE f_table_name = %s
+        """, (json.dumps(style), self.name,))
         return style
+
+    def syncQML(self):
+        return None
 
     def get_style(self):
         cursor = self.execute("""
-            SELECT styleqml FROM layer_styles WHERE f_table_name = %s
+            SELECT stylejson FROM layer_styles WHERE f_table_name = %s
         """, (self.name,))
-        node = minidom.parseString(cursor.fetchone()[0]).documentElement
-        geom_type = node.getElementsByTagName(
-            'symbol')[0].attributes['type'].value
-        mapper = QML_TO_OL[geom_type]
-        style = {}
-        for prop in node.getElementsByTagName('prop'):
-            k = prop.attributes['k'].value
-            v = prop.attributes['v'].value
-            if k in mapper:
-                style[mapper[k]] = v
-        return style
+        return cursor.fetchone()[0]
 
     # Change layer name
     def change_name(self, layer_name, callback=lambda old_lid, new_lid: None):

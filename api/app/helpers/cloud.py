@@ -3,8 +3,9 @@
 
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
-from app.helpers.style import create_qml
+from app.helpers.style import create_qml, create_stylejson, create_stylejson
 import os
+import json
 
 
 DB_RESTRICTED_USERS = (
@@ -200,6 +201,7 @@ class Cloud:
                 f_geometry_column,
                 stylename,
                 styleqml,
+                stylejson,
                 useasdefault
             )
             VALUES (
@@ -209,6 +211,7 @@ class Cloud:
                 'geometry',
                 'default',
                 %s,
+                %s,
                 True
             );
-        """, (name, create_qml(geom_type)))
+        """, (name, create_qml(geom_type), json.dumps(create_stylejson(geom_type),)))

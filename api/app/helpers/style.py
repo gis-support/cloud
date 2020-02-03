@@ -80,3 +80,131 @@ def create_qml(geom_type, style={}):
         return DEFAULT_LINESTRING_STYLE.format(stroke_color, stroke_width)
     else:
         return DEFAULT_POLYGON_STYLE.format(fill_color, stroke_color, stroke_width)
+
+
+def create_stylejson(geom_type):
+    if 'point' in geom_type.lower():
+        return {
+            'renderer': 'single',
+            'type': 'point',
+            'fill-color': '255,255,255,0.4',
+            'stroke-color': '51,153,204,1',
+            'stroke-width': '1',
+            'width': '2'
+        }
+    elif 'line' in geom_type.lower():
+        return {
+            'renderer': 'single',
+            'type': 'line',
+            'stroke-color': '51,153,204,1',
+            'stroke-width': '2'
+        }
+    else:
+        return {
+            'renderer': 'single',
+            'type': 'polygon',
+            'fill-color': '255,255,255,0.4',
+            'stroke-color': '51,153,204,1',
+            'stroke-width': '2'
+        }
+
+
+class LayerStyle:
+
+    def __init__(self, data, geom_type):
+        self.data = data
+        self.geom_type = geom_type
+        self.check_existence('renderer', self.data)
+        self.check_contains('type', self.data['renderer'], [
+                            'single', 'categorized'])
+        self.check_existence('type', self.data)
+        self.renderer = data['renderer']
+        self.style = {}
+        self.style['renderer'] = self.renderer
+        if self.renderer == 'single':
+            self.validate_single()
+        elif self.renderer == 'categorized':
+            self.validate_categorized()
+
+    def check_existence(self, value, data):
+        if value not in data:
+            raise ValueError(f"{value} required")
+
+    def check_contains(self, key, value, data):
+        if value not in data:
+            raise ValueError(f"invalid {key}")
+
+    def check_color(self, color):
+        splitted = color.split(',')
+        if len(splitted) != 4:
+            raise ValueError("invalid number of color arguments")
+        for value in splitted[:2]:
+            try:
+                val = int(value)
+            except:
+                raise ValueError("invalid value for color")
+            if val < 0 or val > 255:
+                raise ValueError("invalid value for color")
+        try:
+            opacity = float(splitted[3])
+        except:
+            raise ValueError("invalid value for opacity")
+        if opacity < 0 or opacity > 1:
+            raise ValueError("invalid value for opacity")
+
+    def check_width(self, width):
+        try:
+            val = int(width)
+        except:
+            raise ValueError("invalid value for width")
+        if val < 1 or val > 10:
+            raise ValueError("invalid value for width (1-10)")
+
+    def check_point(self):
+        self.check_contains('type', self.data['type'], [
+                            'point', 'triangle', 'square'])
+        for color in ['fill-color', 'stroke-color']:
+            self.check_existence(color, self.data)
+            self.check_color(self.data[color])
+        for width in ['stroke-width', 'width']:
+            self.check_existence(width, self.data)
+            self.check_width(self.data[width])
+
+    def check_line(self):
+        self.check_contains('type', self.data['type'], [
+                            'line', 'dashed', 'dotted'])
+        self.check_existence('stroke-color', self.data)
+        self.check_color(self.data['stroke-color'])
+        self.check_existence('stroke-width', self.data)
+        self.check_width(self.data['stroke-width'])
+
+    def check_polygon(self):
+        self.check_contains('type', self.data['type'], ['polygon'])
+        for color in ['fill-color', 'stroke-color']:
+            self.check_existence(color, self.data)
+            self.check_color(self.data[color])
+        self.check_existence('stroke-width', self.data)
+        self.check_width(self.data['stroke-width'])
+
+    def validate_single(self):
+        if self.geom_type == 'point':
+            self.check_point()
+            self.style['type'] = self.data['type']
+            self.style['fill-color'] = self.data['fill-color']
+            self.style['stroke-color'] = self.data['stroke-color']
+            self.style['stroke-width'] = self.data['stroke-width']
+            self.style['width'] = self.data['width']
+        elif self.geom_type == 'line':
+            self.check_line()
+            self.style['type'] = self.data['type']
+            self.style['stroke-color'] = self.data['stroke-color']
+            self.style['stroke-width'] = self.data['stroke-width']
+        else:
+            self.check_polygon()
+            self.style['type'] = self.data['type']
+            self.style['fill-color'] = self.data['fill-color']
+            self.style['stroke-color'] = self.data['stroke-color']
+            self.style['stroke-width'] = self.data['stroke-width']
+
+    def validate_categorized(self):
+        pass

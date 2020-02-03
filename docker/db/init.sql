@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.layer_styles (
     stylename text NULL,
     styleqml xml NULL,
     stylesld xml NULL,
+    stylejson jsonb NULL,
     useasdefault bool NULL,
     description text NULL,
     "owner" varchar(63) NULL,

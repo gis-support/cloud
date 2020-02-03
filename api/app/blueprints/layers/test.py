@@ -421,13 +421,159 @@ class TestLayersStyles(BaseTest):
     def test_styles_get_correct(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
+        # Polygon single style
         r = client.get(f'/api/layers/{lid}/style?token={token}')
         assert r.status_code == 200
         assert r.json
+        assert r.json['style']['renderer'] == 'single'
+        assert r.json['style']['type'] == 'polygon'
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
+        # Point single style
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_points.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct_points.geojson'),
+            'name': 'test1'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}/style?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['renderer'] == 'single'
+        assert r.json['style']['type'] == 'point'
+        assert r.json['style']['fill-color'] == '255,255,255,0.4'
+        assert r.json['style']['stroke-color'] == '51,153,204,1'
+        assert r.json['style']['stroke-width'] == '1'
+        assert r.json['style']['width'] == '2'
+        # Line single style
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_lines.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct_lines.geojson'),
+            'name': 'test2'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}/style?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['renderer'] == 'single'
+        assert r.json['style']['type'] == 'line'
+        assert r.json['style']['stroke-color'] == '51,153,204,1'
+        assert r.json['style']['stroke-width'] == '2'
 
+    def test_styles_put_correct_single_point(self, client):
+        # Single Point
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_points.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct_points.geojson'),
+            'name': 'test1'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid = r.json['layers']['id']
+        default_style = {
+            'renderer': 'single',
+            'type': 'point',
+            'fill-color': '0,0,0,1',
+            'stroke-color': '0,0,0,1',
+            'stroke-width': '5',
+            'width': '10'
+        }
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        # Single Point Triangle
+        default_style['type'] = 'triangle'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        assert r.json['style']['type'] == 'triangle'
+        # Single Point Square
+        default_style['type'] = 'square'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        assert r.json['style']['type'] == 'square'
+        # Invalid
+        default_style['type'] = 'circle'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 400
+        assert r.json['error'] == 'invalid type'
+    
+    def test_styles_put_correct_single_line(self, client):
+        # Single Line
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_lines.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct_lines.geojson'),
+            'name': 'test1'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid = r.json['layers']['id']
+        default_style = {
+            'renderer': 'single',
+            'type': 'line',
+            'stroke-color': '0,0,0,1',
+            'stroke-width': '5'
+        }
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        # Single Line Dashed
+        default_style['type'] = 'dashed'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        assert r.json['style']['type'] == 'dashed'
+        # Single Point Dotted
+        default_style['type'] = 'dotted'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        assert r.json['style']['type'] == 'dotted'
+        # Invalid
+        default_style['type'] = 'empty'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 400
+        assert r.json['error'] == 'invalid type'
+    
+    def test_styles_put_correct_single_polygon(self, client):
+        # Single Line
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct.geojson'),
+            'name': 'test1'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid = r.json['layers']['id']
+        default_style = {
+            'renderer': 'single',
+            'type': 'polygon',
+            'fill-color': '0,0,0,1',
+            'stroke-color': '0,0,0,1',
+            'stroke-width': '5'
+        }
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        # Invalid
+        default_style['type'] = 'empty'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 400
+        assert r.json['error'] == 'invalid type'
+
+    """ 
     def test_styles_set_correct(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
@@ -468,7 +614,7 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
-        # TODO validate color values + width
+        # TODO validate color values + width """
 
 
 @pytest.mark.export
