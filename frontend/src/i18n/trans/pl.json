@@ -172,6 +172,7 @@
     }
   },
   "settings": {
+    "labels": "Etykiety",
     "layerInfo": "Informacje o warstwie",
     "symbolization": "Symbolizacja"
   }
