@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from app.helpers.cloud import Cloud
-from app.helpers.style import QML_TO_OL, LayerStyle
+from app.helpers.style import QML_TO_OL, LayerStyle, generate_categories
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from xml.dom import minidom
@@ -76,7 +76,7 @@ class Layer(Cloud):
         return geom
 
     def set_style(self, data):
-        #TODO: self.syncQML()
+        # TODO: self.syncQML()
         style = LayerStyle(data, self.geom_type()).style
         self.execute("""
             UPDATE layer_styles SET stylejson=%s WHERE f_table_name = %s
@@ -120,6 +120,20 @@ class Layer(Cloud):
         for row in cursor.fetchall():
             settings['columns'][row[0]] = row[1]
         return settings
+
+    def categories(self, attr):
+        cursor = self.execute("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = %s AND column_name = %s;
+        """, (self.name, attr,))
+        if cursor.fetchone()[0] == None:
+            raise ValueError("attribute not exists")
+        cursor = self.execute(SQL("""
+            SELECT DISTINCT {}
+            FROM {} LIMIT 20
+        """).format(Identifier(attr), Identifier(self.name)))
+        return generate_categories([c[0] for c in cursor.fetchall()], self.geom_type())
 
     # Add column to layer
     def add_column(self, column_name, column_type):

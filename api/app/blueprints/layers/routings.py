@@ -255,6 +255,23 @@ def layers_settings(lid):
         return post(lid=lid)
 
 
+@mod_layers.route('/layers/<lid>/categories/<attr>', methods=['GET'])
+@swag_from(path_by(__file__, 'docs.values.get.yml'), methods=['GET'])
+@token_required
+def layer_categories(lid, attr):
+    """
+    Get layer categories by ID with read permission
+    Returns schema
+    """
+    @layer_decorator(permission="read")
+    def get(layer, lid=None, attr=None):
+        try:
+            return jsonify({"categories": layer.categories(attr)})
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+    return get(lid=lid, attr=attr)
+
+
 @mod_layers.route('/mvt/<lid>/<int:z>/<int:x>/<int:y>', methods=['GET'])
 @token_required
 @layer_decorator(permission="read")

@@ -1,3 +1,6 @@
+from copy import copy
+from random import randint
+
 DEFAULT_POINT_STYLE = """
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis readOnly="0" minScale="1e+8" simplifyDrawingTol="1" styleCategories="AllStyleCategories" labelsEnabled="0" hasScaleBasedVisibilityFlag="0" maxScale="0" simplifyDrawingHints="1" simplifyAlgorithm="0" version="cloud" simplifyLocal="1" simplifyMaxScale="1">
@@ -109,15 +112,36 @@ def create_stylejson(geom_type):
         }
 
 
+def generate_categories(values, geom_type):
+    categories = []
+    schema = {
+        'type': geom_type,
+        'fill-color': '255,255,255,0.4',
+        'stroke-color': '51,153,204,1',
+        'stroke-width': '1',
+        'width': '2'
+    }
+    if geom_type == 'line':
+        del schema['fill-color']
+        del schema['width']
+    elif geom_type == 'polygon':
+        del schema['width']
+    for value in values:
+        schema_copy = copy(schema)
+        schema_copy['value'] = value
+        schema_copy['stroke-color'] = f'{randint(0,255)},{randint(0,255)},{randint(0,255)},1'
+        categories.append(schema_copy)
+    return categories
+
+
 class LayerStyle:
 
     def __init__(self, data, geom_type):
         self.data = data
         self.geom_type = geom_type
         self.check_existence('renderer', self.data)
-        self.check_contains('type', self.data['renderer'], [
+        self.check_contains('renderer', self.data['renderer'], [
                             'single', 'categorized'])
-        self.check_existence('type', self.data)
         self.renderer = data['renderer']
         self.style = {}
         self.style['renderer'] = self.renderer
@@ -160,51 +184,81 @@ class LayerStyle:
         if val < 1 or val > 10:
             raise ValueError("invalid value for width (1-10)")
 
-    def check_point(self):
-        self.check_contains('type', self.data['type'], [
+    def check_point(self, data):
+        self.check_contains('type', data['type'], [
                             'point', 'triangle', 'square'])
         for color in ['fill-color', 'stroke-color']:
-            self.check_existence(color, self.data)
-            self.check_color(self.data[color])
+            self.check_existence(color, data)
+            self.check_color(data[color])
         for width in ['stroke-width', 'width']:
-            self.check_existence(width, self.data)
-            self.check_width(self.data[width])
+            self.check_existence(width, data)
+            self.check_width(data[width])
 
-    def check_line(self):
-        self.check_contains('type', self.data['type'], [
+    def check_line(self, data):
+        self.check_contains('type', data['type'], [
                             'line', 'dashed', 'dotted'])
-        self.check_existence('stroke-color', self.data)
-        self.check_color(self.data['stroke-color'])
-        self.check_existence('stroke-width', self.data)
-        self.check_width(self.data['stroke-width'])
+        self.check_existence('stroke-color', data)
+        self.check_color(data['stroke-color'])
+        self.check_existence('stroke-width', data)
+        self.check_width(data['stroke-width'])
 
-    def check_polygon(self):
-        self.check_contains('type', self.data['type'], ['polygon'])
+    def check_polygon(self, data):
+        self.check_contains('type', data['type'], ['polygon'])
         for color in ['fill-color', 'stroke-color']:
-            self.check_existence(color, self.data)
-            self.check_color(self.data[color])
-        self.check_existence('stroke-width', self.data)
-        self.check_width(self.data['stroke-width'])
+            self.check_existence(color, data)
+            self.check_color(data[color])
+        self.check_existence('stroke-width', data)
+        self.check_width(data['stroke-width'])
 
     def validate_single(self):
+        self.check_existence('type', self.data)
         if self.geom_type == 'point':
-            self.check_point()
+            self.check_point(self.data)
             self.style['type'] = self.data['type']
             self.style['fill-color'] = self.data['fill-color']
             self.style['stroke-color'] = self.data['stroke-color']
             self.style['stroke-width'] = self.data['stroke-width']
             self.style['width'] = self.data['width']
         elif self.geom_type == 'line':
-            self.check_line()
+            self.check_line(self.data)
             self.style['type'] = self.data['type']
             self.style['stroke-color'] = self.data['stroke-color']
             self.style['stroke-width'] = self.data['stroke-width']
         else:
-            self.check_polygon()
+            self.check_polygon(self.data)
             self.style['type'] = self.data['type']
             self.style['fill-color'] = self.data['fill-color']
             self.style['stroke-color'] = self.data['stroke-color']
             self.style['stroke-width'] = self.data['stroke-width']
 
     def validate_categorized(self):
-        pass
+        self.check_existence('attribute', self.data)
+        self.check_existence('categories', self.data)
+        if not isinstance(self.data['categories'], list):
+            raise ValueError("invalid categories")
+        self.style['categories'] = []
+        self.style['attribute'] = self.data['attribute']
+        for category in self.data['categories']:
+            self.check_existence('value', category)
+            validated_category = {
+                'value': category['value']
+            }
+            if self.geom_type == 'point':
+                self.check_point(category)
+                validated_category['type'] = category['type']
+                validated_category['fill-color'] = category['fill-color']
+                validated_category['stroke-color'] = category['stroke-color']
+                validated_category['stroke-width'] = category['stroke-width']
+                validated_category['width'] = category['width']
+            elif self.geom_type == 'line':
+                self.check_line(category)
+                validated_category['type'] = category['type']
+                validated_category['stroke-color'] = category['stroke-color']
+                validated_category['stroke-width'] = category['stroke-width']
+            else:
+                self.check_polygon(category)
+                validated_category['type'] = category['type']
+                validated_category['fill-color'] = category['fill-color']
+                validated_category['stroke-color'] = category['stroke-color']
+                validated_category['stroke-width'] = category['stroke-width']
+            self.style['categories'].append(validated_category)

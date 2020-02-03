@@ -505,7 +505,7 @@ class TestLayersStyles(BaseTest):
                        data=json.dumps(default_style))
         assert r.status_code == 400
         assert r.json['error'] == 'invalid type'
-    
+
     def test_styles_put_correct_single_line(self, client):
         # Single Line
         token = self.get_token(client)
@@ -544,7 +544,7 @@ class TestLayersStyles(BaseTest):
                        data=json.dumps(default_style))
         assert r.status_code == 400
         assert r.json['error'] == 'invalid type'
-    
+
     def test_styles_put_correct_single_polygon(self, client):
         # Single Line
         token = self.get_token(client)
@@ -573,48 +573,73 @@ class TestLayersStyles(BaseTest):
         assert r.status_code == 400
         assert r.json['error'] == 'invalid type'
 
-    """ 
-    def test_styles_set_correct(self, client):
+    def test_styles_put_correct_categorized_point(self, client):
+        # Categorized Point
         token = self.get_token(client)
-        lid = self.add_geojson_prg(client, token)
-        new_fill_color = '0,0,0,0.4'
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_points.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct_points.geojson'),
+            'name': 'test1'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        attr = 'category'
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}/categories/{attr}?token={token}')
+        categories = r.json['categories']
+        categorized_style = {
+            'renderer': 'categorized',
+            'attribute': attr,
+            'categories': categories
+        }
         r = client.put(f'/api/layers/{lid}/style?token={token}',
-                       data=json.dumps({'fill-color': new_fill_color}))
+                       data=json.dumps(categorized_style))
         assert r.status_code == 200
-        assert r.json
-        assert r.json['style']['fill-color'] == new_fill_color
         r = client.get(f'/api/layers/{lid}/style?token={token}')
         assert r.status_code == 200
         assert r.json
-        assert r.json['style']['fill-color'] == new_fill_color
-        assert r.json['style']['stroke-color'] == '51,153,204,1'
-        assert r.json['style']['stroke-width'] == '2'
-        new_stroke_color = '255,255,255,255'
-        r = client.put(f'/api/layers/{lid}/style?token={token}',
-                       data=json.dumps({'stroke-color': new_stroke_color}))
-        assert r.status_code == 200
-        assert r.json
-        assert r.json['style']['stroke-color'] == new_stroke_color
-        r = client.get(f'/api/layers/{lid}/style?token={token}')
-        assert r.status_code == 200
-        assert r.json
-        assert r.json['style']['fill-color'] == new_fill_color
-        assert r.json['style']['stroke-color'] == new_stroke_color
-        assert r.json['style']['stroke-width'] == '2'
+        assert r.json['style']['renderer'] == 'categorized'
+        assert r.json['style']['attribute'] == attr
+        assert len(r.json['style']['categories']) == 2
+        # Random color
+        assert r.json['style']['categories'][0]['stroke-color'] != r.json['style']['categories'][1]['stroke-color']
 
-    def test_styles_invalid_property(self, client):
+    def test_styles_put_correct_categorized_line(self, client):
+        # Categorized Point
         token = self.get_token(client)
-        lid = self.add_geojson_prg(client, token)
-        new_fill_color = '0,0,0,0.4'
+        path = os.path.join(TEST_DATA_DIR, 'layers')
+        file_request = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'RL-48.dbf'), 'rb').read())), 'RL-48.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'RL-48.prj'), 'rb').read())), 'RL-48.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'RL-48.shp'), 'rb').read())), 'RL-48.shp'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'RL-48.shx'), 'rb').read())), 'RL-48.shx'),
+            'file[4]': (BytesIO((open(os.path.join(path, 'RL-48.cpg'), 'rb').read())), 'RL-48.cpg'),
+            'file[5]': (BytesIO((open(os.path.join(path, 'RL-48.qpj'), 'rb').read())), 'RL-48.qpj'),
+            'name': 'RL-48',
+            'epsg': '2180'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        attr = '06_POW'
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}/categories/{attr}?token={token}')
+        categories = r.json['categories']
+        categorized_style = {
+            'renderer': 'categorized',
+            'attribute': attr,
+            'categories': categories
+        }
         r = client.put(f'/api/layers/{lid}/style?token={token}',
-                       data=json.dumps({'test-color': new_fill_color}))
-        # nothing change
+                       data=json.dumps(categorized_style))
+        assert r.status_code == 200
+        r = client.get(f'/api/layers/{lid}/style?token={token}')
         assert r.status_code == 200
         assert r.json
-        assert r.json['style']['fill-color'] == '255,255,255,0.4'
-        assert r.json['style']['stroke-color'] == '51,153,204,1'
-        assert r.json['style']['stroke-width'] == '2'
-        # TODO validate color values + width """
+        assert r.json['style']['renderer'] == 'categorized'
+        assert r.json['style']['attribute'] == attr
+        assert len(r.json['style']['categories']) == 14
+        # Random color
+        assert r.json['style']['categories'][0]['stroke-color'] != r.json['style']['categories'][1]['stroke-color']
 
 
 @pytest.mark.export
