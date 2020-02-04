@@ -9,6 +9,7 @@ services:
       - "5000:5432"
     volumes:
       - ./docker/db/postgres_data:/var/lib/postgresql
+      - ./docker/db/dumps:/dumps
     environment:
       - POSTGRES_DBNAME
       - POSTGRES_PASS

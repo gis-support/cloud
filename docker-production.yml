@@ -23,6 +23,7 @@ services:
       - "5432:5432"
     volumes:
       - ./docker/db/prod_postgres_data:/var/lib/postgresql
+      - ./docker/db/prod_dumps:/dumps
     environment:
       - POSTGRES_DBNAME
       - POSTGRES_PASS

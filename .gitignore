@@ -1,8 +1,10 @@
 api/app/local_config.py
 docker/db/postgres_data/*
 docker/db/redis_data/*
+docker/db/dumps/*
 docker/db/prod_postgres_data/*
 docker/db/prod_redis_data/*
+docker/db/prod_dumps/*
 .pytest_cache
 
 .DS_Store

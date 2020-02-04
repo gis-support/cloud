@@ -7,4 +7,6 @@ COPY ./docker/db/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 COPY ./docker/db/init.sql /docker-entrypoint-initdb.d/
 RUN chmod +x /docker-entrypoint-initdb.d/init.sql
+COPY ./docker/db/restore.sh /restore
+COPY ./docker/db/dump.sh /dump
 ENV LANG pl_PL.UTF-8
