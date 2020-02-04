@@ -256,7 +256,7 @@ def layers_settings(lid):
 
 
 @mod_layers.route('/layers/<lid>/categories/<attr>', methods=['GET'])
-@swag_from(path_by(__file__, 'docs.values.get.yml'), methods=['GET'])
+@swag_from(path_by(__file__, 'docs.categories.get.yml'), methods=['GET'])
 @token_required
 def layer_categories(lid, attr):
     """
