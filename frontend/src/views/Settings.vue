@@ -28,16 +28,16 @@
         <i class="fa fa-lg fa-spin fa-spinner"></i></div>
       </div>
       <div id="settings-content" class="tab-content stacked-content" v-else>
+        <div class="heading-block">
+          <h3>
+            <span data-i18n="layerSettings.title">{{$i18n.t('default.layerSettings')}}: </span>
+            <span class="red">{{currentEditedLayer.name}}</span>
+            <a @click="goToLayer" :title="$i18n.t('default.goToLayer')">
+              <i class="fa fa-chevron-circle-right red icon-hover"></i>
+            </a>
+          </h3>
+        </div>
         <div class="tab-pane fade in active" id="info-tab">
-          <div class="heading-block">
-            <h3>
-              <span data-i18n="layerSettings.title">{{$i18n.t('default.layerSettings')}}: </span>
-              <span class="red">{{currentEditedLayer.name}}</span>
-              <a @click="goToLayer" :title="$i18n.t('default.goToLayer')">
-                <i class="fa fa-chevron-circle-right red icon-hover"></i>
-              </a>
-            </h3>
-          </div>
           <h4 class="text-left">{{$i18n.t('dashboard.modal.layerName')}}</h4>
           <div style="display: flex">
             <input type="text" class="form-control mr-5"
@@ -110,45 +110,79 @@
               </tbody>
             </table>
           </div>
-          <!-- <div class="pt-10">
-            <h4 class="text-left">Styl warstwy</h4>
-            <div style="display: flex; justify-content: space-around;">
-              <div style="display: flex;">
-                <label class="color-picker__label">
-                  {{$i18n.t('dashboard.modal.strokeColor')}}
-                </label>
-                <div class="color-picker--stroke" style="height:50px; width:50px"></div>
-              </div>
-              <div style="display: flex;">
-                <label class="color-picker__label">
-                  {{$i18n.t('dashboard.modal.fillColor')}}
-                </label>
-                <div class="color-picker--fill" style="height:50px; width:50px"></div>
-              </div>
-              <div
-                style="display: flex;"
-                v-if="Object.keys(styles).includes(currentEditedLayer.id)"
-              >
-                <label class="color-picker__label">
-                  {{$i18n.t('dashboard.modal.strokeWidth')}}
-                </label>
-                <input type="number" class="form-control"
-                  min="1" max="9" step="1"
-                  style="width: 50px; position: relative; top: -5px"
-                  v-model="styles[currentEditedLayer.id]['stroke-width']">
-              </div>
-              <button type="button"
-                class="btn btn-success"
-                @click="saveStyle"
-                style="position: relative;top: -6px;right: -13px;"
-              >
-                {{$i18n.t('default.save')}}
-              </button>
-            </div>
-          </div> -->
         </div>
         <div class="tab-pane fade in active" id="style-tab">
-          <p>styles</p>
+          <div class="col-md-12 pb-10" style="display: flex;">
+            <div class="col-md-6">
+              <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.visType')}}</label>
+              <select class="form-control col-sm-4 mt-15">
+                <option value="single">{{$i18n.t('default.single')}}</option>
+                <option value="categorized">{{$i18n.t('default.categorized')}}</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.objStyle')}}</label>
+              <select class="form-control col-sm-4 mt-15" v-model="layerType"
+                v-if="layerType === 'point' || layerType === 'square' || layerType === 'triangle'">
+                <option value="point">{{$i18n.t('default.point')}}</option>
+                <option value="square">{{$i18n.t('default.square')}}</option>
+                <option value="triangle">{{$i18n.t('default.triangle')}}</option>
+              </select>
+              <select class="form-control col-sm-4 mt-15" v-model="layerType" v-else>
+                <option value="line">{{$i18n.t('default.line')}}</option>
+                <option value="dotted">{{$i18n.t('default.dotted')}}</option>
+                <option value="dashed">{{$i18n.t('default.dashed')}}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-3 color-picker__container" style="left: -30px;">
+              <label class="control-label">Kolor obrysu</label><br>
+              <verte
+                v-if="strokeColor"
+                model="rgb"
+                :value="`rgba(${strokeColor})`"
+              ></verte>
+            </div>
+            <div class="col-md-3 color-picker__container">
+              <label class="control-label">Grubość obrysu</label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                class="form-control mt-15"
+                style="width:50px"
+                v-model="strokeWidth"
+              />
+            </div>
+            <div class="col-md-3 color-picker__container" v-if="fillColor">
+              <label class="control-label">Kolor wypełnienia</label><br>
+              <verte
+                v-if="fillColor"
+                model="rgb"
+                :value="`rgba(${fillColor})`"
+              ></verte>
+            </div>
+            <div class="col-md-3 color-picker__container" style="right: -20px" v-if="width">
+              <label class="control-label">Wielkość punktu</label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                class="form-control mt-15"
+                style="width:50px"
+                v-model="width"
+              />
+            </div>
+          </div>
+          <div class="col-md-12 pr-30" style="display:flex; justify-content:flex-end;">
+            <button
+              type="button"
+              class="btn btn-success"
+            >
+              {{$i18n.t('default.save')}}
+            </button>
+          </div>
         </div>
         <div class="tab-pane fade in active" id="labels-tab">
           <p>labels</p>
@@ -159,17 +193,26 @@
 </template>
 
 <script>
+import verte from 'verte';
+import 'verte/dist/verte.css';
+
 export default {
   name: 'settings',
+  components: { verte },
   data: () => ({
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
+    fillColor: undefined,
     isColumnsVisible: true,
     isMounted: false,
+    layerType: undefined,
     newColumnName: undefined,
     newColumnType: undefined,
+    strokeColor: undefined,
+    strokeWidth: undefined,
     styles: {},
     vectorLayersList: undefined,
+    width: 0,
   }),
   computed: {
     columnTypes() {
@@ -219,6 +262,23 @@ export default {
       }, () => {})
         .set({ title: this.$i18n.t('dashboard.modal.deleteColumnTitle') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
+    async loadStyle() {
+      const lid = this.currentEditedLayer.id;
+      const styleResponse = await this.$store.dispatch('getLayerStyle', this.currentEditedLayer.id);
+      this.$set(this.styles, this.currentEditedLayer.id, styleResponse.body.style);
+
+      // stroke-width i stroke-color są we wszystkich typach
+      this.strokeColor = this.styles[lid]['stroke-color'];
+      this.strokeWidth = this.styles[lid]['stroke-width'];
+      this.layerType = this.styles[lid].type;
+      if (Object.keys(this.styles[lid]).includes('fill-color')) {
+        this.fillColor = this.styles[lid]['fill-color'];
+      }
+      if (Object.keys(this.styles[lid]).includes('width')) {
+        this.width = this.styles[lid].width;
+      }
+      console.log(this.strokeWidth, this.width);
     },
     async saveLayerName() {
       const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
@@ -294,22 +354,44 @@ export default {
     const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
     this.currentLayerSettings = r.body.settings;
 
-    const styleResponse = await this.$store.dispatch('getLayerStyle', this.currentEditedLayer.id);
-    this.$set(this.styles, this.currentEditedLayer.id, styleResponse.body.style);
-
+    this.loadStyle();
     this.isMounted = true;
   },
 };
 </script>
 
 <style scoped>
+  .control-label {
+    position: relative;
+    top: 8px;
+  }
+  .color-picker__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   .disabled {
     cursor: not-allowed !important;
+  }
+  .ml-10 {
+    margin-left: 10px;
+  }
+  .mt-15 {
+    margin-top: 15px;
+  }
+  .picker__container {
+    display: flex;
+  }
+  .pr-30 {
+    padding-right: 30px;
   }
   .text-centered {
     text-align: center;
   }
   .text-left {
     text-align: left;
+  }
+  .verte {
+    justify-content: flex-start;
   }
 </style>

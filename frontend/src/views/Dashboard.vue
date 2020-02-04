@@ -207,7 +207,6 @@
                 <li v-for="layer in fetchedLayers" :key="layer">
                   <label class="checkbox-inline">
                     <input type="checkbox" id="checkbox" :value="layer" v-model="selectedLayers">
-                    {{layer}}
                   </label>
                 </li>
               </ul>
@@ -253,7 +252,6 @@
 <script>
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
-import '@simonwep/pickr/dist/themes/nano.min.css';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
 export default {

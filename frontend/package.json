@@ -9,13 +9,13 @@
     "api": "curl https://cloud.gis.support/api/docs/api.json -o ./src/docs/api.json"
   },
   "dependencies": {
-    "@simonwep/pickr": "^1.5.0",
     "bootstrap": "^3.3.5",
     "core-js": "^3.3.2",
     "jquery": "^3.4.0",
     "lodash": "^4.17.15",
     "ol": "^6.1.1",
     "swagger-client": "^3.9.6",
+    "verte": "0.0.12",
     "vue": "^2.6.10",
     "vue-alertify": "^1.1.0",
     "vue-i18n": "^8.15.0",
