@@ -1,0 +1,51 @@
+Get categories for layer's attribute
+---
+tags:
+  - Layers
+summary: Get categories
+produces:
+  - application/json
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - name: attr
+    in: path
+    description: Layer attribute
+    required: true
+    type: string
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    schema:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              fill-color:
+                type: string
+              stroke-color:
+                type: string
+              stroke-width:
+                type: string
+              width:
+                type: string
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

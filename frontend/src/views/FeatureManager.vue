@@ -503,7 +503,7 @@ export default {
     },
     async getSettings() {
       const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
-      this.currentLayerType = res.obj.settings.geometry_type.toLowerCase();
+      this.currentLayerType = res.obj.settings.geometry_type;
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async saveEditing() {
@@ -640,9 +640,7 @@ export default {
         let drawType;
         if (this.currentLayerType === 'polygon') {
           drawType = 'Polygon';
-        } else if (this.currentLayerType === 'multipolygon') {
-          drawType = 'MultiPolygon';
-        } else if (this.currentLayerType === 'linestring') {
+        } else if (this.currentLayerType === 'line') {
           drawType = 'LineString';
         } else {
           drawType = 'Point';
@@ -855,7 +853,7 @@ export default {
     this.map.addLayer(ortofoto);
 
     this.getPermissions();
-    this.getSettings();
+    await this.getSettings();
 
     this.createSelectInteraction();
     this.loadServices();
