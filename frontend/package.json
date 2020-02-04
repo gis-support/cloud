@@ -12,7 +12,7 @@
     "@simonwep/pickr": "^1.5.0",
     "bootstrap": "^3.3.5",
     "core-js": "^3.3.2",
-    "jquery": "^2.1.4",
+    "jquery": "^3.4.0",
     "lodash": "^4.17.15",
     "ol": "^6.1.1",
     "swagger-client": "^3.9.6",
