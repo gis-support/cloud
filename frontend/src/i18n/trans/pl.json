@@ -47,13 +47,16 @@
     "add": "Dodaj",
     "basemaps": "Mapy podkładowe",
     "cancel": "Anuluj",
+    "categorized": "Kategoryzowany",
     "chooseFiles": "Wybierz pliki",
     "clear": "Wyczyść",
     "close": "Zamknij",
     "dashboard": "Dashboard",
+    "dashed": "Linia przerywana",
     "dataType": "Typ danych",
     "delete": "Usuń",
     "deleted": "Usunięto",
+    "dotted": "Linia kropkowana",
     "download": "Pobierz",
     "downloadAvailableLayers": "Pobierz dostępny warstwy",
     "edit": "Edycja",
@@ -67,6 +70,7 @@
     "isFiltered": "Filtrowanie włączone dla tej kolumny",
     "layers": "Warstwy",
     "layerSettings": "Ustawienia warstwy",
+    "line": "Linia ciągła",
     "loading": "Trwa ładowanie danych",
     "loginError": "Nieprawidłowa nazwa uzytkownika lub hasło",
     "loginSuccess": "Zalogowano",
@@ -79,6 +83,7 @@
     "noLayers": "Brak warstw",
     "noServices": "Brak źródeł zewnętrznych",
     "password": "Hasło",
+    "point": "Punkt",
     "private": "Prywatny",
     "public": "Publiczny",
     "read": "Podgląd",
@@ -86,9 +91,12 @@
     "saveName": "Zapisz nazwę",
     "services": "Źródła zewnętrzne",
     "settings": "Ustawienia",
+    "single": "Pojedynczy",
     "startUpload": "Wyślij pliki",
     "stopUpload": "Zatrzymaj",
     "success": "Sukces",
+    "square": "Kwadrat",
+    "triangle": "Trójkąt",
     "username": "Nazwa użytkownika",
     "users": "Użytkownicy",
     "yes": "Tak"
@@ -174,6 +182,8 @@
   "settings": {
     "labels": "Etykiety",
     "layerInfo": "Informacje o warstwie",
-    "symbolization": "Symbolizacja"
+    "objStyle": "Styl obiektu",
+    "symbolization": "Symbolizacja",
+    "visType": "Typ wizualizacji"
   }
 }
