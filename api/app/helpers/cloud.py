@@ -3,7 +3,7 @@
 
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
-from app.helpers.style import create_qml, create_stylejson, create_stylejson
+from app.helpers.style import create_qml, create_stylejson
 import os
 import json
 
