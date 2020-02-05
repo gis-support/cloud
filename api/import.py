@@ -50,6 +50,12 @@ def upload_layers(layers):
                 print(f"Error: {r.json()['error']}")
             else:
                 print(f"Success: {r.json()}")
+                r = requests.put(f'{API_URL}/layers/{r.json()["layers"]["id"]}/style?token={token}',
+                                 json.dumps(lyr['styl']))
+                if 'error' in r.json():
+                    print(f"Error: {r.json()['error']}")
+                else:
+                    print(f"Success style: {r.json()}")
         except:
             print('Error on server side')
 
