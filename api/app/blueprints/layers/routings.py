@@ -8,11 +8,12 @@ from app.db.general import token_required, cloud_decorator, layer_decorator
 from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
 from shapely.geometry import shape
-from psycopg2.sql import SQL, Identifier
+from psycopg2.sql import SQL, Identifier, Placeholder
 from osgeo import osr
 from osgeo import ogr
 # Layer id sync
 from app.blueprints.rdos.attachments.models import Attachment
+from psycopg2.extensions import AsIs
 import tempfile
 import os.path as op
 from io import BytesIO
@@ -288,11 +289,18 @@ def lid(layer, lid, z=0, x=0, y=0):
 
 def create_mvt_tile(z, x, y, name):
     cur = current_app._db.cursor()
+    #TODO: hotfix
+    query = '''
+        SELECT column_name from information_schema.columns WHERE table_name = %s
+    '''
+    cur.execute(query, (name,))
+    columns = [f'"{row[0]}"' for row in cur.fetchall() if row[0] not in [
+        'geometry']]
     query = SQL('''
-        SELECT ST_AsMVT(tile) FROM (SELECT id,
+        SELECT ST_AsMVT(tile) FROM (SELECT %s,
         ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,8,true) AS geom FROM {}) AS tile
     ''').format(Identifier(name))
-    cur.execute(query, (z, x, y))
+    cur.execute(query, (AsIs(",".join(columns)), z, x, y))
     tile = cur.fetchone()[0]
     return tile.tobytes()
 
