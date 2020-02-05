@@ -64,6 +64,7 @@
     "editSuccess": "Pomyślnie edytowano",
     "email": "Email",
     "error": "Wystąpił błąd",
+    "errorStyle": "Wystąpił błąd podczas pobierania styli",
     "goToLayer": "Przejdź do warstwy",
     "group": "Grupa",
     "groupName": "Nazwa grupy",

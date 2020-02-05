@@ -122,7 +122,7 @@
                 <option value="categorized">{{$i18n.t('default.categorized')}}</option>
               </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" v-if="symbolizationType === 'single'">
               <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.objStyle')}}</label>
               <select class="form-control col-sm-4 mt-15" v-model="layerType"
                 v-if="layerType === 'point' || layerType === 'square' || layerType === 'triangle'">
@@ -138,7 +138,11 @@
               >
                 <option disabled value="polygon">{{$i18n.t('default.polygon')}}</option>
               </select>
-              <select class="form-control col-sm-4 mt-15" v-model="layerType" v-else>
+              <select
+                class="form-control col-sm-4 mt-15"
+                v-model="layerType"
+                v-else
+              >
                 <option disabled value="">{{$i18n.t('settings.chooseObjectStyle')}}</option>
                 <option value="line">{{$i18n.t('default.line')}}</option>
                 <option value="dotted">{{$i18n.t('default.dotted')}}</option>
@@ -146,7 +150,7 @@
               </select>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group" v-if="symbolizationType === 'single'">
             <div class="col-md-3 color-picker__container" v-if="strokeColor" style="left: -30px;">
               <label class="control-label">Kolor obrysu</label><br>
               <verte
@@ -185,15 +189,18 @@
                 v-model="width"
               />
             </div>
+            <div class="col-md-12 pr-30" style="display:flex; justify-content:flex-end;">
+              <button
+                type="button"
+                class="btn btn-success mt-15"
+                @click="saveStyle"
+              >
+                {{$i18n.t('default.save')}}
+              </button>
+            </div>
           </div>
-          <div class="col-md-12 pr-30" style="display:flex; justify-content:flex-end;">
-            <button
-              type="button"
-              class="btn btn-success mt-15"
-              @click="saveStyle"
-            >
-              {{$i18n.t('default.save')}}
-            </button>
+          <div class="form-group" v-else>
+
           </div>
         </div>
         <div class="tab-pane in active" id="labels-tab" v-if="activeTab === 'labels-tab'">
@@ -294,7 +301,6 @@ export default {
       if (Object.keys(this.styles[lid]).includes('width')) {
         this.width = this.styles[lid].width;
       }
-      console.log(this.strokeColor, this.fillColor);
     },
     async saveLayerName() {
       const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
