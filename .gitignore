@@ -5,6 +5,7 @@ docker/db/dumps/*
 docker/db/prod_postgres_data/*
 docker/db/prod_redis_data/*
 docker/db/prod_dumps/*
+api/import/*
 .pytest_cache
 
 .DS_Store

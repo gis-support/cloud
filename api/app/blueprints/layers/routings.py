@@ -124,12 +124,14 @@ def layers(cloud):
                             # Pierwszy wiersz to geometria
                             if idx == 0:
                                 feature_string += 'SRID=4326;%s\t' % feature.GetGeometryRef().ExportToWkt()
-                            elif idx + 1 != len(columns):
-                                feature_string += '%s\t' % feature.GetField(
-                                    column)
                             else:
-                                feature_string += '%s\n' % feature.GetField(
-                                    column)
+                                field = feature.GetField(column)
+                                if isinstance(field, str):
+                                    field = " ".join(field.split())
+                                if idx + 1 != len(columns):
+                                    feature_string += f'{field}\t'
+                                else:
+                                    feature_string += f'{field}\n'
                     count_features += 1
                     tfile.write(feature_string)
                 tfile.seek(0)
