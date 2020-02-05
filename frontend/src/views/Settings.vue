@@ -2,20 +2,21 @@
   <div class="container">
     <div class="col-md-3 layout-sidebar">
       <ul id="myTab" class="nav nav-layout-sidebar nav-stacked">
-          <li class="active">
-          <a href="#info-tab" data-toggle="tab">
+        <li class="active">
+          <a href="#info-tab" data-toggle="tab" @click="setActiveTab('info-tab')">
           <i class="fa fa-info-circle"></i>
           &nbsp;&nbsp;<span>{{$i18n.t('settings.layerInfo')}}</span>
           </a>
         </li>
         <li>
-          <a href="#style-tab" data-toggle="tab">
+          <a href="#style-tab" data-toggle="tab" @click="setActiveTab('style-tab')">
           <i class="fa fa-map-pin"></i>
           &nbsp;&nbsp;<span>{{$i18n.t('settings.symbolization')}}</span>
           </a>
         </li>
         <li class="disabled">
-          <a href="#labels-tab" data-toggle="tab" @click.prevent.stop>
+          <a href="#labels-tab" data-toggle="tab"
+            @click.prevent.stop @click="setActiveTab('labels-tab')">
           <i class="fa fa-map-pin"></i>
           &nbsp;&nbsp;<span>{{$i18n.t('settings.labels')}}</span>
           </a>
@@ -37,7 +38,7 @@
             </a>
           </h3>
         </div>
-        <div class="tab-pane fade in active" id="info-tab">
+        <div class="tab-pane in active" id="info-tab" v-if="activeTab === 'info-tab'">
           <h4 class="text-left">{{$i18n.t('dashboard.modal.layerName')}}</h4>
           <div style="display: flex">
             <input type="text" class="form-control mr-5"
@@ -111,11 +112,12 @@
             </table>
           </div>
         </div>
-        <div class="tab-pane fade in active" id="style-tab">
+        <div class="tab-pane in active" id="style-tab" v-if="activeTab === 'style-tab'">
           <div class="col-md-12 pb-10" style="display: flex;">
             <div class="col-md-6">
               <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.visType')}}</label>
-              <select class="form-control col-sm-4 mt-15">
+              <select class="form-control col-sm-4 mt-15" v-model="symbolizationType">
+                <option disabled value="">{{$i18n.t('settings.chooseVisualizationType')}}</option>
                 <option value="single">{{$i18n.t('default.single')}}</option>
                 <option value="categorized">{{$i18n.t('default.categorized')}}</option>
               </select>
@@ -124,11 +126,20 @@
               <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.objStyle')}}</label>
               <select class="form-control col-sm-4 mt-15" v-model="layerType"
                 v-if="layerType === 'point' || layerType === 'square' || layerType === 'triangle'">
+                <option disabled value="">{{$i18n.t('settings.chooseObjectStyle')}}</option>
                 <option value="point">{{$i18n.t('default.point')}}</option>
                 <option value="square">{{$i18n.t('default.square')}}</option>
                 <option value="triangle">{{$i18n.t('default.triangle')}}</option>
               </select>
+              <select
+                class="form-control col-sm-4 mt-15"
+                v-model="layerType"
+                v-else-if="layerType === 'polygon'"
+              >
+                <option disabled value="polygon">{{$i18n.t('default.polygon')}}</option>
+              </select>
               <select class="form-control col-sm-4 mt-15" v-model="layerType" v-else>
+                <option disabled value="">{{$i18n.t('settings.chooseObjectStyle')}}</option>
                 <option value="line">{{$i18n.t('default.line')}}</option>
                 <option value="dotted">{{$i18n.t('default.dotted')}}</option>
                 <option value="dashed">{{$i18n.t('default.dashed')}}</option>
@@ -136,12 +147,12 @@
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-3 color-picker__container" style="left: -30px;">
+            <div class="col-md-3 color-picker__container" v-if="strokeColor" style="left: -30px;">
               <label class="control-label">Kolor obrysu</label><br>
               <verte
-                v-if="strokeColor"
                 model="rgb"
-                :value="`rgba(${strokeColor})`"
+                :value="strokeColor"
+                v-model="strokeColor"
               ></verte>
             </div>
             <div class="col-md-3 color-picker__container">
@@ -158,9 +169,9 @@
             <div class="col-md-3 color-picker__container" v-if="fillColor">
               <label class="control-label">Kolor wypełnienia</label><br>
               <verte
-                v-if="fillColor"
                 model="rgb"
-                :value="`rgba(${fillColor})`"
+                :value="fillColor"
+                v-model="fillColor"
               ></verte>
             </div>
             <div class="col-md-3 color-picker__container" style="right: -20px" v-if="width">
@@ -178,13 +189,14 @@
           <div class="col-md-12 pr-30" style="display:flex; justify-content:flex-end;">
             <button
               type="button"
-              class="btn btn-success"
+              class="btn btn-success mt-15"
+              @click="saveStyle"
             >
               {{$i18n.t('default.save')}}
             </button>
           </div>
         </div>
-        <div class="tab-pane fade in active" id="labels-tab">
+        <div class="tab-pane in active" id="labels-tab" v-if="activeTab === 'labels-tab'">
           <p>labels</p>
         </div>
       </div>
@@ -200,6 +212,7 @@ export default {
   name: 'settings',
   components: { verte },
   data: () => ({
+    activeTab: 'info-tab',
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
     fillColor: undefined,
@@ -211,6 +224,7 @@ export default {
     strokeColor: undefined,
     strokeWidth: undefined,
     styles: {},
+    symbolizationType: undefined,
     vectorLayersList: undefined,
     width: 0,
   }),
@@ -269,16 +283,18 @@ export default {
       this.$set(this.styles, this.currentEditedLayer.id, styleResponse.body.style);
 
       // stroke-width i stroke-color są we wszystkich typach
-      this.strokeColor = this.styles[lid]['stroke-color'];
+      this.strokeColor = `rgba(${this.styles[lid]['stroke-color']})`;
       this.strokeWidth = this.styles[lid]['stroke-width'];
       this.layerType = this.styles[lid].type;
+      this.symbolizationType = styleResponse.body.style.renderer;
+
       if (Object.keys(this.styles[lid]).includes('fill-color')) {
-        this.fillColor = this.styles[lid]['fill-color'];
+        this.fillColor = `rgba(${this.styles[lid]['fill-color']})`;
       }
       if (Object.keys(this.styles[lid]).includes('width')) {
         this.width = this.styles[lid].width;
       }
-      console.log(this.strokeWidth, this.width);
+      console.log(this.strokeColor, this.fillColor);
     },
     async saveLayerName() {
       const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
@@ -311,9 +327,39 @@ export default {
       }
     },
     async saveStyle() {
+      let fill;
+      let stroke;
+      if (this.fillColor) {
+        fill = this.fillColor.substring( // get rgba between ()
+          this.fillColor.lastIndexOf('(') + 1,
+          this.fillColor.lastIndexOf(')'),
+        );
+
+        if (fill.split(',').length === 3) {
+          fill = `${fill},1`;
+        }
+      }
+      if (this.strokeColor) {
+        stroke = this.strokeColor.substring( // get rgba between ()
+          this.strokeColor.lastIndexOf('(') + 1,
+          this.strokeColor.lastIndexOf(')'),
+        );
+
+        if (stroke.split(',').length === 3) {
+          stroke = `${stroke},1`;
+        }
+      }
+
       const r = await this.$store.dispatch('saveStyle', {
         lid: this.currentEditedLayer.id,
-        body: this.styles[this.currentEditedLayer.id],
+        body: {
+          type: this.layerType,
+          'fill-color': fill,
+          'stroke-color': stroke,
+          'stroke-width': this.strokeWidth,
+          width: this.width,
+          renderer: this.symbolizationType,
+        },
       });
       if (r.status === 200) {
         this.$alertify.success(this.$i18n.t('default.success'));
@@ -333,6 +379,9 @@ export default {
           layerName: this.currentEditedLayer.name,
         },
       });
+    },
+    setActiveTab(tab) {
+      this.activeTab = tab;
     },
     toggleColumnsSection(isVisible) {
       this.isColumnsVisible = isVisible;
