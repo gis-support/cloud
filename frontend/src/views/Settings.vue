@@ -163,7 +163,7 @@
               <label class="control-label">Grubość obrysu</label>
               <input
                 type="number"
-                min="0"
+                min="1"
                 max="10"
                 class="form-control mt-15"
                 style="width:50px"
@@ -182,7 +182,7 @@
               <label class="control-label">Wielkość punktu</label>
               <input
                 type="number"
-                min="0"
+                min="1"
                 max="10"
                 class="form-control mt-15"
                 style="width:50px"
@@ -195,12 +195,108 @@
                 class="btn btn-success mt-15"
                 @click="saveStyle"
               >
-                {{$i18n.t('default.save')}}
+                {{$i18n.t('default.saveStyle')}}
               </button>
             </div>
           </div>
           <div class="form-group" v-else>
-
+            <div class="col-md-12 pb-10" style="display: flex;">
+              <div class="col-md-6">
+                <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.attribute')}}</label>
+                <select class="form-control col-sm-4 mt-15" v-model="categorizedAttr">
+                  <option disabled value="">{{$i18n.t('settings.chooseAttr')}}</option>
+                  <template v-for="attr in Object.keys(currentLayerSettings.columns)">
+                    <option :key="attr" :value="attr">{{attr}}</option>
+                  </template>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  style="margin-top: 38px"
+                  :disabled="!categorizedAttr"
+                  @click="categorizeFeatures(categorizedAttr, currentEditedLayer.id)"
+                >
+                  {{$i18n.t('settings.classify')}}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-success ml-10"
+                  style="margin-top: 38px"
+                  v-if="categories.length > 0"
+                  @click="saveCategorizedStyles"
+                >
+                  {{$i18n.t('default.saveStyle')}}
+                </button>
+              </div>
+            </div>
+            <div class="col-md-12 pb-10">
+              <table v-if="categories.length > 0"
+                class="table table-striped table-bordered table-hover ml-15"
+              >
+                <thead>
+                  <tr role="row">
+                    <th v-if="headers.includes('value')" class="text-centered">
+                      {{$i18n.t('settings.value')}}
+                    </th>
+                    <th v-if="headers.includes('fill-color')" class="text-centered">
+                      {{$i18n.t('settings.fill-color')}}
+                    </th>
+                    <th v-if="headers.includes('stroke-color')" class="text-centered">
+                      {{$i18n.t('settings.stroke-color')}}
+                    </th>
+                    <th v-if="headers.includes('stroke-width')" class="text-centered">
+                      {{$i18n.t('settings.stroke-width')}}
+                    </th>
+                    <th v-if="headers.includes('width')" class="text-centered">
+                      {{$i18n.t('settings.width')}}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(feat, index) in categories" :key="index">
+                    <td v-if="feat.hasOwnProperty('value')" class="text-centered">
+                      <p style="position: relative; top: 5px;">{{feat.value}}</p>
+                    </td>
+                    <td v-if="feat.hasOwnProperty('fill-color')" class="text-centered">
+                      <verte
+                        model="rgb"
+                        style="position: relative; left: 60px;top:5px;"
+                        v-model="feat['fill-color-rgba']"
+                      ></verte>
+                    </td>
+                    <td v-if="feat.hasOwnProperty('stroke-color')" class="text-centered">
+                      <verte
+                        model="rgb"
+                        style="position: relative; left: 40px;top:5px;"
+                        v-model="feat['stroke-color-rgba']"
+                      ></verte>
+                    </td>
+                    <td v-if="feat.hasOwnProperty('stroke-width')" class="text-centered">
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        class="form-control"
+                        style="width:50px; margin:0 auto;"
+                        v-model="feat['stroke-width']"
+                      />
+                    </td>
+                    <td v-if="feat.hasOwnProperty('width')" class="text-centered">
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        class="form-control"
+                        style="width:50px; margin:0 auto;"
+                        v-model="feat['width']"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         <div class="tab-pane in active" id="labels-tab" v-if="activeTab === 'labels-tab'">
@@ -220,6 +316,8 @@ export default {
   components: { verte },
   data: () => ({
     activeTab: 'info-tab',
+    categories: [],
+    categorizedAttr: undefined,
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
     fillColor: undefined,
@@ -266,6 +364,21 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+    async categorizeFeatures(attr, lid) {
+      const r = await this.$store.dispatch('categorizeFeatures', { attr, lid });
+      if (r.status === 200) {
+        this.categories = r.body.categories;
+        this.headers = Object.keys(r.body.categories[0]);
+
+        this.categories.forEach((feat) => {
+          this.$set(feat, 'fill-color-rgba', `rgba(${feat['fill-color']})`);
+          this.$set(feat, 'stroke-color-rgba', `rgba(${feat['stroke-color']})`);
+        });
+        console.log(this.categories);
+      } else {
+        this.$i18n.t('default.error');
+      }
+    },
     async deleteColumn(colName) {
       this.$alertify.confirm(this.$i18n.t('dashboard.modal.deleteLayerColumn'), async () => {
         const payload = {
@@ -294,6 +407,17 @@ export default {
       this.strokeWidth = this.styles[lid]['stroke-width'];
       this.layerType = this.styles[lid].type;
       this.symbolizationType = styleResponse.body.style.renderer;
+      if (this.symbolizationType === 'categorized') {
+        this.categories = styleResponse.body.style.categories;
+        this.categorizedAttr = styleResponse.body.style.attribute;
+        this.headers = Object.keys(this.categories[0]);
+
+        this.categories.forEach((feat) => {
+          this.$set(feat, 'fill-color-rgba', `rgba(${feat['fill-color']})`);
+          this.$set(feat, 'stroke-color-rgba', `rgba(${feat['stroke-color']})`);
+        });
+        console.log(this.categories);
+      }
 
       if (Object.keys(this.styles[lid]).includes('fill-color')) {
         this.fillColor = `rgba(${this.styles[lid]['fill-color']})`;
@@ -332,24 +456,50 @@ export default {
         this.$i18n.t('default.error');
       }
     },
+    async saveCategorizedStyles() {
+      this.categories.forEach((feat) => {
+        let fillRgb = this.formatColor(feat['fill-color-rgba']);
+        let strokeRgb = this.formatColor(feat['stroke-color-rgba']);
+
+        if (fillRgb.split(',').length === 3) {
+          fillRgb = `${fillRgb},1`;
+        }
+        if (strokeRgb.split(',').length === 3) {
+          strokeRgb = `${strokeRgb},1`;
+        }
+        this.$set(feat, 'fill-color', fillRgb);
+        this.$set(feat, 'stroke-color', strokeRgb);
+        // eslint-disable-next-line no-param-reassign
+        delete feat['fill-color-rgba'];
+        // eslint-disable-next-line no-param-reassign
+        delete feat['stroke-color-rgba'];
+      });
+      const r = await this.$store.dispatch('saveStyle', {
+        lid: this.currentEditedLayer.id,
+        body: {
+          categories: this.categories,
+          attribute: this.categorizedAttr,
+          renderer: this.symbolizationType,
+        },
+      });
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('default.success'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
     async saveStyle() {
       let fill;
       let stroke;
       if (this.fillColor) {
-        fill = this.fillColor.substring( // get rgba between ()
-          this.fillColor.lastIndexOf('(') + 1,
-          this.fillColor.lastIndexOf(')'),
-        );
+        fill = this.formatColor(this.fillColor);
 
         if (fill.split(',').length === 3) {
           fill = `${fill},1`;
         }
       }
       if (this.strokeColor) {
-        stroke = this.strokeColor.substring( // get rgba between ()
-          this.strokeColor.lastIndexOf('(') + 1,
-          this.strokeColor.lastIndexOf(')'),
-        );
+        stroke = this.formatColor(this.strokeColor);
 
         if (stroke.split(',').length === 3) {
           stroke = `${stroke},1`;
@@ -372,6 +522,12 @@ export default {
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    formatColor(rgba) {
+      return rgba.substring( // get rgba between ()
+        rgba.lastIndexOf('(') + 1,
+        rgba.lastIndexOf(')'),
+      );
     },
     goToLayer() {
       const lid = this.currentEditedLayer.id;

@@ -91,6 +91,7 @@
     "read": "Podgląd",
     "save": "Zapisz",
     "saveName": "Zapisz nazwę",
+    "saveStyle": "Zapisz styl",
     "services": "Źródła zewnętrzne",
     "settings": "Ustawienia",
     "single": "Pojedynczy",
@@ -182,12 +183,20 @@
     }
   },
   "settings": {
+    "attribute": "Atrybut",
+    "chooseAttr": "Wybierz atrybut",
     "chooseObjectStyle": "Wybierz styl obiektu",
     "chooseVisualizationType": "Wybierz typ wizualizacji",
+    "classify": "Klasyfikuj",
+    "fill-color": "Kolor wypełnienia",
     "labels": "Etykiety",
     "layerInfo": "Informacje o warstwie",
     "objStyle": "Styl obiektu",
+    "stroke-color": "Kolor obrysu",
+    "stroke-width": "Grubość obrysu",
     "symbolization": "Symbolizacja",
-    "visType": "Typ wizualizacji"
+    "value": "Wartość",
+    "visType": "Typ wizualizacji",
+    "width": "Wielkość punktu"
   }
 }

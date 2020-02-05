@@ -441,7 +441,9 @@ export default {
       );
       if (r.status === 200) {
         this.layerStyle = r.obj.style;
-        this.layerType = r.obj.style.type;
+        if (this.layerStyle.renderer === 'single') {
+          this.layerType = r.obj.style.type;
+        }
       } else {
         this.$alertify.error(this.$i18n.t('default.errorStyle'));
       }
@@ -711,21 +713,23 @@ export default {
             matrixSet: 'EPSG:4326',
           });
           resolve(
-            new TileLayer({
-              opacity: 1,
-              visible: false,
-              name: 'Ortofotomapa',
-              group: 'baselayers',
-              source: new WMTS({
-                url: 'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
-                matrixSet: 'EPSG:4326',
-                format: 'image/png',
-                projection: getProjection('EPSG:4326'),
-                tileGrid: options.tileGrid,
-                style: 'default',
-                wrapX: true,
+            this.map.addLayer(
+              new TileLayer({
+                opacity: 1,
+                visible: false,
+                name: 'Ortofotomapa',
+                group: 'baselayers',
+                source: new WMTS({
+                  url: 'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
+                  matrixSet: 'EPSG:4326',
+                  format: 'image/png',
+                  projection: getProjection('EPSG:4326'),
+                  tileGrid: options.tileGrid,
+                  style: 'default',
+                  wrapX: true,
+                }),
               }),
-            }),
+            ),
           );
         }).catch((err) => {
           this.$alertify.error(this.$i18n.t('featureManager.ortoError'));
@@ -823,7 +827,10 @@ export default {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326',
       });
-      this.map.getView().fit(feature.getGeometry()); // TODO - fix zoom
+      this.map.getView().fit(feature.getGeometry(), {
+        maxZoom: 16,
+        duration: 500,
+      });
       this.indexActiveTab = 1; // change tab in sidepanel
     },
     setServiceVisibility(serviceName) {
@@ -835,7 +842,7 @@ export default {
     },
     styleFeatures(f) {
       const featStyle = new Style({});
-      if (f) {
+      if (this.layerType) {
         const stroke = new Stroke({
           color: `rgba(${this.layerStyle['stroke-color']})`,
           width: `${this.layerStyle['stroke-width']}`,
@@ -869,6 +876,44 @@ export default {
           stroke.setLineDash(lineDash);
           featStyle.setStroke(stroke);
         }
+      } else {
+        const attr = f.get(this.layerStyle.attribute);
+        const filteredFeat = this.layerStyle.categories.find(el => el.value === attr);
+        if (filteredFeat) {
+          const stroke = new Stroke({
+            color: `rgba(${filteredFeat['stroke-color']})`,
+            width: `${filteredFeat['stroke-width']}`,
+          });
+          const fill = new Fill({
+            color: `rgba(${filteredFeat['fill-color']})`,
+          });
+          // TODO - add triangle/square/dashed/dotted
+          if (filteredFeat.type === 'point') {
+            featStyle.setImage(
+              new CircleStyle({
+                fill,
+                stroke,
+                radius: filteredFeat.width,
+              }),
+            );
+          } else {
+            featStyle.setFill(fill);
+            featStyle.setStroke(stroke);
+          }
+        } else {
+          featStyle.setImage(
+            new CircleStyle({
+              fill: new Fill({
+                color: [250, 250, 250, 0.4],
+              }),
+              stroke: new Stroke({
+                color: [51, 153, 204, 1],
+                width: 1,
+              }),
+              radius: 2,
+            }),
+          );
+        }
       }
       return featStyle;
     },
@@ -897,9 +942,7 @@ export default {
       }),
     });
 
-    const ortofoto = await this.initOrtofoto();
-    this.map.addLayer(ortofoto);
-
+    this.initOrtofoto();
     this.getPermissions();
     await this.getSettings();
 

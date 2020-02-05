@@ -55,6 +55,20 @@ export default {
         return err.response;
       }
     },
+    async categorizeFeatures(ctx, payload) {
+      try {
+        // eslint-disable-next-line no-underscore-dangle
+        const response = await swagger.apis.Layers.get_api_layers__lid__categories__attr_(
+          {
+            lid: payload.lid,
+            attr: payload.attr,
+          },
+        );
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async deleteAttachment(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle
