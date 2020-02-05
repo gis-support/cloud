@@ -381,7 +381,7 @@ export default {
     currentBaseLayer: 'OpenStreetMap',
     currentColumnFilters: [],
     currentFeature: undefined,
-    currentLayerType: undefined,
+    layerType: undefined,
     draw: undefined,
     editing: false,
     editingDataCopy: undefined,
@@ -389,6 +389,7 @@ export default {
     isDrawing: false,
     isInfoDialogVisible: false,
     items: [],
+    layerStyle: undefined,
     newFeatureProperties: {},
     permission: [],
     searchCount: 0,
@@ -435,71 +436,15 @@ export default {
   },
   methods: {
     async createStyle() {
-      let fill;
-      const styleResponse = await this.$store.dispatch(
+      const r = await this.$store.dispatch(
         'getLayerStyle', this.$route.params.layerId,
       );
-      const currentLayerStyle = styleResponse.obj.style;
-      this.currentLayerType = currentLayerStyle.type;
-      const stroke = new Stroke({
-        color: `rgba(${currentLayerStyle['stroke-color']})`,
-        width: `${currentLayerStyle['stroke-width']}`,
-      });
-      if (Object.keys(currentLayerStyle).includes('fill-color')) {
-        fill = new Fill({
-          color: `rgba(${currentLayerStyle['fill-color']})`,
-        });
+      if (r.status === 200) {
+        this.layerStyle = r.obj.style;
+        this.layerType = r.obj.style.type;
+      } else {
+        this.$alertify.error(this.$i18n.t('default.errorStyle'));
       }
-      let styleDef;
-      if (this.currentLayerType === 'point') {
-        styleDef = {
-          image: new CircleStyle({
-            fill,
-            stroke,
-            radius: currentLayerStyle.width,
-          }),
-        };
-      } else if (this.currentLayerType === 'square') {
-        styleDef = {
-          image: new RegularShape({
-            fill,
-            stroke,
-            points: 4,
-            radius: currentLayerStyle.width,
-            angle: Math.PI / 4,
-          }),
-        };
-      } else if (this.currentLayerType === 'triangle') {
-        styleDef = {
-          image: new RegularShape({
-            fill,
-            stroke,
-            points: 3,
-            radius: currentLayerStyle.width,
-            angle: 0,
-          }),
-        };
-      } else if (this.currentLayerType === 'polygon') {
-        styleDef = {
-          fill,
-          stroke,
-        };
-      } else if (this.currentLayerType === 'line') {
-        styleDef = {
-          stroke,
-        };
-      } else if (this.currentLayerType === 'dashed') {
-        stroke.setLineDash([10, 10]);
-        styleDef = {
-          stroke,
-        };
-      } else if (this.currentLayerType === 'dotted') {
-        stroke.setLineDash([1, 10]);
-        styleDef = {
-          stroke,
-        };
-      }
-      return new Style(styleDef);
     },
     async deleteFeature() {
       this.$alertify.confirm(this.$i18n.t('featureManager.deleteFeatureConfirm'), async () => {
@@ -601,7 +546,7 @@ export default {
         body: {
           geometry: {
             coordinates: coords,
-            type: this.currentLayerType,
+            type: this.layerType,
           },
           properties: this.newFeatureProperties,
           type: 'Feature',
@@ -687,9 +632,9 @@ export default {
         const vector = new VectorLayer({ source, name: 'newFeature' });
         this.map.addLayer(vector);
         let drawType;
-        if (this.currentLayerType === 'polygon') {
+        if (this.layerType === 'polygon') {
           drawType = 'Polygon';
-        } else if (this.currentLayerType === 'line') {
+        } else if (this.layerType === 'line') {
           drawType = 'LineString';
         } else {
           drawType = 'Point';
@@ -878,7 +823,7 @@ export default {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326',
       });
-      this.map.getView().fit(feature.getGeometry());
+      this.map.getView().fit(feature.getGeometry()); // TODO - fix zoom
       this.indexActiveTab = 1; // change tab in sidepanel
     },
     setServiceVisibility(serviceName) {
@@ -887,6 +832,45 @@ export default {
       } else {
         this.getLayerByName(serviceName).setVisible(true);
       }
+    },
+    styleFeatures(f) {
+      const featStyle = new Style({});
+      if (f) {
+        const stroke = new Stroke({
+          color: `rgba(${this.layerStyle['stroke-color']})`,
+          width: `${this.layerStyle['stroke-width']}`,
+        });
+        const fill = new Fill({
+          color: `rgba(${this.layerStyle['fill-color']})`,
+        });
+        if (this.layerType === 'point') {
+          featStyle.setImage(
+            new CircleStyle({
+              fill,
+              stroke,
+              radius: this.layerStyle.width,
+            }),
+          );
+        } else if (this.layerType === 'square' || this.layerType === 'triangle') {
+          featStyle.setImage(
+            new RegularShape({
+              fill,
+              stroke,
+              points: this.layerType === 'square' ? 4 : 3,
+              radius: this.layerStyle.width,
+              angle: this.layerType === 'square' ? Math.PI / 4 : 0,
+            }),
+          );
+        } else if (this.layerType === 'polygon' || this.layerType === 'line') {
+          featStyle.setFill(fill);
+          featStyle.setStroke(stroke);
+        } else if (this.layerType === 'dashed' || this.layerType === 'dotted') {
+          const lineDash = this.layerType === 'dashed' ? [10, 10] : [1, 10];
+          stroke.setLineDash(lineDash);
+          featStyle.setStroke(stroke);
+        }
+      }
+      return featStyle;
     },
     updateSearchCount(count) {
       this.searchCount = count;
@@ -921,8 +905,8 @@ export default {
 
     this.createSelectInteraction();
     this.loadServices();
+    await this.createStyle();
 
-    const featureStyleDef = await this.createStyle();
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
@@ -932,7 +916,7 @@ export default {
           format: new MVT(),
           url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`,
         }),
-        style: featureStyleDef,
+        style: f => this.styleFeatures(f),
       }),
     );
     this.map.addLayer(
@@ -940,7 +924,7 @@ export default {
         name: 'featuresVector',
         visible: false,
         source: new VectorSource({}),
-        style: featureStyleDef,
+        style: f => this.styleFeatures(f),
       }),
     );
 
