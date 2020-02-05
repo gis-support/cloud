@@ -183,7 +183,13 @@
             </h4>
             <div class="col-sm-2" style="margin-top: 6px;" v-if="permission === 'write'">
               <div class="btn-group btn-group-sm" role="group"
-                style="float: right; margin-right: -15px;">
+                style="float: right; margin-right: -15px; display: flex;">
+                <a
+                  class="btn btn-default"
+                  @click="goToSettings"
+                >
+                  <i class="fa fa-cog yellow icon-hover"></i>
+                </a>
                 <div class="btn-group btn-group-sm" role="group">
                   <button type="button" class="btn btn-default dropdown-toggle"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -195,9 +201,6 @@
                     <!-- <li><a>XLSX</a></li> -->
                   </ul>
                 </div>
-                <!-- <a class="btn btn-default">
-                  <i class="fa fa-cog yellow icon-hover"></i>
-                </a> -->
               </div>
             </div>
           </div>
@@ -342,7 +345,12 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import TileWMS from 'ol/source/TileWMS';
-import { Fill, Stroke, Style } from 'ol/style';
+import {
+  Fill,
+  Stroke,
+  Style,
+  RegularShape,
+} from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
@@ -427,29 +435,71 @@ export default {
   },
   methods: {
     async createStyle() {
+      let fill;
       const styleResponse = await this.$store.dispatch(
         'getLayerStyle', this.$route.params.layerId,
       );
-      const fill = new Fill({
-        color: `rgba(${styleResponse.obj.style['fill-color']})`,
-      });
+      const currentLayerStyle = styleResponse.obj.style;
+      this.currentLayerType = currentLayerStyle.type;
       const stroke = new Stroke({
-        color: `rgba(${styleResponse.obj.style['stroke-color']})`,
-        width: `${styleResponse.obj.style['stroke-width']}`,
+        color: `rgba(${currentLayerStyle['stroke-color']})`,
+        width: `${currentLayerStyle['stroke-width']}`,
       });
+      if (Object.keys(currentLayerStyle).includes('fill-color')) {
+        fill = new Fill({
+          color: `rgba(${currentLayerStyle['fill-color']})`,
+        });
+      }
+      let styleDef;
       if (this.currentLayerType === 'point') {
-        return new Style({
+        styleDef = {
           image: new CircleStyle({
             fill,
             stroke,
-            radius: 4,
+            radius: currentLayerStyle.width,
           }),
-        });
+        };
+      } else if (this.currentLayerType === 'square') {
+        styleDef = {
+          image: new RegularShape({
+            fill,
+            stroke,
+            points: 4,
+            radius: currentLayerStyle.width,
+            angle: Math.PI / 4,
+          }),
+        };
+      } else if (this.currentLayerType === 'triangle') {
+        styleDef = {
+          image: new RegularShape({
+            fill,
+            stroke,
+            points: 3,
+            radius: currentLayerStyle.width,
+            angle: 0,
+          }),
+        };
+      } else if (this.currentLayerType === 'polygon') {
+        styleDef = {
+          fill,
+          stroke,
+        };
+      } else if (this.currentLayerType === 'line') {
+        styleDef = {
+          stroke,
+        };
+      } else if (this.currentLayerType === 'dashed') {
+        stroke.setLineDash([10, 10]);
+        styleDef = {
+          stroke,
+        };
+      } else if (this.currentLayerType === 'dotted') {
+        stroke.setLineDash([1, 10]);
+        styleDef = {
+          stroke,
+        };
       }
-      return new Style({
-        fill,
-        stroke,
-      });
+      return new Style(styleDef);
     },
     async deleteFeature() {
       this.$alertify.confirm(this.$i18n.t('featureManager.deleteFeatureConfirm'), async () => {
@@ -503,7 +553,6 @@ export default {
     },
     async getSettings() {
       const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
-      this.currentLayerType = res.obj.settings.geometry_type;
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async saveEditing() {
@@ -691,6 +740,21 @@ export default {
         .getLayers()
         .getArray()
         .find(l => l.get('name') === name);
+    },
+    goToSettings() {
+      this.$router.push(
+        {
+          name: 'settings',
+          params: {
+            layerId: this.$route.params.layerId,
+            layer: {
+              id: this.$route.params.layerId,
+              name: this.$route.params.layerName,
+            },
+            vectorLayersList: this.$route.params.vectorLayersList,
+          },
+        },
+      );
     },
     initOrtofoto() {
       return new Promise((resolve, reject) => {

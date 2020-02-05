@@ -35,7 +35,11 @@
                     @click="$router.push(
                       {
                         name: 'feature_manager',
-                        params: { layerId: val.id, layerName: val.name}
+                        params: {
+                          layerId: val.id,
+                          layerName: val.name,
+                          vectorLayersList
+                        }
                       },
                       setAttachmentsLayer(val.id)
                       )">

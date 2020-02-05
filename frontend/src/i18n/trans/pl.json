@@ -84,6 +84,7 @@
     "noServices": "Brak źródeł zewnętrznych",
     "password": "Hasło",
     "point": "Punkt",
+    "polygon": "Poligon",
     "private": "Prywatny",
     "public": "Publiczny",
     "read": "Podgląd",
@@ -180,6 +181,8 @@
     }
   },
   "settings": {
+    "chooseObjectStyle": "Wybierz styl obiektu",
+    "chooseVisualizationType": "Wybierz typ wizualizacji",
     "labels": "Etykiety",
     "layerInfo": "Informacje o warstwie",
     "objStyle": "Styl obiektu",
