@@ -34,7 +34,7 @@ def get_token():
 
 def upload_layers(layers):
     token = get_token()
-    for idx, lyr in enumerate(layers[:1]):
+    for idx, lyr in enumerate(layers):
         request_body = {
             'name': lyr['nazwa'],
             'epsg': lyr['uklad']
