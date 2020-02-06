@@ -114,7 +114,7 @@
         </div>
         <div class="tab-pane in active" id="style-tab" v-if="activeTab === 'style-tab'">
           <div class="col-md-12 pb-10" style="display: flex;">
-            <div class="col-md-6">
+            <div class="col-md-6 pl-0">
               <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.visType')}}</label>
               <select class="form-control col-sm-4 mt-15" v-model="symbolizationType">
                 <option disabled value="">{{$i18n.t('settings.chooseVisualizationType')}}</option>
@@ -122,7 +122,7 @@
                 <option value="categorized">{{$i18n.t('default.categorized')}}</option>
               </select>
             </div>
-            <div class="col-md-6" v-if="symbolizationType === 'single'">
+            <div class="col-md-6 pl-0" v-if="symbolizationType === 'single'">
               <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.objStyle')}}</label>
               <select class="form-control col-sm-4 mt-15" v-model="layerType"
                 v-if="layerType === 'point' || layerType === 'square' || layerType === 'triangle'">
@@ -201,7 +201,7 @@
           </div>
           <div class="form-group" v-else>
             <div class="col-md-12 pb-10" style="display: flex;">
-              <div class="col-md-6">
+              <div class="col-md-6 pl-0">
                 <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.attribute')}}</label>
                 <select class="form-control col-sm-4 mt-15" v-model="categorizedAttr">
                   <option disabled value="">{{$i18n.t('settings.chooseAttr')}}</option>
