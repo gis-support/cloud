@@ -133,9 +133,11 @@
               </select>
               <select
                 class="form-control col-sm-4 mt-15"
+                disabled
                 v-model="layerType"
                 v-else-if="layerType === 'polygon'"
               >
+                <option disabled value="">{{$i18n.t('default.polygon')}}</option>
                 <option disabled value="polygon">{{$i18n.t('default.polygon')}}</option>
               </select>
               <select
@@ -151,7 +153,7 @@
             </div>
           </div>
           <div class="form-group" v-if="symbolizationType === 'single'">
-            <div class="col-md-3 color-picker__container" v-if="strokeColor" style="left: -30px;">
+            <div class="col-md-3 color-picker__container" style="left: -30px;">
               <label class="control-label">{{$i18n.t('settings.stroke-color')}}</label><br>
               <verte
                 model="rgb"
@@ -177,7 +179,10 @@
                 v-model="strokeWidth"
               />
             </div>
-            <div class="col-md-3 color-picker__container" v-if="fillColor">
+            <div
+              class="col-md-3 color-picker__container"
+              v-if="layerType !== 'line' || layerType !== 'dotted' || layerType !== 'dashed'"
+            >
               <label class="control-label">{{$i18n.t('settings.fill-color')}}</label><br>
               <verte
                 model="rgb"
@@ -187,7 +192,7 @@
             </div>
             <div class="col-md-3 color-picker__container"
               style="right: -20px"
-              v-if="Object.keys(styles[currentEditedLayer.id]).includes('width')"
+              v-if="layerType === 'point' || layerType === 'triangle' || layerType === 'square'"
             >
               <label class="control-label">
                 {{$i18n.t('settings.width')}}
@@ -346,18 +351,18 @@ export default {
     categorizedAttr: undefined,
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
-    fillColor: undefined,
+    fillColor: '255,255,255,0.4',
     isColumnsVisible: true,
     isMounted: false,
     layerType: undefined,
     newColumnName: undefined,
     newColumnType: undefined,
-    strokeColor: undefined,
-    strokeWidth: undefined,
+    strokeColor: '51,153,204,1',
+    strokeWidth: 1,
     styles: {},
     symbolizationType: undefined,
     vectorLayersList: undefined,
-    width: 0,
+    width: 1,
   }),
   computed: {
     columnTypes() {
@@ -441,9 +446,8 @@ export default {
           this.$set(feat, 'fill-color-rgba', `rgba(${feat['fill-color']})`);
           this.$set(feat, 'stroke-color-rgba', `rgba(${feat['stroke-color']})`);
         });
-        console.log(this.categories);
+        this.layerType = this.categories[0].type;
       }
-
       if (Object.keys(this.styles[lid]).includes('fill-color')) {
         this.fillColor = `rgba(${this.styles[lid]['fill-color']})`;
       }
@@ -584,6 +588,17 @@ export default {
     },
     toggleColumnsSection(isVisible) {
       this.isColumnsVisible = isVisible;
+    },
+  },
+  watch: {
+    symbolizationType(newValue, oldValue) {
+      // set default style
+      if (newValue === 'single' && newValue !== oldValue) {
+        this.fillColor = 'rgba(255,255,255,0.4)';
+        this.strokeColor = 'rgba(51,153,204,1)';
+        this.strokeWidth = 1;
+        this.width = 1;
+      }
     },
   },
   async mounted() {
