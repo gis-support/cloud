@@ -548,6 +548,8 @@ export default {
       });
       if (r.status === 200) {
         this.$alertify.success(this.$i18n.t('default.success'));
+        this.categories = [];
+        this.categorizedAttr = undefined;
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
@@ -593,7 +595,7 @@ export default {
   watch: {
     symbolizationType(newValue, oldValue) {
       // set default style
-      if (newValue === 'single' && newValue !== oldValue) {
+      if (newValue === 'single' && oldValue === 'categorized' && this.symbolizationType === 'single') {
         this.fillColor = 'rgba(255,255,255,0.4)';
         this.strokeColor = 'rgba(51,153,204,1)';
         this.strokeWidth = 1;
