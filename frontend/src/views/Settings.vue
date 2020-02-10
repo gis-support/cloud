@@ -512,7 +512,7 @@ export default {
         },
       });
       if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('default.success'));
+        this.$alertify.success(this.$i18n.t('default.styleSaved'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
@@ -547,7 +547,7 @@ export default {
         },
       });
       if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('default.success'));
+        this.$alertify.success(this.$i18n.t('default.styleSaved'));
         this.categories = [];
         this.categorizedAttr = undefined;
       } else {
