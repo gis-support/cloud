@@ -133,9 +133,11 @@
               </select>
               <select
                 class="form-control col-sm-4 mt-15"
+                disabled
                 v-model="layerType"
                 v-else-if="layerType === 'polygon'"
               >
+                <option disabled value="">{{$i18n.t('default.polygon')}}</option>
                 <option disabled value="polygon">{{$i18n.t('default.polygon')}}</option>
               </select>
               <select
@@ -151,8 +153,8 @@
             </div>
           </div>
           <div class="form-group" v-if="symbolizationType === 'single'">
-            <div class="col-md-3 color-picker__container" v-if="strokeColor" style="left: -30px;">
-              <label class="control-label">Kolor obrysu</label><br>
+            <div class="col-md-3 color-picker__container" style="left: -30px;">
+              <label class="control-label">{{$i18n.t('settings.stroke-color')}}</label><br>
               <verte
                 model="rgb"
                 :value="strokeColor"
@@ -160,30 +162,51 @@
               ></verte>
             </div>
             <div class="col-md-3 color-picker__container">
-              <label class="control-label">Grubość obrysu</label>
+              <label class="control-label">
+                {{$i18n.t('settings.stroke-width')}}
+                <i
+                  class="fa fa-question-circle icon-hover"
+                  :title="$i18n.t('settings.sizeInfo')"
+                ></i>
+              </label>
               <input
                 type="number"
                 min="1"
                 max="10"
+                @keyup="checkValue($event)"
                 class="form-control mt-15"
                 style="width:50px"
                 v-model="strokeWidth"
               />
             </div>
-            <div class="col-md-3 color-picker__container" v-if="fillColor">
-              <label class="control-label">Kolor wypełnienia</label><br>
+            <div
+              class="col-md-3 color-picker__container"
+              v-if="layerType !== 'line' || layerType !== 'dotted' || layerType !== 'dashed'"
+            >
+              <label class="control-label">{{$i18n.t('settings.fill-color')}}</label><br>
               <verte
                 model="rgb"
                 :value="fillColor"
                 v-model="fillColor"
               ></verte>
             </div>
-            <div class="col-md-3 color-picker__container" style="right: -20px" v-if="width">
-              <label class="control-label">Wielkość punktu</label>
+            <div class="col-md-3 color-picker__container"
+              style="right: -20px"
+              v-if="layerType === 'point' || layerType === 'triangle' || layerType === 'square'"
+            >
+              <label class="control-label">
+                {{$i18n.t('settings.width')}}
+                <i
+                  class="fa fa-question-circle icon-hover"
+                  :title="$i18n.t('settings.sizeInfo')"
+                ></i>
+              </label>
               <input
                 type="number"
                 min="1"
+                step="1"
                 max="10"
+                @keyup="checkValue($event)"
                 class="form-control mt-15"
                 style="width:50px"
                 v-model="width"
@@ -248,9 +271,17 @@
                     </th>
                     <th v-if="headers.includes('stroke-width')" class="text-centered">
                       {{$i18n.t('settings.stroke-width')}}
+                      <i
+                        class="fa fa-question-circle icon-hover"
+                        :title="$i18n.t('settings.sizeInfo')"
+                      ></i>
                     </th>
                     <th v-if="headers.includes('width')" class="text-centered">
                       {{$i18n.t('settings.width')}}
+                      <i
+                        class="fa fa-question-circle icon-hover"
+                        :title="$i18n.t('settings.sizeInfo')"
+                      ></i>
                     </th>
                   </tr>
                 </thead>
@@ -262,14 +293,12 @@
                     <td v-if="feat.hasOwnProperty('fill-color')" class="text-centered">
                       <verte
                         model="rgb"
-                        style="position: relative; left: 60px;top:5px;"
                         v-model="feat['fill-color-rgba']"
                       ></verte>
                     </td>
                     <td v-if="feat.hasOwnProperty('stroke-color')" class="text-centered">
                       <verte
                         model="rgb"
-                        style="position: relative; left: 40px;top:5px;"
                         v-model="feat['stroke-color-rgba']"
                       ></verte>
                     </td>
@@ -278,6 +307,7 @@
                         type="number"
                         min="1"
                         max="10"
+                        @keyup="checkValue($event)"
                         class="form-control"
                         style="width:50px; margin:0 auto;"
                         v-model="feat['stroke-width']"
@@ -288,6 +318,7 @@
                         type="number"
                         min="1"
                         max="10"
+                        @keyup="checkValue($event)"
                         class="form-control"
                         style="width:50px; margin:0 auto;"
                         v-model="feat['width']"
@@ -320,18 +351,18 @@ export default {
     categorizedAttr: undefined,
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
-    fillColor: undefined,
+    fillColor: '255,255,255,0.4',
     isColumnsVisible: true,
     isMounted: false,
     layerType: undefined,
     newColumnName: undefined,
     newColumnType: undefined,
-    strokeColor: undefined,
-    strokeWidth: undefined,
+    strokeColor: '51,153,204,1',
+    strokeWidth: 1,
     styles: {},
     symbolizationType: undefined,
     vectorLayersList: undefined,
-    width: 0,
+    width: 1,
   }),
   computed: {
     columnTypes() {
@@ -374,7 +405,6 @@ export default {
           this.$set(feat, 'fill-color-rgba', `rgba(${feat['fill-color']})`);
           this.$set(feat, 'stroke-color-rgba', `rgba(${feat['stroke-color']})`);
         });
-        console.log(this.categories);
       } else {
         this.$i18n.t('default.error');
       }
@@ -416,9 +446,8 @@ export default {
           this.$set(feat, 'fill-color-rgba', `rgba(${feat['fill-color']})`);
           this.$set(feat, 'stroke-color-rgba', `rgba(${feat['stroke-color']})`);
         });
-        console.log(this.categories);
+        this.layerType = this.categories[0].type;
       }
-
       if (Object.keys(this.styles[lid]).includes('fill-color')) {
         this.fillColor = `rgba(${this.styles[lid]['fill-color']})`;
       }
@@ -483,7 +512,7 @@ export default {
         },
       });
       if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('default.success'));
+        this.$alertify.success(this.$i18n.t('default.styleSaved'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
@@ -518,9 +547,23 @@ export default {
         },
       });
       if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('default.success'));
+        this.$alertify.success(this.$i18n.t('default.styleSaved'));
+        this.categories = [];
+        this.categorizedAttr = undefined;
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    checkValue(e) {
+      const charCode = (e.which) ? e.which : e.keyCode;
+      if ((charCode > 31 && (charCode > 47 && charCode < 58))) {
+        if (e.srcElement.valueAsNumber > Number(e.srcElement.max)) {
+          e.target.value = 10;
+          this.$alertify.warning(this.$i18n.t('settings.maxSize'));
+        } else if (e.srcElement.valueAsNumber < Number(e.srcElement.min)) {
+          e.target.value = 1;
+          this.$alertify.warning(this.$i18n.t('settings.minSize'));
+        }
       }
     },
     formatColor(rgba) {
@@ -547,6 +590,17 @@ export default {
     },
     toggleColumnsSection(isVisible) {
       this.isColumnsVisible = isVisible;
+    },
+  },
+  watch: {
+    symbolizationType(newValue, oldValue) {
+      // set default style
+      if (newValue === 'single' && oldValue === 'categorized' && this.symbolizationType === 'single') {
+        this.fillColor = 'rgba(255,255,255,0.4)';
+        this.strokeColor = 'rgba(51,153,204,1)';
+        this.strokeWidth = 1;
+        this.width = 1;
+      }
     },
   },
   async mounted() {
@@ -603,6 +657,8 @@ export default {
     text-align: left;
   }
   .verte {
-    justify-content: flex-start;
+    display: flex;
+    justify-content: center;
+    top: 5px;
   }
 </style>
