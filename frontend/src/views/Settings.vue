@@ -188,6 +188,7 @@
                 model="rgb"
                 :value="fillColor"
                 v-model="fillColor"
+                @input="test"
               ></verte>
             </div>
             <div class="col-md-3 color-picker__container"
@@ -351,7 +352,7 @@ export default {
     categorizedAttr: undefined,
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
-    fillColor: '255,255,255,0.4',
+    fillColor: '255,254,255,0.4',
     isColumnsVisible: true,
     isMounted: false,
     layerType: undefined,
@@ -373,6 +374,9 @@ export default {
     },
   },
   methods: {
+    test(e) {
+      console.log(e);
+    },
     async addNewColumn() {
       if (!this.newColumnName || !this.newColumnType) {
         this.$alertify.error(this.$i18n.t('dashboard.modal.noNameOrType'));
@@ -592,7 +596,7 @@ export default {
     symbolizationType(newValue, oldValue) {
       // set default style
       if (newValue === 'single' && oldValue === 'categorized' && this.symbolizationType === 'single') {
-        this.fillColor = 'rgba(255,255,255,0.4)';
+        this.fillColor = 'rgba(255,255,254,0.4)';
         this.strokeColor = 'rgba(51,153,204,1)';
         this.strokeWidth = 1;
         this.width = 1;
