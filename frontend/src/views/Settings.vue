@@ -498,10 +498,6 @@ export default {
         }
         this.$set(feat, 'fill-color', fillRgb);
         this.$set(feat, 'stroke-color', strokeRgb);
-        // eslint-disable-next-line no-param-reassign
-        delete feat['fill-color-rgba'];
-        // eslint-disable-next-line no-param-reassign
-        delete feat['stroke-color-rgba'];
       });
       const r = await this.$store.dispatch('saveStyle', {
         lid: this.currentEditedLayer.id,
