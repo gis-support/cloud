@@ -332,6 +332,7 @@
 
 <script>
 import _ from 'lodash';
+import moment from 'moment';
 import { fromLonLat, get as getProjection } from 'ol/proj';
 import Draw from 'ol/interaction/Draw';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -361,6 +362,7 @@ import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 // import CommentsPanel from '@/components/CommentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import '@/assets/css/feature-manager.css';
+
 
 export default {
   components: {
@@ -539,7 +541,7 @@ export default {
         } else if (this.featureTypes[k[0]] === 'real') {
           this.newFeatureProperties[k[0]] = parseFloat(this.newFeatureProperties[k[0]]);
         } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
-          this.newFeatureProperties[k[0]] = new Date(`${this.newFeatureProperties[k[0]]}`);
+          this.newFeatureProperties[k[0]] = moment(this.newFeatureProperties[k[0]]).format('X');
         }
       });
 
@@ -982,7 +984,11 @@ export default {
       r.obj.features.forEach((feat) => {
         const tempItem = {};
         Object.entries(feat.properties).forEach(([k, v]) => {
-          tempItem[k] = v;
+          if (this.featureTypes[k] === 'timestamp without time zone') {
+            tempItem[k] = moment(v).isValid() ? moment(v).locale('pl').format('L') : '';
+          } else {
+            tempItem[k] = v;
+          }
         });
         this.items.push(tempItem);
       });
