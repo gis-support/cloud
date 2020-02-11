@@ -105,8 +105,8 @@ class Layer(Cloud):
         self.execute(
             SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
         self.execute("""
-            UPDATE layer_styles SET f_table_name = %s
-        """, (self.name,))
+            UPDATE layer_styles SET f_table_name = %s WHERE f_table_name = %s
+        """, (self.name, old_name,))
         self.lid = self.hash_name(self.name)
         callback(old_lid, self.lid)
 
