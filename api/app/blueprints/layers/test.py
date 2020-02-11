@@ -481,6 +481,7 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
+        assert r.json['style']['labels'] == []
         # Point single style
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_points.geojson')
         file_request = {
@@ -499,6 +500,7 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '1'
         assert r.json['style']['width'] == '2'
+        assert r.json['style']['labels'] == []
         # Line single style
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_lines.geojson')
         file_request = {
@@ -515,6 +517,7 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['type'] == 'line'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
+        assert r.json['style']['labels'] == []
 
     def test_styles_put_correct_single_point(self, client):
         # Single Point

@@ -88,6 +88,7 @@ def create_qml(geom_type, style={}):
 def create_stylejson(geom_type):
     if 'point' in geom_type.lower():
         return {
+            'labels': [],
             'renderer': 'single',
             'type': 'point',
             'fill-color': '255,255,255,0.4',
@@ -97,6 +98,7 @@ def create_stylejson(geom_type):
         }
     elif 'line' in geom_type.lower():
         return {
+            'labels': [],
             'renderer': 'single',
             'type': 'line',
             'stroke-color': '51,153,204,1',
@@ -104,6 +106,7 @@ def create_stylejson(geom_type):
         }
     else:
         return {
+            'labels': [],
             'renderer': 'single',
             'type': 'polygon',
             'fill-color': '255,255,255,0.4',
