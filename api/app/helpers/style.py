@@ -136,9 +136,10 @@ def generate_categories(values, geom_type):
 
 class LayerStyle:
 
-    def __init__(self, data, geom_type):
+    def __init__(self, data, geom_type, columns):
         self.data = data
         self.geom_type = geom_type
+        self.columns = columns
         self.check_existence('renderer', self.data)
         self.check_contains('renderer', self.data['renderer'], [
                             'single', 'categorized'])
@@ -149,6 +150,7 @@ class LayerStyle:
             self.validate_single()
         elif self.renderer == 'categorized':
             self.validate_categorized()
+        self.validate_labels()
 
     def check_existence(self, value, data):
         if value not in data:
@@ -209,6 +211,15 @@ class LayerStyle:
             self.check_color(data[color])
         self.check_existence('stroke-width', data)
         self.check_width(data['stroke-width'])
+
+    def validate_labels(self):
+        self.check_existence('labels', self.data)
+        if not isinstance(self.data['labels'], list):
+            raise ValueError(f"invalid labels type")
+        for column in self.data['labels']:
+            self.check_contains(
+                f'labels - column {column} not exists', column, self.columns)
+        self.style['labels'] = self.data['labels']
 
     def validate_single(self):
         self.check_existence('type', self.data)

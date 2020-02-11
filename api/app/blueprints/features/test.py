@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from app.tests.utils import BaseTest, TEST_DATA_DIR
+from time import time
 import datetime
 import json
 import pytest
@@ -110,14 +111,18 @@ class TestFeatures(BaseTest):
         r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 200
-        # WERSJA_OD need to be datetime string, check invalid string
+        # WERSJA_OD need to be timestamp, check string
         feature['properties']['WERSJA_OD'] = "e"
         r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 400
-        #  WERSJA_OD need to be datetime string, check valid string
-        feature['properties']['WERSJA_OD'] = datetime.datetime.now().strftime(
-            "%m/%d/%Y, %H:%M:%S")
+        #  WERSJA_OD need to be datetime string, check int
+        feature['properties']['WERSJA_OD'] = int(time())
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
+                       data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 200
+        #  WERSJA_OD need to be datetime string, check float
+        feature['properties']['WERSJA_OD'] = time()
         r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 200
