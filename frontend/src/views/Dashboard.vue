@@ -52,7 +52,8 @@
                 <span class="panel-title__tools">
                   <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="modal"
                   data-target="#layerSettingsModal" data-placement="top"
-                  :title="$i18n.t('default.settings')" @click="setEditedLayer('vector', key)"></i>
+                  :title="$i18n.t('default.settings')"
+                  @click="setEditedLayer('vector', val.id)"></i>
                   <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
                     data-placement="top" :title="$i18n.t('default.delete')"
                     @click="deleteLayer(val)"></i>
@@ -395,9 +396,11 @@ export default {
         this.isFetching = false;
       });
     },
-    async setEditedLayer(layType, key) {
+    async setEditedLayer(layType, layId) {
       if (layType === 'vector') {
-        this.currentEditedLayer = Object.assign({}, this.vectorLayersList[key]);
+        this.currentEditedLayer = Object.assign(
+          {}, this.vectorLayersList.find(el => el.id === layId),
+        );
       }
       this.$router.push({
         name: 'settings',
