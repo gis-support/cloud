@@ -5,6 +5,9 @@ from app.helpers.style import QML_TO_OL, LayerStyle, generate_categories
 from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from xml.dom import minidom
+from datetime import datetime
+from dateutil.parser import parse
+import dateutil
 import json
 
 PERMISSIONS = {
@@ -18,12 +21,12 @@ RESTRICTED_COLUMNS = (
     "geometry"
 )
 
-TYPES = (
-    'character varying',
-    'real',
-    'integer',
-    'timestamp without time zone'
-)
+TYPES = {
+    'character varying': str,
+    'real': (int, float),
+    'integer': int,
+    'timestamp without time zone': datetime
+}
 
 
 class Layer(Cloud):
@@ -139,7 +142,7 @@ class Layer(Cloud):
     def add_column(self, column_name, column_type):
         if self.column_exists(column_name):
             raise ValueError("column exists")
-        if column_type not in TYPES:
+        if column_type not in list(TYPES.keys()):
             raise ValueError("invalid column type")
         self.execute(
             SQL("ALTER TABLE {} ADD COLUMN {} %s").format(Identifier(self.name), Identifier(column_name)), (AsIs(column_type),))
@@ -168,11 +171,16 @@ class Layer(Cloud):
                 Identifier(self.name), Identifier(user)))
 
     # Column lists
-    def columns(self):
+    def columns(self, with_types=False):
         cursor = self.execute(SQL("""
-            SELECT * FROM {} LIMIT 0
-        """).format(Identifier(self.name)))
-        return [description[0] for description in cursor.description if description[0] not in RESTRICTED_COLUMNS]
+            SELECT column_name, data_type FROM information_schema.columns WHERE table_name = %s AND column_name NOT IN %s
+        """), (self.name, RESTRICTED_COLUMNS,))
+        if with_types:
+            names = {}
+            for c in cursor.fetchall():
+                names[c[0]] = c[1]
+            return names
+        return [c[0] for c in cursor.fetchall()]
 
     # Count features
     def count(self):
@@ -226,7 +234,23 @@ class Layer(Cloud):
         return self.as_geojson_by_fid(cursor.fetchone()[0])
 
     # Edit existing feature
-    def edit_feature(self, fid, columns, values):
+    def edit_feature(self, fid, columns, values, columns_with_types):
+        # Validation
+        error = False
+        for i in range(1, len(columns)):
+            if isinstance(values[i], type(None)):
+                continue
+            elif TYPES[columns_with_types[columns[i]]] == datetime:
+                try:
+                    dt = parse(values[i])
+                except dateutil.parser._parser.ParserError:
+                    error = f"value '{values[i]}' invalid type of column '{columns[i]}' ({columns_with_types[columns[i]]})"
+                    break
+            elif not isinstance(values[i], TYPES[columns_with_types[columns[i]]]):
+                error = f"value '{values[i]}' invalid type of column '{columns[i]}' ({columns_with_types[columns[i]]})"
+                break
+        if error:
+            raise ValueError(error)
         query_string = SQL("UPDATE {} SET {} WHERE id=%s").format(
             Identifier(self.name),
             SQL(', ').join(

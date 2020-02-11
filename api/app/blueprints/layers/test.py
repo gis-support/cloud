@@ -266,6 +266,26 @@ class TestLayers(BaseTest):
         assert r.json['features'][0]['geometry']['coordinates'][0][0] == [
             23.473214359, 52.080550359]
 
+    def test_layers_post_invalid_encoding(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers')
+        file_request = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'invalid_encoding.dbf'), 'rb').read())), 'invalid_encoding.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'invalid_encoding.prj'), 'rb').read())), 'invalid_encoding.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'invalid_encoding.shp'), 'rb').read())), 'invalid_encoding.shp'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'invalid_encoding.shx'), 'rb').read())), 'invalid_encoding.shx'),
+            'file[4]': (BytesIO((open(os.path.join(path, 'invalid_encoding.cpg'), 'rb').read())), 'invalid_encoding.cpg'),
+            'file[5]': (BytesIO((open(os.path.join(path, 'invalid_encoding.qpj'), 'rb').read())), 'invalid_encoding.qpj'),
+            'name': 'invalid_encoding'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/layers/{lid}?token={token}')
+        assert r.status_code == 200
+        assert r.json['features'][0]['geometry']['coordinates'][0][0] == [22.65563999, 51.718238491]
+
 
 @pytest.mark.layerssettings
 class TestLayersSettings(BaseTest):

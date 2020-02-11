@@ -134,7 +134,11 @@ def layers(cloud):
                                 else:
                                     feature_string += f'{field}\n'
                     count_features += 1
-                    tfile.write(feature_string)
+                    try:
+                        tfile.write(feature_string)
+                    except UnicodeEncodeError:
+                        tfile.write(feature_string.encode(
+                            'utf8', 'replace').decode('utf8', 'replace'))
                 tfile.seek(0)
                 cur = current_app._db.cursor()
                 cur.copy_from(tfile, '"{}"'.format(name), null='None', columns=list(
@@ -290,6 +294,10 @@ def lid(layer, lid, z=0, x=0, y=0):
 def create_mvt_tile(z, x, y, name):
     cur = current_app._db.cursor()
     #TODO: hotfix
+    '''
+    SELECT ST_AsMVT(tile) FROM (SELECT UNNEST(SELECT string_agg(column_name, ',') FROM information_schema.columns WHERE table_name = %s AND column_name NOT IN ('geometry')),
+        ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,8,true) AS geom FROM {}) AS tile
+    '''
     query = '''
         SELECT column_name from information_schema.columns WHERE table_name = %s
     '''

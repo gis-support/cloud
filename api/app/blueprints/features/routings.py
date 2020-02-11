@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request
 from flasgger import swag_from
 from app.docs import path_by
 from app.db.general import token_required, layer_decorator
-from app.helpers.layer import Layer
+from app.helpers.layer import Layer, TYPES
 from shapely.geometry import shape
 
 mod_features = Blueprint("features", __name__)
@@ -58,11 +58,16 @@ def features_id(lid, fid):
             geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
             columns = ['geometry']
             values = [geometry]
+            columns_with_types = layer.columns(with_types=True)
             for k, v in data['properties'].items():
-                if k in layer.columns():
+                if k in list(columns_with_types.keys()):
                     columns.append(k)
                     values.append(v)
-            feature = layer.edit_feature(fid, columns, values)
+            try:
+                feature = layer.edit_feature(
+                    fid, columns, values, columns_with_types)
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 400
             return jsonify(feature), 200
         return put(lid=lid)
 

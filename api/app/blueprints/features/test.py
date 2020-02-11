@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from app.tests.utils import BaseTest, TEST_DATA_DIR
+import datetime
 import json
 import pytest
 import os
@@ -44,6 +45,7 @@ class TestFeatures(BaseTest):
         base_geometry = len(r.json['geometry']['coordinates'][0][0])
         r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
                        data=open(path), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 200
         r = client.get(
             '/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
         edited_geometry = len(r.json['geometry']['coordinates'][0][0])
@@ -79,3 +81,43 @@ class TestFeatures(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['features'] == []
+
+    def test_features_invalid_type(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        fid = 1
+        r = client.get(
+            '/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
+        base_geometry = len(r.json['geometry']['coordinates'][0][0])
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
+        feature = json.loads(open(path).read())
+        # Shape_Leng need to be float or int, check string
+        feature['properties']['Shape_Leng'] = "e"
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
+                       data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 400
+        r = client.get(
+            '/api/layers/{}/features/{}?token={}'.format(lid, fid, token))
+        edited_geometry = len(r.json['geometry']['coordinates'][0][0])
+        assert base_geometry == edited_geometry
+        # Shape_Leng need to be float or int, check int
+        feature['properties']['Shape_Leng'] = 1
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
+                       data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 200
+        # Shape_Leng need to be float, check float
+        feature['properties']['Shape_Leng'] = 1.0
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
+                       data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 200
+        # WERSJA_OD need to be datetime string, check invalid string
+        feature['properties']['WERSJA_OD'] = "e"
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
+                       data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 400
+        #  WERSJA_OD need to be datetime string, check valid string
+        feature['properties']['WERSJA_OD'] = datetime.datetime.now().strftime(
+            "%m/%d/%Y, %H:%M:%S")
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
+                       data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 200
