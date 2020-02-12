@@ -266,6 +266,7 @@ export default {
       if (r.status === 201) {
         this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
         this.getPermissions(); // update permissions table
+        this.getUsers();
         this.email = undefined;
         this.password = undefined;
         this.newUserGroup = undefined;
