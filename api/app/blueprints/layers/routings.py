@@ -296,7 +296,7 @@ def create_mvt_tile(z, x, y, name):
     #TODO: hotfix
     '''
     SELECT ST_AsMVT(tile) FROM (SELECT UNNEST(SELECT string_agg(column_name, ',') FROM information_schema.columns WHERE table_name = %s AND column_name NOT IN ('geometry')),
-        ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,256,true) AS geom FROM {}) AS tile
+        ST_AsMVTGeom(ST_Buffer(ST_transform(geometry, 3857), 0),tilebbox(%s, %s, %s, 3857),4096,256,true) AS geom FROM {}) AS tile
     '''
     query = '''
         SELECT column_name from information_schema.columns WHERE table_name = %s
@@ -306,7 +306,7 @@ def create_mvt_tile(z, x, y, name):
         'geometry']]
     query = SQL('''
         SELECT ST_AsMVT(tile) FROM (SELECT %s,
-        ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,8,true) AS geom FROM {}) AS tile
+        ST_AsMVTGeom(ST_Buffer(ST_transform(geometry, 3857), 0),tilebbox(%s, %s, %s, 3857),4096,256,true) AS geom FROM {}) AS tile
     ''').format(Identifier(name))
     cur.execute(query, (AsIs(",".join(columns)), z, x, y))
     tile = cur.fetchone()[0]

@@ -970,6 +970,7 @@ export default {
       new VectorTileLayer({
         name: 'features',
         preload: 0,
+        renderBuffer: 256,
         source: new VectorTileSource({
           cacheSize: 1,
           format: new MVT(),
