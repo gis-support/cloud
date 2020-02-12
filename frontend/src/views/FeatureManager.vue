@@ -862,7 +862,7 @@ export default {
           text: labelsToShow.join(' '),
           fill: new Fill({ color: 'white' }),
           stroke: new Stroke({ color: 'black', width: 4 }),
-          offsetX: -20,
+          offsetY: -10,
         }),
       });
       if (this.layerType) {
