@@ -853,8 +853,8 @@ export default {
       const featStyle = new Style({
         text: new Text({
           text: labelsToShow.join(' '),
-          fill: new Fill({ color: 'black' }),
-          stroke: new Stroke({ color: 'yellow', width: 1 }),
+          fill: new Fill({ color: 'white' }),
+          stroke: new Stroke({ color: 'black', width: 4 }),
           offsetX: -20,
         }),
       });

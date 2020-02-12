@@ -16,7 +16,7 @@
         </li>
         <li>
           <a href="#labels-tab" data-toggle="tab" @click="setActiveTab('labels-tab')">
-          <i class="fa fa-map-pin"></i>
+          <i class="fa fa-tags"></i>
           &nbsp;&nbsp;<span>{{$i18n.t('settings.labels')}}</span>
           </a>
         </li>
@@ -187,7 +187,6 @@
                 model="rgb"
                 :value="fillColor"
                 v-model="fillColor"
-                @input="test"
               ></verte>
             </div>
             <div class="col-md-3 color-picker__container"
@@ -550,12 +549,14 @@ export default {
         this.$set(feat, 'fill-color', fillRgb);
         this.$set(feat, 'stroke-color', strokeRgb);
       });
+      const labelsToSave = this.labelsAll.filter(el => this.activeLabels.includes(el));
       const r = await this.$store.dispatch('saveStyle', {
         lid: this.currentEditedLayer.id,
         body: {
           categories: this.categories,
           attribute: this.categorizedAttr,
           renderer: this.symbolizationType,
+          labels: labelsToSave,
         },
       });
       if (r.status === 200) {
@@ -619,10 +620,12 @@ export default {
         }
       }
 
+      const labelsToSave = this.labelsAll.filter(el => this.activeLabels.includes(el));
       const r = await this.$store.dispatch('saveStyle', {
         lid: this.currentEditedLayer.id,
         body: {
           type: this.layerType,
+          labels: labelsToSave,
           'fill-color': fill,
           'stroke-color': stroke,
           'stroke-width': this.strokeWidth,
