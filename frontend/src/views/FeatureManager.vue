@@ -174,12 +174,12 @@
       <div class="right-panel padding-0">
         <div class="col-sm-12">
           <div style="display: inline-block; width: 100%;">
-            <h4 class="col-sm-10 right-panel__title" v-if="$route.params.layerName">
+            <h4 class="col-sm-10 right-panel__title">
               <i class="fa fa-map-o title__icon"></i>
               <span
                 class="mvp-red right-panel__name"
-                :title="$route.params.layerName"
-              >{{$route.params.layerName | maxLength}}</span>
+                :title="layerName"
+              >{{layerName ? layerName : '' | maxLength}}</span>
             </h4>
             <div class="col-sm-2" style="margin-top: 6px;" v-if="permission === 'write'">
               <div class="btn-group btn-group-sm" role="group"
@@ -410,6 +410,9 @@ export default {
     },
     featureTypes() {
       return this.$store.getters.getCurrentFeaturesTypes;
+    },
+    layerName() {
+      return this.$store.getters.getLayerName;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
@@ -974,8 +977,6 @@ export default {
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
-        renderBuffer: 256,
-        declutter: true,
         source: new VectorTileSource({
           cacheSize: 1,
           format: new MVT(),

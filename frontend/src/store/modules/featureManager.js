@@ -22,6 +22,7 @@ export default {
     activeLayer: undefined,
     currentFeaturesTypes: undefined,
     featureAttachments: {},
+    layerName: undefined,
     mapCenter: {
       lat: 51.919438,
       lon: 19.145136,
@@ -159,6 +160,9 @@ export default {
     getFeatureAttachments(state) {
       return state.featureAttachments;
     },
+    getLayerName(state) {
+      return state.layerName || localStorage.getItem('layerName');
+    },
     getMapCenter(state) {
       return state.mapCenter;
     },
@@ -202,6 +206,10 @@ export default {
     },
     setCurrentFeaturesTypes(state, types) {
       state.currentFeaturesTypes = types;
+    },
+    setLayerName(state, name) {
+      state.layerName = name;
+      localStorage.setItem('layerName', name);
     },
   },
 };

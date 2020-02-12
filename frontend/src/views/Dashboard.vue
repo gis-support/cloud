@@ -31,18 +31,7 @@
               <h4 class="panel-title flex-center">
                 <span class="panel-title__names">
                   <i class="icon-li fa fa-map-o fa-lg mr-5"></i>
-                  <span class="bold" href="#"
-                    @click="$router.push(
-                      {
-                        name: 'feature_manager',
-                        params: {
-                          layerId: val.id,
-                          layerName: val.name,
-                          vectorLayersList
-                        }
-                      },
-                      setAttachmentsLayer(val.id)
-                      )">
+                  <span class="bold" href="#" @click="goToManager(val)">
                     {{ val.name }}
                   </span>
                   <span class="desc-sm">
@@ -436,6 +425,20 @@ export default {
       }, () => {})
         .set({ title: this.$i18n.t('dashboard.modal.deleteLayerTitle') })
         .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+    },
+    goToManager(val) {
+      this.$router.push(
+        {
+          name: 'feature_manager',
+          params: {
+            layerId: val.id,
+            layerName: val.name,
+            vectorLayersList: this.vectorLayersList,
+          },
+        },
+      );
+      this.setAttachmentsLayer(val.id);
+      this.$store.commit('setLayerName', val.name);
     },
     isNumber(evt) {
       const e = (evt) || window.event;
