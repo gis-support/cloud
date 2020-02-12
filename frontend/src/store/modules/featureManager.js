@@ -170,6 +170,9 @@ export default {
     addAttachmentToFeature(state, params) {
       const groups = Object.keys(params.attachments);
       groups.forEach((el) => {
+        if (!Object.keys(state.featureAttachments).includes(params.lid)) {
+          Vue.set(state, 'featureAttachments', params.lid);
+        }
         const ids = state.featureAttachments[params.lid][params.fid][el].map(att => att.id);
         const attachArr = [
           ...state.featureAttachments[params.lid][params.fid][el],

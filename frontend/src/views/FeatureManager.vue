@@ -321,7 +321,9 @@
                   v-if="currentFeature && Object.keys(featureAttachments).length > 0"
                   :lid="$route.params.layerId"
                   :fid="currentFeature.properties.id"
-                  :permission="permission" />
+                  :permission="permission"
+                  :usersGroup="usersGroup"
+                />
               </div>
             </div>
           </div>
@@ -400,6 +402,7 @@ export default {
     searchItemValue: '',
     selectedColumnFilters: [],
     selectedRows: [],
+    usersGroup: undefined,
   }),
   computed: {
     activeLayer() {
@@ -506,6 +509,13 @@ export default {
     async getSettings() {
       const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
+    },
+    async getUsers() {
+      const r = await this.$store.dispatch('getUsers');
+      if (r.status === 200) {
+        this.usersGroup = r.obj.users[this.user];
+        this.$store.commit('setUsersWithGroups', r.obj.users);
+      }
     },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
@@ -960,6 +970,7 @@ export default {
 
     this.initOrtofoto();
     this.getPermissions();
+    await this.getUsers();
     await this.getSettings();
 
     this.createSelectInteraction();
@@ -969,7 +980,7 @@ export default {
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
-        preload: 0,
+        renderBuffer: 256,
         source: new VectorTileSource({
           cacheSize: 1,
           format: new MVT(),
