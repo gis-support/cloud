@@ -312,10 +312,6 @@
                 </div>
               </div>
               <div v-show="indexActiveTab == 2">
-                <!-- <CommentsPanel
-                  ref="comments-panel"
-                  @changeDialogVisibility="changeDialogVisibility"
-                  :selected-id="$route.params.layerId" /> -->
                 <AttachmentsPanel
                   ref="attachments-panel"
                   v-if="currentFeature && Object.keys(featureAttachments).length > 0"
@@ -362,7 +358,6 @@ import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
-// import CommentsPanel from '@/components/CommentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import '@/assets/css/feature-manager.css';
 
@@ -371,7 +366,6 @@ export default {
   components: {
     AttachmentsPanel,
     AttributesPanel,
-    // CommentsPanel,
     FeatureManagerTable,
     FiltersPanel,
   },
@@ -981,6 +975,7 @@ export default {
       new VectorTileLayer({
         name: 'features',
         renderBuffer: 256,
+        declutter: true,
         source: new VectorTileSource({
           cacheSize: 1,
           format: new MVT(),
