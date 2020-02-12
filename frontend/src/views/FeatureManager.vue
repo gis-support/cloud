@@ -353,6 +353,7 @@ import {
   RegularShape,
 } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
+import Text from 'ol/style/Text';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
@@ -383,6 +384,7 @@ export default {
     currentBaseLayer: 'OpenStreetMap',
     currentColumnFilters: [],
     currentFeature: undefined,
+    labels: [],
     layerType: undefined,
     draw: undefined,
     editing: false,
@@ -442,6 +444,7 @@ export default {
         'getLayerStyle', this.$route.params.layerId,
       );
       if (r.status === 200) {
+        this.labels = r.obj.style.labels;
         this.layerStyle = r.obj.style;
         if (this.layerStyle.renderer === 'single') {
           this.layerType = r.obj.style.type;
@@ -843,7 +846,18 @@ export default {
       }
     },
     styleFeatures(f) {
-      const featStyle = new Style({});
+      const labelsToShow = [];
+      this.labels.forEach((el) => {
+        labelsToShow.push(f.getProperties()[el]);
+      });
+      const featStyle = new Style({
+        text: new Text({
+          text: labelsToShow.join(' '),
+          fill: new Fill({ color: 'black' }),
+          stroke: new Stroke({ color: 'yellow', width: 1 }),
+          offsetX: -20,
+        }),
+      });
       if (this.layerType) {
         const stroke = new Stroke({
           color: `rgba(${this.layerStyle['stroke-color']})`,

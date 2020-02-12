@@ -14,9 +14,8 @@
           &nbsp;&nbsp;<span>{{$i18n.t('settings.symbolization')}}</span>
           </a>
         </li>
-        <li class="disabled">
-          <a href="#labels-tab" data-toggle="tab"
-            @click.prevent.stop @click="setActiveTab('labels-tab')">
+        <li>
+          <a href="#labels-tab" data-toggle="tab" @click="setActiveTab('labels-tab')">
           <i class="fa fa-map-pin"></i>
           &nbsp;&nbsp;<span>{{$i18n.t('settings.labels')}}</span>
           </a>
@@ -332,7 +331,45 @@
           </div>
         </div>
         <div class="tab-pane in active" id="labels-tab" v-if="activeTab === 'labels-tab'">
-          <p>labels</p>
+          <span class="d-flex">
+            <h4>{{$i18n.t('settings.labelsTitle')}}</h4>
+            <i
+              class="fa fa-question-circle icon-hover ml-10"
+              :title="$i18n.t('settings.labelsHelper')"
+            ></i>
+          </span>
+          <button
+            type="button"
+            style="float: right"
+            class="btn btn-success mb-10"
+            @click="saveLabels(labelsAll.filter(el => activeLabels.includes(el)))"
+          >
+            {{$i18n.t('default.saveLabels')}}
+          </button>
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr role="row">
+                <th class="text-centered">{{$i18n.t('default.active')}}</th>
+                <th class="text-centered">{{$i18n.t('default.attributes')}}</th>
+              </tr>
+            </thead>
+            <draggable
+              tag="tbody"
+              :list="labelsAll"
+              @start="drag=true"
+              @end="drag=false"
+            >
+              <tr v-for="(el, index) in labelsAll" :key="index">
+                <td
+                  class="text-centered"
+                  style="width: 50px"
+                >
+                  <input type="checkbox" :id="el" :value="el" v-model="activeLabels">
+                </td>
+                <td class="text-centered">{{el}}</td>
+              </tr>
+            </draggable>
+          </table>
         </div>
       </div>
     </div>
@@ -340,21 +377,29 @@
 </template>
 
 <script>
+import _ from 'lodash';
+import draggable from 'vuedraggable';
 import verte from 'verte';
 import 'verte/dist/verte.css';
 
 export default {
   name: 'settings',
-  components: { verte },
+  components: {
+    verte,
+    draggable,
+  },
   data: () => ({
+    activeLabels: [],
     activeTab: 'info-tab',
     categories: [],
     categorizedAttr: undefined,
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
+    drag: false,
     fillColor: '255,254,255,0.4',
     isColumnsVisible: true,
     isMounted: false,
+    labelsAll: [],
     layerType: undefined,
     newColumnName: undefined,
     newColumnType: undefined,
@@ -374,9 +419,6 @@ export default {
     },
   },
   methods: {
-    test(e) {
-      console.log(e);
-    },
     async addNewColumn() {
       if (!this.newColumnName || !this.newColumnType) {
         this.$alertify.error(this.$i18n.t('dashboard.modal.noNameOrType'));
@@ -435,6 +477,11 @@ export default {
       const lid = this.currentEditedLayer.id;
       const styleResponse = await this.$store.dispatch('getLayerStyle', this.currentEditedLayer.id);
       this.$set(this.styles, this.currentEditedLayer.id, styleResponse.body.style);
+      this.activeLabels = styleResponse.body.style.labels;
+      this.labelsAll = _.union(
+        this.activeLabels.filter(v => this.labelsAll.includes(v)),
+        this.labelsAll,
+      );
 
       // stroke-width i stroke-color są we wszystkich typach
       this.strokeColor = `rgba(${this.styles[lid]['stroke-color']})`;
@@ -508,6 +555,43 @@ export default {
         body: {
           categories: this.categories,
           attribute: this.categorizedAttr,
+          renderer: this.symbolizationType,
+        },
+      });
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('default.styleSaved'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async saveLabels() {
+      let fill;
+      let stroke;
+      if (this.fillColor) {
+        fill = this.formatColor(this.fillColor);
+
+        if (fill.split(',').length === 3) {
+          fill = `${fill},1`;
+        }
+      }
+      if (this.strokeColor) {
+        stroke = this.formatColor(this.strokeColor);
+
+        if (stroke.split(',').length === 3) {
+          stroke = `${stroke},1`;
+        }
+      }
+
+      const labelsToSave = this.labelsAll.filter(el => this.activeLabels.includes(el));
+      const r = await this.$store.dispatch('saveStyle', {
+        lid: this.currentEditedLayer.id,
+        body: {
+          type: this.layerType,
+          'fill-color': fill,
+          'stroke-color': stroke,
+          'stroke-width': this.strokeWidth,
+          labels: labelsToSave,
+          width: this.width,
           renderer: this.symbolizationType,
         },
       });
@@ -618,6 +702,7 @@ export default {
 
     const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
     this.currentLayerSettings = r.body.settings;
+    this.labelsAll = Object.keys(r.body.settings.columns).filter(el => el !== 'id');
 
     this.loadStyle();
     this.isMounted = true;
@@ -637,6 +722,9 @@ export default {
   }
   .disabled {
     cursor: not-allowed !important;
+  }
+  .mb-10 {
+    margin-bottom: 10px;
   }
   .ml-10 {
     margin-left: 10px;
