@@ -433,6 +433,37 @@ class TestLayersSettings(BaseTest):
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
+    
+    def test_settings_change_name_styles_bug_2(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_points.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct_points.geojson'),
+            'name': 'test1'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid2 = r.json['layers']['id']
+        new_column = {
+            "layer_name": "x"
+        }
+        r = client.post(
+            f'/api/layers/{lid}/settings?token={token}', data=json.dumps(new_column))
+        """
+        Bug description:
+        401 - TypeError: 'NoneType' object is not subscriptable
+        """
+        r = client.get(f'/api/layers/{lid2}/style?token={token}')
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['style']['renderer'] == 'single'
+        assert r.json['style']['type'] == 'point'
+        assert r.json['style']['fill-color'] == '255,255,255,0.4'
+        assert r.json['style']['stroke-color'] == '51,153,204,1'
+        assert r.json['style']['stroke-width'] == '1'
+        assert r.json['style']['width'] == '2'
+
 
 
 @pytest.mark.styles
@@ -450,6 +481,7 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
+        assert r.json['style']['labels'] == []
         # Point single style
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_points.geojson')
         file_request = {
@@ -468,6 +500,7 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '1'
         assert r.json['style']['width'] == '2'
+        assert r.json['style']['labels'] == []
         # Line single style
         path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_lines.geojson')
         file_request = {
@@ -484,6 +517,7 @@ class TestLayersStyles(BaseTest):
         assert r.json['style']['type'] == 'line'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
+        assert r.json['style']['labels'] == []
 
     def test_styles_put_correct_single_point(self, client):
         # Single Point
@@ -497,6 +531,7 @@ class TestLayersStyles(BaseTest):
                         follow_redirects=True, content_type='multipart/form-data')
         lid = r.json['layers']['id']
         default_style = {
+            'labels': [],
             'renderer': 'single',
             'type': 'point',
             'fill-color': '0,0,0,1',
@@ -538,6 +573,7 @@ class TestLayersStyles(BaseTest):
                         follow_redirects=True, content_type='multipart/form-data')
         lid = r.json['layers']['id']
         default_style = {
+            'labels': [],
             'renderer': 'single',
             'type': 'line',
             'stroke-color': '0,0,0,1',
@@ -577,6 +613,7 @@ class TestLayersStyles(BaseTest):
                         follow_redirects=True, content_type='multipart/form-data')
         lid = r.json['layers']['id']
         default_style = {
+            'labels': [],
             'renderer': 'single',
             'type': 'polygon',
             'fill-color': '0,0,0,1',
@@ -608,6 +645,7 @@ class TestLayersStyles(BaseTest):
         r = client.get(f'/api/layers/{lid}/categories/{attr}?token={token}')
         categories = r.json['categories']
         categorized_style = {
+            'labels': [],
             'renderer': 'categorized',
             'attribute': attr,
             'categories': categories
@@ -645,6 +683,7 @@ class TestLayersStyles(BaseTest):
         r = client.get(f'/api/layers/{lid}/categories/{attr}?token={token}')
         categories = r.json['categories']
         categorized_style = {
+            'labels': [],
             'renderer': 'categorized',
             'attribute': attr,
             'categories': categories
@@ -660,6 +699,46 @@ class TestLayersStyles(BaseTest):
         assert len(r.json['style']['categories']) == 14
         # Random color
         assert r.json['style']['categories'][0]['stroke-color'] != r.json['style']['categories'][1]['stroke-color']
+    
+    def test_styles_put_labels(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        # Empty labels
+        default_style = {
+            'labels': [],
+            'renderer': 'single',
+            'type': 'polygon',
+            'fill-color': '0,0,0,1',
+            'stroke-color': '0,0,0,1',
+            'stroke-width': '5'
+        }
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        assert r.json['style']['labels'] == []
+        # Correct labels
+        default_style['labels'] = ['JPT_SJR_KO', 'Shape_Leng']
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 200
+        assert r.json['style']['labels'] == default_style['labels']
+        # Invalid labels
+        default_style['labels'] = ['test', 'Shape_Leng']
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 400
+        assert r.json['error'] == 'invalid labels - column test not exists'
+        # Invalid labels type
+        default_style['labels'] = 'test'
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 400
+        assert r.json['error'] == 'invalid labels type'
+        default_style['labels'] = 1
+        r = client.put(f'/api/layers/{lid}/style?token={token}',
+                       data=json.dumps(default_style))
+        assert r.status_code == 400
+        assert r.json['error'] == 'invalid labels type'
 
 
 @pytest.mark.export

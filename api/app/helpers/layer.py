@@ -25,7 +25,7 @@ TYPES = {
     'character varying': str,
     'real': (int, float),
     'integer': int,
-    'timestamp without time zone': datetime
+    'timestamp without time zone': (int, float)
 }
 
 
@@ -80,7 +80,7 @@ class Layer(Cloud):
 
     def set_style(self, data):
         # TODO: self.syncQML()
-        style = LayerStyle(data, self.geom_type()).style
+        style = LayerStyle(data, self.geom_type(), self.columns()).style
         self.execute("""
             UPDATE layer_styles SET stylejson=%s WHERE f_table_name = %s
         """, (json.dumps(style), self.name,))
@@ -105,8 +105,8 @@ class Layer(Cloud):
         self.execute(
             SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
         self.execute("""
-            UPDATE layer_styles SET f_table_name = %s
-        """, (self.name,))
+            UPDATE layer_styles SET f_table_name = %s WHERE f_table_name = %s
+        """, (self.name, old_name,))
         self.lid = self.hash_name(self.name)
         callback(old_lid, self.lid)
 
@@ -240,15 +240,11 @@ class Layer(Cloud):
         for i in range(1, len(columns)):
             if isinstance(values[i], type(None)):
                 continue
-            elif TYPES[columns_with_types[columns[i]]] == datetime:
-                try:
-                    dt = parse(values[i])
-                except dateutil.parser._parser.ParserError:
-                    error = f"value '{values[i]}' invalid type of column '{columns[i]}' ({columns_with_types[columns[i]]})"
-                    break
             elif not isinstance(values[i], TYPES[columns_with_types[columns[i]]]):
                 error = f"value '{values[i]}' invalid type of column '{columns[i]}' ({columns_with_types[columns[i]]})"
                 break
+            elif columns_with_types[columns[i]] == 'timestamp without time zone':
+                values[i] = datetime.fromtimestamp(values[i])
         if error:
             raise ValueError(error)
         query_string = SQL("UPDATE {} SET {} WHERE id=%s").format(

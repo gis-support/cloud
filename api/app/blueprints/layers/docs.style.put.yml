@@ -17,6 +17,11 @@ parameters:
     schema:
       type: object
       properties:
+        labels:
+          type: array
+          items:
+            type: string
+            description: Column name
         fill-color:
           type: string
           required: false
