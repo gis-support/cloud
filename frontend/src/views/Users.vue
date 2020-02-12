@@ -8,8 +8,8 @@
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main pt-10" style="display: flex;">
-        <input type="text" class="form-control container__input mr-5" v-model="email"
-          :placeholder="$i18n.t('default.email')">
+        <input type="text" class="form-control container__input mr-5" v-model="username"
+          :placeholder="$i18n.t('default.username')">
         <input type="password" class="form-control container__input mr-5" v-model="password"
           :placeholder="$i18n.t('default.password')">
         <select class="form-control mr-5"
@@ -26,7 +26,7 @@
         <button type="button"
           class="btn btn-success"
           @click="addNewUser"
-          :disabled="!email || !password"
+          :disabled="!username || !password"
         >
           {{$i18n.t('default.add')}}
         </button>
@@ -219,7 +219,7 @@
 export default {
   data: () => ({
     currentPermissions: {},
-    email: undefined,
+    username: undefined,
     groups: [],
     groupToAssign: undefined,
     mapPermissionColors: {
@@ -258,7 +258,7 @@ export default {
       }
     },
     async addNewUser() {
-      const payload = { user: this.email, password: this.password, group: this.newUserGroup };
+      const payload = { user: this.username, password: this.password, group: this.newUserGroup };
       if (!this.newUserGroup) {
         delete payload.group;
       }
@@ -267,7 +267,7 @@ export default {
         this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
         this.getPermissions(); // update permissions table
         this.getUsers();
-        this.email = undefined;
+        this.username = undefined;
         this.password = undefined;
         this.newUserGroup = undefined;
       } else if (r.status === 409) {
