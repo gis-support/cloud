@@ -172,6 +172,9 @@ export default {
     permission: {
       type: String,
     },
+    usersGroup: {
+      type: String,
+    },
   },
   data: () => ({
     attachmentLink: undefined,
@@ -179,7 +182,7 @@ export default {
     attachmentName: undefined,
     isAttachmentAdding: false,
     isAttachmentPublic: '',
-    usersGroup: undefined,
+    // usersGroup: undefined,
   }),
   computed: {
     defaultGroup() {
@@ -223,11 +226,6 @@ export default {
     async getUsers() {
       if (Object.keys(this.usersWithGroups).length > 0) {
         this.usersGroup = this.usersWithGroups[this.user];
-      } else {
-        const r = await this.$store.dispatch('getUsers');
-        if (r.status === 200) {
-          this.usersGroup = r.obj.users[this.user];
-        }
       }
     },
     deleteLink(item) {

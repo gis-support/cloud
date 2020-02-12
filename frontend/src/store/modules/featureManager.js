@@ -22,6 +22,7 @@ export default {
     activeLayer: undefined,
     currentFeaturesTypes: undefined,
     featureAttachments: {},
+    layerName: undefined,
     mapCenter: {
       lat: 51.919438,
       lon: 19.145136,
@@ -159,6 +160,9 @@ export default {
     getFeatureAttachments(state) {
       return state.featureAttachments;
     },
+    getLayerName(state) {
+      return state.layerName || localStorage.getItem('layerName');
+    },
     getMapCenter(state) {
       return state.mapCenter;
     },
@@ -170,6 +174,9 @@ export default {
     addAttachmentToFeature(state, params) {
       const groups = Object.keys(params.attachments);
       groups.forEach((el) => {
+        if (!Object.keys(state.featureAttachments).includes(params.lid)) {
+          Vue.set(state, 'featureAttachments', params.lid);
+        }
         const ids = state.featureAttachments[params.lid][params.fid][el].map(att => att.id);
         const attachArr = [
           ...state.featureAttachments[params.lid][params.fid][el],
@@ -199,6 +206,10 @@ export default {
     },
     setCurrentFeaturesTypes(state, types) {
       state.currentFeaturesTypes = types;
+    },
+    setLayerName(state, name) {
+      state.layerName = name;
+      localStorage.setItem('layerName', name);
     },
   },
 };

@@ -174,12 +174,12 @@
       <div class="right-panel padding-0">
         <div class="col-sm-12">
           <div style="display: inline-block; width: 100%;">
-            <h4 class="col-sm-10 right-panel__title" v-if="$route.params.layerName">
+            <h4 class="col-sm-10 right-panel__title">
               <i class="fa fa-map-o title__icon"></i>
               <span
                 class="mvp-red right-panel__name"
-                :title="$route.params.layerName"
-              >{{$route.params.layerName | maxLength}}</span>
+                :title="layerName"
+              >{{layerName ? layerName : '' | maxLength}}</span>
             </h4>
             <div class="col-sm-2" style="margin-top: 6px;" v-if="permission === 'write'">
               <div class="btn-group btn-group-sm" role="group"
@@ -312,16 +312,14 @@
                 </div>
               </div>
               <div v-show="indexActiveTab == 2">
-                <!-- <CommentsPanel
-                  ref="comments-panel"
-                  @changeDialogVisibility="changeDialogVisibility"
-                  :selected-id="$route.params.layerId" /> -->
                 <AttachmentsPanel
                   ref="attachments-panel"
                   v-if="currentFeature && Object.keys(featureAttachments).length > 0"
                   :lid="$route.params.layerId"
                   :fid="currentFeature.properties.id"
-                  :permission="permission" />
+                  :permission="permission"
+                  :usersGroup="usersGroup"
+                />
               </div>
             </div>
           </div>
@@ -360,7 +358,6 @@ import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
-// import CommentsPanel from '@/components/CommentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import '@/assets/css/feature-manager.css';
 
@@ -369,7 +366,6 @@ export default {
   components: {
     AttachmentsPanel,
     AttributesPanel,
-    // CommentsPanel,
     FeatureManagerTable,
     FiltersPanel,
   },
@@ -400,6 +396,7 @@ export default {
     searchItemValue: '',
     selectedColumnFilters: [],
     selectedRows: [],
+    usersGroup: undefined,
   }),
   computed: {
     activeLayer() {
@@ -413,6 +410,9 @@ export default {
     },
     featureTypes() {
       return this.$store.getters.getCurrentFeaturesTypes;
+    },
+    layerName() {
+      return this.$store.getters.getLayerName;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
@@ -506,6 +506,13 @@ export default {
     async getSettings() {
       const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
+    },
+    async getUsers() {
+      const r = await this.$store.dispatch('getUsers');
+      if (r.status === 200) {
+        this.usersGroup = r.obj.users[this.user];
+        this.$store.commit('setUsersWithGroups', r.obj.users);
+      }
     },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
@@ -855,7 +862,7 @@ export default {
           text: labelsToShow.join(' '),
           fill: new Fill({ color: 'white' }),
           stroke: new Stroke({ color: 'black', width: 4 }),
-          offsetX: -20,
+          offsetY: -10,
         }),
       });
       if (this.layerType) {
@@ -960,6 +967,7 @@ export default {
 
     this.initOrtofoto();
     this.getPermissions();
+    await this.getUsers();
     await this.getSettings();
 
     this.createSelectInteraction();
@@ -969,7 +977,6 @@ export default {
     this.map.addLayer(
       new VectorTileLayer({
         name: 'features',
-        preload: 0,
         renderBuffer: 256,
         source: new VectorTileSource({
           cacheSize: 1,
