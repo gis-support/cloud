@@ -248,7 +248,7 @@ export default {
     async addGroup() {
       const r = await this.$store.dispatch('addGroup', { group: this.newGroupName });
       if (r.status === 201) {
-        this.$alertify.success(this.$i18n.t('default.success'));
+        this.$alertify.success(this.$i18n.t('default.newGroupAdded'));
         this.groups.push(this.newGroupName);
         this.newGroupName = '';
       } else if (r.status === 400) {
