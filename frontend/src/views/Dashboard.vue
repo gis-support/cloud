@@ -3,35 +3,64 @@
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
-          <i class="fa fa-database"></i>
-          <span data-i18n="dashboard.title"> {{$i18n.t('dashboard.title.vectorLayersList')}}</span>
+          <i class="fa fa-database" />
+          <span data-i18n="dashboard.title"> {{ $i18n.t('dashboard.title.vectorLayersList') }}</span>
         </div>
         <div class="p-0">
-          <input type="text" class="form-control container__input" v-model="searchVector"
-            :placeholder="$i18n.t('dashboard.placeholder.layersFilter')">
+          <input
+            type="text"
+            class="form-control container__input"
+            v-model="searchVector"
+            :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
+          >
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main">
-        <span data-toggle="modal" data-target="#addLayerModal" data-type="vectorLayer">
-          <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
-          <a class="green section__content--add">{{$i18n.t('dashboard.list.addLayer')}}</a>
+        <span
+          data-toggle="modal"
+          data-target="#addLayerModal"
+          data-type="vectorLayer"
+        >
+          <i
+            class="fa fa-plus-circle fa-lg green pt-10"
+            style="margin-right:5px;"
+          />
+          <a class="green section__content--add">{{ $i18n.t('dashboard.list.addLayer') }}</a>
         </span>
 
-        <div class="loading-overlay pt-10 pb-10" v-if="!vectorLayersList">
-          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
-          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        <div
+          class="loading-overlay pt-10 pb-10"
+          v-if="!vectorLayersList"
+        >
+          <div class="loading-indicator mb-10">
+            <h4>{{ $i18n.t('default.loading') }}</h4>
+            <i class="fa fa-lg fa-spin fa-spinner" />
+          </div>
         </div>
 
-        <div v-if="filteredListVector.length == 0" class="pt-10 pb-10">
-          {{$i18n.t('default.noLayers')}}
+        <div
+          v-if="filteredListVector.length == 0"
+          class="pt-10 pb-10"
+        >
+          {{ $i18n.t('default.noLayers') }}
         </div>
-        <template v-else v-for="(val, key) in filteredListVector">
-          <div class="mb-0" :key="key">
+        <template
+          v-else
+          v-for="(val, key) in filteredListVector"
+        >
+          <div
+            class="mb-0"
+            :key="key"
+          >
             <div class="panel-heading pl-0 pr-0">
               <h4 class="panel-title flex-center">
                 <span class="panel-title__names">
-                  <i class="icon-li fa fa-map-o fa-lg mr-5"></i>
-                  <span class="bold" href="#" @click="goToManager(val)">
+                  <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                  <span
+                    class="bold"
+                    href="#"
+                    @click="goToManager(val)"
+                  >
                     {{ val.name }}
                   </span>
                   <span class="desc-sm">
@@ -39,13 +68,21 @@
                   </span>
                 </span>
                 <span class="panel-title__tools">
-                  <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="modal"
-                  data-target="#layerSettingsModal" data-placement="top"
-                  :title="$i18n.t('default.settings')"
-                  @click="setEditedLayer('vector', val.id)"></i>
-                  <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" :title="$i18n.t('default.delete')"
-                    @click="deleteLayer(val)"></i>
+                  <i
+                    class="fa fa-cog fa-lg yellow icon-hover"
+                    data-toggle="modal"
+                    data-target="#layerSettingsModal"
+                    data-placement="top"
+                    :title="$i18n.t('default.settings')"
+                    @click="setEditedLayer('vector', val.id)"
+                  />
+                  <i
+                    class="fa fa-trash fa-lg red icon-hover"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    :title="$i18n.t('default.delete')"
+                    @click="deleteLayer(val)"
+                  />
                 </span>
               </h4>
             </div>
@@ -57,55 +94,93 @@
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
-          <i class="fa fa-database"></i>
+          <i class="fa fa-database" />
           <span data-i18n="dashboard.title">
-            {{$i18n.t('dashboard.title.externalSourcesList')}}
+            {{ $i18n.t('dashboard.title.externalSourcesList') }}
           </span>
         </div>
         <div class="p-0">
-          <input type="text" class="form-control container__input" v-model="searchExtSources"
-            :placeholder="$i18n.t('dashboard.placeholder.externalSourcesFilter')">
+          <input
+            type="text"
+            class="form-control container__input"
+            v-model="searchExtSources"
+            :placeholder="$i18n.t('dashboard.placeholder.externalSourcesFilter')"
+          >
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main">
-        <span data-toggle="modal" data-target="#addLayerWmsModal" data-type="externalLayer">
-          <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;"></i>
-          <a class="green section__content--add">{{$i18n.t('dashboard.list.addService')}}</a>
+        <span
+          data-toggle="modal"
+          data-target="#addLayerWmsModal"
+          data-type="externalLayer"
+        >
+          <i
+            class="fa fa-plus-circle fa-lg green pt-10"
+            style="margin-right:5px;"
+          />
+          <a class="green section__content--add">{{ $i18n.t('dashboard.list.addService') }}</a>
         </span>
 
-        <div class="loading-overlay pt-10 pb-10" v-if="!servicesList">
-          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
-          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        <div
+          class="loading-overlay pt-10 pb-10"
+          v-if="!servicesList"
+        >
+          <div class="loading-indicator mb-10">
+            <h4>{{ $i18n.t('default.loading') }}</h4>
+            <i class="fa fa-lg fa-spin fa-spinner" />
+          </div>
         </div>
 
-        <div v-if="filteredServicesList.length == 0" class="pt-10 pb-10">
-          {{$i18n.t('default.noLayers')}}
+        <div
+          v-if="filteredServicesList.length == 0"
+          class="pt-10 pb-10"
+        >
+          {{ $i18n.t('default.noLayers') }}
         </div>
-        <template v-else v-for="(val, key) in filteredServicesList">
-          <div class="mb-0" :key="key">
+        <template
+          v-else
+          v-for="(val, key) in filteredServicesList"
+        >
+          <div
+            class="mb-0"
+            :key="key"
+          >
             <div class="panel-heading pl-0 pr-0">
               <h4 class="panel-title flex-center">
                 <span class="panel-title__names">
-                  <i class="icon-li fa fa-map-o fa-lg mr-5"></i>
+                  <i class="icon-li fa fa-map-o fa-lg mr-5" />
                   <span class="bold panel-title__wms">
                     {{ val.name }}
                   </span>
-                  <span class="desc-sm" :title="val.url">
+                  <span
+                    class="desc-sm"
+                    :title="val.url"
+                  >
                     <strong>URL</strong>: {{ val.url | maxLength }}
                   </span>
-                  <span class="desc-sm" :title="val.group">
-                    <strong>{{$i18n.t('default.group')}}</strong>: {{ val.group }}
+                  <span
+                    class="desc-sm"
+                    :title="val.group"
+                  >
+                    <strong>{{ $i18n.t('default.group') }}</strong>: {{ val.group }}
                   </span>
-                  <span class="desc-sm" :title="val.layers">
-                    <strong>{{$i18n.t('default.layers')}}</strong>: {{ val.layers | maxLength }}
+                  <span
+                    class="desc-sm"
+                    :title="val.layers"
+                  >
+                    <strong>{{ $i18n.t('default.layers') }}</strong>: {{ val.layers | maxLength }}
                   </span>
                 </span>
                 <span class="panel-title__tools">
                   <!-- <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
                     data-placement="top" :title="$i18n.t('default.settings')"></i> -->
-                  <i class="fa fa-trash fa-lg red icon-hover" data-toggle="tooltip"
-                    data-placement="top" :title="$i18n.t('default.delete')"
-                    @click="deleteService(val.id)"></i>
+                  <i
+                    class="fa fa-trash fa-lg red icon-hover"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    :title="$i18n.t('default.delete')"
+                    @click="deleteService(val.id)"
+                  />
                 </span>
               </h4>
             </div>
@@ -115,23 +190,42 @@
     </div>
 
     <!--MODAL DODAWANIA WARSTW-->
-    <div class="modal fade" data-backdrop="static" id="addLayerModal" tabindex="-1" role="dialog"
-      aria-hidden="true" ref="addLayerModal">
-      <div class="modal-dialog modal-dialog-centered" role="document">
+    <div
+      class="modal fade"
+      data-backdrop="static"
+      id="addLayerModal"
+      tabindex="-1"
+      role="dialog"
+      aria-hidden="true"
+      ref="addLayerModal"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered"
+        role="document"
+      >
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">{{$i18n.t('dashboard.modal.addLayer')}}</h4>
+            <h4 class="modal-title">
+              {{ $i18n.t('dashboard.modal.addLayer') }}
+            </h4>
           </div>
           <div class="modal-body">
             <div style="display: flex">
               <label class="control-label col-sm-4 pl-0">
-                {{$i18n.t('dashboard.modal.layerName')}}
+                {{ $i18n.t('dashboard.modal.layerName') }}
               </label>
-              <input type="text" class="form-control" v-model="vectorLayerName">
+              <input
+                type="text"
+                class="form-control"
+                v-model="vectorLayerName"
+              >
             </div>
-            <div style="display: flex" class="pt-10">
+            <div
+              style="display: flex"
+              class="pt-10"
+            >
               <label class="control-label col-sm-4 pl-0">
-                {{$i18n.t('dashboard.modal.epsg')}}
+                {{ $i18n.t('dashboard.modal.epsg') }}
               </label>
               <input
                 class="form-control"
@@ -153,14 +247,22 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal"
-              @click="clearUploadFiles" ref="closeModalBtn">
-              {{$i18n.t('default.cancel')}}
+            <button
+              type="button"
+              class="btn btn-default"
+              data-dismiss="modal"
+              @click="clearUploadFiles"
+              ref="closeModalBtn"
+            >
+              {{ $i18n.t('default.cancel') }}
             </button>
-            <button type="button" class="btn btn-success" @click="sendVectorLayer"
+            <button
+              type="button"
+              class="btn btn-success"
+              @click="sendVectorLayer"
               :disabled="!vectorLayerName"
             >
-              {{$i18n.t('default.save')}}
+              {{ $i18n.t('default.save') }}
             </button>
           </div>
         </div>
@@ -169,71 +271,126 @@
     <!--KONIEC MODALA-->
 
     <!--MODAL DODAWANIA USŁUG-->
-    <div class="modal fade" data-backdrop="static" id="addLayerWmsModal" tabindex="-2" role="dialog"
-      aria-hidden="true" ref="addLayerWmsModal">
-      <div class="modal-dialog modal-dialog-centered" role="document">
+    <div
+      class="modal fade"
+      data-backdrop="static"
+      id="addLayerWmsModal"
+      tabindex="-2"
+      role="dialog"
+      aria-hidden="true"
+      ref="addLayerWmsModal"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered"
+        role="document"
+      >
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">{{$i18n.t('dashboard.modal.addLayerWms')}}</h4>
+            <h4 class="modal-title">
+              {{ $i18n.t('dashboard.modal.addLayerWms') }}
+            </h4>
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label class="control-label col-sm-4" style="width: 150px">
-                {{$i18n.t('dashboard.modal.serviceName')}}
+              <label
+                class="control-label col-sm-4"
+                style="width: 150px"
+              >
+                {{ $i18n.t('dashboard.modal.serviceName') }}
               </label>
-              <input type="text" class="form-control" v-model="serviceName">
+              <input
+                type="text"
+                class="form-control"
+                v-model="serviceName"
+              >
             </div>
-            <div class="pt-10" style="display: flex;">
-              <label class="control-label col-sm-4" style="width: 160px">
-                {{$i18n.t('dashboard.modal.layerAddress')}}
+            <div
+              class="pt-10"
+              style="display: flex;"
+            >
+              <label
+                class="control-label col-sm-4"
+                style="width: 160px"
+              >
+                {{ $i18n.t('dashboard.modal.layerAddress') }}
               </label>
-              <input type="text" class="form-control" v-model="serviceUrl">
+              <input
+                type="text"
+                class="form-control"
+                v-model="serviceUrl"
+              >
               <i
                 class="fa fa-cloud-download fetch-wms-icon"
                 :class="{disabled: serviceUrl.length < 1}"
                 :title="$i18n.t('default.downloadAvailableLayers')"
                 aria-hidden="true"
-                @click="fetchWms">
-              </i>
+                @click="fetchWms"
+              />
             </div>
-            <div class="pt-10" v-if="fetchedLayers.length > 0">
+            <div
+              class="pt-10"
+              v-if="fetchedLayers.length > 0"
+            >
               <ul class="select-layer-list">
-                <li v-for="layer in fetchedLayers" :key="layer">
+                <li
+                  v-for="layer in fetchedLayers"
+                  :key="layer"
+                >
                   <label class="checkbox-inline">
-                    <input type="checkbox" id="checkbox" :value="layer" v-model="selectedLayers">
+                    <input
+                      type="checkbox"
+                      id="checkbox"
+                      :value="layer"
+                      v-model="selectedLayers"
+                    >
                   </label>
                 </li>
               </ul>
             </div>
-            <div class="loading-overlay pt-10 pb-10" style="text-align: center;"
-              v-if="fetchedLayers.length === 0 && isFetching">
-              <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
-              <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+            <div
+              class="loading-overlay pt-10 pb-10"
+              style="text-align: center;"
+              v-if="fetchedLayers.length === 0 && isFetching"
+            >
+              <div class="loading-indicator mb-10">
+                <h4>{{ $i18n.t('default.loading') }}</h4>
+                <i class="fa fa-lg fa-spin fa-spinner" />
+              </div>
             </div>
-            <hr/>
-            <div class="pt-10" v-if="fetchedLayers.length > 0">
+            <hr>
+            <div
+              class="pt-10"
+              v-if="fetchedLayers.length > 0"
+            >
               <label class="checkbox-inline">
-                <input type="checkbox" id="checkbox" v-model="isServicePublic">
-                {{$i18n.t('dashboard.modal.servicePublic')}}
+                <input
+                  type="checkbox"
+                  id="checkbox"
+                  v-model="isServicePublic"
+                >
+                {{ $i18n.t('dashboard.modal.servicePublic') }}
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default"
+            <button
+              type="button"
+              class="btn btn-default"
               data-dismiss="modal"
               ref="closeModalWmsBtn"
               @click="clearServicesModal"
             >
-              {{$i18n.t('default.cancel')}}
+              {{ $i18n.t('default.cancel') }}
             </button>
-            <button type="button"
+            <button
+              type="button"
               class="btn btn-success"
               :disabled="selectedLayers.length === 0 ||
                 serviceName.length === 0 ||
                 selectedLayers.length === 0"
               @click="addService"
             >
-              {{$i18n.t('default.save')}}
+              {{ $i18n.t('default.save') }}
             </button>
           </div>
         </div>
@@ -249,7 +406,7 @@ import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
 export default {
-  name: 'dashboard',
+  name: 'Dashboard',
   data: vm => ({
     currentEditedLayer: undefined,
     epsg: undefined,

@@ -1,29 +1,52 @@
 <template>
-  <div class="content content-login" v-on:keyup.enter="loginRequest">
-      <div class="container">
-        <div class="account-wrapper">
-          <div class="account-body">
-            <h3 class="text-center">{{$i18n.t('login.loginTitle')}}</h3>
-              <div class="form-group">
-                <input type="text" name="email" class="form-control" id="login-username"
-                :placeholder="$i18n.t('default.email')" tabindex="1" v-model="email"
-                ref="login-username">
-              </div>
-              <div class="form-group">
-                <input type="password" name="password" class="form-control"
-                id="login-password" :placeholder="$i18n.t('default.password')"
-                tabindex="2" v-model="password">
-              </div>
-              <div class="form-group">
-                <button type="submit" id="loginButton" class="btn btn-primary btn-block btn-lg"
-                tabindex="4" @click="loginRequest">
-                  <span>{{$i18n.t('login.logIn')}}</span>
-                </button>
-              </div>
+  <div
+    class="content content-login"
+    @keyup.enter="loginRequest"
+  >
+    <div class="container">
+      <div class="account-wrapper">
+        <div class="account-body">
+          <h3 class="text-center">
+            {{ $i18n.t('login.loginTitle') }}
+          </h3>
+          <div class="form-group">
+            <input
+              type="text"
+              name="email"
+              class="form-control"
+              id="login-username"
+              :placeholder="$i18n.t('default.email')"
+              tabindex="1"
+              v-model="email"
+              ref="login-username"
+            >
+          </div>
+          <div class="form-group">
+            <input
+              type="password"
+              name="password"
+              class="form-control"
+              id="login-password"
+              :placeholder="$i18n.t('default.password')"
+              tabindex="2"
+              v-model="password"
+            >
+          </div>
+          <div class="form-group">
+            <button
+              type="submit"
+              id="loginButton"
+              class="btn btn-primary btn-block btn-lg"
+              tabindex="4"
+              @click="loginRequest"
+            >
+              <span>{{ $i18n.t('login.logIn') }}</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>

@@ -1,13 +1,20 @@
 <template>
   <div class="table-content">
     <div>
-
-
-      <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-if="items.length < 1">
-        <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
-        <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+      <div
+        class="loading-overlay pt-10 pb-10"
+        style="text-align: center;"
+        v-if="items.length < 1"
+      >
+        <div class="loading-indicator mb-10">
+          <h4>{{ $i18n.t('default.loading') }}</h4>
+          <i class="fa fa-lg fa-spin fa-spinner" />
+        </div>
       </div>
-      <div class="vscroll" v-else>
+      <div
+        class="vscroll"
+        v-else
+      >
         <div class="table-data table-responsive">
           <table class="table table-bordered table-hover table-striped">
             <thead>
@@ -28,17 +35,17 @@
                         v-show="!editing && isFiltredColumn(column)"
                         :title="$i18n.t('default.isFiltered')"
                         :class="{
-                        'filter' : column.filter,
-                        'filtered' : isFiltredColumn(column),
+                          'filter' : column.filter,
+                          'filtered' : isFiltredColumn(column),
                         }"
                       />
                       <span
                         v-show="!editing"
                         :class="{
-                        'sorting' : column.sortable &&
-                          (!sortedColumn || sortedColumn != column.key),
-                        'sorting_asc' : sortedColumn == column.key && sortedColumnType == 'asc',
-                        'sorting_desc' : sortedColumn == column.key && sortedColumnType == 'desc',
+                          'sorting' : column.sortable &&
+                            (!sortedColumn || sortedColumn != column.key),
+                          'sorting_asc' : sortedColumn == column.key && sortedColumnType == 'asc',
+                          'sorting_desc' : sortedColumn == column.key && sortedColumnType == 'desc',
                         }"
                         @click.capture="column.sortable ? sort($event, column.key) : false"
                       />
@@ -76,11 +83,15 @@
             </tbody>
           </table>
         </div>
-        <div class="table-scroll-bar" :style="{top: `${itemHeight}px`}"
-          v-show="filteredItems.length > windowItems.length">
-          <div :style="{height : `${filteredItems.length * (itemHeight)}px`}" style="width: 1px;">
-
-          </div>
+        <div
+          class="table-scroll-bar"
+          :style="{top: `${itemHeight}px`}"
+          v-show="filteredItems.length > windowItems.length"
+        >
+          <div
+            :style="{height : `${filteredItems.length * (itemHeight)}px`}"
+            style="width: 1px;"
+          />
         </div>
       </div>
     </div>
@@ -97,30 +108,32 @@ export default {
   props: {
     items: {
       type: Array,
-      required: true,
+      required: true
     },
     columns: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     search: {
       type: String,
-      default: '',
+      default: ''
     },
     columnFilters: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     editing: {
       type: Boolean,
-      default: true,
+      default: true
     },
     layId: {
       type: String,
+      default: ''
     },
     rowsToDownload: {
       type: Array,
-    },
+      default: () => []
+    }
   },
   data() {
     return {
@@ -133,7 +146,7 @@ export default {
       rowsToDownloadCopy: this.rowsToDownload,
       selectedIndex: -1,
       sortedColumn: false,
-      sortedColumnType: 'asc',
+      sortedColumnType: 'asc'
     };
   },
   computed: {
@@ -163,14 +176,16 @@ export default {
 
       return _.orderBy(
         self.filteredItems,
-        [(item) => {
-          if (typeof (item[self.sortedColumn]) === 'string') {
-            const value = _.deburr(item[self.sortedColumn]);
-            return value ? value.toLowerCase() : '';
+        [
+          item => {
+            if (typeof item[self.sortedColumn] === 'string') {
+              const value = _.deburr(item[self.sortedColumn]);
+              return value ? value.toLowerCase() : '';
+            }
+            return item[self.sortedColumn];
           }
-          return item[self.sortedColumn];
-        }],
-        [self.sortedColumnType],
+        ],
+        [self.sortedColumnType]
       );
     },
     windowItems() {
@@ -178,7 +193,11 @@ export default {
       if (self.maxItems === 0) {
         return [];
       }
-      return _.slice(self.sortedItems, self.indexFirstItem, self.indexFirstItem + self.maxItems);
+      return _.slice(
+        self.sortedItems,
+        self.indexFirstItem,
+        self.indexFirstItem + self.maxItems
+      );
     },
 
     filteredColumns() {
@@ -188,16 +207,21 @@ export default {
         return {};
       }
 
-      return _(self.columnFilters).map(filter => filter.column).uniq().keyBy()
+      return _(self.columnFilters)
+        .map(filter => filter.column)
+        .uniq()
+        .keyBy()
         .mapValues(() => true)
         .value();
     },
     selectedItem() {
-      return this.selectedIndex === -1 ? null : this.sortedItems[this.selectedIndex];
+      return this.selectedIndex === -1
+        ? null
+        : this.sortedItems[this.selectedIndex];
     },
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
-    },
+    }
   },
   watch: {
     searchedItems() {
@@ -228,7 +252,7 @@ export default {
       // this._computedWatchers.filteredColumns.update();
       // this._computedWatchers.filteredItems.update();
       this.$recompute('filteredItems');
-    },
+    }
   },
   methods: {
     async getAttachments(fid) {
@@ -236,17 +260,27 @@ export default {
       const r = await this.$store.dispatch('getFeatureAttachments', payload);
       const groups = Object.keys(r.body.attachments);
       if (r.status === 200) {
-        if (this.featureAttachments[this.layId]
-        && !Object.keys(this.featureAttachments[this.layId]).includes(fid.toString())) {
-          this.$store.commit('setAttachmentsFeature', { lid: this.layId, fid, groups });
+        if (
+          this.featureAttachments[this.layId] &&
+          !Object.keys(this.featureAttachments[this.layId]).includes(
+            fid.toString()
+          )
+        ) {
+          this.$store.commit('setAttachmentsFeature', {
+            lid: this.layId,
+            fid,
+            groups
+          });
         }
         this.$store.commit('addAttachmentToFeature', {
           lid: this.layId,
           fid,
-          attachments: r.obj.attachments,
+          attachments: r.obj.attachments
         });
       } else {
-        this.$alertify.error(this.$i18n.t('featureManager.errorAttachmentsFetch'));
+        this.$alertify.error(
+          this.$i18n.t('featureManager.errorAttachmentsFetch')
+        );
       }
     },
     filtrowanie(items) {
@@ -259,7 +293,7 @@ export default {
 
       const filtersGroup = [];
       let condition = '';
-      _.each(self.columnFilters, (filter) => {
+      _.each(self.columnFilters, filter => {
         if (filtersGroup.length === 0) {
           filtersGroup.push([filter]);
         } else if (condition === 'OR') {
@@ -271,12 +305,13 @@ export default {
       });
 
       const result = [];
-      _.each(filtersGroup, (filters) => {
+      _.each(filtersGroup, filters => {
         let items2 = items;
-        _.each(filters, (filter) => {
-          items2 = _.filter(
-            items2, item => ValueFilterMap[filter.operation](filter.value)
-              .isFiltered(item[filter.column]),
+        _.each(filters, filter => {
+          items2 = _.filter(items2, item =>
+            ValueFilterMap[filter.operation](filter.value).isFiltered(
+              item[filter.column]
+            )
           );
         });
         result.push(items2);
@@ -314,7 +349,9 @@ export default {
     },
     selectItem(item) {
       if (!item) {
-        this.$alertify.warning('Dany element nie znajduje się w cześci załadowanych danych z serwera');
+        this.$alertify.warning(
+          'Dany element nie znajduje się w cześci załadowanych danych z serwera'
+        );
         return;
       }
       this.selectedIndex = _.findIndex(this.sortedItems, o => o === item);
@@ -326,7 +363,9 @@ export default {
     selectToDownloadCtrl(idx, item) {
       const isFound = this.rowsToDownloadCopy.some(el => el.id === item.id);
       if (isFound) {
-        const delIdx = this.rowsToDownloadCopy.findIndex(el => el.id === item.id);
+        const delIdx = this.rowsToDownloadCopy.findIndex(
+          el => el.id === item.id
+        );
         this.rowsToDownloadCopy.splice(delIdx, 1);
       } else {
         this.rowsToDownloadCopy.push(item);
@@ -337,9 +376,15 @@ export default {
       document.getSelection().removeAllRanges();
       const tableIndex = this.filteredItems.findIndex(el => el.id === item.id);
       if (this.selectedIndex < tableIndex + 1) {
-        this.rowsToDownloadCopy = this.filteredItems.slice(this.selectedIndex, tableIndex + 1);
+        this.rowsToDownloadCopy = this.filteredItems.slice(
+          this.selectedIndex,
+          tableIndex + 1
+        );
       } else {
-        this.rowsToDownloadCopy = this.filteredItems.slice(tableIndex, this.selectedIndex + 1);
+        this.rowsToDownloadCopy = this.filteredItems.slice(
+          tableIndex,
+          this.selectedIndex + 1
+        );
       }
       this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
     },
@@ -354,7 +399,8 @@ export default {
       }
 
       let indexScroll = index;
-      const y = self.selectedIndex + self.maxItems - (self.sortedItems.length - 1);
+      const y =
+        self.selectedIndex + self.maxItems - (self.sortedItems.length - 1);
       if (y > 0) {
         indexScroll = index - y;
       }
@@ -362,9 +408,9 @@ export default {
       self.scrollEl.scrollTop = indexScroll * self.itemHeight;
     },
     wyszukaj(items, wartosc) {
-      const filteredItems = _.filter(items, item => _.some(
-        item, value => value && value.toString().indexOf(wartosc) !== -1,
-      ));
+      const filteredItems = _.filter(items, item =>
+        _.some(item, value => value && value.toString().indexOf(wartosc) !== -1)
+      );
       this.$emit('updateSearchCount', filteredItems.length);
       return filteredItems;
     },
@@ -381,14 +427,14 @@ export default {
 
       self.itemHeight = theadTrhEl.offsetHeight - 1;
       self.arenaHeight = tableEl.offsetHeight - self.itemHeight;
-      self.maxItems = Math.floor((self.arenaHeight) / self.itemHeight);
+      self.maxItems = Math.floor(self.arenaHeight / self.itemHeight);
       // self._computedWatchers.windowItems.update();
       this.$recompute('windowItems');
 
       new ResizeObserver(() => {
         self.arenaHeight = tableEl.offsetHeight - self.itemHeight;
 
-        const newMaxItems = Math.floor((self.arenaHeight) / self.itemHeight);
+        const newMaxItems = Math.floor(self.arenaHeight / self.itemHeight);
 
         if (newMaxItems !== self.maxItems) {
           self.maxItems = newMaxItems;
@@ -398,7 +444,9 @@ export default {
       }).observe(tableEl);
 
       function checkScrollPosition() {
-        self.indexFirstItem = Math.floor(self.scrollEl.scrollTop / self.itemHeight + 0.78);
+        self.indexFirstItem = Math.floor(
+          self.scrollEl.scrollTop / self.itemHeight + 0.78
+        );
         // self._computedWatchers.windowItems.update();
         self.$recompute('windowItems');
       }
@@ -406,7 +454,7 @@ export default {
 
       function checkScrollPosition2(e) {
         if (!e.shiftKey) {
-          self.scrollEl.scrollTop -= e.wheelDeltaY || (e.deltaY * -40);
+          self.scrollEl.scrollTop -= e.wheelDeltaY || e.deltaY * -40;
         }
       }
       tableEl.addEventListener('wheel', checkScrollPosition2);
@@ -415,7 +463,8 @@ export default {
     sort($event, kolumn) {
       const self = this;
       if (self.sortedColumn === kolumn) {
-        self.sortedColumnType = self.sortedColumnType === 'asc' ? 'desc' : 'asc';
+        self.sortedColumnType =
+          self.sortedColumnType === 'asc' ? 'desc' : 'asc';
       } else {
         self.sortedColumn = kolumn;
         self.sortedColumnType = 'asc';
@@ -424,7 +473,9 @@ export default {
       this.$recompute('sortedItems');
     },
     isFiltredColumn(column) {
-      return column.key in this.filteredColumns && this.filteredColumns[column.key];
+      return (
+        column.key in this.filteredColumns && this.filteredColumns[column.key]
+      );
     },
 
     updateColumnFilters() {
@@ -432,7 +483,7 @@ export default {
       this.$recompute('filteredColumns');
       // this._computedWatchers.filteredItems.update();
       this.$recompute('filteredItems');
-    },
+    }
   },
   beforeCreate() {},
   created() {
@@ -448,6 +499,6 @@ export default {
   beforeDestroy() {
     this.$root.$off('update-column-filters', this.updateColumnFilters);
   },
-  destroyed() {},
+  destroyed() {}
 };
 </script>

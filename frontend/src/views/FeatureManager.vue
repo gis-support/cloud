@@ -3,54 +3,78 @@
     <div id="root">
       <div class="map-table-content">
         <div class="map-content">
-          <div class="map" ref="map" id="map">
-
-          </div>
+          <div
+            class="map"
+            ref="map"
+            id="map"
+          />
         </div>
         <nav
-        class="navbar navbar-default table-menu"
-        style="margin-bottom: 0px;"
-      >
-        <div class="container-fluid">
-          <p
-            class="navbar-text"
-            v-cloak
-          >{{$i18n.t('featureManager.objectsNumber')}}
-            <span v-text="searchCount"></span>
-          </p>
-          <div class="navbar-form navbar-right">
-            <div class="form-group">
-              <input type="text" class="form-control"
-              placeholder="Wyszukaj"
-              :title="$i18n.t('featureManager.localSearch')"
-              v-model.trim="searchItemValue"/>
+          class="navbar navbar-default table-menu"
+          style="margin-bottom: 0px;"
+        >
+          <div class="container-fluid">
+            <p
+              class="navbar-text"
+              v-cloak
+            >
+              {{ $i18n.t('featureManager.objectsNumber') }}
+              <span v-text="searchCount" />
+            </p>
+            <div class="navbar-form navbar-right">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Wyszukaj"
+                  :title="$i18n.t('featureManager.localSearch')"
+                  v-model.trim="searchItemValue"
+                />
+              </div>
             </div>
-          </div>
-          <button type="button" class="btn navbar-btn navbar-right btn-default"
-            :class="{'btn-danger' : currentColumnFilters.length > 0,
-              'btn-default' : currentColumnFilters.length == 0 }"
-            :title="$i18n.t('featureManager.objectsFilter')"
-            @click="openColumnFilterDecision"><i class="fa fa-filter"></i>
-          </button>
-          <button type="button" class="btn navbar-btn navbar-right btn-default"
-            :title="$i18n.t('featureManager.addFeature')" @click="drawNewFeature"
-            v-if="!isDrawing && permission === 'write'">
-            <i class="fa fa-plus"></i>
-          </button>
-          <span class="navbar-right" v-else>
-            <button type="button" class="btn navbar-btn btn-default" v-if="permission === 'write'"
-              :title="$i18n.t('featureManager.cancelFeatureAdding')" @click="clearFeatureAdding">
-              <i class="fa fa-times-circle"></i>
+            <button
+              type="button"
+              class="btn navbar-btn navbar-right btn-default"
+              :class="{'btn-danger' : currentColumnFilters.length > 0,
+                       'btn-default' : currentColumnFilters.length == 0 }"
+              :title="$i18n.t('featureManager.objectsFilter')"
+              @click="openColumnFilterDecision"
+            >
+              <i class="fa fa-filter" />
             </button>
-          </span>
-          <button type="button" class="btn navbar-btn navbar-right btn-default"
-            v-if="selectedRows.length > 0"
-            @click="downloadLayer(selectedRows)"
-          >
-            <i class="fa fa-download"></i>
-          </button>
-        </div>
-      </nav>
+            <button
+              type="button"
+              class="btn navbar-btn navbar-right btn-default"
+              :title="$i18n.t('featureManager.addFeature')"
+              @click="drawNewFeature"
+              v-if="!isDrawing && permission === 'write'"
+            >
+              <i class="fa fa-plus" />
+            </button>
+            <span
+              class="navbar-right"
+              v-else
+            >
+              <button
+                type="button"
+                class="btn navbar-btn btn-default"
+                v-if="permission === 'write'"
+                :title="$i18n.t('featureManager.cancelFeatureAdding')"
+                @click="clearFeatureAdding"
+              >
+                <i class="fa fa-times-circle" />
+              </button>
+            </span>
+            <button
+              type="button"
+              class="btn navbar-btn navbar-right btn-default"
+              v-if="selectedRows.length > 0"
+              @click="downloadLayer(selectedRows)"
+            >
+              <i class="fa fa-download" />
+            </button>
+          </div>
+        </nav>
         <!-- {{ $route.params.layerId }} -->
         <FeatureManagerTable
           v-if="items.length > 0"
@@ -59,51 +83,76 @@
           :column-filters="currentColumnFilters"
           :editing="false"
           :items="items"
-          :layId="$route.params.layerId"
-          :rowsToDownload="selectedRows"
+          :lay-id="$route.params.layerId"
+          :rows-to-download="selectedRows"
           :search="searchItemValue"
           @selectFeatureById="selectFeatureById"
           @updateSearchCount="updateSearchCount"
           @updateSelectedRows="updateSelectedRows"
         />
-        <div class="loading-overlay pt-10 pb-10" style="text-align: center;" v-else>
-          <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
-          <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+        <div
+          class="loading-overlay pt-10 pb-10"
+          style="text-align: center;"
+          v-else
+        >
+          <div class="loading-indicator mb-10">
+            <h4>{{ $i18n.t('default.loading') }}</h4>
+            <i class="fa fa-lg fa-spin fa-spinner" />
+          </div>
         </div>
 
-        <div class="modal-mask" v-if="columnFilterDecisionDialogView">
+        <div
+          class="modal-mask"
+          v-if="columnFilterDecisionDialogView"
+        >
           <div class="modal-wrapper">
             <div class="modal-dialog modal-md">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{$i18n.t('featureManager.objectsFilter')}}</h4>
+                  <h4 class="modal-title">{{ $i18n.t('featureManager.objectsFilter') }}</h4>
                 </div>
                 <div class="modal-body">
                   <FiltersPanel
                     ref="column-filters"
                     :columns="columns"
-                    v-model="selectedColumnFilters"></FiltersPanel>
+                    v-model="selectedColumnFilters"
+                  />
                 </div>
                 <div class="modal-footer">
-                  <div class="btn-group btn-group-justified" role="group">
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-success"
+                  <div
+                    class="btn-group btn-group-justified"
+                    role="group"
+                  >
+                    <div
+                      class="btn-group"
+                      role="group"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-success"
                         @click="$emit('columnFilterDecision', 'accept')"
-                        :disabled="!isFiltersValidated(selectedColumnFilters)">
-                          {{$i18n.t('default.save')}}
-                        </button>
+                        :disabled="!isFiltersValidated(selectedColumnFilters)"
+                      >{{ $i18n.t('default.save') }}</button>
                     </div>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-danger"
-                        @click="$emit('columnFilterDecision', 'clear')">
-                        {{$i18n.t('default.clear')}}
-                      </button>
+                    <div
+                      class="btn-group"
+                      role="group"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-danger"
+                        @click="$emit('columnFilterDecision', 'clear')"
+                      >{{ $i18n.t('default.clear') }}</button>
                     </div>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-default"
-                        @click="$emit('columnFilterDecision', 'cancel')">
-                        {{$i18n.t('default.cancel')}}
-                      </button>
+                    <div
+                      class="btn-group"
+                      role="group"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-default"
+                        @click="$emit('columnFilterDecision', 'cancel')"
+                      >{{ $i18n.t('default.cancel') }}</button>
                     </div>
                   </div>
                 </div>
@@ -112,45 +161,76 @@
           </div>
         </div>
 
-        <div class="modal-mask" v-if="addFeatureDialog">
+        <div
+          class="modal-mask"
+          v-if="addFeatureDialog"
+        >
           <div class="modal-wrapper">
             <div class="modal-dialog modal-md modal-new-feature">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{$i18n.t('featureManager.addFeatureTitle')}}</h4>
+                  <h4 class="modal-title">{{ $i18n.t('featureManager.addFeatureTitle') }}</h4>
                 </div>
-                <div class="modal-body" v-if="activeLayer">
+                <div
+                  class="modal-body"
+                  v-if="activeLayer"
+                >
                   <template v-for="name in Object.keys(activeLayer.features[0].properties)">
-                    <div class="form-group" style="display: flex;" :key="name" v-if="name !== 'id'">
-                      <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                        {{name}}
-                      </label>
-                      <input class="form-control col-sm-7"
+                    <div
+                      class="form-group"
+                      style="display: flex;"
+                      :key="name"
+                      v-if="name !== 'id'"
+                    >
+                      <label
+                        class="control-label col-sm-4"
+                        style="position: relative; top: 8px"
+                      >{{ name }}</label>
+                      <input
+                        class="form-control col-sm-7"
                         v-model="newFeatureProperties[name]"
                         v-if="featureTypes[name] === 'real' || featureTypes[name] === 'integer'"
-                        type="number"/>
-                      <input class="form-control col-sm-7"
+                        type="number"
+                      />
+                      <input
+                        class="form-control col-sm-7"
                         v-model="newFeatureProperties[name]"
                         v-else-if="featureTypes[name] === 'character varying'"
-                        type="text"/>
-                      <input class="form-control col-sm-7"
+                        type="text"
+                      />
+                      <input
+                        class="form-control col-sm-7"
                         v-model="newFeatureProperties[name]"
                         v-else-if="featureTypes[name] === 'timestamp without time zone'"
-                        type="datetime-local"/>
+                        type="datetime-local"
+                      />
                     </div>
                   </template>
                 </div>
                 <div class="modal-footer">
-                  <div class="btn-group btn-group-justified" role="group">
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-danger" @click="saveNewFeature">
-                        {{$i18n.t('default.save')}}
-                      </button>
+                  <div
+                    class="btn-group btn-group-justified"
+                    role="group"
+                  >
+                    <div
+                      class="btn-group"
+                      role="group"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-danger"
+                        @click="saveNewFeature"
+                      >{{ $i18n.t('default.save') }}</button>
                     </div>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-default" @click="clearFeatureAdding">
-                        {{$i18n.t('default.cancel')}}
-                      </button>
+                    <div
+                      class="btn-group"
+                      role="group"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-default"
+                        @click="clearFeatureAdding"
+                      >{{ $i18n.t('default.cancel') }}</button>
                     </div>
                   </div>
                 </div>
@@ -169,35 +249,53 @@
           :editing="editing"
           @update-filtred-count="updateCount"
           @update-select-item="updateSelectItem"
-          ></virtual-table> -->
+        ></virtual-table>-->
       </div>
       <div class="right-panel padding-0">
         <div class="col-sm-12">
           <div style="display: inline-block; width: 100%;">
             <h4 class="col-sm-10 right-panel__title">
-              <i class="fa fa-map-o title__icon"></i>
+              <i class="fa fa-map-o title__icon" />
               <span
                 class="mvp-red right-panel__name"
                 :title="layerName"
-              >{{layerName ? layerName : '' | maxLength}}</span>
+              >{{ layerName ? layerName : '' | maxLength }}</span>
             </h4>
-            <div class="col-sm-2" style="margin-top: 6px;" v-if="permission === 'write'">
-              <div class="btn-group btn-group-sm" role="group"
-                style="float: right; margin-right: -15px; display: flex;">
+            <div
+              class="col-sm-2"
+              style="margin-top: 6px;"
+              v-if="permission === 'write'"
+            >
+              <div
+                class="btn-group btn-group-sm"
+                role="group"
+                style="float: right; margin-right: -15px; display: flex;"
+              >
                 <a
                   class="btn btn-default"
                   @click="goToSettings"
                 >
-                  <i class="fa fa-cog yellow icon-hover"></i>
+                  <i class="fa fa-cog yellow icon-hover" />
                 </a>
-                <div class="btn-group btn-group-sm" role="group">
-                  <button type="button" class="btn btn-default dropdown-toggle"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-download green icon-hover"></i> <span class="caret"></span>
+                <div
+                  class="btn-group btn-group-sm"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-default dropdown-toggle"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i class="fa fa-download green icon-hover" />
+                    <span class="caret" />
                   </button>
                   <ul class="dropdown-menu">
                     <!-- <li><a>SHP</a></li> -->
-                    <li @click="downloadLayer([])"><a>GEOJSON</a></li>
+                    <li @click="downloadLayer([])">
+                      <a>GEOJSON</a>
+                    </li>
                     <!-- <li><a>XLSX</a></li> -->
                   </ul>
                 </div>
@@ -205,126 +303,170 @@
             </div>
           </div>
 
-            <ul class="nav nav-tabs nav-justified"
-              style="margin-left: -15px; width: calc(100% + 30px);">
-              <li role="presentation" :class="{active: indexActiveTab === 0}">
-                <a href="#" @click="indexActiveTab = 0">
-                  <i class="fa fa-bars"></i> {{$i18n.t('featureManager.legend')}}</a>
-              </li>
-              <li role="presentation"
-                :class="{active: indexActiveTab === 1}" v-show="currentFeature">
-                <a href="#" @click="indexActiveTab = 1">
-                  <i class="fa fa-table"></i> {{$i18n.t('featureManager.attributes')}}</a>
-              </li>
-              <li role="presentation"
-                :class="{active: indexActiveTab === 2, disabled: !featureAttachments}"
-                v-show="currentFeature">
-                <a href="#" @click="indexActiveTab = 2">
-                  <i class="fa fa-info"></i> {{$i18n.t('featureManager.informations')}}</a>
-              </li>
-            </ul>
-            <div>
-              <div v-show="indexActiveTab == 0" class="legend-panel right-sub-panel">
-                <div class="scroll-tab">
-                  <div class="baseLayers">
-                    <h4>{{$i18n.t('default.basemaps')}}:</h4>
-                    <ul class="list-group">
-                      <li class="list-group-item"
-                        v-for="name in baseLayers"
-                        :key="name"
-                        :class="{'activeLayer' : currentBaseLayer == name}"
-                        @click="changeBaseLayer(name)"
+          <ul
+            class="nav nav-tabs nav-justified"
+            style="margin-left: -15px; width: calc(100% + 30px);"
+          >
+            <li
+              role="presentation"
+              :class="{active: indexActiveTab === 0}"
+            >
+              <a
+                href="#"
+                @click="indexActiveTab = 0"
+              >
+                <i class="fa fa-bars" />
+                {{ $i18n.t('featureManager.legend') }}
+              </a>
+            </li>
+            <li
+              role="presentation"
+              :class="{active: indexActiveTab === 1}"
+              v-show="currentFeature"
+            >
+              <a
+                href="#"
+                @click="indexActiveTab = 1"
+              >
+                <i class="fa fa-table" />
+                {{ $i18n.t('featureManager.attributes') }}
+              </a>
+            </li>
+            <li
+              role="presentation"
+              :class="{active: indexActiveTab === 2, disabled: !featureAttachments}"
+              v-show="currentFeature"
+            >
+              <a
+                href="#"
+                @click="indexActiveTab = 2"
+              >
+                <i class="fa fa-info" />
+                {{ $i18n.t('featureManager.informations') }}
+              </a>
+            </li>
+          </ul>
+          <div>
+            <div
+              v-show="indexActiveTab == 0"
+              class="legend-panel right-sub-panel"
+            >
+              <div class="scroll-tab">
+                <div class="baseLayers">
+                  <h4>{{ $i18n.t('default.basemaps') }}:</h4>
+                  <ul class="list-group">
+                    <li
+                      class="list-group-item"
+                      v-for="name in baseLayers"
+                      :key="name"
+                      :class="{'activeLayer' : currentBaseLayer == name}"
+                      @click="changeBaseLayer(name)"
+                    >{{ name }}</li>
+                  </ul>
+                </div>
+                <div class="services">
+                  <h4>{{ $i18n.t('default.services') }}:</h4>
+                  <ul class="list-group">
+                    <span v-if="services.length > 0">
+                      <li
+                        class="list-group-item"
+                        v-for="service in services"
+                        :key="service.name"
+                        :class="{'activeLayer' : activeServices.includes(service.name)}"
                       >
-                      {{ name }}
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="services">
-                    <h4>{{$i18n.t('default.services')}}:</h4>
-                    <ul class="list-group">
-                      <span v-if="services.length > 0">
-                        <li class="list-group-item"
-                          v-for="service in services"
-                          :key="service.name"
-                          :class="{'activeLayer' : activeServices.includes(service.name)}"
+                        <label
+                          class="checkbox-inline mb-0"
+                          :title="service.layers"
                         >
-                        <label class="checkbox-inline mb-0" :title="service.layers">
-                          <input type="checkbox"
+                          <input
+                            type="checkbox"
                             @click="setServiceVisibility(service.name)"
                             :value="service.name"
                             v-model="activeServices"
-                          >
+                          />
                           {{ service.name }} ({{ service.layers | maxLength }})
                         </label>
-                        </li>
-                      </span>
-                      <span v-else>
-                        <li class="list-group-item no-item">
-                          {{$i18n.t('default.noServices')}}
-                        </li>
-                      </span>
-                    </ul>
+                      </li>
+                    </span>
+                    <span v-else>
+                      <li class="list-group-item no-item">{{ $i18n.t('default.noServices') }}</li>
+                    </span>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div v-show="indexActiveTab == 1">
+              <template v-if="permission === 'write'">
+                <template v-if="!editing">
+                  <div
+                    class="btn-group btn-group-edit"
+                    role="group"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-success btn-group-justified"
+                      @click="editAttributes"
+                    >{{ $i18n.t('default.edit') }}</button>
                   </div>
-                </div>
-              </div>
-
-              <div v-show="indexActiveTab == 1">
-                <template v-if="permission === 'write'">
-                  <template v-if="!editing">
-                    <div class="btn-group btn-group-edit" role="group">
-                      <button
-                        type="button"
-                        class="btn btn-success btn-group-justified"
-                        @click="editAttributes"
-                      >{{$i18n.t('default.edit')}}</button>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div class="btn-group btn-group-action btn-group-edit" role="group">
-                      <button
-                        type="button"
-                        class="btn btn-success"
-                        @click="saveEditing"
-                      >{{$i18n.t('default.save')}}</button>
-                    </div>
-                    <div class="btn-group btn-group-action btn-group-edit" role="group">
-                      <button
-                        type="button"
-                        class="btn btn-default"
-                        @click="cancelEditing"
-                      >{{$i18n.t('default.cancel')}}</button>
-                    </div>
-                    <div class="btn-group btn-group-action btn-group-edit" role="group">
-                      <button type="button" class="btn btn-danger" @click="deleteFeature">
-                        {{$i18n.t('default.delete')}}
-                      </button>
-                    </div>
-                  </template>
                 </template>
+                <template v-else>
+                  <div
+                    class="btn-group btn-group-action btn-group-edit"
+                    role="group"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-success"
+                      @click="saveEditing"
+                    >{{ $i18n.t('default.save') }}</button>
+                  </div>
+                  <div
+                    class="btn-group btn-group-action btn-group-edit"
+                    role="group"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-default"
+                      @click="cancelEditing"
+                    >{{ $i18n.t('default.cancel') }}</button>
+                  </div>
+                  <div
+                    class="btn-group btn-group-action btn-group-edit"
+                    role="group"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      @click="deleteFeature"
+                    >{{ $i18n.t('default.delete') }}</button>
+                  </div>
+                </template>
+              </template>
 
-                <div class="scroll-tab">
-                  <AttributesPanel
-                    v-if="currentFeature"
-                    ref="attributes-panel"
-                    :editing="editing"
-                    :fields="currentFeature"
-                  />
-                </div>
-              </div>
-              <div v-show="indexActiveTab == 2">
-                <AttachmentsPanel
-                  ref="attachments-panel"
-                  v-if="currentFeature && Object.keys(featureAttachments).length > 0"
-                  :lid="$route.params.layerId"
-                  :fid="currentFeature.properties.id"
-                  :permission="permission"
-                  :usersGroup="usersGroup"
+              <div class="scroll-tab">
+                <AttributesPanel
+                  v-if="currentFeature"
+                  ref="attributes-panel"
+                  :editing="editing"
+                  :fields="currentFeature"
                 />
               </div>
+            </div>
+            <div v-show="indexActiveTab == 2">
+              <AttachmentsPanel
+                ref="attachments-panel"
+                v-if="currentFeature && Object.keys(featureAttachments).length > 0"
+                :lid="$route.params.layerId"
+                :fid="currentFeature.properties.id"
+                :permission="permission"
+                :users-group="usersGroup"
+              />
             </div>
           </div>
         </div>
       </div>
+    </div>
   </div>
 </template>
 
@@ -344,12 +486,7 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import TileWMS from 'ol/source/TileWMS';
-import {
-  Fill,
-  Stroke,
-  Style,
-  RegularShape,
-} from 'ol/style';
+import { Fill, Stroke, Style, RegularShape } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import Text from 'ol/style/Text';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
@@ -361,22 +498,25 @@ import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import '@/assets/css/feature-manager.css';
 
-
 export default {
   components: {
     AttachmentsPanel,
     AttributesPanel,
     FeatureManagerTable,
-    FiltersPanel,
+    FiltersPanel
   },
   data: () => ({
     activeServices: [],
     addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
     columnFilterDecisionDialogView: false,
-    columns: [{
-      head: true, sortable: true, filter: true,
-    }],
+    columns: [
+      {
+        head: true,
+        sortable: true,
+        filter: true
+      }
+    ],
     currentBaseLayer: 'OpenStreetMap',
     currentColumnFilters: [],
     currentFeature: undefined,
@@ -396,7 +536,7 @@ export default {
     searchItemValue: '',
     selectedColumnFilters: [],
     selectedRows: [],
-    usersGroup: undefined,
+    usersGroup: undefined
   }),
   computed: {
     activeLayer() {
@@ -428,20 +568,21 @@ export default {
     },
     user() {
       return this.$store.getters.getUser;
-    },
+    }
   },
   filters: {
-    maxLength: (val) => {
+    maxLength: val => {
       if (val.length > 30) {
         return `${val.slice(0, 30)}...`;
       }
       return val;
-    },
+    }
   },
   methods: {
     async createStyle() {
       const r = await this.$store.dispatch(
-        'getLayerStyle', this.$route.params.layerId,
+        'getLayerStyle',
+        this.$route.params.layerId
       );
       if (r.status === 200) {
         this.labels = r.obj.style.labels;
@@ -454,26 +595,38 @@ export default {
       }
     },
     async deleteFeature() {
-      this.$alertify.confirm(this.$i18n.t('featureManager.deleteFeatureConfirm'), async () => {
-        const r = await this.$store.dispatch('deleteFeature', {
-          lid: this.$route.params.layerId,
-          fid: this.currentFeature.properties.id,
-        });
-        if (r.status === 200) {
-          this.editingEndOperations();
-          this.refreshVectorSource(this.getLayerByName('features'));
-          const featIdx = this.items.findIndex(el => el.id === this.currentFeature.properties.id);
-          this.items.splice(featIdx, 1);
-          this.$refs['table-data'].$recompute('windowItems'); // update table data
-          const featIdxLay = this.activeLayer.features.findIndex(
-            el => el.properties.id === this.currentFeature.properties.id,
-          );
-          this.activeLayer.features.splice(featIdxLay, 1);
-          this.selectFeature(undefined);
-        }
-      }, () => {})
+      this.$alertify
+        .confirm(
+          this.$i18n.t('featureManager.deleteFeatureConfirm'),
+          async () => {
+            const r = await this.$store.dispatch('deleteFeature', {
+              lid: this.$route.params.layerId,
+              fid: this.currentFeature.properties.id
+            });
+            if (r.status === 200) {
+              this.editingEndOperations();
+              this.refreshVectorSource(this.getLayerByName('features'));
+              const featIdx = this.items.findIndex(
+                el => el.id === this.currentFeature.properties.id
+              );
+              this.items.splice(featIdx, 1);
+              this.$refs['table-data'].$recompute('windowItems'); // update table data
+              const featIdxLay = this.activeLayer.features.findIndex(
+                el => el.properties.id === this.currentFeature.properties.id
+              );
+              this.activeLayer.features.splice(featIdxLay, 1);
+              this.selectFeature(undefined);
+            }
+          },
+          () => {}
+        )
         .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
-        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+        .set({
+          labels: {
+            ok: this.$i18n.t('default.delete'),
+            cancel: this.$i18n.t('default.cancel')
+          }
+        });
     },
     async downloadLayer(rows) {
       let filteredIds;
@@ -481,12 +634,12 @@ export default {
         filteredIds = {};
       } else {
         filteredIds = {
-          filter_ids: rows.map(el => el.id),
+          filter_ids: rows.map(el => el.id)
         };
       }
       const r = await this.$store.dispatch('downloadLayer', {
         lid: this.$route.params.layerId,
-        body: filteredIds,
+        body: filteredIds
       });
       if (r.status === 200) {
         this.$i18n.t('default.success');
@@ -499,12 +652,15 @@ export default {
     async getPermissions() {
       const r = await this.$store.dispatch('getPermissions');
       const usersPerms = r.obj.permissions.find(
-        el => el.id === this.$route.params.layerId,
+        el => el.id === this.$route.params.layerId
       );
       this.permission = usersPerms.users[this.user];
     },
     async getSettings() {
-      const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
+      const res = await this.$store.dispatch(
+        'getCurrentSettings',
+        this.$route.params.layerId
+      );
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async getUsers() {
@@ -516,13 +672,18 @@ export default {
     },
     async saveEditing() {
       const fid = this.currentFeature.properties.id;
-      const features = this.getLayerByName('featuresVector').getSource().getFeatures();
+      const features = this.getLayerByName('featuresVector')
+        .getSource()
+        .getFeatures();
       const vectorFeature = features.find(el => el.get('id') === fid).clone();
-      this.currentFeature.geometry.coordinates = vectorFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
+      this.currentFeature.geometry.coordinates = vectorFeature
+        .getGeometry()
+        .transform('EPSG:3857', 'EPSG:4326')
+        .getCoordinates();
       const payload = {
         body: this.currentFeature,
         lid: this.$route.params.layerId,
-        fid,
+        fid
       };
       this.$alertify.warning(this.$i18n.t('default.editInProgress'));
       const r = await this.$store.dispatch('editFeature', payload);
@@ -541,17 +702,29 @@ export default {
       }
     },
     async saveNewFeature() {
-      const newFeature = this.getLayerByName('newFeature').getSource().getFeatures()[0];
-      const coords = newFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326').getCoordinates();
-      Object.entries(this.newFeatureProperties).forEach((k) => {
+      const newFeature = this.getLayerByName('newFeature')
+        .getSource()
+        .getFeatures()[0];
+      const coords = newFeature
+        .getGeometry()
+        .transform('EPSG:3857', 'EPSG:4326')
+        .getCoordinates();
+      Object.entries(this.newFeatureProperties).forEach(k => {
         if (!this.newFeatureProperties[k[0]]) return;
 
         if (this.featureTypes[k[0]] === 'integer') {
-          this.newFeatureProperties[k[0]] = parseInt(this.newFeatureProperties[k[0]], 10);
+          this.newFeatureProperties[k[0]] = parseInt(
+            this.newFeatureProperties[k[0]],
+            10
+          );
         } else if (this.featureTypes[k[0]] === 'real') {
-          this.newFeatureProperties[k[0]] = parseFloat(this.newFeatureProperties[k[0]]);
+          this.newFeatureProperties[k[0]] = parseFloat(
+            this.newFeatureProperties[k[0]]
+          );
         } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
-          this.newFeatureProperties[k[0]] = moment(this.newFeatureProperties[k[0]]).format('X');
+          this.newFeatureProperties[k[0]] = moment(
+            this.newFeatureProperties[k[0]]
+          ).format('X');
         }
       });
 
@@ -560,11 +733,11 @@ export default {
         body: {
           geometry: {
             coordinates: coords,
-            type: this.layerType,
+            type: this.layerType
           },
           properties: this.newFeatureProperties,
-          type: 'Feature',
-        },
+          type: 'Feature'
+        }
       });
 
       if (r.status === 201) {
@@ -584,28 +757,33 @@ export default {
     clearFeatureAdding() {
       this.isDrawing = false;
       this.addFeatureDialog = false;
-      this.getLayerByName('newFeature').getSource().clear();
+      this.getLayerByName('newFeature')
+        .getSource()
+        .clear();
       this.getInteractionByName('drawInteraction').setActive(false);
       this.newFeatureProperties = {};
     },
     changeBaseLayer(layerName) {
-      this.map.getLayers().getArray().forEach((el) => {
-        if (el.get('group') === 'baselayers') {
-          if (el.get('name') === layerName) {
-            el.setVisible(true);
-            this.currentBaseLayer = layerName;
-          } else {
-            el.setVisible(false);
+      this.map
+        .getLayers()
+        .getArray()
+        .forEach(el => {
+          if (el.get('group') === 'baselayers') {
+            if (el.get('name') === layerName) {
+              el.setVisible(true);
+              this.currentBaseLayer = layerName;
+            } else {
+              el.setVisible(false);
+            }
           }
-        }
-      });
+        });
     },
     changeDialogVisibility(vis) {
       this.isInfoDialogVisible = vis;
     },
     createModifyInteraction() {
       const modifyInteraction = new Modify({
-        source: this.getLayerByName('featuresVector').getSource(),
+        source: this.getLayerByName('featuresVector').getSource()
       });
       modifyInteraction.set('name', 'modifyInteraction');
       modifyInteraction.setActive(false);
@@ -613,14 +791,21 @@ export default {
     },
     createSelectInteraction() {
       let active = true;
-      this.map.on('click', (evt) => {
-        if (!active || this.isInteractionActive('modifyInteraction')
-          || this.isInteractionActive('drawInteraction')) return;
+      this.map.on('click', evt => {
+        if (
+          !active ||
+          this.isInteractionActive('modifyInteraction') ||
+          this.isInteractionActive('drawInteraction')
+        )
+          return;
 
-        const feature = this.map.forEachFeatureAtPixel(evt.pixel,
-          feat => feat, {
-            hitTolerance: 5,
-          });
+        const feature = this.map.forEachFeatureAtPixel(
+          evt.pixel,
+          feat => feat,
+          {
+            hitTolerance: 5
+          }
+        );
         this.selectFeature(feature);
       });
       return {
@@ -629,7 +814,7 @@ export default {
         },
         getActive() {
           return active;
-        },
+        }
       };
     },
     drawFeatureEnd() {
@@ -656,7 +841,7 @@ export default {
 
         const draw = new Draw({
           source,
-          type: drawType,
+          type: drawType
         });
         draw.set('name', 'drawInteraction');
         this.map.addInteraction(draw);
@@ -672,12 +857,14 @@ export default {
       this.editingDataCopy = JSON.parse(JSON.stringify(this.currentFeature));
 
       this.getLayerByName('features').setVisible(false);
-      this.activeLayer.features.forEach((feature) => {
+      this.activeLayer.features.forEach(feature => {
         const tempFeature = new GeoJSON().readFeature(feature, {
           featureProjection: 'EPSG:3857',
-          dataProjection: 'EPSG:4326',
+          dataProjection: 'EPSG:4326'
         });
-        this.getLayerByName('featuresVector').getSource().addFeature(tempFeature);
+        this.getLayerByName('featuresVector')
+          .getSource()
+          .addFeature(tempFeature);
       });
       if (!this.getInteractionByName('modifyInteraction')) {
         this.createModifyInteraction();
@@ -688,11 +875,16 @@ export default {
     editingEndOperations() {
       this.getLayerByName('features').setVisible(true);
       this.getInteractionByName('modifyInteraction').setActive(false);
-      this.getLayerByName('featuresVector').getSource().clear();
+      this.getLayerByName('featuresVector')
+        .getSource()
+        .clear();
       this.editing = false;
     },
     getInteractionByName(name) {
-      return this.map.getInteractions().getArray().find(i => i.get('name') === name);
+      return this.map
+        .getInteractions()
+        .getArray()
+        .find(i => i.get('name') === name);
     },
     getLayerByName(name) {
       return this.map
@@ -701,66 +893,76 @@ export default {
         .find(l => l.get('name') === name);
     },
     goToSettings() {
-      this.$router.push(
-        {
-          name: 'settings',
-          params: {
-            layerId: this.$route.params.layerId,
-            layer: {
-              id: this.$route.params.layerId,
-              name: this.$route.params.layerName,
-            },
-            vectorLayersList: this.$route.params.vectorLayersList,
+      this.$router.push({
+        name: 'settings',
+        params: {
+          layerId: this.$route.params.layerId,
+          layer: {
+            id: this.$route.params.layerId,
+            name: this.$route.params.layerName
           },
-        },
-      );
+          vectorLayersList: this.$route.params.vectorLayersList
+        }
+      });
     },
     initOrtofoto() {
       return new Promise((resolve, reject) => {
         const parser = new WMTSCapabilities();
-        fetch('https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO?SERVICE=WMTS&REQUEST=GetCapabilities').then(response => response.text()).then((text) => {
-          const result = parser.read(text);
-          const options = optionsFromCapabilities(result, {
-            layer: 'ORTOFOTOMAPA',
-            matrixSet: 'EPSG:4326',
+        fetch(
+          'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO?SERVICE=WMTS&REQUEST=GetCapabilities'
+        )
+          .then(response => response.text())
+          .then(text => {
+            const result = parser.read(text);
+            const options = optionsFromCapabilities(result, {
+              layer: 'ORTOFOTOMAPA',
+              matrixSet: 'EPSG:4326'
+            });
+            resolve(
+              this.map.addLayer(
+                new TileLayer({
+                  opacity: 1,
+                  visible: false,
+                  name: 'Ortofotomapa',
+                  group: 'baselayers',
+                  source: new WMTS({
+                    url:
+                      'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
+                    matrixSet: 'EPSG:4326',
+                    format: 'image/png',
+                    projection: getProjection('EPSG:4326'),
+                    tileGrid: options.tileGrid,
+                    style: 'default',
+                    wrapX: true
+                  })
+                })
+              )
+            );
+          })
+          .catch(err => {
+            this.$alertify.error(this.$i18n.t('featureManager.ortoError'));
+            reject(err);
           });
-          resolve(
-            this.map.addLayer(
-              new TileLayer({
-                opacity: 1,
-                visible: false,
-                name: 'Ortofotomapa',
-                group: 'baselayers',
-                source: new WMTS({
-                  url: 'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
-                  matrixSet: 'EPSG:4326',
-                  format: 'image/png',
-                  projection: getProjection('EPSG:4326'),
-                  tileGrid: options.tileGrid,
-                  style: 'default',
-                  wrapX: true,
-                }),
-              }),
-            ),
-          );
-        }).catch((err) => {
-          this.$alertify.error(this.$i18n.t('featureManager.ortoError'));
-          reject(err);
-        });
       });
     },
     isFiltersValidated(filters) {
-      return _.every(filters, filter => filter.operation !== '' && filter.column !== '' && filter.value !== '');
+      return _.every(
+        filters,
+        filter =>
+          filter.operation !== '' && filter.column !== '' && filter.value !== ''
+      );
     },
     isInteractionActive(interaction) {
-      if (this.getInteractionByName(interaction)
-        && this.getInteractionByName(interaction).getActive()) {
+      if (
+        this.getInteractionByName(interaction) &&
+        this.getInteractionByName(interaction).getActive()
+      ) {
         return true;
       }
       return false;
     },
     loadServices() {
-      this.services.forEach((service) => {
+      this.services.forEach(service => {
         this.map.addLayer(
           new TileLayer({
             name: service.name,
@@ -770,19 +972,21 @@ export default {
               params: {
                 LAYERS: service.layers,
                 TILED: true,
-                SRS: 'EPSG:2180',
-              },
-            }),
-          }),
+                SRS: 'EPSG:2180'
+              }
+            })
+          })
         );
       });
     },
     openColumnFilterDecision() {
       const self = this;
 
-      const handle = (key) => {
+      const handle = key => {
         if (key === 'accept') {
-          self.currentColumnFilters = JSON.parse(JSON.stringify(self.selectedColumnFilters));
+          self.currentColumnFilters = JSON.parse(
+            JSON.stringify(self.selectedColumnFilters)
+          );
 
           self.columnFilterDecisionDialogView = false;
           self.$off('columnFilterDecision', handle);
@@ -790,7 +994,9 @@ export default {
         } else if (key === 'clear') {
           self.selectedColumnFilters = [];
         } else {
-          self.selectedColumnFilters = JSON.parse(JSON.stringify(self.currentColumnFilters));
+          self.selectedColumnFilters = JSON.parse(
+            JSON.stringify(self.currentColumnFilters)
+          );
 
           self.columnFilterDecisionDialogView = false;
           self.$off('columnFilterDecision', handle);
@@ -815,7 +1021,23 @@ export default {
       a.download = `${this.$route.params.layerId}.geojson`;
       a.href = window.URL.createObjectURL(blob);
       a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      e.initEvent(
+        'click',
+        true,
+        false,
+        window,
+        0,
+        0,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        false,
+        0,
+        null
+      );
       a.dispatchEvent(e);
     },
     selectFeature(feature) {
@@ -825,7 +1047,9 @@ export default {
         this.selectFeatureById(fid);
         this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
-          this.$refs['table-data'].selectItem(_.find(this.items, o => o.id === fid));
+          this.$refs['table-data'].selectItem(
+            _.find(this.items, o => o.id === fid)
+          );
         }
       } else {
         this.$refs['table-data'].clearSelection();
@@ -834,14 +1058,16 @@ export default {
       }
     },
     selectFeatureById(fid) {
-      this.currentFeature = this.activeLayer.features.find(el => el.properties.id === fid);
+      this.currentFeature = this.activeLayer.features.find(
+        el => el.properties.id === fid
+      );
       const feature = new GeoJSON().readFeature(this.currentFeature, {
         featureProjection: 'EPSG:3857',
-        dataProjection: 'EPSG:4326',
+        dataProjection: 'EPSG:4326'
       });
       this.map.getView().fit(feature.getGeometry(), {
         maxZoom: 16,
-        duration: 500,
+        duration: 500
       });
       this.indexActiveTab = 1; // change tab in sidepanel
     },
@@ -854,7 +1080,7 @@ export default {
     },
     styleFeatures(f) {
       const labelsToShow = [];
-      this.labels.forEach((el) => {
+      this.labels.forEach(el => {
         labelsToShow.push(f.getProperties()[el]);
       });
       const featStyle = new Style({
@@ -862,34 +1088,37 @@ export default {
           text: labelsToShow.join(' '),
           fill: new Fill({ color: 'white' }),
           stroke: new Stroke({ color: 'black', width: 4 }),
-          offsetY: -10,
-        }),
+          offsetY: -10
+        })
       });
       if (this.layerType) {
         const stroke = new Stroke({
           color: `rgba(${this.layerStyle['stroke-color']})`,
-          width: `${this.layerStyle['stroke-width']}`,
+          width: `${this.layerStyle['stroke-width']}`
         });
         const fill = new Fill({
-          color: `rgba(${this.layerStyle['fill-color']})`,
+          color: `rgba(${this.layerStyle['fill-color']})`
         });
         if (this.layerType === 'point') {
           featStyle.setImage(
             new CircleStyle({
               fill,
               stroke,
-              radius: this.layerStyle.width,
-            }),
+              radius: this.layerStyle.width
+            })
           );
-        } else if (this.layerType === 'square' || this.layerType === 'triangle') {
+        } else if (
+          this.layerType === 'square' ||
+          this.layerType === 'triangle'
+        ) {
           featStyle.setImage(
             new RegularShape({
               fill,
               stroke,
               points: this.layerType === 'square' ? 4 : 3,
               radius: this.layerStyle.width,
-              angle: this.layerType === 'square' ? Math.PI / 4 : 0,
-            }),
+              angle: this.layerType === 'square' ? Math.PI / 4 : 0
+            })
           );
         } else if (this.layerType === 'polygon' || this.layerType === 'line') {
           featStyle.setFill(fill);
@@ -901,14 +1130,16 @@ export default {
         }
       } else {
         const attr = f.get(this.layerStyle.attribute);
-        const filteredFeat = this.layerStyle.categories.find(el => el.value === attr);
+        const filteredFeat = this.layerStyle.categories.find(
+          el => el.value === attr
+        );
         if (filteredFeat) {
           const stroke = new Stroke({
             color: `rgba(${filteredFeat['stroke-color']})`,
-            width: `${filteredFeat['stroke-width']}`,
+            width: `${filteredFeat['stroke-width']}`
           });
           const fill = new Fill({
-            color: `rgba(${filteredFeat['fill-color']})`,
+            color: `rgba(${filteredFeat['fill-color']})`
           });
           // TODO - add triangle/square/dashed/dotted
           if (filteredFeat.type === 'point') {
@@ -916,8 +1147,8 @@ export default {
               new CircleStyle({
                 fill,
                 stroke,
-                radius: filteredFeat.width,
-              }),
+                radius: filteredFeat.width
+              })
             );
           } else {
             featStyle.setFill(fill);
@@ -927,14 +1158,14 @@ export default {
           featStyle.setImage(
             new CircleStyle({
               fill: new Fill({
-                color: [250, 250, 250, 0.4],
+                color: [250, 250, 250, 0.4]
               }),
               stroke: new Stroke({
                 color: [51, 153, 204, 1],
-                width: 1,
+                width: 1
               }),
-              radius: 2,
-            }),
+              radius: 2
+            })
           );
         }
       }
@@ -945,7 +1176,7 @@ export default {
     },
     updateSelectedRows(rows) {
       this.selectedRows = rows;
-    },
+    }
   },
   async mounted() {
     this.map = new Map({
@@ -955,14 +1186,14 @@ export default {
           name: 'OpenStreetMap',
           group: 'baselayers',
           source: new XYZ({
-            url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          }),
-        }),
+            url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          })
+        })
       ],
       view: new View({
         center: fromLonLat([this.mapCenter.lon, this.mapCenter.lat]),
-        zoom: this.mapZoom,
-      }),
+        zoom: this.mapZoom
+      })
     });
 
     this.initOrtofoto();
@@ -981,33 +1212,45 @@ export default {
         source: new VectorTileSource({
           cacheSize: 1,
           format: new MVT(),
-          url: `${this.apiUrl}/mvt/${this.$route.params.layerId}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`,
+          url: `${this.apiUrl}/mvt/${
+            this.$route.params.layerId
+          }/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
         }),
-        style: f => this.styleFeatures(f),
-      }),
+        style: f => this.styleFeatures(f)
+      })
     );
     this.map.addLayer(
       new VectorLayer({
         name: 'featuresVector',
         visible: false,
         source: new VectorSource({}),
-        style: f => this.styleFeatures(f),
-      }),
+        style: f => this.styleFeatures(f)
+      })
     );
 
-    const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
+    const r = await this.$store.dispatch(
+      'getLayer',
+      this.$route.params.layerId
+    );
     if (r.status === 200) {
       this.$store.commit('setActiveLayer', r.obj);
-      Object.keys(r.obj.features[0].properties).forEach((el) => {
+      Object.keys(r.obj.features[0].properties).forEach(el => {
         this.columns.push({
-          key: el, name: el, sortable: true, filter: true,
+          key: el,
+          name: el,
+          sortable: true,
+          filter: true
         });
       });
-      r.obj.features.forEach((feat) => {
+      r.obj.features.forEach(feat => {
         const tempItem = {};
         Object.entries(feat.properties).forEach(([k, v]) => {
           if (this.featureTypes[k] === 'timestamp without time zone') {
-            tempItem[k] = moment(v).isValid() ? moment(v).locale('pl').format('L') : '';
+            tempItem[k] = moment(v).isValid()
+              ? moment(v)
+                  .locale('pl')
+                  .format('L')
+              : '';
           } else {
             tempItem[k] = v;
           }
@@ -1018,7 +1261,7 @@ export default {
       this.$alertify.error(this.$i18n.t('default.error'));
     }
     this.searchCount = this.items.length;
-  },
+  }
 };
 </script>
 

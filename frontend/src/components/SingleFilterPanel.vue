@@ -5,53 +5,84 @@
         <label class="control-label col-sm-4">Wybierz kolumne filtra:</label>
         <div class="col-sm-8">
           <div class="input-group">
-            <select class="form-control"
+            <select
+              class="form-control"
               :value="value.column"
-              @input="updateValue('column', $event.target.value)">
-              <option v-for="(field, idx) in fields"
+              @input="updateValue('column', $event.target.value)"
+            >
+              <option
+                v-for="(field, idx) in fields"
                 v-text="field"
                 :key="field+idx"
-                :value="field"/>
+                :value="field"
+              />
             </select>
             <span class="input-group-btn">
-              <button class="btn btn-danger" type="button" title="Usuń filtr" @click="deleteFilter">
-                <i class="fa fa-times"/></button>
+              <button
+                class="btn btn-danger"
+                type="button"
+                title="Usuń filtr"
+                @click="deleteFilter"
+              >
+                <i class="fa fa-times" /></button>
             </span>
           </div>
         </div>
       </div>
-      <div class="form-group" v-if="value.column != ''">
+      <div
+        class="form-group"
+        v-if="value.column != ''"
+      >
         <label class="control-label col-sm-4">Wartość:</label>
         <div class="col-sm-8">
           <div class="input-group">
             <div class="input-group-btn">
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                <span v-if="featureTypes[value.column] === 'character varying'"
+              <button
+                type="button"
+                class="btn btn-default dropdown-toggle"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span
+                  v-if="featureTypes[value.column] === 'character varying'"
                   style="position: relative; left: -5px;"
-                  v-text="value.operation == '' ? 'Operacja' : filterMap[value.operation]"/>
-                  <span v-else
+                  v-text="value.operation == '' ? 'Operacja' : filterMap[value.operation]"
+                />
+                <span
+                  v-else
                   style="position: relative; left: -5px;"
-                  v-text="value.operation == '' ? 'Operacja' : value.operation"/>
-                <span class="caret"/>
+                  v-text="value.operation == '' ? 'Operacja' : value.operation"
+                />
+                <span class="caret" />
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li v-for="(operation, idx) in getOperations(value.column)" :key="operation+idx">
-                  <a href="#"
+                <li
+                  v-for="(operation, idx) in getOperations(value.column)"
+                  :key="operation+idx"
+                >
+                  <a
+                    href="#"
                     v-if="featureTypes[value.column] === 'character varying'"
                     @click="updateValue('operation', operation)"
-                    v-text="filterMap[operation]"/>
-                  <a href="#"
+                    v-text="filterMap[operation]"
+                  />
+                  <a
+                    href="#"
                     v-else
                     @click="updateValue('operation', operation)"
-                    v-text="operation"/>
+                    v-text="operation"
+                  />
                 </li>
               </ul>
             </div>
-            <input type="text" class="form-control"
+            <input
+              type="text"
+              class="form-control"
               :value="value.value"
               @input="updateValue('value', $event.target.value)"
-              placeholder="Wpisz wartość"/>
+              placeholder="Wpisz wartość"
+            >
           </div>
         </div>
       </div>

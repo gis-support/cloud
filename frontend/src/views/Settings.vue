@@ -1,68 +1,121 @@
 <template>
   <div class="container">
     <div class="col-md-3 layout-sidebar">
-      <ul id="myTab" class="nav nav-layout-sidebar nav-stacked">
+      <ul
+        id="myTab"
+        class="nav nav-layout-sidebar nav-stacked"
+      >
         <li class="active">
-          <a href="#info-tab" data-toggle="tab" @click="setActiveTab('info-tab')">
-          <i class="fa fa-info-circle"></i>
-          &nbsp;&nbsp;<span>{{$i18n.t('settings.layerInfo')}}</span>
+          <a
+            href="#info-tab"
+            data-toggle="tab"
+            @click="setActiveTab('info-tab')"
+          >
+            <i class="fa fa-info-circle" />
+            &nbsp;&nbsp;<span>{{ $i18n.t('settings.layerInfo') }}</span>
           </a>
         </li>
         <li>
-          <a href="#style-tab" data-toggle="tab" @click="setActiveTab('style-tab')">
-          <i class="fa fa-map-pin"></i>
-          &nbsp;&nbsp;<span>{{$i18n.t('settings.symbolization')}}</span>
+          <a
+            href="#style-tab"
+            data-toggle="tab"
+            @click="setActiveTab('style-tab')"
+          >
+            <i class="fa fa-map-pin" />
+            &nbsp;&nbsp;<span>{{ $i18n.t('settings.symbolization') }}</span>
           </a>
         </li>
         <li>
-          <a href="#labels-tab" data-toggle="tab" @click="setActiveTab('labels-tab')">
-          <i class="fa fa-tags"></i>
-          &nbsp;&nbsp;<span>{{$i18n.t('settings.labels')}}</span>
+          <a
+            href="#labels-tab"
+            data-toggle="tab"
+            @click="setActiveTab('labels-tab')"
+          >
+            <i class="fa fa-tags" />
+            &nbsp;&nbsp;<span>{{ $i18n.t('settings.labels') }}</span>
           </a>
         </li>
       </ul>
     </div>
     <div class="col-md-9 col-sm-8 layout-main">
-      <div class="loading-overlay pt-10 pb-10 text-centered" v-if="!isMounted">
-        <div class="loading-indicator mb-10"><h4>{{$i18n.t('default.loading')}}</h4>
-        <i class="fa fa-lg fa-spin fa-spinner"></i></div>
+      <div
+        class="loading-overlay pt-10 pb-10 text-centered"
+        v-if="!isMounted"
+      >
+        <div class="loading-indicator mb-10">
+          <h4>{{ $i18n.t('default.loading') }}</h4>
+          <i class="fa fa-lg fa-spin fa-spinner" />
+        </div>
       </div>
-      <div id="settings-content" class="tab-content stacked-content" v-else>
+      <div
+        id="settings-content"
+        class="tab-content stacked-content"
+        v-else
+      >
         <div class="heading-block">
           <h3>
-            <span data-i18n="layerSettings.title">{{$i18n.t('default.layerSettings')}}: </span>
-            <span class="red">{{currentEditedLayer.name}}</span>
-            <a @click="goToLayer" :title="$i18n.t('default.goToLayer')">
-              <i class="fa fa-chevron-circle-right red icon-hover"></i>
+            <span data-i18n="layerSettings.title">{{ $i18n.t('default.layerSettings') }}: </span>
+            <span class="red">{{ currentEditedLayer.name }}</span>
+            <a
+              @click="goToLayer"
+              :title="$i18n.t('default.goToLayer')"
+            >
+              <i class="fa fa-chevron-circle-right red icon-hover" />
             </a>
           </h3>
         </div>
-        <div class="tab-pane in active" id="info-tab" v-if="activeTab === 'info-tab'">
-          <h4 class="text-left">{{$i18n.t('dashboard.modal.layerName')}}</h4>
+        <div
+          class="tab-pane in active"
+          id="info-tab"
+          v-if="activeTab === 'info-tab'"
+        >
+          <h4 class="text-left">
+            {{ $i18n.t('dashboard.modal.layerName') }}
+          </h4>
           <div style="display: flex">
-            <input type="text" class="form-control mr-5"
-              v-model="currentEditedLayer.name">
+            <input
+              type="text"
+              class="form-control mr-5"
+              v-model="currentEditedLayer.name"
+            >
             <button
               type="button"
               class="btn btn-success"
               @click="saveLayerName"
               :disabled="!currentEditedLayer.name"
             >
-              {{$i18n.t('default.saveName')}}
+              {{ $i18n.t('default.saveName') }}
             </button>
           </div>
           <div class="pt-10">
-            <h4 class="text-left">{{$i18n.t('dashboard.modal.addColumn')}}</h4>
+            <h4 class="text-left">
+              {{ $i18n.t('dashboard.modal.addColumn') }}
+            </h4>
             <div style="display: flex">
-              <input type="text" class="form-control mr-5"
-                placeholder="Nazwa kolumny" v-model="newColumnName">
-              <select class="form-control mr-5" name="column-types-select"
-                v-model="newColumnType">
-                <option :value="undefined" selected disabled>
-                  {{$i18n.t('dashboard.modal.chooseColumnType')}}
+              <input
+                type="text"
+                class="form-control mr-5"
+                placeholder="Nazwa kolumny"
+                v-model="newColumnName"
+              >
+              <select
+                class="form-control mr-5"
+                name="column-types-select"
+                v-model="newColumnType"
+              >
+                <option
+                  :value="undefined"
+                  selected
+                  disabled
+                >
+                  {{ $i18n.t('dashboard.modal.chooseColumnType') }}
                 </option>
-                <option v-for="colType in columnTypes" :key="colType" :value="colType">
-                  {{colType}}
+                <option
+                  v-for="colType in columnTypes"
+                  :key="colType"
+                  :value="colType"
+                >
+                  {{ colType }}
                 </option>
               </select>
               <button
@@ -71,64 +124,125 @@
                 @click="addNewColumn"
                 :disabled="!newColumnType || !newColumnName"
               >
-                {{$i18n.t('default.add')}}
+                {{ $i18n.t('default.add') }}
               </button>
             </div>
           </div>
           <div class="pt-10">
             <h4 class="text-left">
-              {{$i18n.t('dashboard.modal.layerColumns')}}
-              <i class="fa fa-chevron-up" @click="toggleColumnsSection(false)"
-                v-if="isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
+              {{ $i18n.t('dashboard.modal.layerColumns') }}
+              <i
+                class="fa fa-chevron-up"
+                @click="toggleColumnsSection(false)"
+                v-if="isColumnsVisible"
+                aria-hidden="true"
+                style="cursor: pointer;"
                 :title="$i18n.t('dashboard.modal.hideColumns')"
-              ></i>
-              <i class="fa fa-chevron-down" @click="toggleColumnsSection(true)"
-                v-if="!isColumnsVisible" aria-hidden="true" style="cursor: pointer;"
+              />
+              <i
+                class="fa fa-chevron-down"
+                @click="toggleColumnsSection(true)"
+                v-if="!isColumnsVisible"
+                aria-hidden="true"
+                style="cursor: pointer;"
                 :title="$i18n.t('dashboard.modal.showColumns')"
-              ></i>
+              />
             </h4>
-            <table v-if="isColumnsVisible" class="table table-striped table-bordered table-hover">
+            <table
+              v-if="isColumnsVisible"
+              class="table table-striped table-bordered table-hover"
+            >
               <thead>
                 <tr role="row">
-                  <th class="text-centered">{{$i18n.t('default.name')}}</th>
-                  <th class="text-centered">{{$i18n.t('default.dataType')}}</th>
-                  <th class="text-centered">{{$i18n.t('default.actions')}}</th>
+                  <th class="text-centered">
+                    {{ $i18n.t('default.name') }}
+                  </th>
+                  <th class="text-centered">
+                    {{ $i18n.t('default.dataType') }}
+                  </th>
+                  <th class="text-centered">
+                    {{ $i18n.t('default.actions') }}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(value, name, index) in currentLayerSettings.columns" :key="index">
-                  <td class="text-centered">{{name}}</td>
-                  <td class="text-centered">{{value}}</td>
+                <tr
+                  v-for="(value, name, index) in currentLayerSettings.columns"
+                  :key="index"
+                >
+                  <td class="text-centered">
+                    {{ name }}
+                  </td>
+                  <td class="text-centered">
+                    {{ value }}
+                  </td>
                   <td class="text-centered">
                     <i
                       v-if="name !== 'id'"
                       class="fa fa-trash fa-lg red icon-hover"
                       :title="$i18n.t('default.delete')"
-                      @click="deleteColumn(name)"></i>
+                      @click="deleteColumn(name)"
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-        <div class="tab-pane in active" id="style-tab" v-if="activeTab === 'style-tab'">
-          <div class="col-md-12 pb-10" style="display: flex;">
+        <div
+          class="tab-pane in active"
+          id="style-tab"
+          v-if="activeTab === 'style-tab'"
+        >
+          <div
+            class="col-md-12 pb-10"
+            style="display: flex;"
+          >
             <div class="col-md-6 pl-0">
-              <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.visType')}}</label>
-              <select class="form-control col-sm-4 mt-15" v-model="symbolizationType">
-                <option disabled value="">{{$i18n.t('settings.chooseVisualizationType')}}</option>
-                <option value="single">{{$i18n.t('default.single')}}</option>
-                <option value="categorized">{{$i18n.t('default.categorized')}}</option>
+              <label class="control-label col-sm-6 pl-0">{{ $i18n.t('settings.visType') }}</label>
+              <select
+                class="form-control col-sm-4 mt-15"
+                v-model="symbolizationType"
+              >
+                <option
+                  disabled
+                  value=""
+                >
+                  {{ $i18n.t('settings.chooseVisualizationType') }}
+                </option>
+                <option value="single">
+                  {{ $i18n.t('default.single') }}
+                </option>
+                <option value="categorized">
+                  {{ $i18n.t('default.categorized') }}
+                </option>
               </select>
             </div>
-            <div class="col-md-6 pl-0" v-if="symbolizationType === 'single'">
-              <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.objStyle')}}</label>
-              <select class="form-control col-sm-4 mt-15" v-model="layerType"
-                v-if="layerType === 'point' || layerType === 'square' || layerType === 'triangle'">
-                <option disabled value="">{{$i18n.t('settings.chooseObjectStyle')}}</option>
-                <option value="point">{{$i18n.t('default.point')}}</option>
-                <option value="square">{{$i18n.t('default.square')}}</option>
-                <option value="triangle">{{$i18n.t('default.triangle')}}</option>
+            <div
+              class="col-md-6 pl-0"
+              v-if="symbolizationType === 'single'"
+            >
+              <label class="control-label col-sm-6 pl-0">{{ $i18n.t('settings.objStyle') }}</label>
+              <select
+                class="form-control col-sm-4 mt-15"
+                v-model="layerType"
+                v-if="layerType === 'point' || layerType === 'square' || layerType === 'triangle'"
+              >
+                <option
+                  disabled
+                  value=""
+                >
+                  {{ $i18n.t('settings.chooseObjectStyle') }}
+                </option>
+                <option value="point">
+                  {{ $i18n.t('default.point') }}
+                </option>
+                <option value="square">
+                  {{ $i18n.t('default.square') }}
+                </option>
+                <option value="triangle">
+                  {{ $i18n.t('default.triangle') }}
+                </option>
               </select>
               <select
                 class="form-control col-sm-4 mt-15"
@@ -136,37 +250,64 @@
                 v-model="layerType"
                 v-else-if="layerType === 'polygon'"
               >
-                <option disabled value="">{{$i18n.t('default.polygon')}}</option>
-                <option disabled value="polygon">{{$i18n.t('default.polygon')}}</option>
+                <option
+                  disabled
+                  value=""
+                >
+                  {{ $i18n.t('default.polygon') }}
+                </option>
+                <option
+                  disabled
+                  value="polygon"
+                >
+                  {{ $i18n.t('default.polygon') }}
+                </option>
               </select>
               <select
                 class="form-control col-sm-4 mt-15"
                 v-model="layerType"
                 v-else
               >
-                <option disabled value="">{{$i18n.t('settings.chooseObjectStyle')}}</option>
-                <option value="line">{{$i18n.t('default.line')}}</option>
-                <option value="dotted">{{$i18n.t('default.dotted')}}</option>
-                <option value="dashed">{{$i18n.t('default.dashed')}}</option>
+                <option
+                  disabled
+                  value=""
+                >
+                  {{ $i18n.t('settings.chooseObjectStyle') }}
+                </option>
+                <option value="line">
+                  {{ $i18n.t('default.line') }}
+                </option>
+                <option value="dotted">
+                  {{ $i18n.t('default.dotted') }}
+                </option>
+                <option value="dashed">
+                  {{ $i18n.t('default.dashed') }}
+                </option>
               </select>
             </div>
           </div>
-          <div class="form-group" v-if="symbolizationType === 'single'">
-            <div class="col-md-3 color-picker__container" style="left: -30px;">
-              <label class="control-label">{{$i18n.t('settings.stroke-color')}}</label><br>
+          <div
+            class="form-group"
+            v-if="symbolizationType === 'single'"
+          >
+            <div
+              class="col-md-3 color-picker__container"
+              style="left: -30px;"
+            >
+              <label class="control-label">{{ $i18n.t('settings.stroke-color') }}</label><br>
               <verte
                 model="rgb"
                 :value="strokeColor"
                 v-model="strokeColor"
-              ></verte>
+              />
             </div>
             <div class="col-md-3 color-picker__container">
               <label class="control-label">
-                {{$i18n.t('settings.stroke-width')}}
+                {{ $i18n.t('settings.stroke-width') }}
                 <i
                   class="fa fa-question-circle icon-hover"
                   :title="$i18n.t('settings.sizeInfo')"
-                ></i>
+                />
               </label>
               <input
                 type="number"
@@ -176,29 +317,30 @@
                 class="form-control mt-15"
                 style="width:50px"
                 v-model="strokeWidth"
-              />
+              >
             </div>
             <div
               class="col-md-3 color-picker__container"
               v-if="layerType !== 'line' || layerType !== 'dotted' || layerType !== 'dashed'"
             >
-              <label class="control-label">{{$i18n.t('settings.fill-color')}}</label><br>
+              <label class="control-label">{{ $i18n.t('settings.fill-color') }}</label><br>
               <verte
                 model="rgb"
                 :value="fillColor"
                 v-model="fillColor"
-              ></verte>
+              />
             </div>
-            <div class="col-md-3 color-picker__container"
+            <div
+              class="col-md-3 color-picker__container"
               style="right: -20px"
               v-if="layerType === 'point' || layerType === 'triangle' || layerType === 'square'"
             >
               <label class="control-label">
-                {{$i18n.t('settings.width')}}
+                {{ $i18n.t('settings.width') }}
                 <i
                   class="fa fa-question-circle icon-hover"
                   :title="$i18n.t('settings.sizeInfo')"
-                ></i>
+                />
               </label>
               <input
                 type="number"
@@ -209,26 +351,48 @@
                 class="form-control mt-15"
                 style="width:50px"
                 v-model="width"
-              />
+              >
             </div>
-            <div class="col-md-12 pr-30" style="display:flex; justify-content:flex-end;">
+            <div
+              class="col-md-12 pr-30"
+              style="display:flex; justify-content:flex-end;"
+            >
               <button
                 type="button"
                 class="btn btn-success mt-15"
                 @click="saveStyle"
               >
-                {{$i18n.t('default.saveStyle')}}
+                {{ $i18n.t('default.saveStyle') }}
               </button>
             </div>
           </div>
-          <div class="form-group" v-else>
-            <div class="col-md-12 pb-10" style="display: flex;">
+          <div
+            class="form-group"
+            v-else
+          >
+            <div
+              class="col-md-12 pb-10"
+              style="display: flex;"
+            >
               <div class="col-md-6 pl-0">
-                <label class="control-label col-sm-6 pl-0">{{$i18n.t('settings.attribute')}}</label>
-                <select class="form-control col-sm-4 mt-15" v-model="categorizedAttr">
-                  <option disabled value="">{{$i18n.t('settings.chooseAttr')}}</option>
+                <label class="control-label col-sm-6 pl-0">{{ $i18n.t('settings.attribute') }}</label>
+                <select
+                  class="form-control col-sm-4 mt-15"
+                  v-model="categorizedAttr"
+                >
+                  <option
+                    disabled
+                    value=""
+                  >
+                    {{ $i18n.t('settings.chooseAttr') }}
+                  </option>
                   <template v-for="attr in Object.keys(currentLayerSettings.columns)">
-                    <option :key="attr" :value="attr">{{attr}}</option>
+                    <option
+                      :key="attr"
+                      :value="attr"
+                    >
+                      {{ attr }}
+                    </option>
                   </template>
                 </select>
               </div>
@@ -240,7 +404,7 @@
                   :disabled="!categorizedAttr"
                   @click="categorizeFeatures(categorizedAttr, currentEditedLayer.id)"
                 >
-                  {{$i18n.t('settings.classify')}}
+                  {{ $i18n.t('settings.classify') }}
                 </button>
                 <button
                   type="button"
@@ -249,59 +413,92 @@
                   v-if="categories.length > 0"
                   @click="saveCategorizedStyles"
                 >
-                  {{$i18n.t('default.saveStyle')}}
+                  {{ $i18n.t('default.saveStyle') }}
                 </button>
               </div>
             </div>
             <div class="col-md-12 pb-10">
-              <table v-if="categories.length > 0"
+              <table
+                v-if="categories.length > 0"
                 class="table table-striped table-bordered table-hover ml-15"
               >
                 <thead>
                   <tr role="row">
-                    <th v-if="headers.includes('value')" class="text-centered">
-                      {{$i18n.t('settings.value')}}
+                    <th
+                      v-if="headers.includes('value')"
+                      class="text-centered"
+                    >
+                      {{ $i18n.t('settings.value') }}
                     </th>
-                    <th v-if="headers.includes('fill-color')" class="text-centered">
-                      {{$i18n.t('settings.fill-color')}}
+                    <th
+                      v-if="headers.includes('fill-color')"
+                      class="text-centered"
+                    >
+                      {{ $i18n.t('settings.fill-color') }}
                     </th>
-                    <th v-if="headers.includes('stroke-color')" class="text-centered">
-                      {{$i18n.t('settings.stroke-color')}}
+                    <th
+                      v-if="headers.includes('stroke-color')"
+                      class="text-centered"
+                    >
+                      {{ $i18n.t('settings.stroke-color') }}
                     </th>
-                    <th v-if="headers.includes('stroke-width')" class="text-centered">
-                      {{$i18n.t('settings.stroke-width')}}
+                    <th
+                      v-if="headers.includes('stroke-width')"
+                      class="text-centered"
+                    >
+                      {{ $i18n.t('settings.stroke-width') }}
                       <i
                         class="fa fa-question-circle icon-hover"
                         :title="$i18n.t('settings.sizeInfo')"
-                      ></i>
+                      />
                     </th>
-                    <th v-if="headers.includes('width')" class="text-centered">
-                      {{$i18n.t('settings.width')}}
+                    <th
+                      v-if="headers.includes('width')"
+                      class="text-centered"
+                    >
+                      {{ $i18n.t('settings.width') }}
                       <i
                         class="fa fa-question-circle icon-hover"
                         :title="$i18n.t('settings.sizeInfo')"
-                      ></i>
+                      />
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(feat, index) in categories" :key="index">
-                    <td v-if="feat.hasOwnProperty('value')" class="text-centered">
-                      <p style="position: relative; top: 5px;">{{feat.value}}</p>
+                  <tr
+                    v-for="(feat, index) in categories"
+                    :key="index"
+                  >
+                    <td
+                      v-if="feat.hasOwnProperty('value')"
+                      class="text-centered"
+                    >
+                      <p style="position: relative; top: 5px;">
+                        {{ feat.value }}
+                      </p>
                     </td>
-                    <td v-if="feat.hasOwnProperty('fill-color')" class="text-centered">
+                    <td
+                      v-if="feat.hasOwnProperty('fill-color')"
+                      class="text-centered"
+                    >
                       <verte
                         model="rgb"
                         v-model="feat['fill-color-rgba']"
-                      ></verte>
+                      />
                     </td>
-                    <td v-if="feat.hasOwnProperty('stroke-color')" class="text-centered">
+                    <td
+                      v-if="feat.hasOwnProperty('stroke-color')"
+                      class="text-centered"
+                    >
                       <verte
                         model="rgb"
                         v-model="feat['stroke-color-rgba']"
-                      ></verte>
+                      />
                     </td>
-                    <td v-if="feat.hasOwnProperty('stroke-width')" class="text-centered">
+                    <td
+                      v-if="feat.hasOwnProperty('stroke-width')"
+                      class="text-centered"
+                    >
                       <input
                         type="number"
                         min="1"
@@ -310,9 +507,12 @@
                         class="form-control"
                         style="width:50px; margin:0 auto;"
                         v-model="feat['stroke-width']"
-                      />
+                      >
                     </td>
-                    <td v-if="feat.hasOwnProperty('width')" class="text-centered">
+                    <td
+                      v-if="feat.hasOwnProperty('width')"
+                      class="text-centered"
+                    >
                       <input
                         type="number"
                         min="1"
@@ -321,7 +521,7 @@
                         class="form-control"
                         style="width:50px; margin:0 auto;"
                         v-model="feat['width']"
-                      />
+                      >
                     </td>
                   </tr>
                 </tbody>
@@ -329,13 +529,17 @@
             </div>
           </div>
         </div>
-        <div class="tab-pane in active" id="labels-tab" v-if="activeTab === 'labels-tab'">
+        <div
+          class="tab-pane in active"
+          id="labels-tab"
+          v-if="activeTab === 'labels-tab'"
+        >
           <span class="d-flex">
-            <h4>{{$i18n.t('settings.labelsTitle')}}</h4>
+            <h4>{{ $i18n.t('settings.labelsTitle') }}</h4>
             <i
               class="fa fa-question-circle icon-hover ml-10"
               :title="$i18n.t('settings.labelsHelper')"
-            ></i>
+            />
           </span>
           <button
             type="button"
@@ -343,13 +547,17 @@
             class="btn btn-success mb-10"
             @click="saveLabels(labelsAll.filter(el => activeLabels.includes(el)))"
           >
-            {{$i18n.t('default.saveLabels')}}
+            {{ $i18n.t('default.saveLabels') }}
           </button>
           <table class="table table-striped table-bordered table-hover">
             <thead>
               <tr role="row">
-                <th class="text-centered">{{$i18n.t('default.active')}}</th>
-                <th class="text-centered">{{$i18n.t('default.attributes')}}</th>
+                <th class="text-centered">
+                  {{ $i18n.t('default.active') }}
+                </th>
+                <th class="text-centered">
+                  {{ $i18n.t('default.attributes') }}
+                </th>
               </tr>
             </thead>
             <draggable
@@ -358,14 +566,24 @@
               @start="drag=true"
               @end="drag=false"
             >
-              <tr v-for="(el, index) in labelsAll" :key="index">
+              <tr
+                v-for="(el, index) in labelsAll"
+                :key="index"
+              >
                 <td
                   class="text-centered"
                   style="width: 50px"
                 >
-                  <input type="checkbox" :id="el" :value="el" v-model="activeLabels">
+                  <input
+                    type="checkbox"
+                    :id="el"
+                    :value="el"
+                    v-model="activeLabels"
+                  >
                 </td>
-                <td class="text-centered">{{el}}</td>
+                <td class="text-centered">
+                  {{ el }}
+                </td>
               </tr>
             </draggable>
           </table>
@@ -382,7 +600,7 @@ import verte from 'verte';
 import 'verte/dist/verte.css';
 
 export default {
-  name: 'settings',
+  name: 'Settings',
   components: {
     verte,
     draggable,

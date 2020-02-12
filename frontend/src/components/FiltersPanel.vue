@@ -1,15 +1,25 @@
 <template>
   <div class="filters-panel">
     <template v-if="!value || value.length == 0">
-      <button class="btn btn-link" @click="toAddNew">
-        <i class="fa fa-plus-circle" aria-hidden="true"/>
+      <button
+        class="btn btn-link"
+        @click="toAddNew"
+      >
+        <i
+          class="fa fa-plus-circle"
+          aria-hidden="true"
+        />
         Dodaj filtr
       </button>
     </template>
     <template v-else>
       <div>
-        <div v-for="(filter, index) in value" :key="index">
-          <SingleFilterPanel ref="filter"
+        <div
+          v-for="(filter, index) in value"
+          :key="index"
+        >
+          <SingleFilterPanel
+            ref="filter"
             :value="filter"
             :columns="columns"
             @input="updateValue(filter, $event)"
@@ -19,15 +29,22 @@
             <div class="form-group">
               <label class="control-label col-sm-4">Następny warunek:</label>
               <div class="col-sm-8">
-                <select class="form-control" v-model="filter.condition"
-                    :value="filter.condition"
-                    @input="updateNext(filter, $event.target.value)">
-                  <option value="" v-if="filter.condition == ''"/>
+                <select
+                  class="form-control"
+                  v-model="filter.condition"
+                  :value="filter.condition"
+                  @input="updateNext(filter, $event.target.value)"
+                >
+                  <option
+                    value
+                    v-if="filter.condition == ''"
+                  />
                   <option
                     v-for="(operation, idx) in filterMergeOperations"
                     v-text="operation"
                     :value="operation"
-                    :key="operation + idx"/>
+                    :key="operation + idx"
+                  />
                 </select>
               </div>
             </div>
@@ -35,21 +52,28 @@
         </div>
       </div>
       <div>
-        <span>Znajdź w tabeli obiekty z warstwy <b v-text="$route.params.layerName"/>
+        <span>
+          Znajdź w tabeli obiekty z warstwy
+          <b v-text="$route.params.layerName" />
           które spełniają warunki:
           <ul>
-          <template v-for="(filter, idx) in value">
-            <span :key="filter.column+idx"
-              v-if="filter.operation != '' && filter.column != '' && filter.value != ''">
-            <li>atrybut
-              <b v-text="filter.column"/>&nbsp;
-              <span v-text="filterOperationsText[filter.operation]"/>&nbsp;
-              <b v-text="filter.value"/>&nbsp;
-              <span v-text="filterMergeOperationsText[filter.condition]"
-                v-if="filter.condition != ''"/>&nbsp;
-            </li>
-            </span>
-          </template>
+            <template v-for="(filter, idx) in value">
+              <span
+                :key="filter.column+idx"
+                v-if="filter.operation != '' && filter.column != '' && filter.value != ''"
+              >
+                <li>
+                  atrybut
+                  <b v-text="filter.column" />&nbsp;
+                  <span v-text="filterOperationsText[filter.operation]" />&nbsp;
+                  <b v-text="filter.value" />&nbsp;
+                  <span
+                    v-text="filterMergeOperationsText[filter.condition]"
+                    v-if="filter.condition != ''"
+                  />&nbsp;
+                </li>
+              </span>
+            </template>
           </ul>
         </span>
       </div>
@@ -62,19 +86,19 @@ import _ from 'lodash';
 import SingleFilterPanel from '@/components/SingleFilterPanel.vue';
 
 export default {
-  name: 'filtersComponent',
+  name: 'FiltersComponent',
   components: {
-    SingleFilterPanel,
+    SingleFilterPanel
   },
   props: {
     columns: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     value: {
       type: Array,
-      required: true,
-    },
+      required: true
+    }
   },
   data: () => ({
     filterMergeOperations: ['AND', 'OR'],
@@ -90,12 +114,12 @@ export default {
       '<': 'jest mniejszy niż',
       '=<': 'jest mniejszy lub równy',
       '=>': 'jest większy lub równy',
-      '>': 'jest większy niż',
+      '>': 'jest większy niż'
     },
     filterMergeOperationsText: {
       AND: 'i',
-      OR: 'lub',
-    },
+      OR: 'lub'
+    }
   }),
   methods: {
     toAddNew() {
@@ -103,7 +127,7 @@ export default {
         column: '',
         operation: '=',
         value: '',
-        condition: '',
+        condition: ''
       });
       this.emitUpdateValue();
     },
@@ -134,11 +158,13 @@ export default {
     },
     emitUpdateValue() {
       this.$emit('input', this.value);
-    },
+    }
   },
   created() {
-    this.fields = _(this.$root.fields).keyBy(field => field.key)
-      .mapValues(field => field.name).value();
-  },
+    this.fields = _(this.$root.fields)
+      .keyBy(field => field.key)
+      .mapValues(field => field.name)
+      .value();
+  }
 };
 </script>

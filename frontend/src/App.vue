@@ -1,19 +1,34 @@
 <template>
   <div id="app">
     <div id="nav">
-      <header class="navbar" role="banner">
+      <header
+        class="navbar"
+        role="banner"
+      >
         <div class="container">
           <div class="navbar-header">
-            <button class="navbar-toggle" type="button" data-toggle="collapse"
-            data-target=".navbar-collapse">
+            <button
+              class="navbar-toggle"
+              type="button"
+              data-toggle="collapse"
+              data-target=".navbar-collapse"
+            >
               <span class="sr-only">Toggle navigation</span>
-              <i class="fa fa-cog"></i>
+              <i class="fa fa-cog" />
             </button>
             <a class="navbar-brand navbar-brand-img">
-              <img id="logo" alt="GIS Support logo" src="@/assets/logo.png">
+              <img
+                id="logo"
+                alt="GIS Support logo"
+                src="@/assets/logo.png"
+              >
             </a>
           </div>
-          <nav v-if="user" class="collapse navbar-collapse" role="navigation">
+          <nav
+            v-if="user"
+            class="collapse navbar-collapse"
+            role="navigation"
+          >
             <ul class="nav navbar-nav navbar-right">
               <!-- <li class="navbar-profile" :disabled="$i18n.locale == 'en'"
                 :class="{ btnActive: $i18n.locale == 'en'}" @click="changeLanguage('en')">
@@ -24,28 +39,41 @@
                 <a>PL</a>
               </li> -->
               <li class="dropdown navbar-profile">
-                <a class="dropdown-toggle" style="padding-left: 15px;" data-toggle="dropdown"
-                href="javascript:;" >
+                <a
+                  class="dropdown-toggle"
+                  style="padding-left: 15px;"
+                  data-toggle="dropdown"
+                  href="javascript:;"
+                >
                   <span>{{ user }} &nbsp;</span>
-                  <i class="fa fa-caret-down"></i>
+                  <i class="fa fa-caret-down" />
                 </a>
-                <ul class="dropdown-menu" role="menu">
-                  <li @click="changePage('dashboard')" v-if="this.$route.name !== 'dashboard'">
+                <ul
+                  class="dropdown-menu"
+                  role="menu"
+                >
+                  <li
+                    @click="changePage('dashboard')"
+                    v-if="this.$route.name !== 'dashboard'"
+                  >
                     <a>
-                      <i class="fa fa-dashboard"></i>
-                      &nbsp;&nbsp;<span>{{$i18n.t('default.dashboard')}}</span>
+                      <i class="fa fa-dashboard" />
+                      &nbsp;&nbsp;<span>{{ $i18n.t('default.dashboard') }}</span>
                     </a>
                   </li>
-                  <li @click="changePage('users')" v-if="this.$route.name !== 'users'">
+                  <li
+                    @click="changePage('users')"
+                    v-if="this.$route.name !== 'users'"
+                  >
                     <a>
-                      <i class="fa fa-users"></i>
-                      &nbsp;&nbsp;<span>{{$i18n.t('default.users')}}</span>
+                      <i class="fa fa-users" />
+                      &nbsp;&nbsp;<span>{{ $i18n.t('default.users') }}</span>
                     </a>
                   </li>
                   <li @click="logout">
                     <a>
-                      <i class="fa fa-sign-out"></i>
-                      &nbsp;&nbsp;<span>{{$i18n.t('default.logout')}}</span>
+                      <i class="fa fa-sign-out" />
+                      &nbsp;&nbsp;<span>{{ $i18n.t('default.logout') }}</span>
                     </a>
                   </li>
                 </ul>
@@ -55,7 +83,7 @@
         </div>
       </header>
     </div>
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
