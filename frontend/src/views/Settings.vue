@@ -848,6 +848,7 @@ export default {
       if (!Object.keys(this.featureAttachments).includes(lid)) {
         this.$store.commit('setAttachmentsLayer', lid);
       }
+      this.$store.commit('setLayerName', this.currentEditedLayer.name);
       this.$router.push({
         name: 'feature_manager',
         params: {
