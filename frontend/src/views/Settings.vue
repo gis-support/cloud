@@ -716,7 +716,6 @@ export default {
       this.categories.forEach(feat => {
         let fillRgb = this.formatColor(feat['fill-color-rgba']);
         let strokeRgb = this.formatColor(feat['stroke-color-rgba']);
-
         if (fillRgb.split(',').length === 3) {
           fillRgb = `${fillRgb},1`;
         }
@@ -745,42 +744,46 @@ export default {
       }
     },
     async saveLabels() {
-      let fill;
-      let stroke;
-      if (this.fillColor) {
-        fill = this.formatColor(this.fillColor);
-
-        if (fill.split(',').length === 3) {
-          fill = `${fill},1`;
-        }
-      }
-      if (this.strokeColor) {
-        stroke = this.formatColor(this.strokeColor);
-
-        if (stroke.split(',').length === 3) {
-          stroke = `${stroke},1`;
-        }
-      }
-
-      const labelsToSave = this.labelsAll.filter(el =>
-        this.activeLabels.includes(el)
-      );
-      const r = await this.$store.dispatch('saveStyle', {
-        lid: this.currentEditedLayer.id,
-        body: {
-          type: this.layerType,
-          'fill-color': fill,
-          'stroke-color': stroke,
-          'stroke-width': this.strokeWidth,
-          labels: labelsToSave,
-          width: this.width,
-          renderer: this.symbolizationType
-        }
-      });
-      if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('default.styleSaved'));
+      if (this.symbolizationType === 'categorized') {
+        this.saveCategorizedStyles();
       } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
+        let fill;
+        let stroke;
+        if (this.fillColor) {
+          fill = this.formatColor(this.fillColor);
+
+          if (fill.split(',').length === 3) {
+            fill = `${fill},1`;
+          }
+        }
+        if (this.strokeColor) {
+          stroke = this.formatColor(this.strokeColor);
+
+          if (stroke.split(',').length === 3) {
+            stroke = `${stroke},1`;
+          }
+        }
+        const labelsToSave = this.labelsAll.filter(el =>
+          this.activeLabels.includes(el)
+        );
+        const r = await this.$store.dispatch('saveStyle', {
+          lid: this.currentEditedLayer.id,
+          body: {
+            type: this.layerType,
+            attribute: this.categorizedAttr,
+            'fill-color': fill,
+            'stroke-color': stroke,
+            'stroke-width': this.strokeWidth,
+            labels: labelsToSave,
+            width: this.width,
+            renderer: this.symbolizationType
+          }
+        });
+        if (r.status === 200) {
+          this.$alertify.success(this.$i18n.t('default.styleSaved'));
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
       }
     },
     async saveStyle() {
