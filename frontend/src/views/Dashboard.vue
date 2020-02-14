@@ -283,6 +283,7 @@
       <div
         class="modal-dialog modal-dialog-centered"
         role="document"
+        style="max-height: 80%"
       >
         <div class="modal-content">
           <div class="modal-header">
@@ -343,6 +344,7 @@
                       :value="layer"
                       v-model="selectedLayers"
                     >
+                    {{ layer }}
                   </label>
                 </li>
               </ul>
