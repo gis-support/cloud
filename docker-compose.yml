@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   db:
-    container_name: cloud-db
+    container_name: ${CONTAINER_BASENAME}-db
     restart: always
     build:
       context: ./
@@ -23,7 +23,7 @@ services:
       - DEFAULT_GROUPS
       - DEFAULT_GROUP
   api:
-    container_name: cloud-api
+    container_name: ${CONTAINER_BASENAME}-api
     restart: always
     build:
       context: ./
@@ -41,11 +41,14 @@ services:
       - DEFAULT_USER
       - DEFAULT_PASS
       - DEFAULT_GROUP
+      - CONTAINER_BASENAME
+      - APP_DEV_DB_PORT
+      - APP_DEV_HOST_URL
     depends_on:
       - db
       - redis
   redis:
-    container_name: cloud-redis
+    container_name: ${CONTAINER_BASENAME}-redis
     image: redis:5.0.6
     volumes:
       - ./docker/db/redis_data:/data

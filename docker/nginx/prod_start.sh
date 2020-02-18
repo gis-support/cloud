@@ -1,0 +1,1 @@
+curl https://${APP_PROD_HOST_URL}/api/docs/api.json -o /cloud/src/docs/api.json && cd /cloud && npm i && npm run build && echo 'Cloud application ready to use' && nginx -g 'daemon off;'

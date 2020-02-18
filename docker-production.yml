@@ -2,7 +2,7 @@ version: "3.3"
 services:
   nginx:
     restart: always
-    container_name: cloud-nginx-prod
+    container_name: ${CONTAINER_BASENAME}-nginx-prod
     build:
       context: ./
       dockerfile: ./docker/nginx/Dockerfile
@@ -13,9 +13,24 @@ services:
       - db
       - api
       - redis
+    environment:
+      - APP_PROD_HOST_URL
+      - VUE_APP_PROD_HOST_URL=${APP_PROD_HOST_URL}
+    command: bash -c "./prod_start.sh"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "service",
+          "nginx",
+          "status",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
   db:
     restart: always
-    container_name: cloud-db-prod
+    container_name: ${CONTAINER_BASENAME}-db-prod
     build:
       context: ./
       dockerfile: ./docker/db/Dockerfile
@@ -39,19 +54,18 @@ services:
       test:
         [
           "CMD",
-          "export",
-          "PGPASSWORD=nielogowacsienategousera",
-          "&&",
           "pg_isready",
           "-U",
           "docker",
+          "-h",
+          "localhost"
         ]
       interval: 5s
       timeout: 3s
       retries: 5
   api:
     restart: always
-    container_name: cloud-api-prod
+    container_name: ${CONTAINER_BASENAME}-api-prod
     build:
       context: ./
       dockerfile: ./docker/api/Dockerfile
@@ -63,12 +77,29 @@ services:
       - DEFAULT_USER
       - DEFAULT_PASS
       - DEFAULT_GROUP
+      - CONTAINER_BASENAME
+      - APP_PROD_DB_PORT
+      - APP_PROD_API_PORT
+      - APP_PROD_HOST_URL
     depends_on:
       - db
       - redis
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "localhost:${APP_PROD_API_PORT}",
+          "docker",
+          "-h",
+          "localhost"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
   redis:
     restart: always
-    container_name: cloud-redis-prod
+    container_name: ${CONTAINER_BASENAME}-redis-prod
     image: redis:5.0.6
     volumes:
       - ./docker/db/prod_redis_data:/data

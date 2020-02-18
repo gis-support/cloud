@@ -119,7 +119,10 @@ sudo rm -rf ./docker/db/redis_data
 
 * Docker Compose 1.21+
 
-2. Należy uruchomić polecenie:
+2. Należy ustawić odpowiednie parametry w pliku .env w głównym katalogu aplikacji.
+
+3. Należy wykonać polecenie:
+
 ```
 docker-compose -f docker-production.yml up -d --build
 ```

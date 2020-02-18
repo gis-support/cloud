@@ -18,7 +18,7 @@ const swagger = new Swagger({
 
 export default {
   state: {
-    apiUrl: 'https://cloud.gis.support/api',
+    apiUrl: `https://${process.env.VUE_APP_PROD_HOST_URL}/api`,
     columnTypes: ['character varying', 'real', 'integer', 'timestamp without time zone'],
     services: [],
   },

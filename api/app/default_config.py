@@ -11,11 +11,12 @@ class Config(object):
     DBNAME = 'cloud'
     DBUSER = 'docker'
     DBPASS = 'nielogowacsienategousera'
-    DBPORT = 5432
-    DBHOST = 'cloud-db-prod'
-    APP_HOST = 'cloud.gis.support'
-    APP_PORT = 4999
-    REDIS_URL = "redis://@cloud-redis-prod:6379/0"
+    DBPORT = environ.get('APP_PROD_DB_PORT', 5432)
+    APP_NAME = environ.get('CONTAINER_BASENAME', 'cloud')
+    DBHOST = f'{APP_NAME}-db-prod'
+    APP_HOST = environ.get('APP_PROD_HOST_URL', 'cloud.gis.support')
+    APP_PORT = environ.get('APP_PROD_API_PORT', 4999)
+    REDIS_URL = f"redis://@{APP_NAME}-redis-prod:6379/0"
     SECRET_KEY = 'test'
     DEBUG = False
     TESTING = False
@@ -23,14 +24,16 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    APP_PORT = 5001
-    APP_HOST = 'localhost'
-    REDIS_URL = "redis://@cloud-redis:6379/0"
-    DBHOST = 'cloud-db'
+    APP_PORT = environ.get('APP_DEV_API_PORT', 5001)
+    APP_HOST = environ.get('APP_DEV_HOST_URL', 'localhost')
+    APP_NAME = environ.get('CONTAINER_BASENAME', 'cloud')
+    REDIS_URL = f"redis://@{APP_NAME}-redis:6379/0"
+    DBHOST = f'{APP_NAME}-db'
 
 
 class TestingConfig(Config):
     TESTING = True
+    APP_NAME = environ.get('CONTAINER_BASENAME', 'cloud')
     DBNAME = 'cloud-testing'
-    DBHOST = 'cloud-db'
-    REDIS_URL = "redis://@cloud-redis:6379/1"
+    DBHOST = f'{APP_NAME}-db'
+    REDIS_URL = f"redis://@{APP_NAME}-redis:6379/1"
