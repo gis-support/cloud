@@ -11,7 +11,7 @@ class Config(object):
     DBNAME = 'cloud'
     DBUSER = 'docker'
     DBPASS = 'nielogowacsienategousera'
-    DBPORT = environ.get('APP_PROD_DB_PORT', 5432)
+    DBPORT = 5432
     APP_NAME = environ.get('CONTAINER_BASENAME', 'cloud')
     DBHOST = f'{APP_NAME}-db-prod'
     APP_HOST = environ.get('APP_PROD_HOST_URL', 'cloud.gis.support')
