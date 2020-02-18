@@ -6,4 +6,5 @@ RUN apt-get install -y nodejs git
 COPY ./docker/nginx/prod_start.sh ./
 RUN chmod +x ./prod_start.sh
 COPY ./frontend /cloud
-COPY ./docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/nginx/nginx.conf.template /etc/nginx/nginx.conf.template
+RUN touch /etc/nginx/conf.d/default.conf
