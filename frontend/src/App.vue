@@ -16,12 +16,15 @@
               <span class="sr-only">Toggle navigation</span>
               <i class="fa fa-cog" />
             </button>
-            <a class="navbar-brand navbar-brand-img">
+            <a
+              class="navbar-brand navbar-brand-img"
+              @click="redirectToDashboard()"
+            >
               <img
                 id="logo"
                 alt="GIS Support logo"
                 src="@/assets/logo.png"
-              >
+              />
             </a>
           </div>
           <nav
@@ -37,7 +40,7 @@
               <li class="navbar-profile" :disabled="$i18n.locale == 'pl'"
                 :class="{ btnActive: $i18n.locale == 'pl'}" @click="changeLanguage('pl')">
                 <a>PL</a>
-              </li> -->
+              </li>-->
               <li class="dropdown navbar-profile">
                 <a
                   class="dropdown-toggle"
@@ -58,7 +61,8 @@
                   >
                     <a>
                       <i class="fa fa-dashboard" />
-                      &nbsp;&nbsp;<span>{{ $i18n.t('default.dashboard') }}</span>
+                      &nbsp;&nbsp;
+                      <span>{{ $i18n.t('default.dashboard') }}</span>
                     </a>
                   </li>
                   <li
@@ -67,13 +71,15 @@
                   >
                     <a>
                       <i class="fa fa-users" />
-                      &nbsp;&nbsp;<span>{{ $i18n.t('default.users') }}</span>
+                      &nbsp;&nbsp;
+                      <span>{{ $i18n.t('default.users') }}</span>
                     </a>
                   </li>
                   <li @click="logout">
                     <a>
                       <i class="fa fa-sign-out" />
-                      &nbsp;&nbsp;<span>{{ $i18n.t('default.logout') }}</span>
+                      &nbsp;&nbsp;
+                      <span>{{ $i18n.t('default.logout') }}</span>
                     </a>
                   </li>
                 </ul>
@@ -93,7 +99,7 @@ export default {
   computed: {
     user() {
       return this.$store.getters.getUser;
-    },
+    }
   },
   methods: {
     changeLanguage(lang) {
@@ -106,10 +112,13 @@ export default {
       this.$store.commit('logOut');
       this.$router.push({ name: 'login' });
     },
+    redirectToDashboard() {
+      this.$router.push({ name: 'dashboard' });
+    }
   },
   async mounted() {
     this.changeLanguage('pl');
-  },
+  }
 };
 </script>
 
