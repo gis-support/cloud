@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from app.tests.utils import BaseTest
+from app.tests.utils import BaseTest, TEST_DATA_DIR
+from io import BytesIO
 import json
 import pytest
 import os
@@ -155,3 +156,23 @@ class TestGroups(BaseTest):
         assert r.status_code == 400
         assert r.json
         assert r.json['error'] == 'group restricted'
+
+
+@pytest.mark.auth
+class TestLogo(BaseTest):
+
+    def test_get_logo(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'images', 'logo.png')
+        r = client.get('/api/logo')
+        assert r.get_data() == open(path, 'rb').read()
+
+    def test_post_logo(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'images', 'logo.png')
+        file_request = {
+            'file': (BytesIO(open(path, 'rb').read()), 'logo.png'),
+        }
+        r = client.post('/api/logo?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.get_data() == open(path, 'rb').read()

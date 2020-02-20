@@ -20,7 +20,7 @@
               <img
                 id="logo"
                 alt="GIS Support logo"
-                src="@/assets/logo.png"
+                :src="`${this.$store.getters.getApiUrl}/logo`"
               >
             </a>
           </div>
