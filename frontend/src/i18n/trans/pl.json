@@ -4,7 +4,7 @@
       "addLayer": "Dodaj nową warstwę",
       "addService": "Dodaj źródło zewnętrzne"
     },
-    "modal":  {
+    "modal": {
       "addLayer": "Dodawanie nowej warstwy",
       "addLayerWms": "Dodawanie warstwy ze źródła zewnętrznego",
       "addColumn": "Dodawanie kolumny do warstwy",
@@ -12,6 +12,7 @@
       "columnAdded": "Dodano kolumnę",
       "columnName": "Nazwa kolumny",
       "columns": "Kolumny warstwy",
+      "dataFormat": "Format danych",
       "deleteLayerColumn": "Czy na pewno chcesz usunąć kolumnę?",
       "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
       "deleteColumnTitle": "Usuwanie kolumny",
