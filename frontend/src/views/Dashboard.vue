@@ -228,13 +228,12 @@
               <select
                 class="form-control"
                 v-model="selectedDataExtension"
-                @change="updateAvaliableDataFormats()"
               >
                 <option
                   v-for="(dataFormat, id) of dataFormats"
                   v-text="dataFormat.text"
                   :key="id"
-                  :value="dataFormat.value"
+                  :value="dataFormat"
                 />
               </select>
             </div>
@@ -401,9 +400,13 @@ export default {
   data: vm => ({
     currentEditedLayer: undefined,
     dataFormats: [
-      { text: 'ESRI ShapeFile', value: '.shp' },
-      { text: 'GeoJSON', value: '.geojson' },
-      { text: 'GML', value: '.gml' }
+      {
+        text: 'ESRI Shapefile',
+        value: 'shapefile',
+        extensions: ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.qpj']
+      },
+      { text: 'GeoJSON', value: 'geojson', extensions: ['.geojson'] },
+      { text: 'GML', value: 'gml', extensions: ['.gml'] }
     ],
     epsg: undefined,
     fetchedLayers: [],
@@ -493,6 +496,14 @@ export default {
         return `${val.slice(0, 50)}...`;
       }
       return val;
+    }
+  },
+  watch: {
+    selectedDataExtension() {
+      this.$refs.dropzoneUploadLayer.dropzone.hiddenFileInput.setAttribute(
+        'accept',
+        this.selectedDataExtension.extensions.join()
+      );
     }
   },
   methods: {
@@ -662,14 +673,10 @@ export default {
       if (!Object.keys(this.featureAttachments).includes(lid)) {
         this.$store.commit('setAttachmentsLayer', lid);
       }
-    },
-    updateAvaliableDataFormats() {
-      //trzeba ograniczyć przyjmowane rozszerzenia przez dropzone do rozszerzenia ze zmiennej this.selectedDataExtension
-      //this.$refs.dropzoneUploadLayer.options.acceptedFiles = this.selectedDataExtension;
     }
   },
   async mounted() {
-    // console.log(this.$swagger);
+    this.selectedDataExtension = this.dataFormats[0];
     this.getLayers();
     this.getServices();
     this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
