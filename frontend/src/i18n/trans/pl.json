@@ -158,7 +158,9 @@
     "noLayerNameError": "Nazwa warstwy jest wymagana",
     "removeFile": "Usuń plik",
     "uploadError": "Błąd podczas przesyłania pliku",
-    "uploadSuccess": "Pomyślnie przesłano plik"
+    "uploadSuccess": "Pomyślnie przesłano plik",
+    "uploadExtensionError": "Nieodpowiednie rozszerzenie pliku",
+    "uploadDuplicate": "Ten plik został już dodany"
   },
   "users": {
     "assignUser": "Przypisz użytkownika",

@@ -238,14 +238,35 @@
               </select>
             </div>
             <div class="pt-10">
-              <vue-dropzone
+              <!--<vue-dropzone
                 ref="dropzoneUploadLayer"
                 id="dropzone"
                 :options="dropzoneOptions"
                 @vdropzone-error="sendingError"
                 @vdropzone-sending-multiple="sendingEvent"
                 @vdropzone-success-multiple="sendingSuccess"
-              />
+              />-->
+              <ul>
+                <li
+                  v-for="(file,id) in files"
+                  :key="id"
+                >
+                  {{file.name}}
+                  <i
+                    class="icon-li fa fa-times fa-lg ml-5"
+                    @click="removeFile(file)"
+                  />
+                </li>
+              </ul>
+              <file-upload
+                ref="upload"
+                v-model="files"
+                multiple="multiple"
+                :drop="true"
+                :drop-directory="true"
+                post-action="postAction"
+                @input-filter="fileFilter"
+              >{{this.$i18n.t('upload.defaultMessage')}}</file-upload>
             </div>
           </div>
           <div class="modal-footer">
@@ -391,6 +412,7 @@
 </template>
 
 <script>
+import FileUpload from 'vue-upload-component';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
@@ -410,6 +432,7 @@ export default {
     ],
     epsg: undefined,
     fetchedLayers: [],
+    files: [],
     isEpsgAutomatic: true,
     isFetching: false,
     isSendingError: false,
@@ -429,6 +452,9 @@ export default {
         save: true
       }
     },
+    postAction: `${
+      vm.$store.getters.getApiUrl
+    }/layers?token=${localStorage.getItem('token')}`,
     searchExtSources: '',
     searchVector: '',
     serviceUrl: '',
@@ -464,7 +490,8 @@ export default {
     }
   }),
   components: {
-    vueDropzone: vue2Dropzone
+    //vueDropzone: vue2Dropzone,
+    FileUpload
   },
   computed: {
     featureAttachments() {
@@ -500,10 +527,11 @@ export default {
   },
   watch: {
     selectedDataExtension() {
-      this.$refs.dropzoneUploadLayer.dropzone.hiddenFileInput.setAttribute(
+      this.files = [];
+      /*this.$refs.dropzoneUploadLayer.dropzone.hiddenFileInput.setAttribute(
         'accept',
         this.selectedDataExtension.extensions.join()
-      );
+      );*/
     }
   },
   methods: {
@@ -592,7 +620,7 @@ export default {
       this.serviceUrl = '';
     },
     clearUploadFiles() {
-      this.$refs.dropzoneUploadLayer.removeAllFiles();
+      this.files = [];
       this.vectorLayerName = '';
       this.isEpsgAutomatic = true;
     },
@@ -621,6 +649,21 @@ export default {
           }
         });
     },
+    fileFilter: function(newFile, oldFile, prevent) {
+      let ext = newFile.name.substr(newFile.name.lastIndexOf('.'));
+      if (newFile && !oldFile) {
+        if (!this.selectedDataExtension.extensions.includes(ext)) {
+          this.$alertify.error(this.$i18n.t('upload.uploadExtensionError'));
+          return prevent();
+        }
+        for (file of this.files) {
+          if (newFile.name === file.name && newFile.size === file.size) {
+            this.$alertify.error(this.$i18n.t('upload.uploadDuplicate'));
+            return prevent();
+          }
+        }
+      }
+    },
     goToManager(val) {
       this.$router.push({
         name: 'feature_manager',
@@ -641,6 +684,12 @@ export default {
         return false;
       }
       return true;
+    },
+    removeFile(file) {
+      let fileIndex = this.files.indexOf(file);
+      if (fileIndex > -1) {
+        this.files.splice(fileIndex, 1);
+      }
     },
     sendingError(file) {
       if (!this.isSendingError) {
@@ -667,7 +716,8 @@ export default {
       this.isSendingError = false;
     },
     sendVectorLayer() {
-      this.$refs.dropzoneUploadLayer.processQueue();
+      //$refs.upload.active = true;
+      //this.$refs.dropzoneUploadLayer.processQueue();
     },
     setAttachmentsLayer(lid) {
       if (!Object.keys(this.featureAttachments).includes(lid)) {
@@ -729,6 +779,35 @@ export default {
 .files-list li {
   width: 120px;
   list-style: none;
+}
+.file-uploads {
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  display: inline-block;
+  min-height: 100px;
+  width: 80%;
+  border: 1px solid lightgray;
+}
+.file-uploads.file-uploads-html4 input[type='file'] {
+  opacity: 0;
+  font-size: 20em;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.file-uploads.file-uploads-html5 input[type='file'] {
+  overflow: hidden;
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  z-index: -1;
+  opacity: 0;
 }
 .heading-block:after,
 .heading-block:before {
