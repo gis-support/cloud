@@ -238,14 +238,6 @@
               </select>
             </div>
             <div class="pt-10">
-              <!--<vue-dropzone
-                ref="dropzoneUploadLayer"
-                id="dropzone"
-                :options="dropzoneOptions"
-                @vdropzone-error="sendingError"
-                @vdropzone-sending-multiple="sendingEvent"
-                @vdropzone-success-multiple="sendingSuccess"
-              />-->
               <ul>
                 <li
                   v-for="(file,id) in files"
@@ -261,11 +253,13 @@
               <file-upload
                 ref="upload"
                 v-model="files"
-                multiple="multiple"
+                :multiple="uploadMultiple"
+                :data="{name: this.vectorLayerName}"
                 :drop="true"
                 :drop-directory="true"
-                post-action="postAction"
+                :post-action="postAction"
                 @input-filter="fileFilter"
+                @input-file="fileInput"
               >{{this.$i18n.t('upload.defaultMessage')}}</file-upload>
             </div>
           </div>
@@ -413,8 +407,6 @@
 
 <script>
 import FileUpload from 'vue-upload-component';
-import vue2Dropzone from 'vue2-dropzone';
-import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
 export default {
@@ -461,36 +453,11 @@ export default {
     serviceName: '',
     selectedDataExtension: '',
     selectedLayers: [],
+    uploadMultiple: true,
     vectorLayerName: '',
-    vectorLayersList: undefined,
-    dropzoneOptions: {
-      url: `${vm.$store.getters.getApiUrl}/layers?token=${localStorage.getItem(
-        'token'
-      )}`,
-      acceptedFiles: 'none',
-      addRemoveLinks: true,
-      autoProcessQueue: false,
-      dictCancelUpload: vm.$i18n.t('upload.cancelUpload'),
-      dictRemoveFile: vm.$i18n.t('upload.removeFile'),
-      dictDefaultMessage: vm.$i18n.t('upload.defaultMessage'),
-      thumbnailWidth: 150,
-      maxFilesize: 256,
-      timeout: 180000,
-      uploadMultiple: true,
-      parallelUploads: 10,
-      methods: 'post',
-      success(file, response) {
-        vm.$alertify.success(vm.$i18n.t('upload.uploadSuccess'));
-        const newLayer = { id: response.layers.id, name: response.layers.name };
-        if (!vm.vectorLayersList.find(el => el.id === newLayer.id)) {
-          vm.vectorLayersList.push(newLayer);
-        }
-        vm.$refs.closeModalBtn.click();
-      }
-    }
+    vectorLayersList: undefined
   }),
   components: {
-    //vueDropzone: vue2Dropzone,
     FileUpload
   },
   computed: {
@@ -528,10 +495,6 @@ export default {
   watch: {
     selectedDataExtension() {
       this.files = [];
-      /*this.$refs.dropzoneUploadLayer.dropzone.hiddenFileInput.setAttribute(
-        'accept',
-        this.selectedDataExtension.extensions.join()
-      );*/
     }
   },
   methods: {
@@ -664,6 +627,37 @@ export default {
         }
       }
     },
+    fileInput: function(newFile, oldFile) {
+      if (newFile && !oldFile) {
+      }
+      if (newFile && oldFile) {
+        if (newFile.active !== oldFile.active) {
+        }
+        if (newFile.error != oldFile.error) {
+          vm.$alertify.error(
+            vm.$i18n.t('upload.uploadError') + ' ' + newFile.name
+          );
+        }
+        if (newFile.success !== oldFile.success) {
+          vm.$alertify.success(
+            vm.$i18n.t('upload.uploadSuccess') + ' ' + newFile.name
+          );
+          let newLayer = {
+            id: newFile.response.layers.id,
+            name: newFile.response.layers.name
+          };
+          if (!this.vectorLayersList.find(el => el.id === newLayer.id)) {
+            this.vectorLayersList.push(newLayer);
+          }
+        }
+      }
+      if (this.$refs.upload.uploaded) {
+        this.files = [];
+        this.vectorLayerName = '';
+        this.selectedDataExtension = this.dataFormats[0];
+        this.$refs.closeModalBtn.click();
+      }
+    },
     goToManager(val) {
       this.$router.push({
         name: 'feature_manager',
@@ -716,8 +710,7 @@ export default {
       this.isSendingError = false;
     },
     sendVectorLayer() {
-      //$refs.upload.active = true;
-      //this.$refs.dropzoneUploadLayer.processQueue();
+      this.$refs.upload.active = true;
     },
     setAttachmentsLayer(lid) {
       if (!Object.keys(this.featureAttachments).includes(lid)) {
