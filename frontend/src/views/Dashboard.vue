@@ -315,6 +315,26 @@
               />
             </div>
             <div
+              style="display: flex"
+              class="pt-10"
+            >
+              <label
+                class="control-label col-sm-4"
+                style="width: 150px"
+              >{{ $i18n.t('dashboard.modal.dataFormat') }}</label>
+              <select
+                class="form-control"
+                v-model="selectedMapService"
+              >
+                <option
+                  v-for="(mapService, id) of mapServices"
+                  v-text="mapService.text"
+                  :key="id"
+                  :value="mapService"
+                />
+              </select>
+            </div>
+            <div
               class="pt-10"
               style="display: flex;"
             >
@@ -422,6 +442,12 @@ export default {
       { text: 'GeoJSON', value: 'geojson', extensions: ['.geojson'] },
       { text: 'GML', value: 'gml', extensions: ['.gml'] }
     ],
+    mapServices: [
+      {
+        text: 'WMS',
+        value: 'wms'
+      }
+    ],
     epsg: undefined,
     fetchedLayers: [],
     files: [],
@@ -452,6 +478,7 @@ export default {
     serviceUrl: '',
     serviceName: '',
     selectedDataExtension: '',
+    selectedMapService: '',
     selectedLayers: [],
     uploadMultiple: true,
     vectorLayerName: '',
@@ -719,6 +746,7 @@ export default {
     }
   },
   async mounted() {
+    this.selectedMapService = this.mapServices[0];
     this.selectedDataExtension = this.dataFormats[0];
     this.getLayers();
     this.getServices();
