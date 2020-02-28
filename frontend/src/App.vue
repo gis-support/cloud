@@ -75,6 +75,16 @@
                       <span>{{ $i18n.t('default.users') }}</span>
                     </a>
                   </li>
+                  <li
+                    @click="changePage('appSettings')"
+                    v-if="this.$route.name !== 'appSettings'"
+                  >
+                    <a>
+                      <i class="fa fa-cog" />
+                      &nbsp;&nbsp;
+                      <span>{{ $i18n.t('default.settings') }}</span>
+                    </a>
+                  </li>
                   <li @click="logout">
                     <a>
                       <i class="fa fa-sign-out" />

@@ -154,6 +154,7 @@
     "automaticEpsg": "Układ współrzędnych określany jest automatycznie",
     "cancelUpload": "Anuluj wysyłanie",
     "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",
+    "uploadLogoMessage": "Przeciągnij obraz lub kliknij i wybierz plik do przesłania",
     "noEpsg": "Nie rozpoznano układu współrzędnych. Wprowadź go ręcznie",
     "noLayerNameError": "Nazwa warstwy jest wymagana",
     "removeFile": "Usuń plik",
@@ -191,6 +192,8 @@
     }
   },
   "settings": {
+    "activeLogo": "Aktualne logo",
+    "addNewLogo": "Dodaj nowe logo",
     "attribute": "Atrybut",
     "chooseAttr": "Wybierz atrybut",
     "chooseObjectStyle": "Wybierz styl obiektu",
@@ -201,6 +204,7 @@
     "labelsHelper": "Za pomocą pola typu checkbox należy zaznaczyć etykiety, które maja być aktywne. Dodatkowo, kolejność wyświetlanych atrybutów odpowiada kolejności w liście",
     "labelsTitle": "Lista atrybutów używanych jako etykiety",
     "layerInfo": "Informacje o warstwie",
+    "logo": "Logo",
     "maxSize": "Maksymalna wartość to 10",
     "minSize": "Minimalna wartość to 1",
     "objStyle": "Styl obiektu",
