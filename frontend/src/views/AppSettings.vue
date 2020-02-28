@@ -35,13 +35,6 @@
           v-if="activeTab === 'logo-tab'"
         >
           <div>
-            <h4 class="text-left">{{ $i18n.t('settings.activeLogo') }}</h4>
-            <img
-              id="logo"
-              :src="`${$store.getters.getApiUrl}/logo`"
-            />
-          </div>
-          <div>
             <h4 class="text-left">{{ $i18n.t('settings.addNewLogo') }}</h4>
             <file-upload
               ref="upload"
