@@ -9,6 +9,7 @@
     "api": "curl https://cloud.gis.support/api/docs/api.json -o ./src/docs/api.json"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "bootstrap": "^3.3.5",
     "core-js": "^3.3.2",
     "jquery": "^3.4.0",

@@ -230,9 +230,9 @@
                 v-model="selectedDataExtension"
               >
                 <option
-                  v-for="(dataFormat, id) of dataFormats"
+                  v-for="(dataFormat, idx) of dataFormats"
                   v-text="dataFormat.text"
-                  :key="id"
+                  :key="idx"
                   :value="dataFormat"
                 />
               </select>
@@ -240,8 +240,8 @@
             <div class="pt-10">
               <ul>
                 <li
-                  v-for="(file,id) in files"
-                  :key="id"
+                  v-for="(file,idx) in files"
+                  :key="idx"
                 >
                   {{file.name}}
                   <i
@@ -253,13 +253,10 @@
               <file-upload
                 ref="upload"
                 v-model="files"
-                :multiple="uploadMultiple"
-                :data="{name: this.vectorLayerName}"
+                :multiple="true"
                 :drop="true"
                 :drop-directory="true"
-                :post-action="postAction"
                 @input-filter="fileFilter"
-                @input-file="fileInput"
               >{{this.$i18n.t('upload.defaultMessage')}}</file-upload>
             </div>
           </div>
@@ -327,9 +324,9 @@
                 v-model="selectedMapService"
               >
                 <option
-                  v-for="(mapService, id) of mapServices"
+                  v-for="(mapService, idx) of mapServices"
                   v-text="mapService.text"
-                  :key="id"
+                  :key="idx"
                   :value="mapService"
                 />
               </select>
@@ -480,7 +477,6 @@ export default {
     selectedDataExtension: '',
     selectedMapService: '',
     selectedLayers: [],
-    uploadMultiple: true,
     vectorLayerName: '',
     vectorLayersList: undefined
   }),
@@ -612,6 +608,7 @@ export default {
     clearUploadFiles() {
       this.files = [];
       this.vectorLayerName = '';
+      this.selectedDataExtension = this.dataFormats[0];
       this.isEpsgAutomatic = true;
     },
     deleteLayer(el) {
@@ -654,37 +651,6 @@ export default {
         }
       }
     },
-    fileInput: function(newFile, oldFile) {
-      if (newFile && !oldFile) {
-      }
-      if (newFile && oldFile) {
-        if (newFile.active !== oldFile.active) {
-        }
-        if (newFile.error != oldFile.error) {
-          vm.$alertify.error(
-            vm.$i18n.t('upload.uploadError') + ' ' + newFile.name
-          );
-        }
-        if (newFile.success !== oldFile.success) {
-          vm.$alertify.success(
-            vm.$i18n.t('upload.uploadSuccess') + ' ' + newFile.name
-          );
-          let newLayer = {
-            id: newFile.response.layers.id,
-            name: newFile.response.layers.name
-          };
-          if (!this.vectorLayersList.find(el => el.id === newLayer.id)) {
-            this.vectorLayersList.push(newLayer);
-          }
-        }
-      }
-      if (this.$refs.upload.uploaded) {
-        this.files = [];
-        this.vectorLayerName = '';
-        this.selectedDataExtension = this.dataFormats[0];
-        this.$refs.closeModalBtn.click();
-      }
-    },
     goToManager(val) {
       this.$router.push({
         name: 'feature_manager',
@@ -709,7 +675,7 @@ export default {
     removeFile(file) {
       let fileIndex = this.files.indexOf(file);
       if (fileIndex > -1) {
-        this.files.splice(fileIndex, 1);
+        this.files = this.files.filter(f => f != file);
       }
     },
     sendingError(file) {
@@ -737,7 +703,47 @@ export default {
       this.isSendingError = false;
     },
     sendVectorLayer() {
-      this.$refs.upload.active = true;
+      let formData = new FormData();
+      for (const [index, file] of this.files.entries()) {
+        formData.append(`file[${index}]`, file.file);
+      }
+      formData.append('name', this.vectorLayerName);
+      if (!this.isEpsgAutomatic) {
+        formData.append('epsg', this.epsg);
+      }
+      this.$http
+        .post(this.postAction, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        .then(r => {
+          console.log(r);
+          this.$refs.closeModalBtn.click();
+          if (r.status === 201) {
+            vm.$alertify.success(
+              vm.$i18n.t('upload.uploadSuccess') + ' ' + r.data.layers.name
+            );
+            let newLayer = {
+              id: r.data.layers.id,
+              name: r.data.layers.name
+            };
+            if (!this.vectorLayersList.find(el => el.id === newLayer.id)) {
+              this.vectorLayersList.push(newLayer);
+            }
+          } else if (r.status === 400) {
+            this.isEpsgAutomatic = false;
+            this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
+          } else {
+            vm.$alertify.error(
+              vm.$i18n.t('upload.uploadError') + ' ' + newFile.name
+            );
+          }
+        })
+        .catch(err => {
+          this.$refs.closeModalBtn.click();
+          this.$alertify.error(this.$i18n.t('upload.uploadError'));
+        });
     },
     setAttachmentsLayer(lid) {
       if (!Object.keys(this.featureAttachments).includes(lid)) {
