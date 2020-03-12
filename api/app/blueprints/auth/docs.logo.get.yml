@@ -1,0 +1,10 @@
+Get users
+---
+tags:
+  - Logo
+summary: Get logo
+produces:
+  - image/png
+responses:
+  200:
+    description: Logo

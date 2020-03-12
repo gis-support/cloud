@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, send_from_directory
 from flasgger import swag_from
 from app.docs import path_by
 from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, cloud_decorator
@@ -95,3 +95,17 @@ def groups(cloud):
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
         return jsonify({"groups": "group deleted"})
+
+
+@mod_auth.route('/logo', methods=['GET'])
+@swag_from(path_by(__file__, 'docs.logo.get.yml'), methods=['GET'])
+def logo():
+    return send_from_directory(current_app.config['STATIC'], 'logo.png')
+
+
+@mod_auth.route('/logo', methods=['POST'])
+@swag_from(path_by(__file__, 'docs.logo.post.yml'), methods=['POST'])
+def upload_logo():
+    f = request.files['file']
+    f.save(os.path.join(current_app.config['STATIC'], 'logo.png'))
+    return send_from_directory(current_app.config['STATIC'], 'logo.png')

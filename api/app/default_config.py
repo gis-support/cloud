@@ -4,7 +4,7 @@
 
 # Sklonuj ten plik z nazwą local_config.py żeby wprowadzić zmiany do konfiguracji aplikacji
 
-from os import environ
+from os import environ, path as op
 
 
 class Config(object):
@@ -20,6 +20,7 @@ class Config(object):
     SECRET_KEY = 'test'
     DEBUG = False
     TESTING = False
+    STATIC = op.join(op.dirname(op.dirname(op.realpath(__file__))), 'static')
 
 
 class DevelopmentConfig(Config):

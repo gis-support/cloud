@@ -1,0 +1,21 @@
+Edit logo
+---
+tags:
+  - Logo
+summary: Edit default logo
+produces:
+  - application/png
+parameters:
+  - name: file
+    in: formData
+    description: Layer file
+    required: true
+    type: file
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  201:
+    description: New logo
