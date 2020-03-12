@@ -4,7 +4,7 @@
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
           <i class="fa fa-user-plus" />
-          <span data-i18n="dashboard.title"> {{ $i18n.t('users.title.addUser') }}</span>
+          <span data-i18n="dashboard.title">{{ $i18n.t('users.title.addUser') }}</span>
         </div>
       </h2>
       <div
@@ -16,13 +16,13 @@
           class="form-control container__input mr-5"
           v-model="username"
           :placeholder="$i18n.t('default.username')"
-        >
+        />
         <input
           type="password"
           class="form-control container__input mr-5"
           v-model="password"
           :placeholder="$i18n.t('default.password')"
-        >
+        />
         <select
           class="form-control mr-5"
           style="width: 300px"
@@ -32,9 +32,7 @@
             value="undefined"
             disabled
             hidden
-          >
-            {{ $i18n.t('default.groupName') }}
-          </option>
+          >{{ $i18n.t('default.groupName') }}</option>
           <option
             v-for="group in groups"
             v-text="group"
@@ -47,16 +45,14 @@
           class="btn btn-success"
           @click="addNewUser"
           :disabled="!username || !password"
-        >
-          {{ $i18n.t('default.add') }}
-        </button>
+        >{{ $i18n.t('default.add') }}</button>
       </div>
     </div>
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
           <i class="fa fa-lock" />
-          <span data-i18n="dashboard.title"> {{ $i18n.t('users.title.permissions') }}</span>
+          <span data-i18n="dashboard.title">{{ $i18n.t('users.title.permissions') }}</span>
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main pt-10 d-flex">
@@ -91,9 +87,7 @@
               v-for="user of usersPerm"
               :key="user"
             >
-              <td class="text-centered">
-                {{ user }}
-              </td>
+              <td class="text-centered">{{ user }}</td>
               <td
                 class="text-centered"
                 v-for="perm of permissions"
@@ -119,14 +113,14 @@
       <h2 class="flex-center container__border--bottom container__border--grey">
         <div class="p-0 container__border--bottom container__border--red section__header">
           <i class="fa fa-group" />
-          <span> {{ $i18n.t('users.title.groups') }}</span>
+          <span>{{ $i18n.t('users.title.groups') }}</span>
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main pt-10">
         <span class="col-sm-12 pl-0">
           <h4 class="flex-center mb-0">
             <div class="p-0 container__border--bottom container__border--red section__header">
-              <span> {{ $i18n.t('users.title.assignUser') }}</span>
+              <span>{{ $i18n.t('users.title.assignUser') }}</span>
             </div>
           </h4>
           <span style="display: flex;">
@@ -139,9 +133,7 @@
                 value="undefined"
                 disabled
                 hidden
-              >
-                {{ $i18n.t('default.username') }}
-              </option>
+              >{{ $i18n.t('default.username') }}</option>
               <option
                 v-for="user in users"
                 v-text="user"
@@ -158,9 +150,7 @@
                 value="undefined"
                 disabled
                 hidden
-              >
-                {{ $i18n.t('default.groupName') }}
-              </option>
+              >{{ $i18n.t('default.groupName') }}</option>
               <option
                 v-for="group in groups"
                 v-text="group"
@@ -173,9 +163,7 @@
               class="btn btn-success"
               :disabled="!groupToAssign || !userToAssign"
               @click="assignUser"
-            >
-              {{ $i18n.t('users.assignUser') }}
-            </button>
+            >{{ $i18n.t('users.assignUser') }}</button>
           </span>
           <p v-if="userToAssign">Obecna grupa: {{ usersWithGroups[userToAssign] }}</p>
         </span>
@@ -184,7 +172,7 @@
         <span class="col-sm-6 pl-0">
           <h4 class="flex-center mb-0">
             <div class="p-0 container__border--bottom container__border--red section__header">
-              <span> {{ $i18n.t('users.title.groupAdd') }}</span>
+              <span>{{ $i18n.t('users.title.groupAdd') }}</span>
             </div>
           </h4>
           <span style="display: flex;">
@@ -193,21 +181,19 @@
               class="form-control container__input mr-5"
               :placeholder="$i18n.t('default.groupName')"
               v-model="newGroupName"
-            >
+            />
             <button
               type="button"
               class="btn btn-success"
               @click="addGroup"
               :disabled="!newGroupName"
-            >
-              {{ $i18n.t('default.add') }}
-            </button>
+            >{{ $i18n.t('default.add') }}</button>
           </span>
         </span>
         <span class="col-sm-6 pl-0">
           <h4 class="flex-center mb-0">
             <div class="p-0 container__border--bottom container__border--red section__header">
-              <span> {{ $i18n.t('users.title.groupDelete') }}</span>
+              <span>{{ $i18n.t('users.title.groupDelete') }}</span>
             </div>
           </h4>
           <span style="display: flex;">
@@ -220,9 +206,7 @@
                 value="undefined"
                 disabled
                 hidden
-              >
-                {{ $i18n.t('users.title.chooseGroupToDelete') }}
-              </option>
+              >{{ $i18n.t('users.title.chooseGroupToDelete') }}</option>
               <option
                 v-for="group in groups"
                 v-text="group"
@@ -235,9 +219,7 @@
               class="btn btn-primary"
               :disabled="!usersGroup"
               @click="deleteGroup"
-            >
-              {{ $i18n.t('default.delete') }}
-            </button>
+            >{{ $i18n.t('default.delete') }}</button>
           </span>
         </span>
       </div>
@@ -259,9 +241,7 @@
       >
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">
-              {{ $i18n.t('users.modal.changePermissions') }}
-            </h4>
+            <h4 class="modal-title">{{ $i18n.t('users.modal.changePermissions') }}</h4>
           </div>
           <div
             class="modal-body"
@@ -273,15 +253,9 @@
               name="column-types-select"
               v-model="currentPermissions.permission"
             >
-              <option value="write">
-                {{ $i18n.t('default.edit') }}
-              </option>
-              <option value="read">
-                {{ $i18n.t('default.read') }}
-              </option>
-              <option value="">
-                {{ $i18n.t('default.noAccess') }}
-              </option>
+              <option value="write">{{ $i18n.t('default.edit') }}</option>
+              <option value="read">{{ $i18n.t('default.read') }}</option>
+              <option value>{{ $i18n.t('default.noAccess') }}</option>
             </select>
           </div>
           <div class="modal-footer">
@@ -290,16 +264,12 @@
               class="btn btn-default"
               ref="closeModalBtn"
               data-dismiss="modal"
-            >
-              {{ $i18n.t('default.cancel') }}
-            </button>
+            >{{ $i18n.t('default.cancel') }}</button>
             <button
               type="button"
               class="btn btn-success"
               @click="editPermissions"
-            >
-              {{ $i18n.t('default.save') }}
-            </button>
+            >{{ $i18n.t('default.save') }}</button>
           </div>
         </div>
       </div>
@@ -318,7 +288,7 @@ export default {
     mapPermissionColors: {
       write: '#48B343',
       read: '#F9A122',
-      '': '#EC3C36',
+      '': '#EC3C36'
     },
     newGroupName: undefined,
     newUserGroup: undefined,
@@ -327,7 +297,7 @@ export default {
     users: undefined,
     usersGroup: undefined,
     usersPerm: [],
-    userToAssign: undefined,
+    userToAssign: undefined
   }),
   computed: {
     defaultGroup() {
@@ -335,11 +305,13 @@ export default {
     },
     usersWithGroups() {
       return this.$store.getters.getUsersWithGroups;
-    },
+    }
   },
   methods: {
     async addGroup() {
-      const r = await this.$store.dispatch('addGroup', { group: this.newGroupName });
+      const r = await this.$store.dispatch('addGroup', {
+        group: this.newGroupName
+      });
       if (r.status === 201) {
         this.$alertify.success(this.$i18n.t('default.newGroupAdded'));
         this.groups.push(this.newGroupName);
@@ -351,7 +323,11 @@ export default {
       }
     },
     async addNewUser() {
-      const payload = { user: this.username, password: this.password, group: this.newUserGroup };
+      const payload = {
+        user: this.username,
+        password: this.password,
+        group: this.newUserGroup
+      };
       if (!this.newUserGroup) {
         delete payload.group;
       }
@@ -370,51 +346,81 @@ export default {
       }
     },
     async assignUser() {
-      this.$alertify.confirm(this.$i18n.t('users.assignUserConfirm'), async () => {
-        const r = await this.$store.dispatch('assignUserToGroup', {
-          group: this.groupToAssign,
-          user: this.userToAssign,
-        });
-        if (r.status === 200) {
-          this.$alertify.success(this.$i18n.t('default.success'));
-          this.groupToAssign = undefined;
-          this.userToAssign = undefined;
-        }
-      }, () => {})
+      this.$alertify
+        .confirm(
+          this.$i18n.t('users.assignUserConfirm'),
+          async () => {
+            const r = await this.$store.dispatch('assignUserToGroup', {
+              group: this.groupToAssign,
+              user: this.userToAssign
+            });
+            if (r.status === 200) {
+              this.$alertify.success(this.$i18n.t('default.success'));
+              this.groupToAssign = undefined;
+              this.userToAssign = undefined;
+            }
+          },
+          () => {}
+        )
         .set({ title: this.$i18n.t('users.title.assignUserTitle') })
-        .set({ labels: { ok: this.$i18n.t('default.yes'), cancel: this.$i18n.t('default.cancel') } });
+        .set({
+          labels: {
+            ok: this.$i18n.t('default.yes'),
+            cancel: this.$i18n.t('default.cancel')
+          }
+        });
     },
     async deleteGroup() {
-      this.$alertify.confirm(this.$i18n.t('users.deleteGroupConfirm'), async () => {
-        const r = await this.$store.dispatch('deleteGroup', {
-          group: this.usersGroup,
-        });
-        if (r.status === 200) {
-          this.$alertify.success(this.$i18n.t('default.deleted'));
-          this.usersGroup = undefined;
-          const groupIdx = this.groups.findIndex(el => el === this.usersGroup);
-          this.groups.splice(groupIdx, 1);
-        } else if (r.status === 400) {
-          this.$alertify.error(this.$i18n.t('users.deleteDefaultGroup'));
-        }
-      }, () => {})
+      this.$alertify
+        .confirm(
+          this.$i18n.t('users.deleteGroupConfirm'),
+          async () => {
+            const r = await this.$store.dispatch('deleteGroup', {
+              group: this.usersGroup
+            });
+            if (r.status === 200) {
+              this.$alertify.success(this.$i18n.t('default.deleted'));
+              this.usersGroup = undefined;
+              const groupIdx = this.groups.findIndex(
+                el => el === this.usersGroup
+              );
+              this.groups.splice(groupIdx, 1);
+            } else if (r.status === 400) {
+              this.$alertify.error(this.$i18n.t('users.deleteDefaultGroup'));
+            }
+          },
+          () => {}
+        )
         .set({ title: this.$i18n.t('users.title.deleteGroupTitle') })
-        .set({ labels: { ok: this.$i18n.t('default.delete'), cancel: this.$i18n.t('default.cancel') } });
+        .set({
+          labels: {
+            ok: this.$i18n.t('default.delete'),
+            cancel: this.$i18n.t('default.cancel')
+          }
+        });
     },
     async editPermissions() {
       const payload = {
         lid: this.currentPermissions.layId,
         body: {
           permission: this.currentPermissions.permission,
-          user: this.currentPermissions.username,
-        },
+          user: this.currentPermissions.username
+        }
       };
 
       const r = await this.$store.dispatch('editPermissions', payload);
       if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('users.responses.permissionsChanged'));
-        const layer = this.permissions.find(el => el.id === this.currentPermissions.layId);
-        this.$set(layer.users, r.obj.permissions.user, r.obj.permissions.permission);
+        this.$alertify.success(
+          this.$i18n.t('users.responses.permissionsChanged')
+        );
+        const layer = this.permissions.find(
+          el => el.id === this.currentPermissions.layId
+        );
+        this.$set(
+          layer.users,
+          r.obj.permissions.user,
+          r.obj.permissions.permission
+        );
         this.$refs.closeModalBtn.click();
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -440,13 +446,13 @@ export default {
       this.$set(this.currentPermissions, 'permission', permission);
       this.$set(this.currentPermissions, 'layId', layerId);
       this.$set(this.currentPermissions, 'username', username);
-    },
+    }
   },
   mounted() {
     this.getPermissions();
     this.getGroups();
     this.getUsers();
-  },
+  }
 };
 </script>
 
@@ -471,7 +477,7 @@ export default {
 }
 .desc-sm {
   color: #b5b5b5;
-  font-family: "Open Sans","Trebuchet MS",arial,sans-serif;
+  font-family: 'Open Sans', 'Trebuchet MS', arial, sans-serif;
   font-size: 12px;
   letter-spacing: -1px;
   line-height: 1.75em;
@@ -484,35 +490,36 @@ export default {
 .handler:hover {
   cursor: pointer;
 }
-.heading-block:after, .heading-block:before {
+.heading-block:after,
+.heading-block:before {
   display: none;
 }
 .legend-edit {
-  background: #48B343;
+  background: #48b343;
   margin: 5px;
 }
 .legend-edit::after {
-  content: "- Edycja";
+  content: '- Edycja';
   display: block;
   margin-left: 25px;
   width: 200px;
 }
 .legend-noaccess {
-  background: #EC3C36;
+  background: #ec3c36;
   margin: 5px;
 }
 .legend-noaccess::after {
-  content: "- Brak dostępu";
+  content: '- Brak dostępu';
   display: block;
   margin-left: 25px;
   width: 200px;
 }
 .legend-read {
-  background: #F9A122;
+  background: #f9a122;
   margin: 5px;
 }
 .legend-read::after {
-  content: "- Podgląd";
+  content: '- Podgląd';
   display: block;
   margin-left: 25px;
   width: 200px;
