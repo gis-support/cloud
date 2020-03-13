@@ -61,7 +61,10 @@
                   >{{ val.name }}</span>
                   <span class="desc-sm">{{ val.team }}</span>
                 </span>
-                <span class="panel-title__tools">
+                <span
+                  id="layers-list-icons"
+                  class="panel-title__tools"
+                >
                   <i
                     class="fa fa-cog fa-lg yellow icon-hover"
                     data-toggle="modal"
@@ -839,6 +842,9 @@ export default {
 .heading-block:after,
 .heading-block:before {
   display: none;
+}
+#layers-list-icons {
+  margin-right: 10px;
 }
 .loading-overlay {
   width: 100%;
