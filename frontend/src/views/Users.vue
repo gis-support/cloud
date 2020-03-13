@@ -62,7 +62,7 @@
         >
           <thead>
             <tr role="row">
-              <div>
+              <div id="perms-legend">
                 <div class="legend-square legend-edit" />
                 <div class="legend-square legend-read" />
                 <div class="legend-square legend-noaccess" />
@@ -540,6 +540,9 @@ export default {
 }
 #permissions-table {
   max-width: calc(100% - 1px);
+}
+#perms-legend {
+  min-width: 125px;
 }
 .section__content.heading-block.heading-block-main {
   overflow-y: auto;
