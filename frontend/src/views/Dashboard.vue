@@ -721,7 +721,6 @@ export default {
           }
         })
         .then(r => {
-          console.log(r);
           this.$refs.closeModalBtn.click();
           if (r.status === 201) {
             vm.$alertify.success(
@@ -733,6 +732,9 @@ export default {
             };
             if (!this.vectorLayersList.find(el => el.id === newLayer.id)) {
               this.vectorLayersList.push(newLayer);
+              this.vectorLayersList.sort((a, b) =>
+                a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+              );
             }
           } else if (r.status === 400) {
             this.isEpsgAutomatic = false;
