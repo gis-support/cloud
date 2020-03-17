@@ -8,6 +8,31 @@
             ref="map"
             id="map"
           >
+            <div class="map-tools">
+              <button
+                type="button"
+                class="map-btn"
+                :title="$i18n.t('featureManager.addFeature')"
+                @click="drawNewFeature"
+                v-if="!isDrawing && permission === 'write'"
+              >
+                <i class="fa fa-plus" />
+              </button>
+              <span
+                class="navbar-right"
+                v-else
+              >
+                <button
+                  type="button"
+                  class="map-btn"
+                  v-if="permission === 'write'"
+                  :title="$i18n.t('featureManager.cancelFeatureAdding')"
+                  @click="clearFeatureAdding"
+                >
+                  <i class="fa fa-times-circle" />
+                </button>
+              </span>
+            </div>
             <div class="measure">
               <button
                 type="button"
@@ -84,29 +109,6 @@
             >
               <i class="fa fa-filter" />
             </button>
-            <button
-              type="button"
-              class="btn navbar-btn navbar-right btn-default"
-              :title="$i18n.t('featureManager.addFeature')"
-              @click="drawNewFeature"
-              v-if="!isDrawing && permission === 'write'"
-            >
-              <i class="fa fa-plus" />
-            </button>
-            <span
-              class="navbar-right"
-              v-else
-            >
-              <button
-                type="button"
-                class="btn navbar-btn btn-default"
-                v-if="permission === 'write'"
-                :title="$i18n.t('featureManager.cancelFeatureAdding')"
-                @click="clearFeatureAdding"
-              >
-                <i class="fa fa-times-circle" />
-              </button>
-            </span>
             <button
               type="button"
               class="btn navbar-btn navbar-right btn-default"
@@ -1576,11 +1578,19 @@ export default {
 .map-btn:hover {
   background-color: rgba(0, 60, 136, 0.7);
 }
+.map-tools {
+  padding: 2px;
+  z-index: 1;
+  position: absolute;
+  top: 59px;
+  left: 0.5em;
+}
 .measure {
+  padding: 2px;
   z-index: 1;
   position: absolute;
   top: 80px;
-  left: 10px;
+  left: 0.5em;
 }
 .dropdown-menu {
   left: -110px;
