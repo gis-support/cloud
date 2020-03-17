@@ -7,7 +7,49 @@
             class="map"
             ref="map"
             id="map"
-          />
+          >
+            <div class="measure">
+              <button
+                type="button"
+                class="map-btn"
+                @click="showMeasure"
+                :title="
+                  isMeasureShow
+                    ? $i18n.t('featureManager.map.hideMeasurements')
+                    : isMeasure
+                      ? $i18n.t('featureManager.map.endMeasurements')
+                      : $i18n.t('featureManager.map.showMeasurements')
+                  "
+              >
+                <i
+                  v-if="!isMeasureShow && !isMeasure"
+                  class="fa fa-arrow-right"
+                />
+                <i
+                  v-if="isMeasureShow && !isMeasure"
+                  class="fa fa-arrow-left"
+                />
+                <i
+                  v-if="isMeasure"
+                  class="fa fa-trash"
+                />
+              </button>
+              <button
+                v-show="isMeasureShow"
+                type="button"
+                class="map-btn"
+                :title="$i18n.t('featureManager.map.areaMeasure')"
+                @click="startMeasure('Polygon')"
+              >☐</button>
+              <button
+                v-show="isMeasureShow"
+                type="button"
+                class="map-btn"
+                :title="$i18n.t('featureManager.map.distanceMeasure')"
+                @click="startMeasure('LineString')"
+              >\</button>
+            </div>
+          </div>
         </div>
         <nav
           class="navbar navbar-default table-menu"
@@ -486,7 +528,11 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import TileWMS from 'ol/source/TileWMS';
-import { Fill, Stroke, Style, RegularShape } from 'ol/style';
+import { Circle, Fill, Stroke, Style, RegularShape } from 'ol/style';
+import { LineString, Polygon } from 'ol/geom.js';
+import { getArea, getLength } from 'ol/sphere.js';
+import { unByKey } from 'ol/Observable.js';
+import Overlay from 'ol/Overlay.js';
 import CircleStyle from 'ol/style/Circle';
 import Text from 'ol/style/Text';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
@@ -528,8 +574,13 @@ export default {
     indexActiveTab: 0,
     isDrawing: false,
     isInfoDialogVisible: false,
+    isMeasure: false,
+    isMeasureShow: false,
     items: [],
     layerStyle: undefined,
+    measureTooltip: undefined,
+    measureTooltipElement: undefined,
+    measureType: undefined,
     newFeatureProperties: {},
     permission: [],
     searchCount: 0,
@@ -750,6 +801,114 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+    addMeasurementInteraction(layerName, type) {
+      let drawInteraction = new Draw({
+        source: layerName.getSource(),
+        type: type,
+
+        style: feature => {
+          const geometry = feature.getGeometry();
+          const styles = [];
+
+          if (type === 'LineString' && geometry instanceof LineString) {
+            geometry.forEachSegment((start, end) => {
+              const line = new LineString([start, end]);
+              styles.push(
+                new Style({
+                  geometry: line,
+                  fill: new Fill({
+                    color: 'rgba(0, 142, 132, 0.3)'
+                  }),
+                  stroke: new Stroke({
+                    color: 'rgba(0, 0, 0, 0.5)',
+                    lineDash: [10, 10],
+                    width: 2
+                  }),
+                  text: new Text({
+                    text: this.formatLength(line),
+                    font: '15px sans-serif',
+                    fill: new Fill({ color: 'black' }),
+                    placement: 'line',
+                    stroke: new Stroke({
+                      color: 'rgba(30, 42, 53, 0.3)',
+                      width: 3
+                    }),
+                    offsetX: -20,
+                    offsetY: 20
+                  }),
+                  image: new Circle({
+                    radius: 5,
+                    stroke: new Stroke({
+                      color: '#1e2a35'
+                    }),
+                    fill: new Fill({
+                      color: 'rgba(30, 42, 53, 0.5)'
+                    })
+                  })
+                })
+              );
+            });
+          } else {
+            styles.push(
+              new Style({
+                fill: new Fill({
+                  color: 'rgba(30, 42, 53, 0.3)'
+                }),
+                stroke: new Stroke({
+                  color: 'rgba(0, 0, 0, 0.5)',
+                  lineDash: [10, 10],
+                  width: 2
+                }),
+                image: new Circle({
+                  radius: 5,
+                  stroke: new Stroke({
+                    color: '#1e2a35'
+                  }),
+                  fill: new Fill({
+                    color: 'rgba(30, 42, 53, 0.5)'
+                  })
+                })
+              })
+            );
+          }
+          return styles;
+        }
+      });
+      drawInteraction.set('name', 'drawMeasurement');
+      this.map.addInteraction(drawInteraction);
+
+      let listener;
+      drawInteraction.on('drawstart', evt => {
+        this.getLayerByName('measurement')
+          .getSource()
+          .clear();
+
+        this.sketch = evt.feature;
+
+        listener = this.sketch.getGeometry().on('change', evt => {
+          if (evt.target instanceof Polygon) {
+            let result = `${this.formatArea(
+              evt.target
+            )} <br> ${this.formatLength(evt.target)}`;
+            this.measureTooltipElement.innerHTML = result;
+            this.measureTooltip.setPosition(
+              evt.target.getInteriorPoint().getCoordinates()
+            );
+          } else if (evt.target instanceof LineString) {
+            this.measureTooltipElement.innerHTML = this.formatLength(
+              evt.target
+            );
+            this.measureTooltip.setPosition(evt.target.getLastCoordinate());
+          }
+        });
+      });
+
+      drawInteraction.on('drawend', () => {
+        this.measureTooltip.setOffset([0, -7]);
+        this.sketch = null;
+        unByKey(listener);
+      });
+    },
     cancelEditing() {
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
@@ -781,6 +940,17 @@ export default {
     changeDialogVisibility(vis) {
       this.isInfoDialogVisible = vis;
     },
+    createMeasureTooltip() {
+      this.measureTooltipElement = document.createElement('div');
+      this.measureTooltipElement.style =
+        'position: relative; background: rgba(0,0,0,0.8); border-radius: 4px; color: white; padding: 4px 8px; opacity: 0.7; white-space: nowrap; font-weight: bold';
+      this.measureTooltip = new Overlay({
+        element: this.measureTooltipElement,
+        offset: [0, -15],
+        positioning: 'bottom-center'
+      });
+      this.map.addOverlay(this.measureTooltip);
+    },
     createModifyInteraction() {
       const modifyInteraction = new Modify({
         source: this.getLayerByName('featuresVector').getSource()
@@ -795,7 +965,8 @@ export default {
         if (
           !active ||
           this.isInteractionActive('modifyInteraction') ||
-          this.isInteractionActive('drawInteraction')
+          this.isInteractionActive('drawInteraction') ||
+          this.isInteractionActive('drawMeasurement')
         )
           return;
 
@@ -879,6 +1050,27 @@ export default {
         .getSource()
         .clear();
       this.editing = false;
+    },
+    formatArea(polygon) {
+      var area = getArea(polygon);
+      var output;
+      if (area > 10000) {
+        output =
+          Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
+      } else {
+        output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>';
+      }
+      return output;
+    },
+    formatLength(line) {
+      var length = getLength(line);
+      var output;
+      if (length > 100) {
+        output = Math.round((length / 1000) * 100) / 100 + ' ' + 'km';
+      } else {
+        output = Math.round(length * 100) / 100 + ' ' + 'm';
+      }
+      return output;
     },
     getInteractionByName(name) {
       return this.map
@@ -1078,6 +1270,44 @@ export default {
         this.getLayerByName(serviceName).setVisible(true);
       }
     },
+    showMeasure(e) {
+      if (this.isMeasure) {
+        e.stopPropagation();
+        this.isMeasure = false;
+        this.measureType = false;
+        this.getInteractionByName('drawMeasurement').setActive(false);
+        this.getLayerByName('measurement')
+          .getSource()
+          .clear();
+
+        this.measureTooltipElement.parentNode.removeChild(
+          this.measureTooltipElement
+        );
+      } else {
+        if (this.isMeasureShow) {
+          this.isMeasureShow = false;
+        } else {
+          this.isMeasureShow = true;
+        }
+      }
+    },
+    startMeasure(type) {
+      let drawLayer = this.getLayerByName('measurement');
+      let drawInteraction = this.getInteractionByName('drawMeasurement');
+
+      if (drawInteraction && this.measureType != type) {
+        this.map.removeInteraction(drawInteraction);
+        this.addMeasurementInteraction(drawLayer, type);
+      } else {
+        this.addMeasurementInteraction(drawLayer, type);
+      }
+      this.measureType = type;
+      this.getInteractionByName('drawMeasurement').setActive(true);
+
+      this.createMeasureTooltip();
+      this.isMeasure = true;
+      this.isMeasureShow = false;
+    },
     styleFeatures(f) {
       const labelsToShow = [];
       this.labels.forEach(el => {
@@ -1227,6 +1457,67 @@ export default {
         style: f => this.styleFeatures(f)
       })
     );
+    this.map.addLayer(
+      new VectorLayer({
+        name: 'measurement',
+        source: new VectorSource({}),
+        style: feature => {
+          const geometry = feature.getGeometry();
+          const styles = [];
+          if (geometry instanceof LineString) {
+            geometry.forEachSegment((start, end) => {
+              const line = new LineString([start, end]);
+              styles.push(
+                new Style({
+                  geometry: line,
+                  stroke: new Stroke({
+                    color: 'rgba(37, 81, 122, 1)',
+                    width: 2
+                  }),
+                  fill: new Fill({
+                    color: 'rgba(37, 81, 122, 0.3)'
+                  }),
+                  text: new Text({
+                    text: this.formatLength(line),
+                    font: '15px sans-serif',
+                    fill: new Fill({ color: 'black' }),
+                    placement: 'line',
+                    stroke: new Stroke({
+                      color: 'rgba(37, 81, 122, 0.3)',
+                      width: 3
+                    }),
+                    offsetX: -20,
+                    offsetY: 20
+                  }),
+                  image: new Circle({
+                    radius: 5,
+                    stroke: new Stroke({
+                      color: '#25517a'
+                    }),
+                    fill: new Fill({
+                      color: 'rgba(37, 81, 122, 0.5)'
+                    })
+                  })
+                })
+              );
+            });
+          } else {
+            styles.push(
+              new Style({
+                stroke: new Stroke({
+                  color: 'rgba(37, 81, 122, 1)',
+                  width: 2
+                }),
+                fill: new Fill({
+                  color: 'rgba(37, 81, 122, 0.3)'
+                })
+              })
+            );
+          }
+          return styles;
+        }
+      })
+    );
 
     const r = await this.$store.dispatch(
       'getLayer',
@@ -1266,6 +1557,31 @@ export default {
 </script>
 
 <style scoped>
+.map-btn {
+  position: relative;
+  margin: 1px;
+  padding: 0;
+  color: white;
+  font-size: 1.14em;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  height: 1.375em;
+  width: 1.375em;
+  line-height: 0.4em;
+  background-color: rgba(0, 60, 136, 0.5);
+  border: none;
+  border-radius: 4px;
+}
+.map-btn:hover {
+  background-color: rgba(0, 60, 136, 0.7);
+}
+.measure {
+  z-index: 1;
+  position: absolute;
+  top: 80px;
+  left: 10px;
+}
 .dropdown-menu {
   left: -110px;
 }
@@ -1275,5 +1591,18 @@ export default {
 }
 .list-group-item:not(.no-item):hover {
   cursor: pointer;
+}
+.popup {
+  position: relative;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  color: white;
+  padding: 4px 8px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+.popup-measure {
+  opacity: 1;
+  font-weight: bold;
 }
 </style>

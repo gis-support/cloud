@@ -140,7 +140,14 @@
     "localSearch": "Wyszukiwanie lokalne",
     "objectsFilter": "Filtrowanie obiektów",
     "objectsNumber": "Ilość obiektów",
-    "ortoError": "Błąd ładowania Ortofotomapy"
+    "ortoError": "Błąd ładowania Ortofotomapy",
+    "map": {
+      "areaMeasure": "Pomiar powierzchni",
+      "endMeasurements": "Zakończ pomiar",
+      "distanceMeasure": "Pomiar odległości",
+      "hideMeasurements": "Ukryj pomiary",
+      "showMeasurements": "Pomiary"
+    }
   },
   "login": {
     "loginTitle": "Logowanie",
