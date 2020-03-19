@@ -321,13 +321,14 @@
                       role="group"
                     >
                       <button
+                        :disabled="!bufferValue"
                         type="button"
                         class="btn btn-default"
                         @click="generateBuffer"
                       >{{ $i18n.t('featureManager.bufferGenerate') }}</button>
                     </div>
                   </div>
-                  <div v-if="isBuffer">
+                  <div>
                     <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
                     <div
                       class="form-group"
@@ -339,6 +340,7 @@
                       >{{ $i18n.t('featureManager.bufferLayer') }}</label>
                       <select
                         class="form-control"
+                        :disabled="!isBuffer"
                         v-model="selectedLayerName"
                       >
                         <option
@@ -357,6 +359,7 @@
                       <button
                         type="button"
                         class="btn btn-default"
+                        :disabled="!isBuffer"
                         @click="generateObjectsArray"
                       >{{ $i18n.t('featureManager.generate') }}</button>
                     </div>
@@ -611,6 +614,7 @@
 </template>
 
 <script>
+import * as turf from '@turf/turf';
 import _ from 'lodash';
 import moment from 'moment';
 import { fromLonLat, get as getProjection } from 'ol/proj';
@@ -1036,7 +1040,12 @@ export default {
     },
     closeBufferDialog() {
       this.bufferDialog = false;
+      this.getLayerByName('buffer')
+        .getSource()
+        .clear();
+      this.bufferValue = undefined;
       this.isBuffer = false;
+      this.selectedLayerName = undefined;
     },
     changeBaseLayer(layerName) {
       this.map
@@ -1201,7 +1210,29 @@ export default {
         .find(l => l.get('name') === name);
     },
     generateBuffer() {
-      this.isBuffer = true;
+      let buffer = turf.buffer(this.currentFeature, this.bufferValue / 1000, {
+        units: 'kilometers'
+      });
+      if (buffer) {
+        this.$alertify.success(
+          this.$i18n.t('featureManager.bufferGenerateSuccess')
+        );
+      } else {
+        this.$alertify.error(
+          this.$i18n.t('featureManager.bufferGenerateError')
+        );
+      }
+
+      let bufferFeature = new GeoJSON().readFeature(buffer, {
+        featureProjection: 'EPSG:3857',
+        dataProjection: 'EPSG:4326'
+      });
+      if (bufferFeature) {
+        this.getLayerByName('buffer')
+          .getSource()
+          .addFeature(bufferFeature);
+        this.isBuffer = true;
+      }
     },
     generateObjectsArray() {
       //generateObjectsArray
@@ -1579,6 +1610,22 @@ export default {
         visible: false,
         source: new VectorSource({}),
         style: f => this.styleFeatures(f)
+      })
+    );
+    this.map.addLayer(
+      new VectorLayer({
+        name: 'buffer',
+        visible: true,
+        source: new VectorSource({}),
+        style: new Style({
+          stroke: new Stroke({
+            color: 'rgba(37, 81, 122, 1)',
+            width: 2
+          }),
+          fill: new Fill({
+            color: 'rgba(37, 81, 122, 0.3)'
+          })
+        })
       })
     );
     this.map.addLayer(

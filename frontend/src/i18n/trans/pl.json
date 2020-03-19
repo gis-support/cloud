@@ -126,6 +126,8 @@
     "attributes": "Atrybuty",
     "bufferAnalysis": "Analiza buforowa",
     "bufferGenerate": "Generuj bufor",
+    "bufferGenerateSuccess": "Wygenerowano bufor",
+    "bufferGenerateError": "Błąd generowania buforu",
     "bufferLayer": "Warstwa",
     "bufferValue": "Wartość buforu",
     "cancelFeatureAdding": "Anuluj dodawanie obiektu do warstwy",
