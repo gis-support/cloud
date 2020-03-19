@@ -16,6 +16,7 @@ from app.blueprints.rdos.attachments.models import Attachment
 from psycopg2.extensions import AsIs
 import tempfile
 import os.path as op
+from os import environ
 from io import BytesIO
 import json
 
@@ -45,6 +46,7 @@ def layers(cloud):
         if not files:
             return jsonify({"error": "file is required"}), 401
         name = request.form.get("name")
+        environ['SHAPE_ENCODING'] = request.form.get("encoding", 'cp1250')
         if not name:
             return jsonify({"error": "name is required"}), 401
         if cloud.layer_exists(name):
@@ -306,7 +308,7 @@ def create_mvt_tile(z, x, y, name):
         'geometry']]
     query = SQL('''
         SELECT ST_AsMVT(tile) FROM (SELECT %s,
-        ST_AsMVTGeom(ST_Buffer(ST_transform(geometry, 3857), 0),tilebbox(%s, %s, %s, 3857),4096,50,true) AS geom FROM {}) AS tile
+        ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,50,true) AS geom FROM {}) AS tile
     ''').format(Identifier(name))
     cur.execute(query, (AsIs(",".join(columns)), z, x, y))
     tile = cur.fetchone()[0]
