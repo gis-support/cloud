@@ -69,7 +69,7 @@ def create_token(user):
     random_uuid = str(uuid.uuid4())
     token = jwt.encode({"user": user, "uuid": random_uuid},
                        current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-    current_app._redis.set(random_uuid, user, ex=600)
+    current_app._redis.set(random_uuid, user, ex=60*60*8)
     return token
 
 
@@ -77,12 +77,10 @@ def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kws):
         token = request.args.get('token')
-        # W przypadku braku tokena
         if not token:
             if 'Authorization' not in request.headers:
                 return jsonify({"error": "token required"}), 403
             token = request.headers['Authorization']
-        # W przypadku niepoprawnego tokena
         try:
             user_data = jwt.decode(
                 token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
@@ -90,14 +88,12 @@ def token_required(f):
             return jsonify({"error": "invalid token"}), 403
         random_uuid = user_data.get('uuid')
         user = user_data.get('user')
-        # W przypadku złamania soli i podmianki czegokolwiek w JWT
         if not user or not random_uuid:
             return jsonify({"error": "invalid token"}), 403
         user_redis = current_app._redis.get(random_uuid)
         if not user_redis or user_redis.decode('utf-8') != user:
             return jsonify({"error": "invalid token"}), 403
-        # Wydłużenie tokena o kolejne 10min
-        current_app._redis.set(random_uuid, user, ex=600)
+        current_app._redis.set(random_uuid, user, ex=60*60*8)
         request.user = user
         return f(*args, **kws)
     return decorated_function
