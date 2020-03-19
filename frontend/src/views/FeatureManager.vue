@@ -8,7 +8,7 @@
             ref="map"
             id="map"
           >
-            <div class="map-tools">
+            <div class="add-feature-tool">
               <button
                 type="button"
                 class="map-btn"
@@ -33,7 +33,7 @@
                 </button>
               </span>
             </div>
-            <div class="measure">
+            <div class="measure-tool">
               <button
                 type="button"
                 class="map-btn"
@@ -67,6 +67,15 @@
                 :title="$i18n.t('featureManager.map.distanceMeasure')"
                 @click="startMeasure('LineString')"
               >\</button>
+            </div>
+            <div class="buffer-tool">
+              <button
+                v-show="currentFeature"
+                type="button"
+                class="map-btn"
+                @click="openBufferDialog"
+                :title="$i18n.t('featureManager.map.buffer')"
+              >B</button>
             </div>
           </div>
         </div>
@@ -270,6 +279,99 @@
                         @click="clearFeatureAdding"
                       >{{ $i18n.t('default.cancel') }}</button>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="modal-mask"
+          v-if="bufferDialog"
+        >
+          <div class="modal-wrapper">
+            <div class="modal-dialog modal-md modal-new-feature">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">{{ $i18n.t('featureManager.map.buffer') }}</h4>
+                </div>
+                <div
+                  class="modal-body"
+                  v-if="activeLayer"
+                >
+                  <div style="margin-bottom: 100px">
+                    <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
+                    <div
+                      class="form-group"
+                      style="display: flex;"
+                    >
+                      <label
+                        class="control-label col-sm-4"
+                        style="position: relative; top: 8px"
+                      >{{ $i18n.t('featureManager.bufferValue') }}</label>
+                      <input
+                        class="form-control col-sm-7"
+                        v-model="bufferValue"
+                        type="number"
+                      />
+                    </div>
+                    <div
+                      style="float: right"
+                      class="btn-group"
+                      role="group"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-default"
+                        @click="generateBuffer"
+                      >{{ $i18n.t('featureManager.bufferGenerate') }}</button>
+                    </div>
+                  </div>
+                  <div v-if="isBuffer">
+                    <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
+                    <div
+                      class="form-group"
+                      style="display: flex;"
+                    >
+                      <label
+                        class="control-label col-sm-4"
+                        style="position: relative; top: 8px"
+                      >{{ $i18n.t('featureManager.bufferLayer') }}</label>
+                      <select
+                        class="form-control"
+                        v-model="selectedLayerName"
+                      >
+                        <option
+                          v-for="(layer, idx) of layers"
+                          v-text="layer"
+                          :key="idx"
+                          :value="layer"
+                        />
+                      </select>
+                    </div>
+                    <div
+                      style="float: right"
+                      class="btn-group"
+                      role="group"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-default"
+                        @click="generateObjectsArray"
+                      >{{ $i18n.t('featureManager.generate') }}</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <div
+                    class="btn-group"
+                    role="group"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-default"
+                      @click="closeBufferDialog"
+                    >{{ $i18n.t('default.cancel') }}</button>
                   </div>
                 </div>
               </div>
@@ -551,6 +653,8 @@ export default {
     activeServices: [],
     addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
+    bufferDialog: false,
+    bufferValue: undefined,
     columnFilterDecisionDialogView: false,
     columns: [
       {
@@ -563,11 +667,13 @@ export default {
     currentColumnFilters: [],
     currentFeature: undefined,
     labels: [],
+    layers: ['layer1', 'layer2', 'layer3'],
     layerType: undefined,
     draw: undefined,
     editing: false,
     editingDataCopy: undefined,
     indexActiveTab: 0,
+    isBuffer: false,
     isDrawing: false,
     isInfoDialogVisible: false,
     isMeasure: false,
@@ -582,6 +688,7 @@ export default {
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
+    selectedLayerName: undefined,
     selectedRows: [],
     usersGroup: undefined
   }),
@@ -927,6 +1034,10 @@ export default {
       this.getInteractionByName('drawInteraction').setActive(false);
       this.newFeatureProperties = {};
     },
+    closeBufferDialog() {
+      this.bufferDialog = false;
+      this.isBuffer = false;
+    },
     changeBaseLayer(layerName) {
       this.map
         .getLayers()
@@ -1089,6 +1200,12 @@ export default {
         .getArray()
         .find(l => l.get('name') === name);
     },
+    generateBuffer() {
+      this.isBuffer = true;
+    },
+    generateObjectsArray() {
+      //generateObjectsArray
+    },
     goToSettings() {
       this.$router.push({
         name: 'settings',
@@ -1175,6 +1292,9 @@ export default {
           })
         );
       });
+    },
+    openBufferDialog() {
+      this.bufferDialog = true;
     },
     openColumnFilterDecision() {
       const self = this;
@@ -1580,14 +1700,21 @@ export default {
 .map-btn:hover {
   background-color: rgba(0, 60, 136, 0.7);
 }
-.map-tools {
+.add-feature-tool {
   padding: 2px;
   z-index: 1;
   position: absolute;
   top: 59px;
   left: 0.5em;
 }
-.measure {
+.buffer-tool {
+  padding: 2px;
+  z-index: 1;
+  position: absolute;
+  top: 101px;
+  left: 0.5em;
+}
+.measure-tool {
   padding: 2px;
   z-index: 1;
   position: absolute;
