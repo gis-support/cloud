@@ -37,14 +37,8 @@
               <button
                 type="button"
                 class="map-btn"
-                @click="showMeasure"
-                :title="
-                  isMeasureShow
-                    ? $i18n.t('featureManager.map.hideMeasurements')
-                    : isMeasure
-                      ? $i18n.t('featureManager.map.endMeasurements')
-                      : $i18n.t('featureManager.map.showMeasurements')
-                  "
+                @click.stop="showMeasure"
+                :title="showMeasureTitle"
               >
                 <i
                   v-if="!isMeasureShow && !isMeasure"
@@ -615,6 +609,15 @@ export default {
     },
     services() {
       return this.$store.getters.getServices;
+    },
+    showMeasureTitle() {
+      if (this.isMeasureShow) {
+        return this.$i18n.t('featureManager.map.hideMeasurements');
+      } else if (this.isMeasure) {
+        return this.$i18n.t('featureManager.map.endMeasurements');
+      } else {
+        return this.$i18n.t('featureManager.map.showMeasurements');
+      }
     },
     token() {
       return this.$store.getters.getToken;
@@ -1272,9 +1275,8 @@ export default {
         this.getLayerByName(serviceName).setVisible(true);
       }
     },
-    showMeasure(e) {
+    showMeasure() {
       if (this.isMeasure) {
-        e.stopPropagation();
         this.isMeasure = false;
         this.measureType = false;
         this.getInteractionByName('drawMeasurement').setActive(false);
