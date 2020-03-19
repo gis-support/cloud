@@ -12,6 +12,7 @@ from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
 from shapely.geometry import shape
 from os import path as op
+from os import environ
 from io import BytesIO
 import psycopg2
 import jwt
@@ -48,6 +49,13 @@ def create_user(user, password, group):
         SQL("""ALTER GROUP {} ADD USER {}""").format(Identifier(group), Identifier(user)))
     if current_app.config['TESTING']:
         current_app._redis.lpush('user_list', user)
+
+
+def delete_user(user):
+    current_app._db.execute_sql(SQL("REASSIGN OWNED BY {user} TO postgres;DROP OWNED BY {user};DROP USER {user};").format(
+        user=Identifier(user)))
+    if current_app.config['TESTING']:
+        current_app._redis.lrem('user_list', 0, user)
 
 
 def authenticate_user(user, password):
@@ -95,6 +103,15 @@ def token_required(f):
             return jsonify({"error": "invalid token"}), 403
         current_app._redis.set(random_uuid, user, ex=60*60*8)
         request.user = user
+        return f(*args, **kws)
+    return decorated_function
+
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        if request.user != environ.get('DEFAULT_USER'):
+            return jsonify({"error": "permission denied"}), 403
         return f(*args, **kws)
     return decorated_function
 

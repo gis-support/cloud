@@ -16,7 +16,7 @@ class TestAuth(BaseTest):
 
     def test_users_duplicate(self, client):
         user, password = self.create_user(client)
-        token = self.get_token(client, user=user, password=password)
+        token = self.get_token(client, admin=True)
         r = client.post(f'/api/users?token={token}',
                         data=json.dumps({'user': user, 'password': password}))
         assert r.status_code == 409
@@ -48,9 +48,8 @@ class TestAuth(BaseTest):
         assert r.json
         assert r.json['error'] == 'password required'
 
-    def test_uers_get_correct(self, client):
-        token = self.get_token(
-            client, user=os.environ['DEFAULT_USER'], password=os.environ['DEFAULT_PASS'])
+    def test_users_get_correct(self, client):
+        token = self.get_token(client, admin=True)
         r = client.get(f'/api/users?token={token}')
         assert r.status_code == 200
         assert r.json
@@ -58,12 +57,56 @@ class TestAuth(BaseTest):
         assert r.json['users'][os.environ['DEFAULT_USER']
                                ] == os.environ.get('DEFAULT_GROUP')
 
+    def test_delete_user_by_admin(self, client):
+        token = self.get_token(client, admin=True)
+        user_to_delete = 'test'
+        client.post(
+            f'/api/users?token={token}', data=json.dumps({'user': user_to_delete, 'password': 'test'}))
+        r = client.post(
+            '/api/login', data=json.dumps({'user': user_to_delete, 'password': 'test'}))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['token']
+        r = client.delete(
+            f'/api/users?token={token}', data=json.dumps({'user': user_to_delete}))
+        assert r.status_code == 200
+        assert r.json
+        assert r.json['users'] == 'user deleted'
+        r = client.post(
+            '/api/login', data=json.dumps({'user': user_to_delete, 'password': 'test'}))
+        assert r.status_code == 403
+        assert r.json
+        assert r.json['error'] == 'invalid credentials'
+
+    def test_delete_user_by_user(self, client):
+        user_to_delete, _ = self.create_user(client)
+        user, password = self.create_user(client)
+        r = client.post(
+            '/api/login', data=json.dumps({'user': user, 'password': password}))
+        assert r.status_code == 200
+        assert r.json
+        token = r.json['token']
+        r = client.delete(
+            f'/api/users?token={token}', data=json.dumps({'user': user_to_delete}))
+        assert r.status_code == 403
+        assert r.json
+        assert r.json['error'] == 'permission denied'
+
+    def test_delete_admin(self, client):
+        token = self.get_token(client, admin=True)
+        user_to_delete = 'admin'
+        r = client.delete(
+            f'/api/users?token={token}', data=json.dumps({'user': user_to_delete}))
+        assert r.status_code == 403
+        assert r.json
+        assert r.json['error'] == 'permission denied'
+
 
 @pytest.mark.auth
 class TestGroups(BaseTest):
 
     def test_groups_get_correct(self, client):
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         r = client.get(f'/api/users/groups?token={token}')
         assert r.status_code == 200
         assert r.json
@@ -71,7 +114,7 @@ class TestGroups(BaseTest):
             os.environ.get('DEFAULT_GROUPS', '').split(','))
 
     def test_groups_post_correct(self, client):
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         r = client.post(
             f'/api/users/groups?token={token}', data=json.dumps({'group': 'test'}))
         assert r.status_code == 201
@@ -85,7 +128,7 @@ class TestGroups(BaseTest):
         assert 'test' in r.json['groups']
 
     def test_groups_delete_correct(self, client):
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         client.post(
             f'/api/users/groups?token={token}', data=json.dumps({'group': 'test'}))
         r = client.delete(
@@ -102,7 +145,7 @@ class TestGroups(BaseTest):
 
     def test_groups_exists_post(self, client):
         default_group = os.environ.get('DEFAULT_GROUP')
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         r = client.post(
             f'/api/users/groups?token={token}', data=json.dumps({'group': default_group}))
         assert r.status_code == 400
@@ -111,7 +154,7 @@ class TestGroups(BaseTest):
 
     def test_groups_not_exists_delete(self, client):
         default_group = os.environ.get('DEFAULT_GROUP')
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         r = client.delete(
             f'/api/users/groups?token={token}', data=json.dumps({'group': 'test'}))
         assert r.status_code == 400
@@ -119,7 +162,7 @@ class TestGroups(BaseTest):
         assert r.json['error'] == 'group not exists'
 
     def test_groups_assign_user_correct(self, client):
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         user, _ = self.create_user(client)
         client.post(
             f'/api/users/groups?token={token}', data=json.dumps({'group': 'test'}))
@@ -130,7 +173,7 @@ class TestGroups(BaseTest):
         assert r.json['users'] == 'user assigned'
 
     def test_groups_assign_user_invalid_user(self, client):
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         client.post(
             f'/api/users/groups?token={token}', data=json.dumps({'group': 'test'}))
         r = client.put(
@@ -140,7 +183,7 @@ class TestGroups(BaseTest):
         assert r.json['error'] == 'user not exists'
 
     def test_groups_assign_user_invalid_group(self, client):
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         user, _ = self.create_user(client)
         r = client.put(
             f'/api/users?token={token}', data=json.dumps({'user': user, 'group': 'test'}))
@@ -150,7 +193,7 @@ class TestGroups(BaseTest):
 
     def test_groups_restricted_group_delete(self, client):
         default_group = os.environ.get('DEFAULT_GROUP')
-        token = self.get_token(client)
+        token = self.get_token(client, admin=True)
         r = client.delete(
             f'/api/users/groups?token={token}', data=json.dumps({'group': os.environ['DEFAULT_GROUP']}))
         assert r.status_code == 400
