@@ -73,7 +73,7 @@
                 v-show="currentFeature"
                 type="button"
                 class="map-btn"
-                @click="show"
+                @click="openBufferDialog"
                 :title="$i18n.t('featureManager.map.buffer')"
               >B</button>
             </div>
@@ -286,7 +286,7 @@
           </div>
         </div>
         <modal
-          name="example"
+          name="buffer"
           :draggable="true"
           width="30%"
           height="80%"
@@ -735,9 +735,6 @@ export default {
     }
   },
   methods: {
-    show() {
-      this.$modal.show('example');
-    },
     async createStyle() {
       const r = await this.$store.dispatch(
         'getLayerStyle',
@@ -1323,7 +1320,7 @@ export default {
       });
     },
     openBufferDialog() {
-      this.bufferDialog = true;
+      this.$modal.show('buffer');
     },
     openColumnFilterDecision() {
       const self = this;
