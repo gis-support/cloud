@@ -73,7 +73,7 @@
                 v-show="currentFeature"
                 type="button"
                 class="map-btn"
-                @click="openBufferDialog"
+                @click="show"
                 :title="$i18n.t('featureManager.map.buffer')"
               >B</button>
             </div>
@@ -285,102 +285,90 @@
             </div>
           </div>
         </div>
-        <div
-          class="modal-mask"
-          v-if="bufferDialog"
+        <modal
+          name="example"
+          :draggable="true"
+          width="30%"
+          height="80%"
+          @before-close="closeBufferDialog"
         >
-          <div class="modal-wrapper">
-            <div class="modal-dialog modal-md modal-new-feature">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h4 class="modal-title">{{ $i18n.t('featureManager.map.buffer') }}</h4>
+          <div class="modal-content dragg-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.buffer') }}</h4>
+            </div>
+            <div
+              class="modal-body"
+              v-if="activeLayer"
+            >
+              <div style="margin-bottom: 100px">
+                <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
+                <div
+                  class="form-group"
+                  style="display: flex;"
+                >
+                  <label
+                    class="control-label col-sm-4"
+                    style="position: relative; top: 8px"
+                  >{{ $i18n.t('featureManager.bufferValue') }}</label>
+                  <input
+                    class="form-control col-sm-7"
+                    v-model="bufferValue"
+                    type="number"
+                  />
                 </div>
                 <div
-                  class="modal-body"
-                  v-if="activeLayer"
+                  style="float: right"
+                  class="btn-group"
+                  role="group"
                 >
-                  <div style="margin-bottom: 100px">
-                    <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
-                    <div
-                      class="form-group"
-                      style="display: flex;"
-                    >
-                      <label
-                        class="control-label col-sm-4"
-                        style="position: relative; top: 8px"
-                      >{{ $i18n.t('featureManager.bufferValue') }}</label>
-                      <input
-                        class="form-control col-sm-7"
-                        v-model="bufferValue"
-                        type="number"
-                      />
-                    </div>
-                    <div
-                      style="float: right"
-                      class="btn-group"
-                      role="group"
-                    >
-                      <button
-                        :disabled="!bufferValue"
-                        type="button"
-                        class="btn btn-default"
-                        @click="generateBuffer"
-                      >{{ $i18n.t('featureManager.bufferGenerate') }}</button>
-                    </div>
-                  </div>
-                  <div>
-                    <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
-                    <div
-                      class="form-group"
-                      style="display: flex;"
-                    >
-                      <label
-                        class="control-label col-sm-4"
-                        style="position: relative; top: 8px"
-                      >{{ $i18n.t('featureManager.bufferLayer') }}</label>
-                      <select
-                        class="form-control"
-                        :disabled="!isBuffer"
-                        v-model="selectedLayerName"
-                      >
-                        <option
-                          v-for="(layer, idx) of layers"
-                          v-text="layer.name"
-                          :key="idx"
-                          :value="layer.name"
-                        />
-                      </select>
-                    </div>
-                    <div
-                      style="float: right"
-                      class="btn-group"
-                      role="group"
-                    >
-                      <button
-                        type="button"
-                        class="btn btn-default"
-                        :disabled="!isBuffer"
-                        @click="generateObjectsArray"
-                      >{{ $i18n.t('featureManager.generate') }}</button>
-                    </div>
-                  </div>
+                  <button
+                    :disabled="!bufferValue"
+                    type="button"
+                    class="btn btn-default"
+                    @click="generateBuffer"
+                  >{{ $i18n.t('featureManager.bufferGenerate') }}</button>
                 </div>
-                <div class="modal-footer">
-                  <div
-                    class="btn-group"
-                    role="group"
+              </div>
+              <div>
+                <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
+                <div
+                  class="form-group"
+                  style="display: flex;"
+                >
+                  <label
+                    class="control-label col-sm-4"
+                    style="position: relative; top: 8px"
+                  >{{ $i18n.t('featureManager.bufferLayer') }}</label>
+                  <select
+                    style="max-width: 75%"
+                    class="form-control"
+                    :disabled="!isBuffer"
+                    v-model="selectedLayerName"
                   >
-                    <button
-                      type="button"
-                      class="btn btn-default"
-                      @click="closeBufferDialog"
-                    >{{ $i18n.t('default.cancel') }}</button>
-                  </div>
+                    <option
+                      v-for="(layer, idx) of layers"
+                      v-text="layer.name"
+                      :key="idx"
+                      :value="layer.name"
+                    />
+                  </select>
+                </div>
+                <div
+                  style="float: right"
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-default"
+                    :disabled="!selectedLayerName"
+                    @click="generateObjectsArray"
+                  >{{ $i18n.t('featureManager.generate') }}</button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </modal>
 
         <!-- <virtual-table
           style="height: calc(100% - 54px); position: relative;"
@@ -747,6 +735,9 @@ export default {
     }
   },
   methods: {
+    show() {
+      this.$modal.show('example');
+    },
     async createStyle() {
       const r = await this.$store.dispatch(
         'getLayerStyle',
@@ -1044,7 +1035,6 @@ export default {
       this.newFeatureProperties = {};
     },
     closeBufferDialog() {
-      this.bufferDialog = false;
       this.getLayerByName('buffer')
         .getSource()
         .clear();
@@ -1737,6 +1727,10 @@ export default {
 </script>
 
 <style scoped>
+.dragg-content {
+  width: 100%;
+  height: 100%;
+}
 .map-btn {
   position: relative;
   margin: 1px;

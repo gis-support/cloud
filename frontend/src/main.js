@@ -7,6 +7,7 @@ import store from "./store";
 import i18n from "./i18n";
 import api from "./docs/api.json"; // do podglądania api w monuted
 import axios from "axios";
+import VModal from "vue-js-modal";
 
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -17,6 +18,7 @@ Vue.prototype.$swagger = new Swagger({ spec: api }).client; // do podglądania a
 Vue.config.productionTip = false;
 Vue.use(VueAlertify);
 Vue.prototype.$http = axios;
+Vue.use(VModal, { componentName: "modal" });
 
 window.vm = new Vue({
   router,
