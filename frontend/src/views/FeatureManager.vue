@@ -77,6 +77,15 @@
                 :title="$i18n.t('featureManager.map.buffer')"
               >B</button>
             </div>
+            <div class="distance-tool">
+              <button
+                v-show="currentFeature"
+                type="button"
+                class="map-btn"
+                @click="openDistanceDialog"
+                :title="$i18n.t('featureManager.map.distance')"
+              >D</button>
+            </div>
           </div>
         </div>
         <nav
@@ -364,6 +373,74 @@
                     :disabled="!selectedLayerName"
                     @click="generateObjectsArray"
                   >{{ $i18n.t('featureManager.generate') }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </modal>
+        <modal
+          name="distance"
+          :draggable="true"
+          width="30%"
+          height="80%"
+          @before-close="closeDistanceDialog"
+        >
+          <div class="modal-content dragg-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.distance') }}</h4>
+            </div>
+            <div
+              class="modal-body"
+              v-if="activeLayer"
+            >
+              <div style="margin-bottom: 100px">
+                <h4>{{ $i18n.t('featureManager.distanceAnalysis') }}</h4>
+                <div
+                  class="form-group"
+                  style="display: flex;"
+                >
+                  <label
+                    class="control-label col-sm-4"
+                    style="position: relative; top: 8px"
+                  >{{ $i18n.t('featureManager.bufferValue') }}</label>
+                  <input
+                    class="form-control col-sm-7"
+                    v-model="bufferValue"
+                    type="number"
+                  />
+                </div>
+                <div
+                  class="form-group"
+                  style="display: flex;"
+                >
+                  <label
+                    class="control-label col-sm-4"
+                    style="position: relative; top: 8px"
+                  >{{ $i18n.t('featureManager.fieldName') }}</label>
+                  <select
+                    style="max-width: 75%"
+                    class="form-control"
+                    v-model="selectedFieldName"
+                  >
+                    <option
+                      v-for="(prop, idx) of currentFeatureFieldsNames"
+                      v-text="prop"
+                      :key="idx"
+                      :value="prop"
+                    />
+                  </select>
+                </div>
+                <div
+                  style="float: right"
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    :disabled="!bufferValue || !selectedFieldName"
+                    type="button"
+                    class="btn btn-default"
+                    @click="generateDistance"
+                  >{{ $i18n.t('featureManager.download') }}</button>
                 </div>
               </div>
             </div>
@@ -681,6 +758,7 @@ export default {
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
+    selectedFieldName: undefined,
     selectedLayerName: undefined,
     selectedRows: [],
     usersGroup: undefined
@@ -691,6 +769,13 @@ export default {
     },
     apiUrl() {
       return this.$store.getters.getApiUrl;
+    },
+    currentFeatureFieldsNames() {
+      if (this.currentFeature) {
+        return Object.keys(this.currentFeature.properties);
+      } else {
+        return [];
+      }
     },
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
@@ -1039,6 +1124,13 @@ export default {
       this.isBuffer = false;
       this.selectedLayerName = undefined;
     },
+    closeDistanceDialog() {
+      this.getLayerByName('buffer')
+        .getSource()
+        .clear();
+      this.bufferValue = undefined;
+      this.selectedFieldName = undefined;
+    },
     changeBaseLayer(layerName) {
       this.map
         .getLayers()
@@ -1209,28 +1301,51 @@ export default {
         units: 'kilometers'
       });
       if (buffer) {
-        this.$alertify.success(
-          this.$i18n.t('featureManager.bufferGenerateSuccess')
-        );
+        let bufferFeature = new GeoJSON().readFeature(buffer, {
+          featureProjection: 'EPSG:3857',
+          dataProjection: 'EPSG:4326'
+        });
+        if (bufferFeature) {
+          this.getLayerByName('buffer')
+            .getSource()
+            .addFeature(bufferFeature);
+          this.$alertify.success(
+            this.$i18n.t('featureManager.bufferGenerateSuccess')
+          );
+          this.isBuffer = true;
+        }
       } else {
         this.$alertify.error(
           this.$i18n.t('featureManager.bufferGenerateError')
         );
       }
-
-      let bufferFeature = new GeoJSON().readFeature(buffer, {
-        featureProjection: 'EPSG:3857',
-        dataProjection: 'EPSG:4326'
+    },
+    generateDistance() {
+      this.getLayerByName('buffer')
+        .getSource()
+        .clear();
+      let buffer = turf.buffer(this.currentFeature, this.bufferValue / 1000, {
+        units: 'kilometers'
       });
-      if (bufferFeature) {
-        this.getLayerByName('buffer')
-          .getSource()
-          .addFeature(bufferFeature);
-        this.isBuffer = true;
+      if (buffer) {
+        let bufferFeature = new GeoJSON().readFeature(buffer, {
+          featureProjection: 'EPSG:3857',
+          dataProjection: 'EPSG:4326'
+        });
+        if (bufferFeature) {
+          this.getLayerByName('buffer')
+            .getSource()
+            .addFeature(bufferFeature);
+        }
+        //Bufor wygenerowany, można wysłać request
+      } else {
+        this.$alertify.error(
+          this.$i18n.t('featureManager.bufferGenerateError')
+        );
       }
     },
     generateObjectsArray() {
-      //generateObjectsArray
+      //Bufor wygenerowany, warstwa wybrana. Można wysłać request.
     },
     goToSettings() {
       this.$router.push({
@@ -1348,6 +1463,9 @@ export default {
 
       self.$on('columnFilterDecision', handle);
       self.columnFilterDecisionDialogView = true;
+    },
+    openDistanceDialog() {
+      this.$modal.show('distance');
     },
     refreshVectorSource(layer) {
       const source = layer.getSource();
@@ -1759,6 +1877,13 @@ export default {
   z-index: 1;
   position: absolute;
   top: 101px;
+  left: 0.5em;
+}
+.distance-tool {
+  padding: 2px;
+  z-index: 1;
+  position: absolute;
+  top: 122px;
   left: 0.5em;
 }
 .measure-tool {
