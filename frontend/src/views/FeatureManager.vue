@@ -345,9 +345,9 @@
                       >
                         <option
                           v-for="(layer, idx) of layers"
-                          v-text="layer"
+                          v-text="layer.name"
                           :key="idx"
-                          :value="layer"
+                          :value="layer.name"
                         />
                       </select>
                     </div>
@@ -683,6 +683,7 @@ export default {
     isMeasure: false,
     isMeasureShow: false,
     items: [],
+    layers: [],
     layerStyle: undefined,
     measureTooltip: undefined,
     measureTooltipElement: undefined,
@@ -815,6 +816,10 @@ export default {
       } else {
         this.$i18n.t('featureManager.downloadError');
       }
+    },
+    async getLayers() {
+      const r = await this.$store.dispatch('getLayers');
+      this.layers = r.body.layers;
     },
     async getPermissions() {
       const r = await this.$store.dispatch('getPermissions');
@@ -1210,6 +1215,9 @@ export default {
         .find(l => l.get('name') === name);
     },
     generateBuffer() {
+      this.getLayerByName('buffer')
+        .getSource()
+        .clear();
       let buffer = turf.buffer(this.currentFeature, this.bufferValue / 1000, {
         units: 'kilometers'
       });
@@ -1564,6 +1572,7 @@ export default {
     }
   },
   async mounted() {
+    this.getLayers();
     this.map = new Map({
       target: 'map',
       layers: [
