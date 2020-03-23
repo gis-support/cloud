@@ -190,7 +190,9 @@
     "deleteGroupConfirm": "Czy na pewno chcesz usunąć wybraną grupę?",
     "modal": {
       "changePermissions": "Zmiana uprawnień",
-      "permissionType": "Rodzaj uprawnień"
+      "permissionType": "Rodzaj uprawnień",
+      "deleteUserContent": "Czy na pewno chcesz usunąć uzytkownika?",
+      "deleteUserTitle": "Usuwanie użytkownika"
     },
     "responses": {
       "groupExists": "Grupa o podanej nazwie istnieje",

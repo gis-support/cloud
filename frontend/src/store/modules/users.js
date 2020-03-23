@@ -1,24 +1,24 @@
-import Swagger from 'swagger-client';
-import api from '@/docs/api.json';
+import Swagger from "swagger-client";
+import api from "@/docs/api.json";
 
 const swagger = new Swagger({
   spec: api,
-  requestInterceptor: (r) => {
+  requestInterceptor: r => {
     const request = r;
-    if (!request.url.includes('https')) {
-      request.url = request.url.replace('http', 'https');
+    if (!request.url.includes("https")) {
+      request.url = request.url.replace("http", "https");
     }
-    if (request.url.includes('/login') || request.url.includes('/register')) {
+    if (request.url.includes("/login") || request.url.includes("/register")) {
       return request;
     }
-    request.headers.Authorization = localStorage.getItem('token');
+    request.headers.Authorization = localStorage.getItem("token");
     return request;
-  },
+  }
 }).client;
 
 export default {
   state: {
-    usersWithGroups: {},
+    usersWithGroups: {}
   },
   actions: {
     async addGroup(ctx, payload) {
@@ -45,11 +45,22 @@ export default {
         return err;
       }
     },
+    async deleteUser(ctx, payload) {
+      console.log(payload);
+      try {
+        const response = await swagger.apis.Auth.delete_api_users({ body: payload });
+        return response;
+      } catch (err) {
+        return err;
+      }
+    },
     async editPermissions(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle
-        const response = await swagger.apis.Permissions
-          .put_api_permissions__lid_({ body: payload.body, lid: payload.lid });
+        const response = await swagger.apis.Permissions.put_api_permissions__lid_({
+          body: payload.body,
+          lid: payload.lid
+        });
         return response;
       } catch (err) {
         return err;
@@ -65,8 +76,7 @@ export default {
     },
     async getPermissions() {
       try {
-        const response = await swagger.apis.Permissions
-          .get_api_permissions();
+        const response = await swagger.apis.Permissions.get_api_permissions();
         return response;
       } catch (err) {
         return err;
@@ -74,22 +84,21 @@ export default {
     },
     async getUsers() {
       try {
-        const response = await swagger.apis.Auth
-          .get_api_users();
+        const response = await swagger.apis.Auth.get_api_users();
         return response;
       } catch (err) {
         return err;
       }
-    },
+    }
   },
   getters: {
     getUsersWithGroups(state) {
       return state.usersWithGroups;
-    },
+    }
   },
   mutations: {
     setUsersWithGroups(state, users) {
       state.usersWithGroups = users;
-    },
-  },
+    }
+  }
 };

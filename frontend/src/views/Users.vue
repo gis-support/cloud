@@ -87,7 +87,14 @@
               v-for="user of usersPerm"
               :key="user"
             >
-              <td class="text-centered">{{ user }}</td>
+              <td class="text-centered">
+                <i
+                  v-if="user != 'admin'"
+                  class="fa fa-trash"
+                  @click="deleteUser(user)"
+                />
+                {{ user }}
+              </td>
               <td
                 class="text-centered"
                 v-for="perm of permissions"
@@ -425,6 +432,32 @@ export default {
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    async deleteUser(user) {
+      const payload = {
+        user: user
+      };
+      this.$alertify
+        .confirm(
+          this.$i18n.t('users.modal.deleteUserContent'),
+          async () => {
+            const r = await this.$store.dispatch('deleteUser', payload);
+            if (r.status === 200) {
+              this.users = this.users.filter(u => u !== user);
+              this.$alertify.success(this.$i18n.t('default.deleted'));
+            } else {
+              this.$alertify.error(this.$i18n.t('default.error'));
+            }
+          },
+          () => {}
+        )
+        .set({ title: this.$i18n.t('users.modal.deleteUserTitle') })
+        .set({
+          labels: {
+            ok: this.$i18n.t('default.delete'),
+            cancel: this.$i18n.t('default.cancel')
+          }
+        });
     },
     async getGroups() {
       const r = await this.$store.dispatch('getGroups');
