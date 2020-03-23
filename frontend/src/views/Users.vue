@@ -89,8 +89,9 @@
             >
               <td class="text-centered">
                 <i
+                  :title="$i18n.t('users.title.deleteUser')"
                   v-if="user != 'admin'"
-                  class="fa fa-trash"
+                  class="fa fa-trash handler"
                   @click="deleteUser(user)"
                 />
                 {{ user }}
@@ -443,7 +444,7 @@ export default {
           async () => {
             const r = await this.$store.dispatch('deleteUser', payload);
             if (r.status === 200) {
-              this.users = this.users.filter(u => u !== user);
+              this.usersPerm = this.usersPerm.filter(u => u !== user);
               this.$alertify.success(this.$i18n.t('default.deleted'));
             } else {
               this.$alertify.error(this.$i18n.t('default.error'));

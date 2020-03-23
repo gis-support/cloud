@@ -52,7 +52,6 @@ export default {
       }
     },
     async deleteUser(ctx, payload) {
-      console.log(payload);
       try {
         const response = await swagger.apis.Auth.delete_api_users({ body: payload });
         return response;
