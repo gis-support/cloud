@@ -24,7 +24,7 @@
                 id="logo"
                 alt="GIS Support logo"
                 :src="`${this.$store.getters.getApiUrl}/logo`"
-              >
+              />
             </a>
           </div>
           <nav
@@ -182,6 +182,9 @@ export default {
 .icon-hover:hover {
   opacity: 1;
   padding: 2px;
+  cursor: pointer;
+}
+.navbar-brand-img:hover {
   cursor: pointer;
 }
 .mb-0 {
