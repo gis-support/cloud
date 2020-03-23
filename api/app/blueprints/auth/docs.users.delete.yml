@@ -1,0 +1,28 @@
+Delete user
+---
+tags:
+  - Auth
+summary: Delete user
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        user:
+          type: string
+          description: User login
+          example: "test"
+          required: true
+responses:
+  200:
+    description: Confirmation
+    schema:
+      type: object
+      properties:
+        users:
+          type: string
+          example: "user deleted"

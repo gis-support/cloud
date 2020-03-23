@@ -284,7 +284,8 @@ class TestLayers(BaseTest):
         lid = r.json['layers']['id']
         r = client.get(f'/api/layers/{lid}?token={token}')
         assert r.status_code == 200
-        assert r.json['features'][0]['geometry']['coordinates'][0][0] == [22.65563999, 51.718238491]
+        assert r.json['features'][0]['geometry']['coordinates'][0][0] == [
+            22.65563999, 51.718238491]
 
 
 @pytest.mark.layerssettings
@@ -433,7 +434,7 @@ class TestLayersSettings(BaseTest):
         assert r.json['style']['fill-color'] == '255,255,255,0.4'
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '2'
-    
+
     def test_settings_change_name_styles_bug_2(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
@@ -463,7 +464,6 @@ class TestLayersSettings(BaseTest):
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '1'
         assert r.json['style']['width'] == '2'
-
 
 
 @pytest.mark.styles
@@ -699,7 +699,7 @@ class TestLayersStyles(BaseTest):
         assert len(r.json['style']['categories']) == 14
         # Random color
         assert r.json['style']['categories'][0]['stroke-color'] != r.json['style']['categories'][1]['stroke-color']
-    
+
     def test_styles_put_labels(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
@@ -759,3 +759,46 @@ class TestLayersExport(BaseTest):
             f'/api/layers/{lid}/export/geojson?token={token}', data=json.dumps({}))
         data = json.loads(BytesIO(r.data).read())
         assert len(data['features']) == 2
+
+
+@pytest.mark.mvt
+class TestMVT(BaseTest):
+
+    def test_correct_geojson(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct.geojson'),
+            'name': 'correct'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid = r.json['layers']['id']
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['features'] == 1
+        assert r.json['layers']['name'] == 'correct'
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/mvt/{lid}/10/562/336?token={token}')
+        assert r.status_code == 200
+
+    def test_RL_77(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'layers')
+        file_request = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'RL-77.dbf'), 'rb').read())), 'RL-77.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'RL-77.prj'), 'rb').read())), 'RL-77.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'RL-77.shx'), 'rb').read())), 'RL-77.shx'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'RL-77.shp'), 'rb').read())), 'RL-77.shp'),
+            'name': 'RL-77',
+            'encoding': 'cp1250'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        assert r.json
+        assert r.json['layers']['features'] == 10
+        assert r.json['layers']['name'] == 'RL-77'
+        lid = r.json['layers']['id']
+        r = client.get(f'/api/mvt/{lid}/17/73814/44015?token={token}')
+        assert r.status_code == 200

@@ -5,7 +5,7 @@ const swagger = new Swagger({
   spec: api,
   requestInterceptor: (r) => {
     const request = r;
-    if (!request.url.includes('https')) {
+    if (!request.url.includes('https') && process.env.VUE_APP_PROD_HOST_URL != 'localhost') {
       request.url = request.url.replace('http', 'https');
     }
     if (request.url.includes('/login') || request.url.includes('/register')) {
@@ -18,7 +18,8 @@ const swagger = new Swagger({
 
 export default {
   state: {
-    apiUrl: `https://${process.env.VUE_APP_PROD_HOST_URL}/api`,
+    apiUrl: process.env.VUE_APP_PROD_HOST_URL == 'localhost' ? `http://localhost:5001/api` :
+      `https://${process.env.VUE_APP_PROD_HOST_URL}/api`,
     columnTypes: ['character varying', 'real', 'integer', 'timestamp without time zone'],
     services: [],
   },
@@ -26,7 +27,9 @@ export default {
     async addService(ctx, payload) {
       try {
         const response = await swagger.apis.Attachments
-          .post_api_services({ body: payload });
+          .post_api_services({
+            body: payload
+          });
         return response;
       } catch (err) {
         return err.response;
@@ -35,7 +38,10 @@ export default {
     async changeLayer(ctx, payload) {
       try {
         const response = await swagger.apis.Layers
-          .post_api_layers__lid__settings({ body: payload.body, lid: payload.lid });
+          .post_api_layers__lid__settings({
+            body: payload.body,
+            lid: payload.lid
+          });
         return response;
       } catch (err) {
         return err.response;
@@ -44,7 +50,10 @@ export default {
     async deleteColumn(ctx, payload) {
       try {
         const response = await swagger.apis.Layers
-          .delete_api_layers__lid__settings({ body: payload.body, lid: payload.lid });
+          .delete_api_layers__lid__settings({
+            body: payload.body,
+            lid: payload.lid
+          });
         return response;
       } catch (err) {
         return err.response;
@@ -53,7 +62,9 @@ export default {
     async deleteLayer(ctx, lid) {
       try {
         // eslint-disable-next-line no-underscore-dangle
-        const response = await swagger.apis.Layers.delete_api_layers__lid_({ lid });
+        const response = await swagger.apis.Layers.delete_api_layers__lid_({
+          lid
+        });
         return response;
       } catch (err) {
         return err.response;
@@ -63,7 +74,9 @@ export default {
       try {
         // eslint-disable-next-line no-underscore-dangle
         const response = await swagger.apis.Services
-          .delete_api_services__sid_({ sid });
+          .delete_api_services__sid_({
+            sid
+          });
         return response;
       } catch (err) {
         return err.response;
@@ -72,7 +85,9 @@ export default {
     async getLayer(ctx, lid) {
       try {
         // eslint-disable-next-line no-underscore-dangle
-        const response = await swagger.apis.Layers.get_api_layers__lid_({ lid });
+        const response = await swagger.apis.Layers.get_api_layers__lid_({
+          lid
+        });
         return response;
       } catch (err) {
         return err.response;
@@ -88,7 +103,9 @@ export default {
     },
     async getLayerColumns(ctx, lid) {
       try {
-        const response = await swagger.apis.Layers.get_api_layers__lid__settings({ lid });
+        const response = await swagger.apis.Layers.get_api_layers__lid__settings({
+          lid
+        });
         return response;
       } catch (err) {
         return err.response;

@@ -17,6 +17,12 @@ parameters:
     example: "test"
     required: true
     type: string
+  - name: encoding
+    in: formData
+    description: Encoding
+    example: "cp1250"
+    required: false
+    type: string
   - name: epsg
     in: formData
     description: EPSG number, 4326 default

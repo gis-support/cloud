@@ -11,11 +11,11 @@ TEST_DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class BaseTest:
 
+    DEFAULT_USER = os.environ.get('DEFAULT_USER')
+    DEFAULT_PASS = os.environ.get('DEFAULT_PASS')
+
     def create_user(self, client, default_group=True):
-        DEFAULT_USER = os.environ.get('DEFAULT_USER')
-        DEFAULT_PASS = os.environ.get('DEFAULT_PASS')
-        token = self.get_token(client, user=DEFAULT_USER,
-                               password=DEFAULT_PASS)
+        token = self.get_token(client, admin=True)
         user = str(uuid.uuid4())
         password = str(uuid.uuid4())
         data = {"user": user, "password": password}
@@ -30,7 +30,10 @@ class BaseTest:
         assert r.json['users'] == 'user created'
         return user, password
 
-    def get_token(self, client, user="", password="", default_group=True):
+    def get_token(self, client, user="", password="", default_group=True, admin=False):
+        if admin:
+            user = self.DEFAULT_USER
+            password = self.DEFAULT_PASS
         if not user and not password:
             user, password = self.create_user(
                 client, default_group=default_group)

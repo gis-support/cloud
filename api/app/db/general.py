@@ -12,6 +12,7 @@ from app.helpers.cloud import Cloud
 from app.helpers.layer import Layer
 from shapely.geometry import shape
 from os import path as op
+from os import environ
 from io import BytesIO
 import psycopg2
 import jwt
@@ -50,6 +51,13 @@ def create_user(user, password, group):
         current_app._redis.lpush('user_list', user)
 
 
+def delete_user(user):
+    current_app._db.execute_sql(SQL("REASSIGN OWNED BY {user} TO postgres;DROP OWNED BY {user};DROP USER {user};").format(
+        user=Identifier(user)))
+    if current_app.config['TESTING']:
+        current_app._redis.lrem('user_list', 0, user)
+
+
 def authenticate_user(user, password):
     try:
         con = psycopg2.connect(
@@ -69,7 +77,7 @@ def create_token(user):
     random_uuid = str(uuid.uuid4())
     token = jwt.encode({"user": user, "uuid": random_uuid},
                        current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-    current_app._redis.set(random_uuid, user, ex=600)
+    current_app._redis.set(random_uuid, user, ex=60*60*8)
     return token
 
 
@@ -77,12 +85,10 @@ def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kws):
         token = request.args.get('token')
-        # W przypadku braku tokena
         if not token:
             if 'Authorization' not in request.headers:
                 return jsonify({"error": "token required"}), 403
             token = request.headers['Authorization']
-        # W przypadku niepoprawnego tokena
         try:
             user_data = jwt.decode(
                 token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
@@ -90,15 +96,22 @@ def token_required(f):
             return jsonify({"error": "invalid token"}), 403
         random_uuid = user_data.get('uuid')
         user = user_data.get('user')
-        # W przypadku złamania soli i podmianki czegokolwiek w JWT
         if not user or not random_uuid:
             return jsonify({"error": "invalid token"}), 403
         user_redis = current_app._redis.get(random_uuid)
         if not user_redis or user_redis.decode('utf-8') != user:
             return jsonify({"error": "invalid token"}), 403
-        # Wydłużenie tokena o kolejne 10min
-        current_app._redis.set(random_uuid, user, ex=600)
+        current_app._redis.set(random_uuid, user, ex=60*60*8)
         request.user = user
+        return f(*args, **kws)
+    return decorated_function
+
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        if request.user != environ.get('DEFAULT_USER'):
+            return jsonify({"error": "permission denied"}), 403
         return f(*args, **kws)
     return decorated_function
 

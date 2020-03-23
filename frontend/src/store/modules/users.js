@@ -5,7 +5,7 @@ const swagger = new Swagger({
   spec: api,
   requestInterceptor: r => {
     const request = r;
-    if (!request.url.includes("https")) {
+    if (!request.url.includes("https") && process.env.VUE_APP_PROD_HOST_URL != "localhost") {
       request.url = request.url.replace("http", "https");
     }
     if (request.url.includes("/login") || request.url.includes("/register")) {
@@ -23,7 +23,9 @@ export default {
   actions: {
     async addGroup(ctx, payload) {
       try {
-        const response = await swagger.apis.Auth.post_api_users_groups({ body: payload });
+        const response = await swagger.apis.Auth.post_api_users_groups({
+          body: payload
+        });
         return response;
       } catch (err) {
         return err;
@@ -31,7 +33,9 @@ export default {
     },
     async assignUserToGroup(ctx, payload) {
       try {
-        const response = await swagger.apis.Auth.put_api_users({ body: payload });
+        const response = await swagger.apis.Auth.put_api_users({
+          body: payload
+        });
         return response;
       } catch (err) {
         return err;
@@ -39,7 +43,9 @@ export default {
     },
     async deleteGroup(ctx, payload) {
       try {
-        const response = await swagger.apis.Auth.delete_api_users_groups({ body: payload });
+        const response = await swagger.apis.Auth.delete_api_users_groups({
+          body: payload
+        });
         return response;
       } catch (err) {
         return err;

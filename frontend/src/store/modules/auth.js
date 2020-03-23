@@ -5,7 +5,7 @@ const swagger = new Swagger({
   spec: api,
   requestInterceptor: (r) => {
     const request = r;
-    if (!request.url.includes('https')) {
+    if (!request.url.includes('https') && process.env.VUE_APP_PROD_HOST_URL != 'localhost') {
       request.url = request.url.replace('http', 'https');
     }
     if (request.url.includes('/login')) {
@@ -58,8 +58,12 @@ export default {
     },
     async logIn(ctx, payload) {
       try {
-        const response = await swagger.apis.Auth.post_api_login({ body: payload });
-        const { token } = response.obj;
+        const response = await swagger.apis.Auth.post_api_login({
+          body: payload
+        });
+        const {
+          token
+        } = response.obj;
         ctx.commit('setToken', token);
         ctx.commit('setUser', payload.user);
         localStorage.setItem('token', token);
@@ -75,7 +79,9 @@ export default {
     },
     async register(ctx, payload) {
       try {
-        const response = await swagger.apis.Auth.post_api_users({ body: payload });
+        const response = await swagger.apis.Auth.post_api_users({
+          body: payload
+        });
         return response;
       } catch (err) {
         return err.response;

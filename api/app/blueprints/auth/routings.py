@@ -4,7 +4,7 @@
 from flask import Blueprint, jsonify, request, current_app, send_from_directory
 from flasgger import swag_from
 from app.docs import path_by
-from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, cloud_decorator
+from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, cloud_decorator, delete_user, admin_only
 import os
 
 
@@ -34,11 +34,13 @@ def check_token():
     return jsonify({"token": "valid"})
 
 
-@mod_auth.route('/users', methods=['GET', 'POST', 'PUT'])
+@mod_auth.route('/users', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @swag_from(path_by(__file__, 'docs.users.get.yml'), methods=['GET'])
 @swag_from(path_by(__file__, 'docs.users.post.yml'), methods=['POST'])
 @swag_from(path_by(__file__, 'docs.users.put.yml'), methods=['PUT'])
+@swag_from(path_by(__file__, 'docs.users.delete.yml'), methods=['DELETE'])
 @token_required
+@admin_only
 @cloud_decorator
 def users(cloud):
     if request.method == 'GET':
@@ -64,6 +66,11 @@ def users(cloud):
             return jsonify({"error": "group not exists"}), 409
         cloud.assign_user(user, group)
         return jsonify({"users": "user assigned"}), 200
+    elif request.method == 'DELETE':
+        if user == request.user:
+            return jsonify({"error": "permission denied"}), 403
+        delete_user(user)
+        return jsonify({"users": "user deleted"}), 200
 
 
 @mod_auth.route('/users/groups', methods=['GET', 'POST', 'DELETE'])
@@ -71,6 +78,7 @@ def users(cloud):
 @swag_from(path_by(__file__, 'docs.groups.post.yml'), methods=['POST'])
 @swag_from(path_by(__file__, 'docs.groups.delete.yml'), methods=['DELETE'])
 @token_required
+@admin_only
 @cloud_decorator
 def groups(cloud):
     if request.method == 'GET':

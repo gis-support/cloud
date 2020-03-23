@@ -6,7 +6,7 @@ const swagger = new Swagger({
   spec: api,
   requestInterceptor: (r) => {
     const request = r;
-    if (!request.url.includes('https')) {
+    if (!request.url.includes('https') && process.env.VUE_APP_PROD_HOST_URL != 'localhost') {
       request.url = request.url.replace('http', 'https');
     }
     if (request.url.includes('/login') || request.url.includes('/register')) {
@@ -59,12 +59,10 @@ export default {
     async categorizeFeatures(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle
-        const response = await swagger.apis.Layers.get_api_layers__lid__categories__attr_(
-          {
-            lid: payload.lid,
-            attr: payload.attr,
-          },
-        );
+        const response = await swagger.apis.Layers.get_api_layers__lid__categories__attr_({
+          lid: payload.lid,
+          attr: payload.attr,
+        }, );
         return response;
       } catch (err) {
         return err.response;
@@ -100,7 +98,10 @@ export default {
     async downloadLayer(ctx, payload) {
       try {
         const response = await swagger.apis.Export
-          .post_api_layers__lid__export_geojson({ lid: payload.lid, body: payload.body });
+          .post_api_layers__lid__export_geojson({
+            lid: payload.lid,
+            body: payload.body
+          });
         return response;
       } catch (err) {
         return err.response;
@@ -122,7 +123,9 @@ export default {
     async getCurrentSettings(ctx, lid) {
       try {
         const response = await swagger.apis.Layers
-          .get_api_layers__lid__settings({ lid });
+          .get_api_layers__lid__settings({
+            lid
+          });
         return response;
       } catch (err) {
         return err.response;
@@ -143,7 +146,9 @@ export default {
     async getLayerStyle(ctx, lid) {
       try {
         const response = await swagger.apis.Layers
-          .get_api_layers__lid__style({ lid });
+          .get_api_layers__lid__style({
+            lid
+          });
         return response;
       } catch (err) {
         return err.response;
