@@ -1,0 +1,41 @@
+Set settings
+---
+tags:
+  - Analysis
+summary: Set layers for analysis
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        pn:
+          type: string
+          required: false
+        pk:
+          type: string
+          required: false
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    description: GeoJSON
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

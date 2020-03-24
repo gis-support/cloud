@@ -286,3 +286,56 @@ class Layer(Cloud):
         if not feature_collection['features']:
             feature_collection['features'] = []
         return feature_collection
+
+    def get_distances(self, fid, buffer=0):
+        result = {
+            'pn': [],
+            'pk': []
+        }
+        cursor = self.execute(SQL("""
+            SELECT pn, pk FROM settings
+        """))
+        names = cursor.fetchone()
+        if not names:
+            raise ValueError("empty analysis settings settings")
+        try:
+            pn_layer_name = self.unhash_name(names[0])
+        except ValueError:
+            raise ValueError("invalid pn layer in settings")
+        try:
+            pk_layer_name = self.unhash_name(names[1])
+        except ValueError:
+            raise ValueError("invalid pk layer in settings")
+        # Parki narodowe
+        pn_cursor = self.execute(SQL("""
+            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 3857), ST_Transform(b.geometry, 3857))
+            FROM (SELECT geometry FROM {} WHERE id=%s) a, {} b
+            WHERE ST_DWithin(
+                ST_Transform(a.geometry, 3857),
+                ST_Transform(b.geometry, 3857),
+                %s
+            )
+            ORDER BY 1
+        """).format(Identifier(self.name), Identifier(pn_layer_name)), (fid, buffer,))
+        for row in pn_cursor.fetchall():
+            result['pn'].append({
+                'name': row[0],
+                'distance': row[1]
+            })
+        # Parki krajobrazowe
+        pk_cursor = self.execute(SQL("""
+            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 3857), ST_Transform(b.geometry, 3857))
+            FROM (SELECT geometry FROM {} WHERE id=%s) a, {} b
+            WHERE ST_DWithin(
+                ST_Transform(a.geometry, 3857),
+                ST_Transform(b.geometry, 3857),
+                %s
+            )
+            ORDER BY 1
+        """).format(Identifier(self.name), Identifier(pk_layer_name)), (fid, buffer,))
+        for row in pk_cursor.fetchall():
+            result['pk'].append({
+                'name': row[0],
+                'distance': row[1]
+            })
+        return result
