@@ -115,6 +115,7 @@ export default {
           lid: payload.lid,
           fid: payload.fid,
         });
+        ctx.commit('editFeatureInActiveLayer', payload);
         return response;
       } catch (err) {
         return err.response;
@@ -199,6 +200,18 @@ export default {
     },
     setActiveLayer(state, activeLayer) {
       state.activeLayer = activeLayer;
+    },
+    editFeatureInActiveLayer(state, payload) {
+      state.activeLayer = {
+        type: state.activeLayer,
+        features: state.activeLayer.features.map(layer => {
+          if (layer.properties.id == payload.fid) {
+            layer.properties = payload.body.properties;
+            layer.geometry = payload.body.geometry;
+          }
+          return layer
+        })
+      }
     },
     setAttachmentsFeature(state, params) {
       Vue.set(state.featureAttachments[params.lid], params.fid, {});

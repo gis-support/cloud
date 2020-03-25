@@ -1,40 +1,47 @@
 .modal-mask {
-	position: fixed;
-	z-index: 9999999;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, .5);
-	display: table;
-	transition: opacity .3s ease;
+  position: fixed;
+  z-index: 9999999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  display: table;
+  transition: opacity .3s ease;
 }
+
 .modal-wrapper {
-	display: table-cell;
-    vertical-align: middle;
-    overflow-x: hidden;
-    overflow-y: auto;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  display: table-cell;
+  vertical-align: middle;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
+
 .activeLayer {
   color: #ffffff;
   background-color: #2b3d4c;
 }
+
 .dropdown-menu {
   left: -75px;
 }
-#map{
+
+#map {
   width: 100%;
   height: 100%;
 }
-.map-table-content, .map-content {
+
+.map-table-content,
+.map-content {
   position: relative;
   z-index: 1;
 }
+
 .right-panel__name {
   white-space: nowrap;
   overflow: hidden;
@@ -42,6 +49,7 @@
   display: inline-block;
   max-width: calc(100% - 25px);
 }
+
 .right-panel__title {
   display: inline-block;
   margin-bottom: 30px;
@@ -49,23 +57,28 @@
   margin-top: 6px;
   padding-left: 0px;
 }
+
 .title__icon {
   position: relative;
   top: -3px;
   margin-right: 10px;
 }
+
 .btn-group-justified .btn-group {
   width: 33%;
   padding-right: 5px;
 }
+
 .scroll-tab {
-    overflow: auto;
-    height: calc(100vh - 254px);
+  overflow: auto;
+  height: calc(100vh - 254px);
 }
+
 .btn-group-edit {
   margin-bottom: 20px;
   width: 100%;
 }
+
 .btn-group-edit .btn-success {
   width: 100%;
 }
@@ -73,234 +86,274 @@
 .btn-group-action {
   width: 33%;
 }
+
 .btn-group-action:not(.btn-danger) {
   padding-right: 5px;
 }
+
 .btn-group-action .btn {
   width: 100%;
 }
 
 .right-sub-panel {
-    width: 100%;
-    display: table;
+  width: 100%;
+  display: table;
 }
-.right-sub-panel > div {
-    display: table-caption;
+
+.right-sub-panel>div {
+  display: table-caption;
 }
-.right-sub-panel > div > hr {
-    margin-top: 0px;
-    margin-bottom: 5px;
+
+.right-sub-panel>div>hr {
+  margin-top: 0px;
+  margin-bottom: 5px;
 }
+
 .right-sub-panel .empty-sub-panel {
-    background-color: #eee;
-    border-color: #eee;
-    color: black;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
+  background-color: #eee;
+  border-color: #eee;
+  color: black;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
 }
+
 .right-sub-panel .btn.action {
-    padding: 0;
+  padding: 0;
 }
 
 .attributes-panel .view hr {
-    margin-top: 0px;
-    margin-bottom: 10px;
-}
-.attributes-panel .view {
-    margin-top: 10px;
-}
-.attachments-panel .upload {
-    display: none;
-}
-.attachments-panel .thumbnail{
-    max-width: 100%;
-    margin-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 10px;
 }
 
-.attributes-panel .html-preview{
-    border-style: dotted;
-    border-color: black;
-    border-width: 1px;
-    padding: 5px;
+.attributes-panel .view {
+  margin-top: 10px;
+}
+
+.attachments-panel .upload {
+  display: none;
+}
+
+.attachments-panel .thumbnail {
+  max-width: 100%;
+  margin-bottom: 0px;
+}
+
+.attributes-panel .html-preview {
+  border-style: dotted;
+  border-color: black;
+  border-width: 1px;
+  padding: 5px;
 }
 
 .filter-panel {
-    background-color: #eee;
-    border-color: #eee;
-    color: black;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
+  background-color: #eee;
+  border-color: #eee;
+  color: black;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
 }
+
 .filter-panel .form-group:not(:last-child) {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
+
 .filter-panel .form-group:last-child {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 .filters-panel .condition .control-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* table */
 .active-cell {
-  background-color: #2b3d4c52;
+  background-color: rgba(249, 237, 20, 0.5);
 }
+
 .cell-to-download {
-  background-color: #faa84b52;
+  background-color: rgba(249, 237, 20, 0.5);
 }
+
 .table-content {
   height: calc(40% - 54px);
   max-height: 100%;
   max-width: 100%;
 }
+
 .loading-indicator {
   text-align: center;
 }
+
 .vscroll {
   height: 100%;
   position: relative;
 }
+
 .vscroll th {
   white-space: nowrap;
 }
+
 .vscroll td {
   white-space: nowrap;
 }
+
 .vscroll .table-scroll-bar {
-    position: absolute;
-    width: 15px;
-    right: 0px;
-    bottom: 0px;
-    overflow-y: auto;
-    overflow-x: hidden;
+  position: absolute;
+  width: 15px;
+  right: 0px;
+  bottom: 0px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
+
 .vscroll .table-data {
-  height : 100%;
+  height: 100%;
   overflow-y: hidden;
 }
+
 .vscroll .table-data table {
   /*height : calc(100% - 24px);*/
   overflow-y: hidden;
 }
+
 .vscroll .table-data table thead th div span {
-    flex: 0;
+  flex: 0;
 }
+
 .vscroll .table-data table thead .sorting,
 .vscroll .table-data table thead .sorting_asc,
 .vscroll .table-data table thead .sorting_desc,
 .vscroll .table-data table thead .sorting_asc_disabled,
 .vscroll .table-data table thead .sorting_desc_disabled {
-    cursor: pointer;
-    position: relative;
-    flex: 0;
+  cursor: pointer;
+  position: relative;
+  flex: 0;
 }
+
 .vscroll .table-data table thead .sorting:after,
 .vscroll .table-data table thead .sorting_asc:after,
 .vscroll .table-data table thead .sorting_desc:after,
 .vscroll .table-data table thead .sorting_asc_disabled:after,
 .vscroll .table-data table thead .sorting_desc_disabled:after {
-    font-family: 'Glyphicons Halflings';
-    opacity: 0.5;
-    text-align: right;
-    float:right;
-    margin-left: 2px;
+  font-family: 'Glyphicons Halflings';
+  opacity: 0.5;
+  text-align: right;
+  float: right;
+  margin-left: 2px;
 }
+
 .vscroll .table-data table thead .sorting:after {
-    opacity: 0.2;
-    content: "\e150";
+  opacity: 0.2;
+  content: "\e150";
 }
+
 .vscroll .table-data table thead .sorting_asc:after {
-    content: "\e155";
+  content: "\e155";
 }
+
 .vscroll .table-data table thead .sorting_desc:after {
-    content: "\e156";
+  content: "\e156";
 }
+
 .vscroll .table-data table thead .sorting_asc_disabled:after,
 .vscroll .table-data table thead .sorting_desc_disabled:after {
-    color: #eee;
+  color: #eee;
 }
+
 .vscroll .table-data table thead .filter,
-.vscroll .table-data table thead .filtered{
-    position: relative;
-    flex: 1;
+.vscroll .table-data table thead .filtered {
+  position: relative;
+  flex: 1;
 }
-.vscroll .table-data table thead .filter:before{
-    font-family: 'Glyphicons Halflings';
-    opacity: 0.2;
-    content: "\e138";
-    text-align: right;
-    float:right;
-    margin-left: 2px;
+
+.vscroll .table-data table thead .filter:before {
+  font-family: 'Glyphicons Halflings';
+  opacity: 0.2;
+  content: "\e138";
+  text-align: right;
+  float: right;
+  margin-left: 2px;
 }
+
 .vscroll .table-data table thead .filtered:before {
-    opacity: 0.5;
+  opacity: 0.5;
 }
-.vscroll .table-data table thead th:not(.first) div{
-    display: flex;
+
+.vscroll .table-data table thead th:not(.first) div {
+  display: flex;
 }
+
 #wrapper {
-    width: 100%;
-    height: calc(100% - 56px);
-    padding: 0;
-    margin: 0;
-    min-height: calc(100% - 56px);
+  width: 100%;
+  height: calc(100% - 56px);
+  padding: 0;
+  margin: 0;
+  min-height: calc(100% - 56px);
 }
+
 #root {
-    width: 100%;
-    height: 100%;
-    display: flex;
+  width: 100%;
+  height: 100%;
+  display: flex;
 }
+
 #root .map-table-content {
-    width: 75%;
-    height: 100%;
+  width: 75%;
+  height: 100%;
 
-    min-width: 25%;
-    max-width: 85%;
+  min-width: 25%;
+  max-width: 85%;
 }
+
 #root .map-table-content .map-content {
-    width: 100%;
-    height: 60%;
+  width: 100%;
+  height: 60%;
 
-    min-height: 25%;
-    max-height: 85%;
+  min-height: 25%;
+  max-height: 85%;
 }
+
 #root .map-table-content .table-content {
-    width: 100%;
-    flex-grow: 1;
+  width: 100%;
+  flex-grow: 1;
 }
-#root .map-table-content .table-content > div {
-    position: absolute;
-    width: 100%;
-    height: calc(40% - 54px);
-    max-height: 100%;
+
+#root .map-table-content .table-content>div {
+  position: absolute;
+  width: 100%;
+  height: calc(40% - 54px);
+  max-height: 100%;
 }
-#root .map-table-content .table-content  .virtual-scroller  tr {
-     height: 5px;
+
+#root .map-table-content .table-content .virtual-scroller tr {
+  height: 5px;
 }
 
 
 #root .right-panel {
-    flex-grow: 1;
-    max-width: 25%;
+  flex-grow: 1;
+  max-width: 25%;
 }
+
 .padding-0 {
-    padding-left: 0px;
-    padding-right: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 /*full map*/
 #root .map-table-content-full {
-    width: 100% !important;
-    max-width: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
-#root .map-table-content .map-content-full{
-    height: 100% !important;
-    max-height: 100% !important;
+
+#root .map-table-content .map-content-full {
+  height: 100% !important;
+  max-height: 100% !important;
 }

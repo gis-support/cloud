@@ -933,7 +933,7 @@ export default {
       this.$alertify.warning(this.$i18n.t('default.editInProgress'));
       const r = await this.$store.dispatch('editFeature', payload);
       if (r.status === 200) {
-        this.editingEndOperations();
+        this.editingEndOperations(fid);
         this.refreshVectorSource(this.getLayerByName('features'));
         const itemsIdx = this.items.findIndex(el => el.id === fid);
         this.items[itemsIdx] = r.obj.properties;
@@ -1170,6 +1170,14 @@ export default {
     },
     createSelectInteraction() {
       let active = true;
+      this.map.addLayer(
+        new VectorLayer({
+          name: 'featuresVectorSelection',
+          visible: true,
+          source: new VectorSource({}),
+          style: f => this.styleFeatures(f, false, true)
+        })
+      );
       this.map.on('click', evt => {
         if (
           !active ||
@@ -1235,30 +1243,38 @@ export default {
     editAttributes() {
       this.editing = true;
       this.editingDataCopy = JSON.parse(JSON.stringify(this.currentFeature));
-
-      this.getLayerByName('features').setVisible(false);
+      this.getLayerByName('featuresVectorSelection')
+        .getSource()
+        .clear();
       this.activeLayer.features.forEach(feature => {
-        const tempFeature = new GeoJSON().readFeature(feature, {
-          featureProjection: 'EPSG:3857',
-          dataProjection: 'EPSG:4326'
-        });
-        this.getLayerByName('featuresVector')
-          .getSource()
-          .addFeature(tempFeature);
+        if (feature.properties.id == this.currentFeature.properties.id) {
+          const tempFeature = new GeoJSON().readFeature(feature, {
+            featureProjection: 'EPSG:3857',
+            dataProjection: 'EPSG:4326'
+          });
+          this.getLayerByName('featuresVector')
+            .getSource()
+            .addFeature(tempFeature);
+        }
       });
       if (!this.getInteractionByName('modifyInteraction')) {
         this.createModifyInteraction();
       }
       this.getLayerByName('featuresVector').setVisible(true);
       this.getInteractionByName('modifyInteraction').setActive(true);
+      this.refreshVectorSource(this.getLayerByName('features'));
     },
-    editingEndOperations() {
+    editingEndOperations(edited = false) {
       this.getLayerByName('features').setVisible(true);
       this.getInteractionByName('modifyInteraction').setActive(false);
       this.getLayerByName('featuresVector')
         .getSource()
         .clear();
       this.editing = false;
+      this.refreshVectorSource(this.getLayerByName('features'));
+      if (edited) {
+        this.selectFeatureById(edited);
+      }
     },
     formatArea(polygon) {
       var area = getArea(polygon);
@@ -1516,6 +1532,9 @@ export default {
         this.$refs['table-data'].clearSelection();
         this.currentFeature = undefined;
         this.indexActiveTab = 0;
+        this.getLayerByName('featuresVectorSelection')
+          .getSource()
+          .clear();
       }
     },
     selectFeatureById(fid) {
@@ -1526,10 +1545,12 @@ export default {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326'
       });
-      this.map.getView().fit(feature.getGeometry(), {
-        maxZoom: 16,
-        duration: 500
-      });
+      this.getLayerByName('featuresVectorSelection')
+        .getSource()
+        .clear();
+      this.getLayerByName('featuresVectorSelection')
+        .getSource()
+        .addFeature(feature);
       this.indexActiveTab = 1; // change tab in sidepanel
     },
     setServiceVisibility(serviceName) {
@@ -1576,7 +1597,7 @@ export default {
       this.isMeasure = true;
       this.isMeasureShow = false;
     },
-    styleFeatures(f) {
+    styleFeatures(f, mvt = false, selecting = false) {
       const labelsToShow = [];
       this.labels.forEach(el => {
         labelsToShow.push(f.getProperties()[el]);
@@ -1585,14 +1606,18 @@ export default {
         text: new Text({
           text: labelsToShow.join(' '),
           fill: new Fill({ color: 'white' }),
-          stroke: new Stroke({ color: 'black', width: 4 }),
+          stroke: selecting
+            ? new Stroke({ color: 'rgba(249, 237, 20, 0.5)', width: 4 })
+            : new Stroke({ color: 'black', width: 4 }),
           offsetY: -10
         })
       });
       if (this.layerType) {
         const stroke = new Stroke({
-          color: `rgba(${this.layerStyle['stroke-color']})`,
-          width: `${this.layerStyle['stroke-width']}`
+          color: selecting
+            ? 'rgba(249, 237, 20, 0.5)'
+            : `rgba(${this.layerStyle['stroke-color']})`,
+          width: selecting ? 4 : `${this.layerStyle['stroke-width']}`
         });
         const fill = new Fill({
           color: `rgba(${this.layerStyle['fill-color']})`
@@ -1633,11 +1658,15 @@ export default {
         );
         if (filteredFeat) {
           const stroke = new Stroke({
-            color: `rgba(${filteredFeat['stroke-color']})`,
-            width: `${filteredFeat['stroke-width']}`
+            color: selecting
+              ? 'rgba(249, 237, 20, 0.5)'
+              : `rgba(${filteredFeat['stroke-color']})`,
+            width: selecting ? 4 : `${filteredFeat['stroke-width']}`
           });
           const fill = new Fill({
-            color: `rgba(${filteredFeat['fill-color']})`
+            color: selecting
+              ? 'rgba(249, 237, 20, 0.5)'
+              : `rgba(${filteredFeat['fill-color']})`
           });
           // TODO - add triangle/square/dashed/dotted
           if (filteredFeat.type === 'point') {
@@ -1659,13 +1688,22 @@ export default {
                 color: [250, 250, 250, 0.4]
               }),
               stroke: new Stroke({
-                color: [51, 153, 204, 1],
-                width: 1
+                color: selecting
+                  ? 'rgba(249, 237, 20, 0.5)'
+                  : [51, 153, 204, 1],
+                width: selecting ? 3 : 1
               }),
               radius: 2
             })
           );
         }
+      }
+      if (
+        mvt == true &&
+        this.editing == true &&
+        f.get('id') == this.currentFeature.properties.id
+      ) {
+        return null;
       }
       return featStyle;
     },
@@ -1700,7 +1738,6 @@ export default {
     await this.getUsers();
     await this.getSettings();
 
-    this.createSelectInteraction();
     this.loadServices();
     await this.createStyle();
 
@@ -1715,7 +1752,7 @@ export default {
             this.$route.params.layerId
           }/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
         }),
-        style: f => this.styleFeatures(f)
+        style: f => this.styleFeatures(f, true)
       })
     );
     this.map.addLayer(
@@ -1803,6 +1840,8 @@ export default {
         }
       })
     );
+
+    this.createSelectInteraction();
 
     const r = await this.$store.dispatch(
       'getLayer',
