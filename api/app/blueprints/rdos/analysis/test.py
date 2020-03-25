@@ -162,9 +162,9 @@ class TestSettings(BaseTest):
         assert r.json
         assert len(r.json['distance']['pk']) == 0
         assert len(r.json['distance']['pn']) == 0
-        # Analiza 500km
+        # Analiza 300km
         data = {
-            "buffer": 500*1000,
+            "buffer": 300*1000,
             "name": "testowy punkt"
         }
         r = client.post(
@@ -173,9 +173,20 @@ class TestSettings(BaseTest):
         assert r.json
         assert len(r.json['distance']['pk']) == 2
         assert len(r.json['distance']['pn']) == 0
-        # Analiza 700km
+        # Analiza 400km
         data = {
-            "buffer": 700*1000,
+            "buffer": 400*1000,
+            "name": "testowy punkt"
+        }
+        r = client.post(
+            f'/api/analysis/distance/{lid}/{fid}?token={token}', data=json.dumps(data))
+        assert r.status_code == 200
+        assert r.json
+        assert len(r.json['distance']['pk']) == 15
+        assert len(r.json['distance']['pn']) == 2
+        # Analiza 500km
+        data = {
+            "buffer": 500*1000,
             "name": "testowy punkt"
         }
         r = client.post(

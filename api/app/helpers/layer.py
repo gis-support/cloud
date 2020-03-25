@@ -308,11 +308,11 @@ class Layer(Cloud):
             raise ValueError("invalid pk layer in settings")
         # Parki narodowe
         pn_cursor = self.execute(SQL("""
-            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 3857), ST_Transform(b.geometry, 3857))
+            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 2180), ST_Transform(b.geometry, 2180))
             FROM (SELECT geometry FROM {} WHERE id=%s) a, {} b
             WHERE ST_DWithin(
-                ST_Transform(a.geometry, 3857),
-                ST_Transform(b.geometry, 3857),
+                ST_Transform(a.geometry, 2180),
+                ST_Transform(b.geometry, 2180),
                 %s
             )
             ORDER BY 1
@@ -324,11 +324,11 @@ class Layer(Cloud):
             })
         # Parki krajobrazowe
         pk_cursor = self.execute(SQL("""
-            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 3857), ST_Transform(b.geometry, 3857))
+            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 2180), ST_Transform(b.geometry, 2180))
             FROM (SELECT geometry FROM {} WHERE id=%s) a, {} b
             WHERE ST_DWithin(
-                ST_Transform(a.geometry, 3857),
-                ST_Transform(b.geometry, 3857),
+                ST_Transform(a.geometry, 2180),
+                ST_Transform(b.geometry, 2180),
                 %s
             )
             ORDER BY 1
