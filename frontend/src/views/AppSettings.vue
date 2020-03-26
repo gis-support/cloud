@@ -7,13 +7,24 @@
       >
         <li class="active">
           <a
-            href="#logo-tab"
+            href="#tabLogo"
             data-toggle="tab"
-            @click="setActiveTab('logo-tab')"
+            @click="setActiveTab('tabLogo')"
           >
             <i class="fa fa-image" />
             &nbsp;&nbsp;
-            <span>{{ $i18n.t('settings.logo') }}</span>
+            <span>{{ $i18n.t('settings.tabLogo') }}</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#qgisLogo"
+            data-toggle="tab"
+            @click="setActiveTab('tabQgis')"
+          >
+            <i class="fa fa-quora" />
+            &nbsp;&nbsp;
+            <span>{{ $i18n.t('settings.tabQgis') }}</span>
           </a>
         </li>
       </ul>
@@ -26,13 +37,13 @@
         <div class="heading-block">
           <h3>
             <span data-i18n="settings.title">{{ $i18n.t('default.settings') }}:</span>
-            <span class="red">{{ $i18n.t('settings.logo') }}</span>
+            <span class="red">{{ $i18n.t(`settings.${this.activeTab}`) }}</span>
           </h3>
         </div>
         <div
           class="tab-pane in active"
-          id="logo-tab"
-          v-if="activeTab === 'logo-tab'"
+          id="tabLogo"
+          v-if="activeTab === 'tabLogo'"
         >
           <div>
             <h4 class="text-left">{{ $i18n.t('settings.addNewLogo') }}</h4>
@@ -64,6 +75,47 @@
             style="float:right"
           >{{ $i18n.t('default.add') }}</button>
         </div>
+        <div
+          class="tab-pane in active"
+          id="tabQgis"
+          v-if="activeTab === 'tabQgis'"
+        >
+          <div>
+            <h4>Twoje dane połączenia się do Cloud przez QGIS</h4>
+            <table class="qgis-data-list">
+              <tr>
+                <td>
+                  <h5>{{this.$i18n.t('settings.host')}}:</h5>
+                </td>
+                <td>{{host}}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h5>{{this.$i18n.t('settings.database')}}:</h5>
+                </td>
+                <td>cloud</td>
+              </tr>
+              <tr>
+                <td>
+                  <h5>{{this.$i18n.t('settings.port')}}:</h5>
+                </td>
+                <td>{{port}}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h5>{{this.$i18n.t('settings.user')}}:</h5>
+                </td>
+                <td>{{user}}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h5>{{this.$i18n.t('settings.password')}}:</h5>
+                </td>
+                <td>******</td>
+              </tr>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -75,7 +127,7 @@ import FileUpload from 'vue-upload-component';
 export default {
   name: 'AppSettings',
   data: () => ({
-    activeTab: 'logo-tab',
+    activeTab: 'tabLogo',
     logo: undefined,
     postAction: `${
       vm.$store.getters.getApiUrl
@@ -83,6 +135,17 @@ export default {
   }),
   components: {
     FileUpload
+  },
+  computed: {
+    user() {
+      return this.$store.getters.getUser;
+    },
+    host() {
+      return process.env.VUE_APP_PROD_HOST_URL;
+    },
+    port() {
+      return process.env.VUE_APP_PROD_DB_PORT;
+    }
   },
   methods: {
     addLogo() {
@@ -174,6 +237,11 @@ export default {
 }
 .pr-30 {
   padding-right: 30px;
+}
+.qgis-data-list > tr > td {
+  vertical-align: top;
+  padding: 5px;
+  padding-right: 40px;
 }
 .text-centered {
   text-align: center;
