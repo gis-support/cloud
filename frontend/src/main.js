@@ -14,11 +14,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/css/mvpready-admin.css";
 import "ol/ol.css";
 
-Vue.prototype.$swagger = new Swagger({ spec: api }).client; // do podglądania api w monuted
+Vue.prototype.$swagger = new Swagger({
+  spec: api
+}).client; // do podglądania api w monuted
 Vue.config.productionTip = false;
 Vue.use(VueAlertify);
 Vue.prototype.$http = axios;
-Vue.use(VModal, { componentName: "modal" });
+Vue.use(VModal, {
+  componentName: "modal"
+});
 
 window.vm = new Vue({
   router,
