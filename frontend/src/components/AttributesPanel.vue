@@ -35,12 +35,20 @@
             v-else-if="featureTypes[key] === 'character varying'"
             type="text"
           />
+          <date-picker
+            v-model="attributes.properties[key]"
+            value-type="format"
+            :format="dateFormat"
+            v-else-if="featureTypes[key] === 'timestamp without time zone'"
+          />
+          <!--
           <input
             class="form-control col-sm-7"
             v-model="attributes.properties[key]"
             v-else-if="featureTypes[key] === 'timestamp without time zone'"
             type="datetime-local"
           />
+          -->
         </span>
       </template>
       <hr />
@@ -49,7 +57,20 @@
 </template>
 
 <script>
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 export default {
+  data: () => ({
+    dateFormat: {
+      stringify: date => {
+        return Math.floor(date.getTime() / 1000);
+      },
+      parse: value => {
+        return new Date(value * 1000);
+      }
+    }
+  }),
+  components: { DatePicker },
   props: {
     editing: {
       type: Boolean,
