@@ -1654,7 +1654,7 @@ export default {
       } else {
         const attr = f.get(this.layerStyle.attribute);
         const filteredFeat = this.layerStyle.categories.find(
-          el => el.value === attr
+          el => el.value == attr
         );
         if (filteredFeat) {
           const stroke = new Stroke({
