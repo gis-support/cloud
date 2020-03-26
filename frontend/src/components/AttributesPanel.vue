@@ -1,11 +1,17 @@
 <template>
   <div class="attr-wrapper">
-    <div v-for="(value, key) in fields.properties" :key="key">
+    <div
+      v-for="(value, key) in fields.properties"
+      :key="key"
+    >
       <label>{{ key }}:</label>
       <br />
       <template v-if="!editing">
         <span v-if="value">{{ value }}</span>
-        <span v-else style="color: lightgrey">{{ $i18n.t('default.noData') }}</span>
+        <span
+          v-else
+          style="color: lightgrey"
+        >{{ $i18n.t('default.noData') }}</span>
       </template>
       <template v-else>
         <input
