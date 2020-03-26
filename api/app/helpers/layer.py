@@ -224,7 +224,19 @@ class Layer(Cloud):
         return json.loads(feature[0])
 
     # Add new feature
-    def add_feature(self, columns, values):
+    def add_feature(self, columns, values, columns_with_types):
+        # Validation
+        error = False
+        for i in range(1, len(columns)):
+            if isinstance(values[i], type(None)):
+                continue
+            elif not isinstance(values[i], TYPES[columns_with_types[columns[i]]]):
+                error = f"value '{values[i]}' invalid type of column '{columns[i]}' ({columns_with_types[columns[i]]})"
+                break
+            elif columns_with_types[columns[i]] == 'timestamp without time zone':
+                values[i] = datetime.fromtimestamp(values[i])
+        if error:
+            raise ValueError(error)
         query_string = SQL("INSERT INTO {} ({}) values ({})  RETURNING id;").format(
             Identifier(self.name),
             SQL(', ').join(map(lambda c: Identifier(c), columns)),

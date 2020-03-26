@@ -20,11 +20,15 @@ def features_post(layer, lid):
     geometry = 'SRID=4326;{}'.format(shape(data['geometry']).wkt)
     columns = ['geometry']
     values = [geometry]
+    columns_with_types = layer.columns(with_types=True)
     for k, v in data['properties'].items():
-        if k in layer.columns():
+        if k in list(columns_with_types.keys()):
             columns.append(k)
             values.append(v)
-    feature = layer.add_feature(columns, values)
+    try:
+        feature = layer.add_feature(columns, values, columns_with_types)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     return jsonify(feature), 201
 
 

@@ -126,3 +126,42 @@ class TestFeatures(BaseTest):
         r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, fid, token),
                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 200
+
+    def test_features_post_invalid_type(self, client):
+        token = self.get_token(client)
+        lid = self.add_geojson_prg(client, token)
+        r = client.get(
+            '/api/layers/{}/features/{}?token={}'.format(lid, 1, token))
+        base_geometry = len(r.json['geometry']['coordinates'][0][0])
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
+        feature = json.loads(open(path).read())
+        # Shape_Leng need to be float or int, check string
+        feature['properties']['Shape_Leng'] = "e"
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
+                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 400
+        # Shape_Leng need to be float or int, check int
+        feature['properties']['Shape_Leng'] = 1
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
+                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        # Shape_Leng need to be float, check float
+        feature['properties']['Shape_Leng'] = 1.0
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
+                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        # WERSJA_OD need to be timestamp, check string
+        feature['properties']['WERSJA_OD'] = "e"
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
+                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 400
+        #  WERSJA_OD need to be datetime string, check int
+        feature['properties']['WERSJA_OD'] = int(time())
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
+                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
+        #  WERSJA_OD need to be datetime string, check float
+        feature['properties']['WERSJA_OD'] = time()
+        r = client.post('/api/layers/{}/features?token={}'.format(lid, token),
+                        data=json.dumps(feature), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 201
