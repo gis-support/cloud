@@ -33,7 +33,6 @@
             class="form-control col-sm-7"
             v-model="attributes.properties[key]"
             v-else-if="featureTypes[key] === 'character varying'"
-            @keypress="isNumber($event)"
             type="text"
           />
           <input
