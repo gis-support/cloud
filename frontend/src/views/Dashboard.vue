@@ -571,6 +571,9 @@ export default {
       this.$store.commit('setServices', r.body.services);
     },
     async fetchWms() {
+      if (this.serviceUrl.length < 1) {
+        return;
+      }
       this.isFetching = true;
       const parser = new WMSCapabilities();
       const url = `https://divi.io/wms_proxy/${this.serviceUrl}?request=GetCapabilities&service=WMS`;
@@ -579,6 +582,10 @@ export default {
         .then(text => {
           const result = parser.read(text);
           this.fetchedLayers = result.Capability.Layer.Layer.map(el => el.Name);
+          this.isFetching = false;
+        })
+        .catch(error => {
+          this.$alertify.error(this.$i18n.t('default.error'));
           this.isFetching = false;
         });
     },
