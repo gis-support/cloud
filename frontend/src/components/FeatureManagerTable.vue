@@ -409,7 +409,15 @@ export default {
     },
     wyszukaj(items, wartosc) {
       const filteredItems = _.filter(items, item =>
-        _.some(item, value => value && value.toString().indexOf(wartosc) !== -1)
+        _.some(
+          item,
+          value =>
+            value &&
+            value
+              .toString()
+              .toLowerCase()
+              .indexOf(wartosc.toLowerCase()) !== -1
+        )
       );
       this.$emit('updateSearchCount', filteredItems.length);
       return filteredItems;
