@@ -309,8 +309,14 @@ export default {
         let items2 = items;
         _.each(filters, filter => {
           items2 = _.filter(items2, item =>
-            ValueFilterMap[filter.operation](filter.value).isFiltered(
-              item[filter.column]
+            ValueFilterMap[filter.operation](
+              typeof filter.value === 'string'
+                ? filter.value.toLowerCase()
+                : filter.value
+            ).isFiltered(
+              typeof item[filter.column] === 'string'
+                ? item[filter.column].toLowerCase()
+                : item[filter.column]
             )
           );
         });
