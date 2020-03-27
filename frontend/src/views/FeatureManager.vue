@@ -695,7 +695,7 @@ import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import TileWMS from 'ol/source/TileWMS';
 import { Circle, Fill, Stroke, Style, RegularShape } from 'ol/style';
-import { LineString, Polygon } from 'ol/geom.js';
+import { LineString, Polygon, MultiPoint } from 'ol/geom.js';
 import { getArea, getLength } from 'ol/sphere.js';
 import { unByKey } from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
@@ -1791,7 +1791,83 @@ export default {
         name: 'featuresVector',
         visible: false,
         source: new VectorSource({}),
-        style: f => this.styleFeatures(f)
+        style: feature => {
+          const geometry = feature.getGeometry();
+          const styles = [];
+          if (geometry instanceof Polygon) {
+            styles.push(
+              new Style({
+                stroke: new Stroke({
+                  color: 'rgba(255, 0, 0, 0.5)',
+                  width: 4
+                }),
+                fill: new Fill({
+                  color: `rgba(${this.layerStyle['fill-color']})`
+                })
+              })
+            );
+            this.map.getView().getZoom() >= 12
+              ? styles.push(
+                  new Style({
+                    image: new Circle({
+                      radius: 5,
+                      stroke: new Stroke({
+                        color: 'rgba(255, 77, 77, 1)'
+                      }),
+                      fill: new Fill({
+                        color: 'rgba(255, 77, 77, 0.5)'
+                      })
+                    }),
+                    geometry: function(feature) {
+                      return new MultiPoint(geometry.getCoordinates()[0]);
+                    }
+                  })
+                )
+              : false;
+          } else if (geometry instanceof LineString) {
+            styles.push(
+              new Style({
+                stroke: new Stroke({
+                  color: 'rgba(255, 0, 0, 0.5)',
+                  width: 4
+                })
+              })
+            );
+            this.map.getView().getZoom() >= 12
+              ? styles.push(
+                  new Style({
+                    image: new Circle({
+                      radius: 5,
+                      stroke: new Stroke({
+                        color: 'rgba(255, 77, 77, 1)'
+                      }),
+                      fill: new Fill({
+                        color: 'rgba(255, 77, 77, 0.5)'
+                      })
+                    }),
+                    geometry: function(feature) {
+                      return new MultiPoint(geometry.getCoordinates());
+                    }
+                  })
+                )
+              : false;
+          } else {
+            styles.push(
+              new Style({
+                image: new Circle({
+                  radius: 5,
+                  stroke: new Stroke({
+                    color: 'rgba(255, 0, 0, 1)'
+                  }),
+                  fill: new Fill({
+                    color: 'rgba(255, 77, 77, 0.5)'
+                  })
+                })
+              })
+            );
+          }
+          return styles;
+        }
       })
     );
     this.map.addLayer(
