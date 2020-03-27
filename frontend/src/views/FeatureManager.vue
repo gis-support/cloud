@@ -129,6 +129,16 @@
             >
               <i class="fa fa-download" />
             </button>
+            <button
+              style="margin-right: 2px"
+              type="button"
+              class="btn navbar-btn navbar-right btn-default"
+              :title="$i18n.t('featureManager.zoomToSelected')"
+              v-if="currentFeature"
+              @click="zoomToSelected"
+            >
+              <i class="fa fa-search" />
+            </button>
           </div>
         </nav>
         <!-- {{ $route.params.layerId }} -->
@@ -1743,6 +1753,16 @@ export default {
     },
     updateSelectedRows(rows) {
       this.selectedRows = rows;
+    },
+    zoomToSelected() {
+      const feature = new GeoJSON().readFeature(this.currentFeature, {
+        featureProjection: 'EPSG:3857',
+        dataProjection: 'EPSG:4326'
+      });
+      this.map.getView().fit(feature.getGeometry(), {
+        maxZoom: 16,
+        duration: 500
+      });
     }
   },
   async mounted() {

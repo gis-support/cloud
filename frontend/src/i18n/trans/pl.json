@@ -152,6 +152,7 @@
     "objectsFilter": "Filtrowanie obiektów",
     "objectsNumber": "Ilość obiektów",
     "ortoError": "Błąd ładowania Ortofotomapy",
+    "zoomToSelected": "Przybliż do zaznaczonego obiektu",
     "map": {
       "areaMeasure": "Pomiar powierzchni",
       "buffer": "Bufor",
