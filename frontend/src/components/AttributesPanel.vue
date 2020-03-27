@@ -7,7 +7,7 @@
       <label>{{ key }}:</label>
       <br />
       <template v-if="!editing">
-        <span v-if="value">{{ value | formatData(featureTypes[key]) }}</span>
+        <span v-if="value">{{ value | formatDate(featureTypes[key]) }}</span>
         <span
           v-else
           style="color: lightgrey"
@@ -35,10 +35,11 @@
             v-else-if="featureTypes[key] === 'character varying'"
             type="text"
           />
-          <datepicker
+          <Datepicker
             v-else-if="featureTypes[key] === 'timestamp without time zone'"
-            :value="attributes.properties[key]"
-          ></datepicker>
+            v-model="attributes.properties[key]"
+            format="dd-MM-yyyy"
+          ></Datepicker>
           <!--
           <input
             class="form-control col-sm-7"
@@ -60,7 +61,7 @@ import moment from 'moment';
 
 export default {
   filters: {
-    formatData(value, type) {
+    formatDate(value, type) {
       if (type == 'timestamp without time zone') {
         return value
           ? moment(value)
