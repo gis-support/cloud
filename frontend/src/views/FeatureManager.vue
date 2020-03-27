@@ -254,12 +254,11 @@
                         v-else-if="featureTypes[name] === 'character varying'"
                         type="text"
                       />
-                      <input
-                        class="form-control col-sm-7"
-                        v-model="newFeatureProperties[name]"
+                      <Datepicker
                         v-else-if="featureTypes[name] === 'timestamp without time zone'"
-                        type="datetime-local"
-                      />
+                        v-model="newFeatureProperties[name]"
+                        format="dd.MM.yyyy"
+                      ></Datepicker>
                     </div>
                   </template>
                 </div>
@@ -709,6 +708,7 @@ import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
+import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
 
 export default {
@@ -716,7 +716,8 @@ export default {
     AttachmentsPanel,
     AttributesPanel,
     FeatureManagerTable,
-    FiltersPanel
+    FiltersPanel,
+    Datepicker
   },
   data: () => ({
     activeServices: [],
@@ -925,8 +926,9 @@ export default {
         .getGeometry()
         .transform('EPSG:3857', 'EPSG:4326')
         .getCoordinates();
+      const tempItem = this.dateToTimestamp(this.currentFeature);
       const payload = {
-        body: this.currentFeature,
+        body: tempItem,
         lid: this.$route.params.layerId,
         fid
       };
@@ -936,7 +938,8 @@ export default {
         this.editingEndOperations(fid);
         this.refreshVectorSource(this.getLayerByName('features'));
         const itemsIdx = this.items.findIndex(el => el.id === fid);
-        this.items[itemsIdx] = r.obj.properties;
+        this.items[itemsIdx] = this.formatDate(r.obj).properties;
+        this.currentFeature = r.obj;
         this.$refs['table-data'].$recompute('windowItems'); // update table data
         this.$refs['table-data'].$recompute('filteredItems'); // update table data
         this.$refs['table-data'].$recompute('searchedItems'); // update table data
@@ -954,25 +957,20 @@ export default {
         .getGeometry()
         .transform('EPSG:3857', 'EPSG:4326')
         .getCoordinates();
+      const featureCopy = JSON.parse(JSON.stringify(this.newFeatureProperties));
       Object.entries(this.newFeatureProperties).forEach(k => {
         if (!this.newFeatureProperties[k[0]]) return;
 
         if (this.featureTypes[k[0]] === 'integer') {
-          this.newFeatureProperties[k[0]] = parseInt(
-            this.newFeatureProperties[k[0]],
-            10
-          );
+          featureCopy[k[0]] = parseInt(this.newFeatureProperties[k[0]], 10);
         } else if (this.featureTypes[k[0]] === 'real') {
-          this.newFeatureProperties[k[0]] = parseFloat(
-            this.newFeatureProperties[k[0]]
-          );
+          featureCopy[k[0]] = parseFloat(this.newFeatureProperties[k[0]]);
         } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
-          this.newFeatureProperties[k[0]] = moment(
-            this.newFeatureProperties[k[0]]
-          ).format('X');
+          featureCopy[k[0]] = parseInt(
+            moment(this.newFeatureProperties[k[0]]).format('X')
+          );
         }
       });
-
       const r = await this.$store.dispatch('addFeature', {
         lid: this.$route.params.layerId,
         body: {
@@ -980,7 +978,7 @@ export default {
             coordinates: coords,
             type: this.layerType
           },
-          properties: this.newFeatureProperties,
+          properties: featureCopy,
           type: 'Feature'
         }
       });
@@ -988,12 +986,45 @@ export default {
       if (r.status === 201) {
         this.refreshVectorSource(this.getLayerByName('features'));
         this.clearFeatureAdding();
-        this.items.push(r.obj.properties);
+        const tempItem = this.formatDate(r.obj);
+        this.items.push(tempItem.properties);
         this.activeLayer.features.push(r.obj);
         this.$refs['table-data'].$recompute('windowItems'); // update table data
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    formatDate(feature) {
+      const copy = JSON.parse(JSON.stringify(feature));
+      Object.entries(copy.properties).forEach(([k, v]) => {
+        if (this.featureTypes[k] === 'timestamp without time zone') {
+          copy.properties[k] = moment(v).isValid()
+            ? moment(v)
+                .locale('pl')
+                .format('L')
+            : '';
+        } else {
+          copy.properties[k] = v;
+        }
+      });
+      return copy;
+    },
+    dateToTimestamp(feature) {
+      let featureCopy = JSON.parse(JSON.stringify(feature));
+      Object.entries(feature.properties).forEach(k => {
+        if (!feature.properties[k[0]]) return;
+
+        if (this.featureTypes[k[0]] === 'integer') {
+          featureCopy.properties[k[0]] = parseInt(feature.properties[k[0]], 10);
+        } else if (this.featureTypes[k[0]] === 'real') {
+          featureCopy.properties[k[0]] = parseFloat(feature.properties[k[0]]);
+        } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
+          featureCopy.properties[k[0]] = parseInt(
+            moment.utc(feature.properties[k[0]]).format('X')
+          );
+        }
+      });
+      return featureCopy;
     },
     addMeasurementInteraction(layerName, type) {
       let drawInteraction = new Draw({

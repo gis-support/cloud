@@ -7,7 +7,7 @@
       <label>{{ key }}:</label>
       <br />
       <template v-if="!editing">
-        <span v-if="value">{{ value }}</span>
+        <span v-if="value">{{ value | formatDate(featureTypes[key]) }}</span>
         <span
           v-else
           style="color: lightgrey"
@@ -35,12 +35,19 @@
             v-else-if="featureTypes[key] === 'character varying'"
             type="text"
           />
+          <Datepicker
+            v-else-if="featureTypes[key] === 'timestamp without time zone'"
+            v-model="attributes.properties[key]"
+            format="dd-MM-yyyy"
+          ></Datepicker>
+          <!--
           <input
             class="form-control col-sm-7"
             v-model="attributes.properties[key]"
             v-else-if="featureTypes[key] === 'timestamp without time zone'"
             type="datetime-local"
           />
+          -->
         </span>
       </template>
       <hr />
@@ -49,7 +56,23 @@
 </template>
 
 <script>
+import Datepicker from 'vuejs-datepicker';
+import moment from 'moment';
+
 export default {
+  filters: {
+    formatDate(value, type) {
+      if (type == 'timestamp without time zone') {
+        return value
+          ? moment(value)
+              .locale('pl')
+              .format('L')
+          : null;
+      }
+      return value;
+    }
+  },
+  components: { Datepicker },
   props: {
     editing: {
       type: Boolean,
