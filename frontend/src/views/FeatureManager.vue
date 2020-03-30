@@ -705,7 +705,14 @@ import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import TileWMS from 'ol/source/TileWMS';
 import { Circle, Fill, Stroke, Style, RegularShape } from 'ol/style';
-import { LineString, Polygon, MultiPoint } from 'ol/geom.js';
+import {
+  LineString,
+  Polygon,
+  Point,
+  MultiPoint,
+  MultiLineString,
+  MultiPolygon
+} from 'ol/geom.js';
 import { getArea, getLength } from 'ol/sphere.js';
 import { unByKey } from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
@@ -1813,7 +1820,7 @@ export default {
         source: new VectorSource({}),
         style: feature => {
           const geometry = feature.getGeometry();
-          return [
+          let styles = [
             new Style({
               fill: new Fill({
                 color: 'rgba(255, 77, 77, 0.5)'
@@ -1825,28 +1832,45 @@ export default {
               image: new Circle({
                 radius: 5,
                 stroke: new Stroke({
-                  color: 'rgba(255, 77, 77, 0.5)'
-                }),
-                fill: new Fill({
-                  color: 'rgba(255, 77, 77, 0.5)'
-                })
-              })
-            }),
-            new Style({
-              image: new Circle({
-                radius: 5,
-                stroke: new Stroke({
                   color: 'rgba(255, 0, 0, 1)'
                 }),
                 fill: new Fill({
                   color: 'rgba(255, 77, 77, 1)'
                 })
-              }),
-              geometry: feature => {
-                return new MultiPoint(geometry.getCoordinates().flat());
-              }
+              })
             })
           ];
+          if (
+            !(geometry instanceof Point) &&
+            !(geometry instanceof MultiPoint)
+          ) {
+            styles.push(
+              new Style({
+                image: new Circle({
+                  radius: 5,
+                  stroke: new Stroke({
+                    color: 'rgba(255, 0, 0, 1)'
+                  }),
+                  fill: new Fill({
+                    color: 'rgba(255, 77, 77, 1)'
+                  })
+                }),
+                geometry: () => {
+                  let coordinates = geometry.getCoordinates();
+                  if (
+                    geometry instanceof Polygon ||
+                    geometry instanceof MultiLineString
+                  ) {
+                    coordinates = coordinates.flat();
+                  } else if (geometry instanceof MultiPolygon) {
+                    coordinates = coordinates.flat(2);
+                  }
+                  return new MultiPoint(coordinates);
+                }
+              })
+            );
+          }
+          return styles;
         }
       })
     );
