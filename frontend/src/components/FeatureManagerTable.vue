@@ -24,10 +24,12 @@
                     v-if="column.head"
                     class="first"
                     :key="i"
+                    :style="{'min-width': '50px'}"
                   >#</th>
                   <th
                     v-else-if="!column.head"
                     :key="i"
+                    :style="{'min-width': columnsLengths[column.name] + 'px', 'max-width': columnsLengths[column.name] + 'px'}"
                   >
                     <div>
                       <span v-text="column.name" />
@@ -74,6 +76,7 @@
                       'active-cell' : selectedIndex == indexFirstItem + index,
                       'cell-to-download' : rowsToDownloadCopy.map(el => el.id).includes(item.id)
                     }"
+                    :style="{'min-width': columnsLengths[column.name] + 'px', 'max-width': columnsLengths[column.name] + 'px'}"
                     @click.exact="selectItemIndex(indexFirstItem + index, item)"
                     @click.ctrl="selectToDownloadCtrl(index, item)"
                     @click.shift="selectToDownloadShift(index, item)"
@@ -138,6 +141,7 @@ export default {
   data() {
     return {
       arenaHeight: 0,
+      columnsLengths: {},
       currentFeatureId: undefined,
       maxItems: 0,
       indexFirstItem: 0,
@@ -504,6 +508,26 @@ export default {
     this.$root.$on('update-column-filters', this.updateColumnFilters);
   },
   mounted() {
+    for (let column of this.columns) {
+      if (!column.head) {
+        this.columnsLengths[column.name] = column.name.length * 7.5 + 30;
+      }
+    }
+    for (let item of this.items) {
+      for (let column in item) {
+        if (item[column]) {
+          if (
+            item[column].toString().length * 8 >
+            this.columnsLengths[column]
+          ) {
+            this.columnsLengths[column] =
+              item[column].toString().length >= 200
+                ? item[column].toString().length * 6.5
+                : item[column].toString().length * 7.5;
+          }
+        }
+      }
+    }
     const self = this;
     self.initVirtualTable();
   },
