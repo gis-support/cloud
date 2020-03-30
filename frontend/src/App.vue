@@ -55,34 +55,31 @@
                   class="dropdown-menu"
                   role="menu"
                 >
-                  <li
-                    @click="changePage('dashboard')"
-                    v-if="this.$route.name !== 'dashboard'"
-                  >
+                  <li @click="changePage('dashboard')">
                     <a>
                       <i class="fa fa-dashboard" />
                       &nbsp;&nbsp;
-                      <span>{{ $i18n.t('default.dashboard') }}</span>
+                      <span
+                        v-bind:class="{'active-route':this.$route.name==='dashboard'}"
+                      >{{ $i18n.t('default.dashboard') }}</span>
                     </a>
                   </li>
-                  <li
-                    @click="changePage('users')"
-                    v-if="this.$route.name !== 'users'"
-                  >
+                  <li @click="changePage('users')">
                     <a>
                       <i class="fa fa-users" />
                       &nbsp;&nbsp;
-                      <span>{{ $i18n.t('default.users') }}</span>
+                      <span
+                        v-bind:class="{'active-route':this.$route.name==='users'}"
+                      >{{ $i18n.t('default.users') }}</span>
                     </a>
                   </li>
-                  <li
-                    @click="changePage('appSettings')"
-                    v-if="this.$route.name !== 'appSettings'"
-                  >
+                  <li @click="changePage('appSettings')">
                     <a>
                       <i class="fa fa-cog" />
                       &nbsp;&nbsp;
-                      <span>{{ $i18n.t('default.settings') }}</span>
+                      <span
+                        v-bind:class="{'active-route':this.$route.name==='appSettings'}"
+                      >{{ $i18n.t('default.settings') }}</span>
                     </a>
                   </li>
                   <li @click="logout">
@@ -116,7 +113,9 @@ export default {
       this.$i18n.locale = lang;
     },
     changePage(pageName) {
-      this.$router.push({ name: pageName });
+      if (this.$route.name !== pageName) {
+        this.$router.push({ name: pageName });
+      }
     },
     logout() {
       this.$store.commit('logOut');
@@ -135,6 +134,9 @@ export default {
 <style>
 #app {
   height: 100%;
+}
+.active-route {
+  font-weight: bold;
 }
 .align-center {
   text-align: center;
