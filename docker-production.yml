@@ -20,13 +20,7 @@ services:
       - VUE_APP_PROD_HOST_URL=${APP_PROD_HOST_URL}
     command: bash -c "./prod_start.sh"
     healthcheck:
-      test:
-        [
-          "CMD",
-          "service",
-          "nginx",
-          "status",
-        ]
+      test: ["CMD", "service", "nginx", "status"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -53,15 +47,7 @@ services:
       - DEFAULT_GROUPS
       - DEFAULT_GROUP
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-U",
-          "docker",
-          "-h",
-          "localhost"
-        ]
+      test: ["CMD", "pg_isready", "-U", "docker", "-h", "localhost"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -72,6 +58,8 @@ services:
       context: ./
       dockerfile: ./docker/api/Dockerfile
     command: bash -c "./prod_start.sh"
+    volumes:
+      - ./api/static/logo.png:/api/static/logo.png
     environment:
       - PYTHONUNBUFFERED
       - FLASK_APP
@@ -94,7 +82,7 @@ services:
           "localhost:${APP_PROD_API_PORT}",
           "docker",
           "-h",
-          "localhost"
+          "localhost",
         ]
       interval: 5s
       timeout: 3s
