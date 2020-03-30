@@ -74,9 +74,11 @@
                     :key="idx2 + 'item'"
                     :class="{
                       'active-cell' : selectedIndex == indexFirstItem + index,
-                      'cell-to-download' : rowsToDownloadCopy.map(el => el.id).includes(item.id)
+                      'cell-to-download' : rowsToDownloadCopy.map(el => el.id).includes(item.id),
+                      'overflow-title': columnsLengths[column.name] >= 750
                     }"
                     :style="{'min-width': columnsLengths[column.name] + 'px', 'max-width': columnsLengths[column.name] + 'px'}"
+                    :title="item[column.key] != null && item[column.key].toString().length >= 100?item[column.key]:false"
                     @click.exact="selectItemIndex(indexFirstItem + index, item)"
                     @click.ctrl="selectToDownloadCtrl(index, item)"
                     @click.shift="selectToDownloadShift(index, item)"
@@ -517,12 +519,12 @@ export default {
       for (let column in item) {
         if (item[column]) {
           if (
-            item[column].toString().length * 8 >
+            item[column].toString().length * 7.5 >
             this.columnsLengths[column]
           ) {
             this.columnsLengths[column] =
-              item[column].toString().length >= 200
-                ? item[column].toString().length * 6.5
+              item[column].toString().length * 7.5 >= 750
+                ? 750
                 : item[column].toString().length * 7.5;
           }
         }
@@ -540,3 +542,9 @@ export default {
   destroyed() {}
 };
 </script>
+<style>
+.overflow-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
