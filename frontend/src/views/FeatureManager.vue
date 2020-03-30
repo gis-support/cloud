@@ -1813,80 +1813,40 @@ export default {
         source: new VectorSource({}),
         style: feature => {
           const geometry = feature.getGeometry();
-          const styles = [];
-          if (geometry instanceof Polygon) {
-            styles.push(
-              new Style({
+          return [
+            new Style({
+              fill: new Fill({
+                color: 'rgba(255, 77, 77, 0.5)'
+              }),
+              stroke: new Stroke({
+                color: 'rgba(255, 77, 77, 0.5)',
+                width: 2
+              }),
+              image: new Circle({
+                radius: 5,
                 stroke: new Stroke({
-                  color: 'rgba(255, 0, 0, 0.5)',
-                  width: 4
+                  color: 'rgba(255, 77, 77, 0.5)'
                 }),
                 fill: new Fill({
-                  color: `rgba(${this.layerStyle['fill-color']})`
+                  color: 'rgba(255, 77, 77, 0.5)'
                 })
               })
-            );
-            this.map.getView().getZoom() >= 12
-              ? styles.push(
-                  new Style({
-                    image: new Circle({
-                      radius: 5,
-                      stroke: new Stroke({
-                        color: 'rgba(255, 77, 77, 1)'
-                      }),
-                      fill: new Fill({
-                        color: 'rgba(255, 77, 77, 0.5)'
-                      })
-                    }),
-                    geometry: function(feature) {
-                      return new MultiPoint(geometry.getCoordinates()[0]);
-                    }
-                  })
-                )
-              : false;
-          } else if (geometry instanceof LineString) {
-            styles.push(
-              new Style({
+            }),
+            new Style({
+              image: new Circle({
+                radius: 5,
                 stroke: new Stroke({
-                  color: 'rgba(255, 0, 0, 0.5)',
-                  width: 4
+                  color: 'rgba(255, 0, 0, 1)'
+                }),
+                fill: new Fill({
+                  color: 'rgba(255, 77, 77, 1)'
                 })
-              })
-            );
-            this.map.getView().getZoom() >= 12
-              ? styles.push(
-                  new Style({
-                    image: new Circle({
-                      radius: 5,
-                      stroke: new Stroke({
-                        color: 'rgba(255, 77, 77, 1)'
-                      }),
-                      fill: new Fill({
-                        color: 'rgba(255, 77, 77, 0.5)'
-                      })
-                    }),
-                    geometry: function(feature) {
-                      return new MultiPoint(geometry.getCoordinates());
-                    }
-                  })
-                )
-              : false;
-          } else {
-            styles.push(
-              new Style({
-                image: new Circle({
-                  radius: 5,
-                  stroke: new Stroke({
-                    color: 'rgba(255, 0, 0, 1)'
-                  }),
-                  fill: new Fill({
-                    color: 'rgba(255, 77, 77, 0.5)'
-                  })
-                })
-              })
-            );
-          }
-          return styles;
+              }),
+              geometry: feature => {
+                return new MultiPoint(geometry.getCoordinates().flat());
+              }
+            })
+          ];
         }
       })
     );
