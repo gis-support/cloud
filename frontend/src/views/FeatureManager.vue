@@ -1773,6 +1773,7 @@ export default {
     }
   },
   async mounted() {
+    this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
     this.getLayers();
     this.map = new Map({
       target: 'map',

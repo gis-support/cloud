@@ -40,7 +40,6 @@ def check_token():
 @swag_from(path_by(__file__, 'docs.users.put.yml'), methods=['PUT'])
 @swag_from(path_by(__file__, 'docs.users.delete.yml'), methods=['DELETE'])
 @token_required
-@admin_only
 @cloud_decorator
 def users(cloud):
     if request.method == 'GET':

@@ -48,8 +48,8 @@ class Cloud:
     def execute(self, *args, **kwargs):
         return self.db.execute_sql(*args, **kwargs)
 
-    def get_users_with_layers(self):
-        cursor = self.execute("""
+    def get_users_with_layers(self, grantor=True):
+        cursor = self.execute(f"""
             SELECT t1.rolname, t2.table_name, t2.privilege_type
             FROM pg_roles AS t1
             LEFT JOIN information_schema.role_table_grants as t2
@@ -57,7 +57,7 @@ class Cloud:
             WHERE t1.rolcanlogin = true
             AND t1.rolname NOT IN %s
             AND (t2.privilege_type IN %s OR t2.privilege_type IS NULL)
-            AND (t2.grantor = %s OR t2.grantor IS NULL)
+            AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
             AND (t2.table_name NOT IN %s OR t2.table_name IS NULL)
         """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), self.user, DB_RESTRICTED_TABLES))
         users = {}
@@ -93,8 +93,8 @@ class Cloud:
         return [i[0] for i in cursor.fetchall()]
 
     # Get permissions for layers
-    def get_permissions(self):
-        users, layers = self.get_users_with_layers()
+    def get_permissions(self, grantor):
+        users, layers = self.get_users_with_layers(grantor=grantor)
         permissions = []
         for layer in layers:
             perm = {

@@ -254,6 +254,9 @@ export default {
       return this.$store.getters.getDefaultGroup;
     },
     featureAttachments() {
+      if (!this.$store.getters.getFeatureAttachments[this.lid][this.fid]) {
+        return [];
+      }
       return this.$store.getters.getFeatureAttachments[this.lid][this.fid];
     },
     user() {

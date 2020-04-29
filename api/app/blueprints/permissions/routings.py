@@ -6,6 +6,7 @@ from app.db.general import token_required, layer_decorator, user_exists, cloud_d
 from app.helpers.layer import PERMISSIONS
 from flasgger import swag_from
 from app.docs import path_by
+from os import environ
 
 mod_permissions = Blueprint("permissions", __name__)
 
@@ -15,7 +16,8 @@ mod_permissions = Blueprint("permissions", __name__)
 @token_required
 @cloud_decorator
 def permissions(cloud):
-    return jsonify(cloud.get_permissions())
+    admin = True if request.user == environ.get('DEFAULT_USER') else False
+    return jsonify(cloud.get_permissions(grantor=admin))
 
 
 @mod_permissions.route('/permissions/<lid>', methods=['PUT'])
