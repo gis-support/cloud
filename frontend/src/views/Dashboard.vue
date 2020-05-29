@@ -1,22 +1,24 @@
 <template>
   <div class="dashboard container align-center">
+    <!-- TABELA WARSTW -->
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
           <i class="fa fa-database" />
-          <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.vectorLayersList') }}</span>
+          <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.layersList') }}</span>
         </div>
         <div class="p-0">
           <input
             type="text"
             class="form-control container__input"
-            v-model="searchVector"
+            v-model="searchLayer"
             :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
           />
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main">
         <span
+          class="add-layer"
           data-toggle="modal"
           data-target="#addLayerModal"
           data-type="vectorLayer"
@@ -27,84 +29,8 @@
           />
           <a class="green section__content--add">{{ $i18n.t('dashboard.list.addLayer') }}</a>
         </span>
-
-        <div
-          class="loading-overlay pt-10 pb-10"
-          v-if="!vectorLayersList"
-        >
-          <div class="loading-indicator mb-10">
-            <h4>{{ $i18n.t('default.loading') }}</h4>
-            <i class="fa fa-lg fa-spin fa-spinner" />
-          </div>
-        </div>
-
-        <div
-          v-if="filteredListVector.length == 0"
-          class="pt-10 pb-10"
-        >{{ $i18n.t('default.noLayers') }}</div>
-        <template
-          v-else
-          v-for="(val, key) in filteredListVector"
-        >
-          <div
-            class="mb-0"
-            :key="key"
-          >
-            <div class="panel-heading pl-0 pr-0">
-              <h4 class="panel-title flex-center">
-                <span class="panel-title__names">
-                  <i class="icon-li fa fa-map-o fa-lg mr-5" />
-                  <span
-                    class="bold"
-                    href="#"
-                    @click="goToManager(val)"
-                  >{{ val.name }}</span>
-                  <span class="desc-sm">{{ val.team }}</span>
-                </span>
-                <span
-                  id="layers-list-icons"
-                  class="panel-title__tools"
-                >
-                  <i
-                    class="fa fa-cog fa-lg yellow icon-hover"
-                    data-toggle="modal"
-                    data-target="#layerSettingsModal"
-                    data-placement="top"
-                    :title="$i18n.t('default.settings')"
-                    @click="setEditedLayer('vector', val.id)"
-                  />
-                  <i
-                    class="fa fa-trash fa-lg red icon-hover"
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    :title="$i18n.t('default.delete')"
-                    @click="deleteLayer(val)"
-                  />
-                </span>
-              </h4>
-            </div>
-          </div>
-        </template>
-      </div>
-    </div>
-
-    <div class="col-sm-12 pl-0 pr-0 section">
-      <h2 class="flex-center container__border--bottom container__border--grey mb-0">
-        <div class="p-0 container__border--bottom container__border--red section__header">
-          <i class="fa fa-database" />
-          <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.externalSourcesList') }}</span>
-        </div>
-        <div class="p-0">
-          <input
-            type="text"
-            class="form-control container__input"
-            v-model="searchExtSources"
-            :placeholder="$i18n.t('dashboard.placeholder.externalSourcesFilter')"
-          />
-        </div>
-      </h2>
-      <div class="section__content heading-block heading-block-main">
         <span
+          class="add-layer"
           data-toggle="modal"
           data-target="#addLayerWmsModal"
           data-type="externalLayer"
@@ -118,7 +44,7 @@
 
         <div
           class="loading-overlay pt-10 pb-10"
-          v-if="!servicesList"
+          v-if="!layersAll"
         >
           <div class="loading-indicator mb-10">
             <h4>{{ $i18n.t('default.loading') }}</h4>
@@ -127,12 +53,12 @@
         </div>
 
         <div
-          v-if="filteredServicesList.length == 0"
+          v-if="filteredLayersAll.length == 0"
           class="pt-10 pb-10"
         >{{ $i18n.t('default.noLayers') }}</div>
         <template
           v-else
-          v-for="(val, key) in filteredServicesList"
+          v-for="(val, key) in filteredLayersAll"
         >
           <div
             class="mb-0"
@@ -140,22 +66,21 @@
           >
             <div class="panel-heading pl-0 pr-0">
               <h4 class="panel-title flex-center">
-                <span class="panel-title__names">
-                  <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                <span
+                  v-if="val.url"
+                  class="panel-title__names"
+                >
+                  <i
+                    style="margin-right:9px"
+                    class="icon-li fa fa-link fa-lg"
+                  />
                   <span class="bold panel-title__wms">{{ val.name }}</span>
                   <span
                     class="desc-sm"
                     :title="val.url"
                   >
                     <strong>URL</strong>
-                    : {{ val.url | maxLength }}
-                  </span>
-                  <span
-                    class="desc-sm"
-                    :title="val.group"
-                  >
-                    <strong>{{ $i18n.t('default.group') }}</strong>
-                    : {{ val.group }}
+                    :{{val.url|maxLength}}
                   </span>
                   <span
                     class="desc-sm"
@@ -165,15 +90,37 @@
                     : {{ val.layers | maxLength }}
                   </span>
                 </span>
-                <span class="panel-title__tools">
-                  <!-- <i class="fa fa-cog fa-lg yellow icon-hover" data-toggle="tooltip"
-                  data-placement="top" :title="$i18n.t('default.settings')"></i>-->
+                <span
+                  v-else
+                  class="panel-title__names"
+                >
+                  <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                  <span
+                    class="bold"
+                    href="#"
+                    @click="goToManager(val)"
+                  >{{ val.name }}</span>
+                  <span class="desc-sm">{{ val.team }}</span>
+                </span>
+                <span
+                  id="layers-list-icons"
+                  class="panel-title__tools"
+                >
+                  <i
+                    v-if="!val.url"
+                    class="fa fa-cog fa-lg yellow icon-hover"
+                    data-toggle="modal"
+                    data-target="#layerSettingsModal"
+                    data-placement="top"
+                    :title="$i18n.t('default.settings')"
+                    @click="setEditedLayer('vector', val.id)"
+                  />
                   <i
                     class="fa fa-trash fa-lg red icon-hover"
                     data-toggle="tooltip"
                     data-placement="top"
                     :title="$i18n.t('default.delete')"
-                    @click="deleteService(val.id)"
+                    @click="val.url?deleteService(val.id):deleteLayer(val)"
                   />
                 </span>
               </h4>
@@ -182,6 +129,7 @@
         </template>
       </div>
     </div>
+    <!-- KONIEC TABELI WARSTW -->
 
     <!--MODAL DODAWANIA WARSTW-->
     <div
@@ -455,6 +403,7 @@ export default {
     isFetching: false,
     isSendingError: false,
     isServicePublic: false,
+    layersAll: undefined,
     pickrComponents: {
       preview: true,
       opacity: true,
@@ -473,8 +422,7 @@ export default {
     postAction: `${
       vm.$store.getters.getApiUrl
     }/layers?token=${localStorage.getItem('token')}`,
-    searchExtSources: '',
-    searchVector: '',
+    searchLayer: '',
     serviceUrl: '',
     serviceName: '',
     selectedDataExtension: '',
@@ -490,20 +438,12 @@ export default {
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
     },
-    filteredServicesList() {
-      if (!this.servicesList) {
+    filteredLayersAll() {
+      if (!this.layersAll) {
         return false;
       }
-      return this.servicesList.filter(layer =>
-        layer.name.toLowerCase().includes(this.searchExtSources.toLowerCase())
-      );
-    },
-    filteredListVector() {
-      if (!this.vectorLayersList) {
-        return false;
-      }
-      return this.vectorLayersList.filter(layer =>
-        layer.name.toLowerCase().includes(this.searchVector.toLowerCase())
+      return this.layersAll.filter(layer =>
+        layer.name.toLowerCase().includes(this.searchLayer.toLowerCase())
       );
     },
     servicesList() {
@@ -521,6 +461,12 @@ export default {
   watch: {
     selectedDataExtension() {
       this.files = [];
+    },
+    vectorLayersList() {
+      this.layersAll = this.getLayersAll();
+    },
+    servicesList() {
+      this.layersAll = this.getLayersAll();
     }
   },
   methods: {
@@ -661,6 +607,20 @@ export default {
         }
       }
     },
+    getLayersAll() {
+      let layersAll = [];
+      if (this.vectorLayersList && this.servicesList) {
+        layersAll = [
+          ...this.vectorLayersList,
+          ...this.servicesList
+        ].sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
+      } else if (this.vectorLayersList) {
+        layersAll = this.vectorLayersList;
+      } else if (this.servicesList) {
+        layersAll = this.servicesList;
+      }
+      return layersAll;
+    },
     goToManager(val) {
       this.$router.push({
         name: 'feature_manager',
@@ -774,6 +734,9 @@ export default {
 </script>
 
 <style scoped>
+.add-layer {
+  display: block;
+}
 .btn-upload {
   margin-right: 20px;
 }
@@ -869,7 +832,7 @@ export default {
   margin-right: 5px;
 }
 .section {
-  height: 50%;
+  height: 95%;
 }
 .section__content--add:hover {
   cursor: pointer;
