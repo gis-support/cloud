@@ -52,6 +52,12 @@
     "cancel": "Anuluj",
     "categorized": "Kategoryzowany",
     "chooseFiles": "Wybierz pliki",
+    "columnsTypes": {
+      "character varying": "Tekst",
+      "real": "Liczba rzeczywista",
+      "integer": "Liczba całkowita",
+      "timestamp without time zone": "Data"
+    },
     "clear": "Wyczyść",
     "close": "Zamknij",
     "dashboard": "Dashboard",

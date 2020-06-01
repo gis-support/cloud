@@ -109,6 +109,7 @@
                   v-for="colType in columnTypes"
                   :key="colType"
                   :value="colType"
+                  v-text="$i18n.t(`default.columnsTypes.${colType}`)"
                 >{{ colType }}</option>
               </select>
               <button
@@ -156,7 +157,7 @@
                   :key="index"
                 >
                   <td class="text-centered">{{ name }}</td>
-                  <td class="text-centered">{{ value }}</td>
+                  <td class="text-centered">{{ $i18n.t(`default.columnsTypes.${value}`) }}</td>
                   <td class="text-centered">
                     <i
                       v-if="name !== 'id'"
