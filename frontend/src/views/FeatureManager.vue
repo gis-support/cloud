@@ -91,7 +91,7 @@
                 type="button"
                 class="map-btn"
                 @click="openRotationDialog"
-                :title="$i18n.t('featureManager.map.distance')"
+                :title="$i18n.t('featureManager.map.rotation')"
               >A</button>
             </div>
           </div>
