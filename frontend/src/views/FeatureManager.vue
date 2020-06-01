@@ -88,82 +88,95 @@
             </div>
           </div>
         </div>
-        <nav
-          class="navbar navbar-default table-menu"
-          style="margin-bottom: 0px;"
-        >
-          <div class="container-fluid">
-            <p
-              class="navbar-text"
-              v-cloak
-            >
-              {{ $i18n.t('featureManager.objectsNumber') }}
-              <span v-text="searchCount" />
-            </p>
-            <div class="navbar-form navbar-right">
-              <div class="form-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Wyszukaj"
-                  :title="$i18n.t('featureManager.localSearch')"
-                  v-model.trim="searchItemValue"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              class="btn navbar-btn navbar-right btn-default"
-              :class="{'btn-danger' : currentColumnFilters.length > 0,
-                       'btn-default' : currentColumnFilters.length == 0 }"
-              :title="$i18n.t('featureManager.objectsFilter')"
-              @click="openColumnFilterDecision"
-            >
-              <i class="fa fa-filter" />
-            </button>
-            <button
-              type="button"
-              class="btn navbar-btn navbar-right btn-default"
-              v-if="selectedRows.length > 0"
-              @click="downloadLayer(selectedRows)"
-            >
-              <i class="fa fa-download" />
-            </button>
-            <button
-              style="margin-right: 2px"
-              type="button"
-              class="btn navbar-btn navbar-right btn-default"
-              :title="$i18n.t('featureManager.zoomToSelected')"
-              v-if="currentFeature"
-              @click="zoomToSelected"
-            >
-              <i class="fa fa-search" />
-            </button>
-          </div>
-        </nav>
-        <!-- {{ $route.params.layerId }} -->
-        <FeatureManagerTable
-          v-if="items.length > 0"
-          ref="table-data"
-          :columns="columns"
-          :column-filters="currentColumnFilters"
-          :editing="false"
-          :items="items"
-          :lay-id="$route.params.layerId"
-          :rows-to-download="selectedRows"
-          :search="searchItemValue"
-          @selectFeatureById="selectFeatureById"
-          @updateSearchCount="updateSearchCount"
-          @updateSelectedRows="updateSelectedRows"
-        />
         <div
-          class="loading-overlay pt-10 pb-10"
-          style="text-align: center;"
-          v-else
+          v-show="isTableShow"
+          class="navbar-table-content"
         >
-          <div class="loading-indicator mb-10">
-            <h4>{{ $i18n.t('default.loading') }}</h4>
-            <i class="fa fa-lg fa-spin fa-spinner" />
+          <nav
+            class="navbar navbar-default table-menu"
+            style="margin-bottom: 0px;"
+          >
+            <div class="container-fluid">
+              <button
+                type="button"
+                class="btn navbar-btn navbar-left btn-default"
+                @click="isTableShow=false"
+                :title="$i18n.t('featureManager.closeTable')"
+              >
+                <i class="fa fa-times fa-lg" />
+              </button>
+              <p
+                class="navbar-text"
+                v-cloak
+              >
+                {{ $i18n.t('featureManager.objectsNumber') }}
+                <span v-text="searchCount" />
+              </p>
+              <div class="navbar-form navbar-right">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Wyszukaj"
+                    :title="$i18n.t('featureManager.localSearch')"
+                    v-model.trim="searchItemValue"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn navbar-btn navbar-right btn-default"
+                :class="{'btn-danger' : currentColumnFilters.length > 0,
+                       'btn-default' : currentColumnFilters.length == 0 }"
+                :title="$i18n.t('featureManager.objectsFilter')"
+                @click="openColumnFilterDecision"
+              >
+                <i class="fa fa-filter" />
+              </button>
+              <button
+                type="button"
+                class="btn navbar-btn navbar-right btn-default"
+                v-if="selectedRows.length > 0"
+                @click="downloadLayer(selectedRows)"
+              >
+                <i class="fa fa-download" />
+              </button>
+              <button
+                style="margin-right: 2px"
+                type="button"
+                class="btn navbar-btn navbar-right btn-default"
+                :title="$i18n.t('featureManager.zoomToSelected')"
+                v-if="currentFeature"
+                @click="zoomToSelected"
+              >
+                <i class="fa fa-search" />
+              </button>
+            </div>
+          </nav>
+          <!-- {{ $route.params.layerId }} -->
+          <FeatureManagerTable
+            v-if="items.length > 0"
+            ref="table-data"
+            :columns="columns"
+            :column-filters="currentColumnFilters"
+            :editing="false"
+            :items="items"
+            :lay-id="$route.params.layerId"
+            :rows-to-download="selectedRows"
+            :search="searchItemValue"
+            @selectFeatureById="selectFeatureById"
+            @updateSearchCount="updateSearchCount"
+            @updateSelectedRows="updateSelectedRows"
+          />
+          <div
+            class="loading-overlay pt-10 pb-10"
+            style="text-align: center"
+            v-else
+          >
+            <div class="loading-indicator mb-10">
+              <h4>{{ $i18n.t('default.loading') }}</h4>
+              <i class="fa fa-lg fa-spin fa-spinner" />
+            </div>
           </div>
         </div>
 
@@ -303,6 +316,15 @@
             </div>
           </div>
         </div>
+        <button
+          type="button"
+          class="btn btn-default show-table"
+          v-if="!isTableShow"
+          @click="isTableShow=true"
+          :title="$i18n.t('featureManager.showTable')"
+        >
+          <i class="fa fa-table" />
+        </button>
         <modal
           name="buffer"
           :draggable="true"
@@ -765,6 +787,7 @@ export default {
     isInfoDialogVisible: false,
     isMeasure: false,
     isMeasureShow: false,
+    isTableShow: true,
     items: [],
     layers: [],
     layerStyle: undefined,
