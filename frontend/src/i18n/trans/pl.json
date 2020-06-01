@@ -226,6 +226,7 @@
     "database": "Baza danych",
     "fill-color": "Kolor wypełnienia",
     "host": "Host",
+    "invalidValue": "Niepoprawna wartość",
     "labels": "Etykiety",
     "labelsHelper": "Za pomocą pola typu checkbox należy zaznaczyć etykiety, które maja być aktywne. Dodatkowo, kolejność wyświetlanych atrybutów odpowiada kolejności w liście",
     "labelsTitle": "Lista atrybutów używanych jako etykiety",

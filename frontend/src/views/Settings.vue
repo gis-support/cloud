@@ -829,13 +829,21 @@ export default {
     },
     checkValue(e) {
       const charCode = e.which ? e.which : e.keyCode;
-      if (charCode > 31 && charCode > 47 && charCode < 58) {
+      if (
+        (charCode > 37 && charCode > 47 && charCode < 58) ||
+        (charCode > 37 && charCode > 95 && charCode < 106)
+      ) {
         if (e.srcElement.valueAsNumber > Number(e.srcElement.max)) {
           e.target.value = 10;
           this.$alertify.warning(this.$i18n.t('settings.maxSize'));
         } else if (e.srcElement.valueAsNumber < Number(e.srcElement.min)) {
           e.target.value = 1;
           this.$alertify.warning(this.$i18n.t('settings.minSize'));
+        }
+      } else {
+        if (!e.srcElement.valueAsNumber) {
+          this.$alertify.warning(this.$i18n.t('settings.invalidValue'));
+          e.target.value = 1;
         }
       }
     },
