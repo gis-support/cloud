@@ -1,11 +1,11 @@
 {
   "dashboard": {
     "list": {
-      "addLayer": "Dodaj nową warstwę",
-      "addService": "Dodaj źródło zewnętrzne"
+      "addLayer": "Dodaj nową warstwę wektorową",
+      "addService": "Dodaj nowe źródło zewnętrzne"
     },
     "modal": {
-      "addLayer": "Dodawanie nowej warstwy",
+      "addLayer": "Dodawanie nowej warstwy wektorowej",
       "addLayerWms": "Dodawanie warstwy ze źródła zewnętrznego",
       "addColumn": "Dodawanie kolumny do warstwy",
       "chooseColumnType": "Wybierz typ kolumny",
@@ -40,6 +40,7 @@
     },
     "title": {
       "vectorLayersList": "Lista warstw wektorowych",
+      "layersList": "Lista warstw",
       "externalSourcesList": "Lista źródeł zewnętrznych"
     }
   },
@@ -52,6 +53,12 @@
     "cancel": "Anuluj",
     "categorized": "Kategoryzowany",
     "chooseFiles": "Wybierz pliki",
+    "columnsTypes": {
+      "character varying": "Tekst",
+      "real": "Liczba rzeczywista",
+      "integer": "Liczba całkowita",
+      "timestamp without time zone": "Data"
+    },
     "clear": "Wyczyść",
     "close": "Zamknij",
     "dashboard": "Dashboard",
@@ -131,6 +138,7 @@
     "bufferLayer": "Warstwa",
     "bufferValue": "Wartość buforu",
     "cancelFeatureAdding": "Anuluj dodawanie obiektu do warstwy",
+    "closeTable": "Zamknij tabelę",
     "commentsTitle": "Komentarze",
     "deleteAttachmentConfirm": "Czy na pewno chcesz załącznik?",
     "deleteAttachmentHeader": "Usuwanie załącznika",
@@ -154,6 +162,7 @@
     "ortoError": "Błąd ładowania Ortofotomapy",
     "rotate": "Obróć",
     "rotationValue": "Azymut",
+    "showTable": "Pokaż tabelę",
     "zoomToSelected": "Przybliż do zaznaczonego obiektu",
     "map": {
       "areaMeasure": "Pomiar powierzchni",
@@ -229,6 +238,7 @@
     "database": "Baza danych",
     "fill-color": "Kolor wypełnienia",
     "host": "Host",
+    "invalidValue": "Niepoprawna wartość",
     "labels": "Etykiety",
     "labelsHelper": "Za pomocą pola typu checkbox należy zaznaczyć etykiety, które maja być aktywne. Dodatkowo, kolejność wyświetlanych atrybutów odpowiada kolejności w liście",
     "labelsTitle": "Lista atrybutów używanych jako etykiety",
