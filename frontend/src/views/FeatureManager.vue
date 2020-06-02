@@ -8,7 +8,7 @@
             ref="map"
             id="map"
           >
-            <div class="add-feature-tool">
+            <div class="add-feature-tool map-tool-left">
               <button
                 type="button"
                 class="map-btn"
@@ -33,7 +33,7 @@
                 </button>
               </span>
             </div>
-            <div class="measure-tool">
+            <div class="measure-tool map-tool-left">
               <button
                 type="button"
                 class="map-btn"
@@ -68,7 +68,7 @@
                 @click="startMeasure('LineString')"
               >\</button>
             </div>
-            <div class="buffer-tool">
+            <div class="buffer-tool map-tool-left">
               <button
                 v-show="currentFeature"
                 type="button"
@@ -77,7 +77,7 @@
                 :title="$i18n.t('featureManager.map.buffer')"
               >B</button>
             </div>
-            <div class="distance-tool">
+            <div class="distance-tool map-tool-left">
               <button
                 v-show="currentFeature"
                 type="button"
@@ -86,86 +86,105 @@
                 :title="$i18n.t('featureManager.map.distance')"
               >D</button>
             </div>
+            <div class="rotation-tool map-tool-right">
+              <button
+                type="button"
+                class="map-btn"
+                @click="openRotationDialog"
+                :title="$i18n.t('featureManager.map.rotation')"
+              >A</button>
+            </div>
           </div>
         </div>
-        <nav
-          class="navbar navbar-default table-menu"
-          style="margin-bottom: 0px;"
-        >
-          <div class="container-fluid">
-            <p
-              class="navbar-text"
-              v-cloak
-            >
-              {{ $i18n.t("featureManager.objectsNumber") }}
-              <span v-text="searchCount" />
-            </p>
-            <div class="navbar-form navbar-right">
-              <div class="form-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Wyszukaj"
-                  :title="$i18n.t('featureManager.localSearch')"
-                  v-model.trim="searchItemValue"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              class="btn navbar-btn navbar-right btn-default"
-              :class="{
-                'btn-danger': currentColumnFilters.length > 0,
-                'btn-default': currentColumnFilters.length == 0
-              }"
-              :title="$i18n.t('featureManager.objectsFilter')"
-              @click="openColumnFilterDecision"
-            >
-              <i class="fa fa-filter" />
-            </button>
-            <button
-              type="button"
-              class="btn navbar-btn navbar-right btn-default"
-              v-if="selectedRows.length > 0"
-              @click="downloadLayer(selectedRows)"
-            >
-              <i class="fa fa-download" />
-            </button>
-            <button
-              style="margin-right: 2px"
-              type="button"
-              class="btn navbar-btn navbar-right btn-default"
-              :title="$i18n.t('featureManager.zoomToSelected')"
-              v-if="currentFeature"
-              @click="zoomToSelected"
-            >
-              <i class="fa fa-search" />
-            </button>
-          </div>
-        </nav>
-        <!-- {{ $route.params.layerId }} -->
-        <FeatureManagerTable
-          v-if="items.length > 0"
-          ref="table-data"
-          :columns="columns"
-          :column-filters="currentColumnFilters"
-          :editing="false"
-          :items="items"
-          :lay-id="$route.params.layerId"
-          :rows-to-download="selectedRows"
-          :search="searchItemValue"
-          @selectFeatureById="selectFeatureById"
-          @updateSearchCount="updateSearchCount"
-          @updateSelectedRows="updateSelectedRows"
-        />
         <div
-          class="loading-overlay pt-10 pb-10"
-          style="text-align: center;"
-          v-else
+          v-show="isTableShow"
+          class="navbar-table-content"
         >
-          <div class="loading-indicator mb-10">
-            <h4>{{ $i18n.t("default.loading") }}</h4>
-            <i class="fa fa-lg fa-spin fa-spinner" />
+          <nav
+            class="navbar navbar-default table-menu"
+            style="margin-bottom: 0px;"
+          >
+            <div class="container-fluid">
+              <button
+                type="button"
+                class="btn navbar-btn navbar-left btn-default"
+                @click="isTableShow=false"
+                :title="$i18n.t('featureManager.closeTable')"
+              >
+                <i class="fa fa-times fa-lg" />
+              </button>
+              <p
+                class="navbar-text"
+                v-cloak
+              >
+                {{ $i18n.t('featureManager.objectsNumber') }}
+                <span v-text="searchCount" />
+              </p>
+              <div class="navbar-form navbar-right">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Wyszukaj"
+                    :title="$i18n.t('featureManager.localSearch')"
+                    v-model.trim="searchItemValue"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn navbar-btn navbar-right btn-default"
+                :class="{'btn-danger' : currentColumnFilters.length > 0,
+                       'btn-default' : currentColumnFilters.length == 0 }"
+                :title="$i18n.t('featureManager.objectsFilter')"
+                @click="openColumnFilterDecision"
+              >
+                <i class="fa fa-filter" />
+              </button>
+              <button
+                type="button"
+                class="btn navbar-btn navbar-right btn-default"
+                v-if="selectedRows.length > 0"
+                @click="downloadLayer(selectedRows)"
+              >
+                <i class="fa fa-download" />
+              </button>
+              <button
+                style="margin-right: 2px"
+                type="button"
+                class="btn navbar-btn navbar-right btn-default"
+                :title="$i18n.t('featureManager.zoomToSelected')"
+                v-if="currentFeature"
+                @click="zoomToSelected"
+              >
+                <i class="fa fa-search" />
+              </button>
+            </div>
+          </nav>
+          <!-- {{ $route.params.layerId }} -->
+          <FeatureManagerTable
+            v-if="items.length > 0"
+            ref="table-data"
+            :columns="columns"
+            :column-filters="currentColumnFilters"
+            :editing="false"
+            :items="items"
+            :lay-id="$route.params.layerId"
+            :rows-to-download="selectedRows"
+            :search="searchItemValue"
+            @selectFeatureById="selectFeatureById"
+            @updateSearchCount="updateSearchCount"
+            @updateSelectedRows="updateSelectedRows"
+          />
+          <div
+            class="loading-overlay pt-10 pb-10"
+            style="text-align: center"
+            v-else
+          >
+            <div class="loading-indicator mb-10">
+              <h4>{{ $i18n.t('default.loading') }}</h4>
+              <i class="fa fa-lg fa-spin fa-spinner" />
+            </div>
           </div>
         </div>
 
@@ -177,7 +196,7 @@
             <div class="modal-dialog modal-md">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{ $i18n.t("featureManager.objectsFilter") }}</h4>
+                  <h4 class="modal-title">{{ $i18n.t('featureManager.objectsFilter') }}</h4>
                 </div>
                 <div class="modal-body">
                   <FiltersPanel
@@ -200,7 +219,7 @@
                         class="btn btn-success"
                         @click="$emit('columnFilterDecision', 'accept')"
                         :disabled="!isFiltersValidated(selectedColumnFilters)"
-                      >{{ $i18n.t("default.save") }}</button>
+                      >{{ $i18n.t('default.save') }}</button>
                     </div>
                     <div
                       class="btn-group"
@@ -210,7 +229,7 @@
                         type="button"
                         class="btn btn-danger"
                         @click="$emit('columnFilterDecision', 'clear')"
-                      >{{ $i18n.t("default.clear") }}</button>
+                      >{{ $i18n.t('default.clear') }}</button>
                     </div>
                     <div
                       class="btn-group"
@@ -220,7 +239,7 @@
                         type="button"
                         class="btn btn-default"
                         @click="$emit('columnFilterDecision', 'cancel')"
-                      >{{ $i18n.t("default.cancel") }}</button>
+                      >{{ $i18n.t('default.cancel') }}</button>
                     </div>
                   </div>
                 </div>
@@ -237,7 +256,7 @@
             <div class="modal-dialog modal-md modal-new-feature">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{ $i18n.t("featureManager.addFeatureTitle") }}</h4>
+                  <h4 class="modal-title">{{ $i18n.t('featureManager.addFeatureTitle') }}</h4>
                 </div>
                 <div
                   class="modal-body"
@@ -253,11 +272,7 @@
                       <label
                         class="control-label col-sm-4"
                         style="position: relative; top: 8px"
-                      >
-                        {{
-                        name
-                        }}
-                      </label>
+                      >{{ name }}</label>
                       <input
                         class="form-control col-sm-7"
                         v-model="newFeatureProperties[name]"
@@ -291,7 +306,7 @@
                         type="button"
                         class="btn btn-danger"
                         @click="saveNewFeature"
-                      >{{ $i18n.t("default.save") }}</button>
+                      >{{ $i18n.t('default.save') }}</button>
                     </div>
                     <div
                       class="btn-group"
@@ -301,7 +316,7 @@
                         type="button"
                         class="btn btn-default"
                         @click="clearFeatureAdding"
-                      >{{ $i18n.t("default.cancel") }}</button>
+                      >{{ $i18n.t('default.cancel') }}</button>
                     </div>
                   </div>
                 </div>
@@ -309,6 +324,15 @@
             </div>
           </div>
         </div>
+        <button
+          type="button"
+          class="btn btn-default show-table"
+          v-if="!isTableShow"
+          @click="isTableShow=true"
+          :title="$i18n.t('featureManager.showTable')"
+        >
+          <i class="fa fa-table" />
+        </button>
         <modal
           name="buffer"
           :draggable="true"
@@ -318,14 +342,14 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.map.buffer") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.buffer') }}</h4>
             </div>
             <div
               class="modal-body"
               v-if="activeLayer"
             >
               <div style="margin-bottom: 100px">
-                <h4>{{ $i18n.t("featureManager.bufferAnalysis") }}</h4>
+                <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
                 <div
                   class="form-group"
                   style="display: flex;"
@@ -333,11 +357,7 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.bufferValue")
-                    }}
-                  </label>
+                  >{{ $i18n.t('featureManager.bufferValue') }}</label>
                   <input
                     class="form-control col-sm-7"
                     v-model="bufferValue"
@@ -354,11 +374,11 @@
                     type="button"
                     class="btn btn-default"
                     @click="generateBuffer"
-                  >{{ $i18n.t("featureManager.bufferGenerate") }}</button>
+                  >{{ $i18n.t('featureManager.bufferGenerate') }}</button>
                 </div>
               </div>
               <div>
-                <h4>{{ $i18n.t("featureManager.generateObjectsArray") }}</h4>
+                <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
                 <div
                   class="form-group"
                   style="display: flex;"
@@ -366,11 +386,7 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.bufferLayer")
-                    }}
-                  </label>
+                  >{{ $i18n.t('featureManager.bufferLayer') }}</label>
                   <select
                     style="max-width: 75%"
                     class="form-control"
@@ -395,7 +411,7 @@
                     class="btn btn-default"
                     :disabled="!selectedLayerName"
                     @click="generateObjectsArray"
-                  >{{ $i18n.t("featureManager.generate") }}</button>
+                  >{{ $i18n.t('featureManager.generate') }}</button>
                 </div>
               </div>
             </div>
@@ -410,14 +426,14 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.map.distance") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.distance') }}</h4>
             </div>
             <div
               class="modal-body"
               v-if="activeLayer"
             >
               <div style="margin-bottom: 100px">
-                <h4>{{ $i18n.t("featureManager.distanceAnalysis") }}</h4>
+                <h4>{{ $i18n.t('featureManager.distanceAnalysis') }}</h4>
                 <div
                   class="form-group"
                   style="display: flex;"
@@ -425,11 +441,7 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.bufferValue")
-                    }}
-                  </label>
+                  >{{ $i18n.t('featureManager.bufferValue') }}</label>
                   <input
                     class="form-control col-sm-7"
                     v-model="bufferValue"
@@ -443,11 +455,7 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.fieldName")
-                    }}
-                  </label>
+                  >{{ $i18n.t('featureManager.fieldName') }}</label>
                   <select
                     style="max-width: 75%"
                     class="form-control"
@@ -471,7 +479,70 @@
                     type="button"
                     class="btn btn-default"
                     @click="generateDistance"
-                  >{{ $i18n.t("featureManager.download") }}</button>
+                  >{{ $i18n.t('featureManager.download') }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </modal>
+        <modal
+          name="rotation"
+          :draggable="true"
+          width="30%"
+          height="30%"
+          @before-close="rotationValue = 0"
+        >
+          <div class="modal-content dragg-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.rotation') }}</h4>
+            </div>
+            <div
+              class="modal-body"
+              v-if="activeLayer"
+            >
+              <div
+                class="form-group"
+                style="display: flex;"
+              >
+                <label
+                  class="control-label col-sm-4"
+                  style="position: relative; top: 8px"
+                >{{ $i18n.t('featureManager.rotationValue') + ` [ ${String.fromCharCode(176)} ]` }}</label>
+                <input
+                  class="form-control col-sm-7"
+                  v-model="rotationValue"
+                  type="number"
+                  :step="45"
+                  :max="360"
+                  :min="0"
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div
+                class="btn-group btn-group-justified"
+                role="group"
+              >
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    :disabled="rotationValue>360||rotationValue<0||!/^\d+$/.test(rotationValue)"
+                    type="button"
+                    class="btn btn-success"
+                    @click="rotateMapByAngle(rotationValue)"
+                  >{{ $i18n.t('featureManager.rotate') }}</button>
+                </div>
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="$modal.hide('rotation')"
+                  >{{ $i18n.t('default.close') }}</button>
                 </div>
               </div>
             </div>
@@ -495,14 +566,10 @@
           <div style="display: inline-block; width: 100%;">
             <h4 class="col-sm-10 right-panel__title">
               <i class="fa fa-map-o title__icon" />
-              <div
+              <span
                 class="mvp-red right-panel__name"
                 :title="layerName"
-              >
-                {{
-                layerName ? layerName : ""
-                }}
-              </div>
+              >{{ layerName ? layerName : '' | maxLength }}</span>
             </h4>
             <div
               class="col-sm-2"
@@ -517,7 +584,6 @@
                 <a
                   class="btn btn-default"
                   @click="goToSettings"
-                  :title="$i18n.t('default.settings')"
                 >
                   <i class="fa fa-cog yellow icon-hover" />
                 </a>
@@ -531,7 +597,6 @@
                     data-toggle="dropdown"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    :title="$i18n.t('featureManager.download')"
                   >
                     <i class="fa fa-download green icon-hover" />
                     <span class="caret" />
@@ -554,19 +619,19 @@
           >
             <li
               role="presentation"
-              :class="{ active: indexActiveTab === 0 }"
+              :class="{active: indexActiveTab === 0}"
             >
               <a
                 href="#"
                 @click="indexActiveTab = 0"
               >
                 <i class="fa fa-bars" />
-                {{ $i18n.t("featureManager.legend") }}
+                {{ $i18n.t('featureManager.legend') }}
               </a>
             </li>
             <li
               role="presentation"
-              :class="{ active: indexActiveTab === 1 }"
+              :class="{active: indexActiveTab === 1}"
               v-show="currentFeature"
             >
               <a
@@ -574,12 +639,12 @@
                 @click="indexActiveTab = 1"
               >
                 <i class="fa fa-table" />
-                {{ $i18n.t("featureManager.attributes") }}
+                {{ $i18n.t('featureManager.attributes') }}
               </a>
             </li>
             <li
               role="presentation"
-              :class="{ active: indexActiveTab === 2, disabled: !featureAttachments }"
+              :class="{active: indexActiveTab === 2, disabled: !featureAttachments}"
               v-show="currentFeature"
             >
               <a
@@ -587,7 +652,7 @@
                 @click="indexActiveTab = 2"
               >
                 <i class="fa fa-info" />
-                {{ $i18n.t("featureManager.informations") }}
+                {{ $i18n.t('featureManager.informations') }}
               </a>
             </li>
           </ul>
@@ -598,26 +663,26 @@
             >
               <div class="scroll-tab">
                 <div class="baseLayers">
-                  <h4>{{ $i18n.t("default.basemaps") }}:</h4>
+                  <h4>{{ $i18n.t('default.basemaps') }}:</h4>
                   <ul class="list-group">
                     <li
                       class="list-group-item"
                       v-for="name in baseLayers"
                       :key="name"
-                      :class="{ activeLayer: currentBaseLayer == name }"
+                      :class="{'activeLayer' : currentBaseLayer == name}"
                       @click="changeBaseLayer(name)"
                     >{{ name }}</li>
                   </ul>
                 </div>
                 <div class="services">
-                  <h4>{{ $i18n.t("default.services") }}:</h4>
+                  <h4>{{ $i18n.t('default.services') }}:</h4>
                   <ul class="list-group">
                     <span v-if="services.length > 0">
                       <li
                         class="list-group-item"
                         v-for="service in services"
                         :key="service.name"
-                        :class="{ activeLayer: activeServices.includes(service.name) }"
+                        :class="{'activeLayer' : activeServices.includes(service.name)}"
                       >
                         <label
                           class="checkbox-inline mb-0"
@@ -634,12 +699,13 @@
                       </li>
                     </span>
                     <span v-else>
-                      <li class="list-group-item no-item">{{ $i18n.t("default.noServices") }}</li>
+                      <li class="list-group-item no-item">{{ $i18n.t('default.noServices') }}</li>
                     </span>
                   </ul>
                 </div>
               </div>
             </div>
+
             <div v-show="indexActiveTab == 1">
               <template v-if="permission === 'write'">
                 <template v-if="!editing">
@@ -651,7 +717,7 @@
                       type="button"
                       class="btn btn-success btn-group-justified"
                       @click="editAttributes"
-                    >{{ $i18n.t("default.edit") }}</button>
+                    >{{ $i18n.t('default.edit') }}</button>
                   </div>
                 </template>
                 <template v-else>
@@ -663,7 +729,7 @@
                       type="button"
                       class="btn btn-success"
                       @click="saveEditing"
-                    >{{ $i18n.t("default.save") }}</button>
+                    >{{ $i18n.t('default.save') }}</button>
                   </div>
                   <div
                     class="btn-group btn-group-action btn-group-edit"
@@ -673,7 +739,7 @@
                       type="button"
                       class="btn btn-default"
                       @click="cancelEditing"
-                    >{{ $i18n.t("default.cancel") }}</button>
+                    >{{ $i18n.t('default.cancel') }}</button>
                   </div>
                   <div
                     class="btn-group btn-group-action btn-group-edit"
@@ -683,7 +749,7 @@
                       type="button"
                       class="btn btn-danger"
                       @click="deleteFeature"
-                    >{{ $i18n.t("default.delete") }}</button>
+                    >{{ $i18n.t('default.delete') }}</button>
                   </div>
                 </template>
               </template>
@@ -715,27 +781,23 @@
 </template>
 
 <script>
-import turfBuffer from '@turf/buffer';
+import * as turf from '@turf/turf';
+import _ from 'lodash';
 import moment from 'moment';
-
-import Map from 'ol/Map';
-import View from 'ol/View';
 import { fromLonLat, get as getProjection } from 'ol/proj';
-import { Draw, Modify } from 'ol/interaction';
-import { MVT, WMTSCapabilities, GeoJSON } from 'ol/format';
-import {
-  VectorTile as VectorTileSource,
-  Vector as VectorSource,
-  TileWMS,
-  XYZ,
-  WMTS
-} from 'ol/source';
-import {
-  VectorTile as VectorTileLayer,
-  Vector as VectorLayer,
-  Tile as TileLayer
-} from 'ol/layer';
-import { Circle, Fill, Stroke, Style, RegularShape, Text } from 'ol/style';
+import Draw from 'ol/interaction/Draw';
+import GeoJSON from 'ol/format/GeoJSON';
+import Map from 'ol/Map';
+import Modify from 'ol/interaction/Modify';
+import MVT from 'ol/format/MVT';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import VectorTileSource from 'ol/source/VectorTile';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import TileWMS from 'ol/source/TileWMS';
+import { Circle, Fill, Stroke, Style, RegularShape } from 'ol/style';
 import {
   LineString,
   Polygon,
@@ -747,8 +809,11 @@ import {
 import { getArea, getLength } from 'ol/sphere.js';
 import { unByKey } from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
-import { optionsFromCapabilities } from 'ol/source/WMTS';
-
+import CircleStyle from 'ol/style/Circle';
+import Text from 'ol/style/Text';
+import WMTSCapabilities from 'ol/format/WMTSCapabilities';
+import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
+import XYZ from 'ol/source/XYZ';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
@@ -793,6 +858,7 @@ export default {
     isInfoDialogVisible: false,
     isMeasure: false,
     isMeasureShow: false,
+    isTableShow: true,
     items: [],
     layers: [],
     layerStyle: undefined,
@@ -801,6 +867,7 @@ export default {
     measureType: undefined,
     newFeatureProperties: {},
     permission: [],
+    rotationValue: 0,
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
@@ -1389,7 +1456,7 @@ export default {
       this.getLayerByName('buffer')
         .getSource()
         .clear();
-      const buffer = turfBuffer(this.currentFeature, this.bufferValue / 1000, {
+      let buffer = turf.buffer(this.currentFeature, this.bufferValue / 1000, {
         units: 'kilometers'
       });
       if (buffer) {
@@ -1416,7 +1483,7 @@ export default {
       this.getLayerByName('buffer')
         .getSource()
         .clear();
-      const buffer = turfBuffer(this.currentFeature, this.bufferValue / 1000, {
+      let buffer = turf.buffer(this.currentFeature, this.bufferValue / 1000, {
         units: 'kilometers'
       });
       if (buffer) {
@@ -1493,15 +1560,11 @@ export default {
       });
     },
     isFiltersValidated(filters) {
-      return filters.every(
+      return _.every(
+        filters,
         filter =>
           filter.operation !== '' && filter.column !== '' && filter.value !== ''
       );
-      // return _.every(
-      //   filters,
-      //   filter =>
-
-      // );
     },
     isInteractionActive(interaction) {
       if (
@@ -1563,12 +1626,23 @@ export default {
     openDistanceDialog() {
       this.$modal.show('distance');
     },
+    openRotationDialog() {
+      this.$modal.show('rotation');
+    },
     refreshVectorSource(layer) {
       const source = layer.getSource();
       source.tileCache.expireCache({});
       source.tileCache.clear();
       source.refresh();
       layer.changed();
+    },
+    rotateMapByAngle(angle) {
+      let radians =
+        (angle * Math.PI * 2) / 360 + this.map.getView().getRotation();
+      if (radians > Math.PI * 2) {
+        radians -= Math.PI * 2;
+      }
+      this.map.getView().setRotation(radians);
     },
     saveFile(r) {
       const data = JSON.stringify(r.body);
@@ -1605,7 +1679,7 @@ export default {
         this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
           this.$refs['table-data'].selectItem(
-            this.items.find(item => item.id === fid)
+            _.find(this.items, o => o.id === fid)
           );
         }
       } else {
@@ -1695,16 +1769,18 @@ export default {
       if (this.layerType) {
         const stroke = new Stroke({
           color: selecting
-            ? 'rgba(249, 237, 20, 0.5)'
+            ? 'rgba(249, 237, 20, 0.8)'
             : `rgba(${this.layerStyle['stroke-color']})`,
           width: selecting ? 4 : `${this.layerStyle['stroke-width']}`
         });
         const fill = new Fill({
-          color: `rgba(${this.layerStyle['fill-color']})`
+          color: selecting
+            ? 'rgba(249, 237, 20, 0.5)'
+            : `rgba(${this.layerStyle['fill-color']})`
         });
         if (this.layerType === 'point') {
           featStyle.setImage(
-            new Circle({
+            new CircleStyle({
               fill,
               stroke,
               radius: this.layerStyle.width
@@ -1751,7 +1827,7 @@ export default {
           // TODO - add triangle/square/dashed/dotted
           if (filteredFeat.type === 'point') {
             featStyle.setImage(
-              new Circle({
+              new CircleStyle({
                 fill,
                 stroke,
                 radius: filteredFeat.width
@@ -1763,7 +1839,7 @@ export default {
           }
         } else {
           featStyle.setImage(
-            new Circle({
+            new CircleStyle({
               fill: new Fill({
                 color: [250, 250, 250, 0.4]
               }),
@@ -2049,32 +2125,31 @@ export default {
   background-color: rgba(0, 60, 136, 0.7);
 }
 .add-feature-tool {
-  padding: 2px;
-  z-index: 1;
-  position: absolute;
   top: 59px;
-  left: 0.5em;
 }
 .buffer-tool {
-  padding: 2px;
-  z-index: 1;
-  position: absolute;
   top: 101px;
-  left: 0.5em;
 }
 .distance-tool {
+  top: 122px;
+}
+.map-tool-left {
   padding: 2px;
   z-index: 1;
   position: absolute;
-  top: 122px;
   left: 0.5em;
 }
-.measure-tool {
+.map-tool-right {
   padding: 2px;
   z-index: 1;
   position: absolute;
+  right: 0.5em;
+}
+.measure-tool {
   top: 80px;
-  left: 0.5em;
+}
+.rotation-tool {
+  top: 28px;
 }
 .dropdown-menu {
   left: -110px;
