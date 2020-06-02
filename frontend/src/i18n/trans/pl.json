@@ -132,6 +132,7 @@
     "bufferLayer": "Warstwa",
     "bufferValue": "Wartość buforu",
     "cancelFeatureAdding": "Anuluj dodawanie obiektu do warstwy",
+    "closeTable": "Zamknij tabelę",
     "commentsTitle": "Komentarze",
     "deleteAttachmentConfirm": "Czy na pewno chcesz załącznik?",
     "deleteAttachmentHeader": "Usuwanie załącznika",
@@ -153,6 +154,7 @@
     "objectsFilter": "Filtrowanie obiektów",
     "objectsNumber": "Ilość obiektów",
     "ortoError": "Błąd ładowania Ortofotomapy",
+    "showTable": "Pokaż tabelę",
     "zoomToSelected": "Przybliż do zaznaczonego obiektu",
     "map": {
       "areaMeasure": "Pomiar powierzchni",
