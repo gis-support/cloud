@@ -1,0 +1,10 @@
+Get favicon
+---
+tags:
+  - Favicon
+summary: Get favicon
+produces:
+  - image/vnd.microsoft.icon 
+responses:
+  200:
+    description: Favicon file

@@ -66,7 +66,8 @@ def users(cloud):
         cloud.assign_user(user, group)
         return jsonify({"users": "user assigned"}), 200
     elif request.method == 'DELETE':
-        if user == request.user:
+        admin = os.environ.get('DEFAULT_USER')
+        if request.user != admin or user == admin:
             return jsonify({"error": "permission denied"}), 403
         delete_user(user)
         return jsonify({"users": "user deleted"}), 200
@@ -112,7 +113,23 @@ def logo():
 
 @mod_auth.route('/logo', methods=['POST'])
 @swag_from(path_by(__file__, 'docs.logo.post.yml'), methods=['POST'])
+@token_required
 def upload_logo():
     f = request.files['file']
     f.save(os.path.join(current_app.config['STATIC'], 'logo.png'))
-    return send_from_directory(current_app.config['STATIC'], 'logo.png')
+    return send_from_directory(current_app.config['STATIC'], 'logo.png'), 201
+
+
+@mod_auth.route('/favicon', methods=['GET'])
+@swag_from(path_by(__file__, 'docs.favicon.get.yml'), methods=['GET'])
+def get_favicon():
+    return send_from_directory(current_app.config['STATIC'], 'favicon.ico')
+
+
+@mod_auth.route('/favicon', methods=['POST'])
+@swag_from(path_by(__file__, 'docs.favicon.post.yml'), methods=['POST'])
+@token_required
+def upload_favicon():
+    f = request.files['file']
+    f.save(os.path.join(current_app.config['STATIC'], 'favicon.ico'))
+    return send_from_directory(current_app.config['STATIC'], 'favicon.ico'), 201

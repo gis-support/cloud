@@ -1,0 +1,29 @@
+Upload favicon
+---
+tags:
+  - Favicon
+summary: Upload default favicon
+produces:
+  - image/vnd.microsoft.icon 
+parameters:
+  - name: file
+    in: formData
+    description: Favicon file
+    required: true
+    type: file
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+    201:
+        description: New favicon file
+    403:
+        description: Invalid token
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "invalid token"

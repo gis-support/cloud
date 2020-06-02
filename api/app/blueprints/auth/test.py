@@ -219,3 +219,39 @@ class TestLogo(BaseTest):
         r = client.post('/api/logo?token={}'.format(token), data=file_request,
                         follow_redirects=True, content_type='multipart/form-data')
         assert r.get_data() == open(path, 'rb').read()
+
+
+@pytest.mark.auth
+class TestFavicon(BaseTest):
+
+    def test_get_favicon(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'images', 'favicon.ico')
+        r = client.get('api/favicon')
+        assert r.get_data() == open(path, 'rb').read()
+
+    def test_post_favicon(self, client):
+        token = self.get_token(client)
+        path = os.path.join(TEST_DATA_DIR, 'images', 'favicon.ico')
+        file_request = {
+            'file': (BytesIO(open(path, 'rb').read()), 'favicon.ico'),
+        }
+        r = client.post('/api/favicon?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.get_data() == open(path, 'rb').read()
+        file_request = {
+            'file': (BytesIO(open(path, 'rb').read()), 'favicon.ico'),
+        }
+        r = client.post('/api/favicon?token=jakiszlytoken', data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 403
+        assert r.json
+        assert r.json['error'] == 'invalid token'
+        file_request = {
+            'file': (BytesIO(open(path, 'rb').read()), 'favicon.ico'),
+        }
+        r = client.post('/api/favicon', data=file_request, follow_redirects=True, 
+                        content_type='multipart/form-data')
+        assert r.status_code == 403
+        assert r.json
+        assert r.json['error'] == 'token required'
