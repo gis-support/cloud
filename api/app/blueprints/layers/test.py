@@ -232,12 +232,10 @@ class TestLayers(BaseTest):
         token = self.get_token(client)
         path = os.path.join(TEST_DATA_DIR, 'layers')
         file_request = {
-            'file[0]': (BytesIO((open(os.path.join(path, 'RL-48.dbf'), 'rb').read())), 'RL-48.dbf'),
-            'file[1]': (BytesIO((open(os.path.join(path, 'RL-48.prj'), 'rb').read())), 'RL-48.prj'),
-            'file[2]': (BytesIO((open(os.path.join(path, 'RL-48.shp'), 'rb').read())), 'RL-48.shp'),
-            'file[3]': (BytesIO((open(os.path.join(path, 'RL-48.shx'), 'rb').read())), 'RL-48.shx'),
-            'file[4]': (BytesIO((open(os.path.join(path, 'RL-48.cpg'), 'rb').read())), 'RL-48.cpg'),
-            'file[5]': (BytesIO((open(os.path.join(path, 'RL-48.qpj'), 'rb').read())), 'RL-48.qpj'),
+            'file[0]': (BytesIO((open(os.path.join(path, 'RL-48-2.dbf'), 'rb').read())), 'RL-48-2.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'RL-48-2.shp'), 'rb').read())), 'RL-48-2.shp'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'RL-48-2.shx'), 'rb').read())), 'RL-48-2.shx'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'RL-48-2.cpg'), 'rb').read())), 'RL-48-2.cpg'),
             'name': 'RL-48'
         }
         r = client.post('/api/layers?token={}'.format(token), data=file_request,
