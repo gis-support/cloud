@@ -1,11 +1,11 @@
 {
   "dashboard": {
     "list": {
-      "addLayer": "Dodaj nową warstwę",
-      "addService": "Dodaj źródło zewnętrzne"
+      "addLayer": "Dodaj nową warstwę wektorową",
+      "addService": "Dodaj nowe źródło zewnętrzne"
     },
     "modal": {
-      "addLayer": "Dodawanie nowej warstwy",
+      "addLayer": "Dodawanie nowej warstwy wektorowej",
       "addLayerWms": "Dodawanie warstwy ze źródła zewnętrznego",
       "addColumn": "Dodawanie kolumny do warstwy",
       "chooseColumnType": "Wybierz typ kolumny",
@@ -40,6 +40,7 @@
     },
     "title": {
       "vectorLayersList": "Lista warstw wektorowych",
+      "layersList": "Lista warstw",
       "externalSourcesList": "Lista źródeł zewnętrznych"
     }
   },
