@@ -269,7 +269,7 @@
                 type="number"
                 min="1"
                 max="10"
-                @keyup="checkValue($event)"
+                @keyup="checkValue($event, 'strokeWidth')"
                 class="form-control mt-15"
                 style="width:50px"
                 v-model="strokeWidth"
@@ -304,7 +304,7 @@
                 min="1"
                 step="1"
                 max="10"
-                @keyup="checkValue($event)"
+                @keyup="checkValue($event, 'width')"
                 class="form-control mt-15"
                 style="width:50px"
                 v-model="width"
@@ -442,7 +442,7 @@
                         type="number"
                         min="1"
                         max="10"
-                        @keyup="checkValue($event)"
+                        @keyup="checkValue($event, 'stroke-width', index, 'categories')"
                         class="form-control"
                         style="width:50px; margin:0 auto;"
                         v-model="feat['stroke-width']"
@@ -456,7 +456,7 @@
                         type="number"
                         min="1"
                         max="10"
-                        @keyup="checkValue($event)"
+                        @keyup="checkValue($event, 'width', index, 'categories')"
                         class="form-control"
                         style="width:50px; margin:0 auto;"
                         v-model="feat['width']"
@@ -827,15 +827,29 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
-    checkValue(e) {
+    checkValue(e, model, idx, arr) {
       const charCode = e.which ? e.which : e.keyCode;
-      if (charCode > 31 && charCode > 47 && charCode < 58) {
+      if (
+        (charCode > 37 && charCode > 47 && charCode < 58) ||
+        (charCode > 37 && charCode > 95 && charCode < 106)
+      ) {
         if (e.srcElement.valueAsNumber > Number(e.srcElement.max)) {
-          e.target.value = 10;
+          typeof idx === 'number' && arr
+            ? (this[arr][idx][model] = e.srcElement.max)
+            : (this[model] = e.srcElement.max);
           this.$alertify.warning(this.$i18n.t('settings.maxSize'));
         } else if (e.srcElement.valueAsNumber < Number(e.srcElement.min)) {
-          e.target.value = 1;
+          typeof idx === 'number' && arr
+            ? (this[arr][idx][model] = e.srcElement.min)
+            : (this[model] = e.srcElement.min);
           this.$alertify.warning(this.$i18n.t('settings.minSize'));
+        }
+      } else {
+        if (!e.srcElement.valueAsNumber) {
+          this.$alertify.warning(this.$i18n.t('settings.invalidValue'));
+          typeof idx === 'number' && arr
+            ? (this[arr][idx][model] = 1)
+            : (this[model] = 1);
         }
       }
     },
