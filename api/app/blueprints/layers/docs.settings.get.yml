@@ -25,6 +25,8 @@ responses:
           type: string
         name:
           type: object
+        bbox:
+          type: object
         columns:
           type: object
   403:

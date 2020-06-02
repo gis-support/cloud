@@ -78,6 +78,12 @@ class Layer(Cloud):
             geom = 'polygon'
         return geom
 
+    def bounding_box(self):
+        cursor = self.execute(SQL("""
+            SELECT ST_AsGeoJSON(ST_Extent(geometry)) FROM {};
+        """).format(Identifier(self.name)))
+        return json.loads(cursor.fetchone()[0])
+
     def set_style(self, data):
         # TODO: self.syncQML()
         style = LayerStyle(data, self.geom_type(), self.columns()).style
@@ -118,6 +124,7 @@ class Layer(Cloud):
             "id": self.lid,
             "name": self.name,
             "geometry_type": self.geom_type(),
+            "bbox": self.bounding_box(),
             "columns": {}
         }
         for row in cursor.fetchall():
