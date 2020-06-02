@@ -160,6 +160,8 @@
     "objectsFilter": "Filtrowanie obiektów",
     "objectsNumber": "Ilość obiektów",
     "ortoError": "Błąd ładowania Ortofotomapy",
+    "rotate": "Obróć",
+    "rotationValue": "Azymut",
     "showTable": "Pokaż tabelę",
     "zoomToSelected": "Przybliż do zaznaczonego obiektu",
     "map": {
@@ -169,6 +171,7 @@
       "endMeasurements": "Zakończ pomiar",
       "distanceMeasure": "Pomiar odległości",
       "hideMeasurements": "Ukryj pomiary",
+      "rotation": "Obrót mapy",
       "showMeasurements": "Pomiary"
     }
   },

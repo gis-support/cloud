@@ -8,7 +8,7 @@
             ref="map"
             id="map"
           >
-            <div class="add-feature-tool">
+            <div class="add-feature-tool map-tool-left">
               <button
                 type="button"
                 class="map-btn"
@@ -33,7 +33,7 @@
                 </button>
               </span>
             </div>
-            <div class="measure-tool">
+            <div class="measure-tool map-tool-left">
               <button
                 type="button"
                 class="map-btn"
@@ -68,7 +68,7 @@
                 @click="startMeasure('LineString')"
               >\</button>
             </div>
-            <div class="buffer-tool">
+            <div class="buffer-tool map-tool-left">
               <button
                 v-show="currentFeature"
                 type="button"
@@ -77,7 +77,7 @@
                 :title="$i18n.t('featureManager.map.buffer')"
               >B</button>
             </div>
-            <div class="distance-tool">
+            <div class="distance-tool map-tool-left">
               <button
                 v-show="currentFeature"
                 type="button"
@@ -85,6 +85,14 @@
                 @click="openDistanceDialog"
                 :title="$i18n.t('featureManager.map.distance')"
               >D</button>
+            </div>
+            <div class="rotation-tool map-tool-right">
+              <button
+                type="button"
+                class="map-btn"
+                @click="openRotationDialog"
+                :title="$i18n.t('featureManager.map.rotation')"
+              >A</button>
             </div>
           </div>
         </div>
@@ -477,6 +485,69 @@
             </div>
           </div>
         </modal>
+        <modal
+          name="rotation"
+          :draggable="true"
+          width="30%"
+          height="30%"
+          @before-close="rotationValue = 0"
+        >
+          <div class="modal-content dragg-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.rotation') }}</h4>
+            </div>
+            <div
+              class="modal-body"
+              v-if="activeLayer"
+            >
+              <div
+                class="form-group"
+                style="display: flex;"
+              >
+                <label
+                  class="control-label col-sm-4"
+                  style="position: relative; top: 8px"
+                >{{ $i18n.t('featureManager.rotationValue') + ` [ ${String.fromCharCode(176)} ]` }}</label>
+                <input
+                  class="form-control col-sm-7"
+                  v-model="rotationValue"
+                  type="number"
+                  :step="45"
+                  :max="360"
+                  :min="0"
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div
+                class="btn-group btn-group-justified"
+                role="group"
+              >
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    :disabled="rotationValue>360||rotationValue<0||!/^\d+$/.test(rotationValue)"
+                    type="button"
+                    class="btn btn-success"
+                    @click="rotateMapByAngle(rotationValue)"
+                  >{{ $i18n.t('featureManager.rotate') }}</button>
+                </div>
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="$modal.hide('rotation')"
+                  >{{ $i18n.t('default.close') }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </modal>
 
         <!-- <virtual-table
           style="height: calc(100% - 54px); position: relative;"
@@ -796,6 +867,7 @@ export default {
     measureType: undefined,
     newFeatureProperties: {},
     permission: [],
+    rotationValue: 0,
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
@@ -1554,12 +1626,23 @@ export default {
     openDistanceDialog() {
       this.$modal.show('distance');
     },
+    openRotationDialog() {
+      this.$modal.show('rotation');
+    },
     refreshVectorSource(layer) {
       const source = layer.getSource();
       source.tileCache.expireCache({});
       source.tileCache.clear();
       source.refresh();
       layer.changed();
+    },
+    rotateMapByAngle(angle) {
+      let radians =
+        (angle * Math.PI * 2) / 360 + this.map.getView().getRotation();
+      if (radians > Math.PI * 2) {
+        radians -= Math.PI * 2;
+      }
+      this.map.getView().setRotation(radians);
     },
     saveFile(r) {
       const data = JSON.stringify(r.body);
@@ -2042,32 +2125,31 @@ export default {
   background-color: rgba(0, 60, 136, 0.7);
 }
 .add-feature-tool {
-  padding: 2px;
-  z-index: 1;
-  position: absolute;
   top: 59px;
-  left: 0.5em;
 }
 .buffer-tool {
-  padding: 2px;
-  z-index: 1;
-  position: absolute;
   top: 101px;
-  left: 0.5em;
 }
 .distance-tool {
+  top: 122px;
+}
+.map-tool-left {
   padding: 2px;
   z-index: 1;
   position: absolute;
-  top: 122px;
   left: 0.5em;
 }
-.measure-tool {
+.map-tool-right {
   padding: 2px;
   z-index: 1;
   position: absolute;
+  right: 0.5em;
+}
+.measure-tool {
   top: 80px;
-  left: 0.5em;
+}
+.rotation-tool {
+  top: 28px;
 }
 .dropdown-menu {
   left: -110px;
