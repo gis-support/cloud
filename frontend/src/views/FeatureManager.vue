@@ -108,7 +108,7 @@
               <button
                 type="button"
                 class="btn navbar-btn navbar-left btn-default"
-                @click="isTableShow=false"
+                @click="isTableShow = false"
                 :title="$i18n.t('featureManager.closeTable')"
               >
                 <i class="fa fa-times fa-lg" />
@@ -117,7 +117,7 @@
                 class="navbar-text"
                 v-cloak
               >
-                {{ $i18n.t('featureManager.objectsNumber') }}
+                {{ $i18n.t("featureManager.objectsNumber") }}
                 <span v-text="searchCount" />
               </p>
               <div class="navbar-form navbar-right">
@@ -134,8 +134,10 @@
               <button
                 type="button"
                 class="btn navbar-btn navbar-right btn-default"
-                :class="{'btn-danger' : currentColumnFilters.length > 0,
-                       'btn-default' : currentColumnFilters.length == 0 }"
+                :class="{
+                  'btn-danger': currentColumnFilters.length > 0,
+                  'btn-default': currentColumnFilters.length == 0
+                }"
                 :title="$i18n.t('featureManager.objectsFilter')"
                 @click="openColumnFilterDecision"
               >
@@ -182,7 +184,7 @@
             v-else
           >
             <div class="loading-indicator mb-10">
-              <h4>{{ $i18n.t('default.loading') }}</h4>
+              <h4>{{ $i18n.t("default.loading") }}</h4>
               <i class="fa fa-lg fa-spin fa-spinner" />
             </div>
           </div>
@@ -196,7 +198,7 @@
             <div class="modal-dialog modal-md">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{ $i18n.t('featureManager.objectsFilter') }}</h4>
+                  <h4 class="modal-title">{{ $i18n.t("featureManager.objectsFilter") }}</h4>
                 </div>
                 <div class="modal-body">
                   <FiltersPanel
@@ -219,7 +221,7 @@
                         class="btn btn-success"
                         @click="$emit('columnFilterDecision', 'accept')"
                         :disabled="!isFiltersValidated(selectedColumnFilters)"
-                      >{{ $i18n.t('default.save') }}</button>
+                      >{{ $i18n.t("default.save") }}</button>
                     </div>
                     <div
                       class="btn-group"
@@ -229,7 +231,7 @@
                         type="button"
                         class="btn btn-danger"
                         @click="$emit('columnFilterDecision', 'clear')"
-                      >{{ $i18n.t('default.clear') }}</button>
+                      >{{ $i18n.t("default.clear") }}</button>
                     </div>
                     <div
                       class="btn-group"
@@ -239,7 +241,7 @@
                         type="button"
                         class="btn btn-default"
                         @click="$emit('columnFilterDecision', 'cancel')"
-                      >{{ $i18n.t('default.cancel') }}</button>
+                      >{{ $i18n.t("default.cancel") }}</button>
                     </div>
                   </div>
                 </div>
@@ -256,7 +258,7 @@
             <div class="modal-dialog modal-md modal-new-feature">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{ $i18n.t('featureManager.addFeatureTitle') }}</h4>
+                  <h4 class="modal-title">{{ $i18n.t("featureManager.addFeatureTitle") }}</h4>
                 </div>
                 <div
                   class="modal-body"
@@ -272,7 +274,11 @@
                       <label
                         class="control-label col-sm-4"
                         style="position: relative; top: 8px"
-                      >{{ name }}</label>
+                      >
+                        {{
+                        name
+                        }}
+                      </label>
                       <input
                         class="form-control col-sm-7"
                         v-model="newFeatureProperties[name]"
@@ -306,7 +312,7 @@
                         type="button"
                         class="btn btn-danger"
                         @click="saveNewFeature"
-                      >{{ $i18n.t('default.save') }}</button>
+                      >{{ $i18n.t("default.save") }}</button>
                     </div>
                     <div
                       class="btn-group"
@@ -316,7 +322,7 @@
                         type="button"
                         class="btn btn-default"
                         @click="clearFeatureAdding"
-                      >{{ $i18n.t('default.cancel') }}</button>
+                      >{{ $i18n.t("default.cancel") }}</button>
                     </div>
                   </div>
                 </div>
@@ -328,7 +334,7 @@
           type="button"
           class="btn btn-default show-table"
           v-if="!isTableShow"
-          @click="isTableShow=true"
+          @click="isTableShow = true"
           :title="$i18n.t('featureManager.showTable')"
         >
           <i class="fa fa-table" />
@@ -342,14 +348,14 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t('featureManager.map.buffer') }}</h4>
+              <h4 class="modal-title">{{ $i18n.t("featureManager.map.buffer") }}</h4>
             </div>
             <div
               class="modal-body"
               v-if="activeLayer"
             >
               <div style="margin-bottom: 100px">
-                <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
+                <h4>{{ $i18n.t("featureManager.bufferAnalysis") }}</h4>
                 <div
                   class="form-group"
                   style="display: flex;"
@@ -357,7 +363,11 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >{{ $i18n.t('featureManager.bufferValue') }}</label>
+                  >
+                    {{
+                    $i18n.t("featureManager.bufferValue")
+                    }}
+                  </label>
                   <input
                     class="form-control col-sm-7"
                     v-model="bufferValue"
@@ -374,11 +384,11 @@
                     type="button"
                     class="btn btn-default"
                     @click="generateBuffer"
-                  >{{ $i18n.t('featureManager.bufferGenerate') }}</button>
+                  >{{ $i18n.t("featureManager.bufferGenerate") }}</button>
                 </div>
               </div>
               <div>
-                <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
+                <h4>{{ $i18n.t("featureManager.generateObjectsArray") }}</h4>
                 <div
                   class="form-group"
                   style="display: flex;"
@@ -386,7 +396,11 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >{{ $i18n.t('featureManager.bufferLayer') }}</label>
+                  >
+                    {{
+                    $i18n.t("featureManager.bufferLayer")
+                    }}
+                  </label>
                   <select
                     style="max-width: 75%"
                     class="form-control"
@@ -411,7 +425,7 @@
                     class="btn btn-default"
                     :disabled="!selectedLayerName"
                     @click="generateObjectsArray"
-                  >{{ $i18n.t('featureManager.generate') }}</button>
+                  >{{ $i18n.t("featureManager.generate") }}</button>
                 </div>
               </div>
             </div>
@@ -426,14 +440,14 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t('featureManager.map.distance') }}</h4>
+              <h4 class="modal-title">{{ $i18n.t("featureManager.map.distance") }}</h4>
             </div>
             <div
               class="modal-body"
               v-if="activeLayer"
             >
               <div style="margin-bottom: 100px">
-                <h4>{{ $i18n.t('featureManager.distanceAnalysis') }}</h4>
+                <h4>{{ $i18n.t("featureManager.distanceAnalysis") }}</h4>
                 <div
                   class="form-group"
                   style="display: flex;"
@@ -441,7 +455,11 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >{{ $i18n.t('featureManager.bufferValue') }}</label>
+                  >
+                    {{
+                    $i18n.t("featureManager.bufferValue")
+                    }}
+                  </label>
                   <input
                     class="form-control col-sm-7"
                     v-model="bufferValue"
@@ -455,7 +473,11 @@
                   <label
                     class="control-label col-sm-4"
                     style="position: relative; top: 8px"
-                  >{{ $i18n.t('featureManager.fieldName') }}</label>
+                  >
+                    {{
+                    $i18n.t("featureManager.fieldName")
+                    }}
+                  </label>
                   <select
                     style="max-width: 75%"
                     class="form-control"
@@ -479,7 +501,7 @@
                     type="button"
                     class="btn btn-default"
                     @click="generateDistance"
-                  >{{ $i18n.t('featureManager.download') }}</button>
+                  >{{ $i18n.t("featureManager.download") }}</button>
                 </div>
               </div>
             </div>
@@ -494,7 +516,7 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t('featureManager.map.rotation') }}</h4>
+              <h4 class="modal-title">{{ $i18n.t("featureManager.map.rotation") }}</h4>
             </div>
             <div
               class="modal-body"
@@ -507,7 +529,11 @@
                 <label
                   class="control-label col-sm-4"
                   style="position: relative; top: 8px"
-                >{{ $i18n.t('featureManager.rotationValue') + ` [ ${String.fromCharCode(176)} ]` }}</label>
+                >
+                  {{
+                  $i18n.t("featureManager.rotationValue") + ` [ ${String.fromCharCode(176)} ]`
+                  }}
+                </label>
                 <input
                   class="form-control col-sm-7"
                   v-model="rotationValue"
@@ -528,11 +554,13 @@
                   role="group"
                 >
                   <button
-                    :disabled="rotationValue>360||rotationValue<0||!/^\d+$/.test(rotationValue)"
+                    :disabled="
+                      rotationValue > 360 || rotationValue < 0 || !/^\d+$/.test(rotationValue)
+                    "
                     type="button"
                     class="btn btn-success"
                     @click="rotateMapByAngle(rotationValue)"
-                  >{{ $i18n.t('featureManager.rotate') }}</button>
+                  >{{ $i18n.t("featureManager.rotate") }}</button>
                 </div>
                 <div
                   class="btn-group"
@@ -542,7 +570,7 @@
                     type="button"
                     class="btn btn-danger"
                     @click="$modal.hide('rotation')"
-                  >{{ $i18n.t('default.close') }}</button>
+                  >{{ $i18n.t("default.close") }}</button>
                 </div>
               </div>
             </div>
@@ -569,7 +597,11 @@
               <span
                 class="mvp-red right-panel__name"
                 :title="layerName"
-              >{{ layerName ? layerName : '' | maxLength }}</span>
+              >
+                {{
+                layerName ? layerName : "" | maxLength
+                }}
+              </span>
             </h4>
             <div
               class="col-sm-2"
@@ -584,6 +616,7 @@
                 <a
                   class="btn btn-default"
                   @click="goToSettings"
+                  :title="$i18n.t('default.settings')"
                 >
                   <i class="fa fa-cog yellow icon-hover" />
                 </a>
@@ -597,6 +630,7 @@
                     data-toggle="dropdown"
                     aria-haspopup="true"
                     aria-expanded="false"
+                    :title="$i18n.t('featureManager.download')"
                   >
                     <i class="fa fa-download green icon-hover" />
                     <span class="caret" />
@@ -619,19 +653,19 @@
           >
             <li
               role="presentation"
-              :class="{active: indexActiveTab === 0}"
+              :class="{ active: indexActiveTab === 0 }"
             >
               <a
                 href="#"
                 @click="indexActiveTab = 0"
               >
                 <i class="fa fa-bars" />
-                {{ $i18n.t('featureManager.legend') }}
+                {{ $i18n.t("featureManager.legend") }}
               </a>
             </li>
             <li
               role="presentation"
-              :class="{active: indexActiveTab === 1}"
+              :class="{ active: indexActiveTab === 1 }"
               v-show="currentFeature"
             >
               <a
@@ -639,12 +673,12 @@
                 @click="indexActiveTab = 1"
               >
                 <i class="fa fa-table" />
-                {{ $i18n.t('featureManager.attributes') }}
+                {{ $i18n.t("featureManager.attributes") }}
               </a>
             </li>
             <li
               role="presentation"
-              :class="{active: indexActiveTab === 2, disabled: !featureAttachments}"
+              :class="{ active: indexActiveTab === 2, disabled: !featureAttachments }"
               v-show="currentFeature"
             >
               <a
@@ -652,7 +686,7 @@
                 @click="indexActiveTab = 2"
               >
                 <i class="fa fa-info" />
-                {{ $i18n.t('featureManager.informations') }}
+                {{ $i18n.t("featureManager.informations") }}
               </a>
             </li>
           </ul>
@@ -663,26 +697,26 @@
             >
               <div class="scroll-tab">
                 <div class="baseLayers">
-                  <h4>{{ $i18n.t('default.basemaps') }}:</h4>
+                  <h4>{{ $i18n.t("default.basemaps") }}:</h4>
                   <ul class="list-group">
                     <li
                       class="list-group-item"
                       v-for="name in baseLayers"
                       :key="name"
-                      :class="{'activeLayer' : currentBaseLayer == name}"
+                      :class="{ activeLayer: currentBaseLayer == name }"
                       @click="changeBaseLayer(name)"
                     >{{ name }}</li>
                   </ul>
                 </div>
                 <div class="services">
-                  <h4>{{ $i18n.t('default.services') }}:</h4>
+                  <h4>{{ $i18n.t("default.services") }}:</h4>
                   <ul class="list-group">
                     <span v-if="services.length > 0">
                       <li
                         class="list-group-item"
                         v-for="service in services"
                         :key="service.name"
-                        :class="{'activeLayer' : activeServices.includes(service.name)}"
+                        :class="{ activeLayer: activeServices.includes(service.name) }"
                       >
                         <label
                           class="checkbox-inline mb-0"
@@ -699,7 +733,7 @@
                       </li>
                     </span>
                     <span v-else>
-                      <li class="list-group-item no-item">{{ $i18n.t('default.noServices') }}</li>
+                      <li class="list-group-item no-item">{{ $i18n.t("default.noServices") }}</li>
                     </span>
                   </ul>
                 </div>
@@ -717,7 +751,7 @@
                       type="button"
                       class="btn btn-success btn-group-justified"
                       @click="editAttributes"
-                    >{{ $i18n.t('default.edit') }}</button>
+                    >{{ $i18n.t("default.edit") }}</button>
                   </div>
                 </template>
                 <template v-else>
@@ -729,7 +763,7 @@
                       type="button"
                       class="btn btn-success"
                       @click="saveEditing"
-                    >{{ $i18n.t('default.save') }}</button>
+                    >{{ $i18n.t("default.save") }}</button>
                   </div>
                   <div
                     class="btn-group btn-group-action btn-group-edit"
@@ -739,7 +773,7 @@
                       type="button"
                       class="btn btn-default"
                       @click="cancelEditing"
-                    >{{ $i18n.t('default.cancel') }}</button>
+                    >{{ $i18n.t("default.cancel") }}</button>
                   </div>
                   <div
                     class="btn-group btn-group-action btn-group-edit"
@@ -749,7 +783,7 @@
                       type="button"
                       class="btn btn-danger"
                       @click="deleteFeature"
-                    >{{ $i18n.t('default.delete') }}</button>
+                    >{{ $i18n.t("default.delete") }}</button>
                   </div>
                 </template>
               </template>
@@ -781,23 +815,26 @@
 </template>
 
 <script>
-import * as turf from '@turf/turf';
-import _ from 'lodash';
+import turfBuffer from '@turf/buffer';
 import moment from 'moment';
-import { fromLonLat, get as getProjection } from 'ol/proj';
-import Draw from 'ol/interaction/Draw';
-import GeoJSON from 'ol/format/GeoJSON';
 import Map from 'ol/Map';
-import Modify from 'ol/interaction/Modify';
-import MVT from 'ol/format/MVT';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import VectorTileSource from 'ol/source/VectorTile';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import TileWMS from 'ol/source/TileWMS';
-import { Circle, Fill, Stroke, Style, RegularShape } from 'ol/style';
+import { fromLonLat, get as getProjection } from 'ol/proj';
+import { Draw, Modify } from 'ol/interaction';
+import { MVT, WMTSCapabilities, GeoJSON } from 'ol/format';
+import {
+  VectorTile as VectorTileSource,
+  Vector as VectorSource,
+  TileWMS,
+  XYZ,
+  WMTS
+} from 'ol/source';
+import {
+  VectorTile as VectorTileLayer,
+  Vector as VectorLayer,
+  Tile as TileLayer
+} from 'ol/layer';
+import { Circle, Fill, Stroke, Style, RegularShape, Text } from 'ol/style';
 import {
   LineString,
   Polygon,
@@ -809,11 +846,7 @@ import {
 import { getArea, getLength } from 'ol/sphere.js';
 import { unByKey } from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
-import CircleStyle from 'ol/style/Circle';
-import Text from 'ol/style/Text';
-import WMTSCapabilities from 'ol/format/WMTSCapabilities';
-import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
-import XYZ from 'ol/source/XYZ';
+import { optionsFromCapabilities } from 'ol/source/WMTS';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
@@ -1456,7 +1489,7 @@ export default {
       this.getLayerByName('buffer')
         .getSource()
         .clear();
-      let buffer = turf.buffer(this.currentFeature, this.bufferValue / 1000, {
+      let buffer = turfBuffer(this.currentFeature, this.bufferValue / 1000, {
         units: 'kilometers'
       });
       if (buffer) {
@@ -1483,7 +1516,7 @@ export default {
       this.getLayerByName('buffer')
         .getSource()
         .clear();
-      let buffer = turf.buffer(this.currentFeature, this.bufferValue / 1000, {
+      let buffer = turfBuffer(this.currentFeature, this.bufferValue / 1000, {
         units: 'kilometers'
       });
       if (buffer) {
@@ -1560,8 +1593,7 @@ export default {
       });
     },
     isFiltersValidated(filters) {
-      return _.every(
-        filters,
+      return filters.every(
         filter =>
           filter.operation !== '' && filter.column !== '' && filter.value !== ''
       );
@@ -1679,7 +1711,7 @@ export default {
         this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
           this.$refs['table-data'].selectItem(
-            _.find(this.items, o => o.id === fid)
+            this.items.find(item => item.id === fid)
           );
         }
       } else {
@@ -1780,7 +1812,7 @@ export default {
         });
         if (this.layerType === 'point') {
           featStyle.setImage(
-            new CircleStyle({
+            new Circle({
               fill,
               stroke,
               radius: this.layerStyle.width
@@ -1827,7 +1859,7 @@ export default {
           // TODO - add triangle/square/dashed/dotted
           if (filteredFeat.type === 'point') {
             featStyle.setImage(
-              new CircleStyle({
+              new Circle({
                 fill,
                 stroke,
                 radius: filteredFeat.width
@@ -1839,7 +1871,7 @@ export default {
           }
         } else {
           featStyle.setImage(
-            new CircleStyle({
+            new Circle({
               fill: new Fill({
                 color: [250, 250, 250, 0.4]
               }),
