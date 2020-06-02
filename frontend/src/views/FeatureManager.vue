@@ -1686,12 +1686,14 @@ export default {
       if (this.layerType) {
         const stroke = new Stroke({
           color: selecting
-            ? 'rgba(249, 237, 20, 0.5)'
+            ? 'rgba(249, 237, 20, 0.8)'
             : `rgba(${this.layerStyle['stroke-color']})`,
           width: selecting ? 4 : `${this.layerStyle['stroke-width']}`
         });
         const fill = new Fill({
-          color: `rgba(${this.layerStyle['fill-color']})`
+          color: selecting
+            ? 'rgba(249, 237, 20, 0.5)'
+            : `rgba(${this.layerStyle['fill-color']})`
         });
         if (this.layerType === 'point') {
           featStyle.setImage(
