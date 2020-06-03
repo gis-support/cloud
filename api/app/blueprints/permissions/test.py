@@ -13,7 +13,7 @@ class TestPermissions(BaseTest):
 
     def test_permissions_all(self, client):
         test_user = self.get_token(client)
-        token_admin = self.get_token(client)
+        token_admin = self.get_token(client, admin=True)
         user, password = self.create_user(client)
         # Create 4 layers
         # First only for admin user
@@ -265,3 +265,35 @@ class TestPermissions(BaseTest):
         assert r.json
         default_group = os.environ.get('DEFAULT_GROUP')
         assert len(r.json['attachments'][default_group]) == 1
+
+    def test_permission_CGS_13(self, client):
+        # Case: 
+        # 1. Creating new user
+        # 2. Granting new user edit permission to layer
+        # 3. Reloging to new user account
+        # 4. Can't edit layer even tho permission was granted
+        token_admin = self.get_token(client, admin=True)
+        lid = self.add_geojson_prg(client, token_admin)
+        # New user
+        new_user, password = self.create_user(client)
+        # Granting permission to write 
+        r = client.put(f'/api/permissions/{lid}?token={token_admin}',
+                       data=json.dumps({'user': new_user, 'permission': 'write'}))
+        assert r.status_code == 200
+        assert r.json['permissions']['permission'] == 'write'
+        assert r.json['permissions']['user'] == new_user
+        # Checking permissions
+        r = client.get(f'/api/permissions?token={token_admin}')
+        for perm in r.json['permissions']:
+            if perm['id'] != lid:
+                continue
+            write_perm = 0
+            if perm['users'][new_user] == 'write':
+                write_perm = 1
+        assert write_perm == 1
+        # Editing layer as a new user
+        new_user_token = self.get_token(client, user=new_user, password=password)
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_feature.json')
+        r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, 1, new_user_token),
+                       data=open(path), follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 200
