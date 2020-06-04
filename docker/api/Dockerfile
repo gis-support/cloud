@@ -1,4 +1,4 @@
-FROM python:3.8.2
+FROM python:3.8.3
 # Removing libs causing conflicts
 RUN apt-get remove -y binutils libgcc-8-dev
 # Add unstable repo to allow us to access latest GDAL builds
