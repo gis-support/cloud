@@ -178,10 +178,10 @@ export default {
     logo: undefined,
     postLogo: `${vm.$store.getters.getApiUrl}/logo?token=${localStorage.getItem(
       'token'
-    )}` /*,
+    )}`,
     postFavicon: `${
       vm.$store.getters.getApiUrl
-    }/favicon?token=${localStorage.getItem('token')}`*/
+    }/favicon?token=${localStorage.getItem('token')}`
   }),
   components: {
     FileUpload
@@ -213,12 +213,13 @@ export default {
         if (newFile.success && !oldFile.success) {
           this.$alertify.success(this.$i18n.t('upload.uploadSuccess'));
           this.logo = undefined;
+          this.favicon = undefined;
         }
       }
     },
     inputFilter(newFile, oldFile, prevent) {
       if (newFile && !oldFile) {
-        if (!/\.(jpeg|jpe|jpg|gif|png)$/i.test(newFile.name)) {
+        if (!/\.(jpeg|jpe|jpg|gif|png|ico)$/i.test(newFile.name)) {
           this.$alertify.error(this.$i18n.t('upload.uploadExtensionError'));
           return prevent();
         }
