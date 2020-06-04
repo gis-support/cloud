@@ -18,11 +18,22 @@
         </li>
         <li>
           <a
+            href="#favicon"
+            data-toggle="tab"
+            @click="setActiveTab('tabFavicon')"
+          >
+            <i class="fa fa-fonticons" />
+            &nbsp;&nbsp;
+            <span>{{ $i18n.t('settings.tabFavicon') }}</span>
+          </a>
+        </li>
+        <li>
+          <a
             href="#qgisLogo"
             data-toggle="tab"
             @click="setActiveTab('tabQgis')"
           >
-            <i class="fa fa-quora" />
+            <i class="fa fa-quora"></i>
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.tabQgis') }}</span>
           </a>
@@ -48,10 +59,10 @@
           <div>
             <h4 class="text-left">{{ $i18n.t('settings.addNewLogo') }}</h4>
             <file-upload
-              ref="upload"
+              ref="uploadLogo"
               v-model="logo"
               accept="image/*"
-              :post-action="postAction"
+              :post-action="postLogo"
               :multiple="false"
               :drop="true"
               :drop-directory="true"
@@ -116,6 +127,41 @@
             </table>
           </div>
         </div>
+        <div
+          class="tab-pane in active"
+          id="tabFavicon"
+          v-if="activeTab === 'tabFavicon'"
+        >
+          <div>
+            <h4 class="text-left">{{ $i18n.t('settings.addNewFavicon') }}</h4>
+            <file-upload
+              ref="uploadFavicon"
+              v-model="favicon"
+              accept="image/*"
+              :post-action="postFavicon"
+              :multiple="false"
+              :drop="true"
+              :drop-directory="true"
+              @input-filter="inputFilter"
+              @input-file="inputFile"
+            >
+              {{this.$i18n.t('upload.uploadLogoMessage')}}
+              <ul>
+                <li
+                  style="color:green"
+                  v-if="favicon"
+                >{{favicon[0].name}}</li>
+              </ul>
+            </file-upload>
+          </div>
+          <button
+            type="button"
+            class="btn btn-success"
+            @click="addFavicon()"
+            :disabled="!favicon"
+            style="float:right"
+          >{{ $i18n.t('default.add') }}</button>
+        </div>
       </div>
     </div>
   </div>
@@ -128,10 +174,14 @@ export default {
   name: 'AppSettings',
   data: () => ({
     activeTab: 'tabLogo',
+    favicon: undefined,
     logo: undefined,
-    postAction: `${
+    postLogo: `${vm.$store.getters.getApiUrl}/logo?token=${localStorage.getItem(
+      'token'
+    )}` /*,
+    postFavicon: `${
       vm.$store.getters.getApiUrl
-    }/logo?token=${localStorage.getItem('token')}`
+    }/favicon?token=${localStorage.getItem('token')}`*/
   }),
   components: {
     FileUpload
@@ -148,8 +198,11 @@ export default {
     }
   },
   methods: {
+    addFavicon() {
+      this.$refs.uploadFavicon.active = true;
+    },
     addLogo() {
-      this.$refs.upload.active = true;
+      this.$refs.uploadLogo.active = true;
     },
     inputFile(newFile, oldFile) {
       if (newFile && oldFile) {
@@ -170,9 +223,6 @@ export default {
           return prevent();
         }
       }
-    },
-    removeLogo() {
-      this.logo = undefined;
     },
     setActiveTab(tab) {
       this.activeTab = tab;

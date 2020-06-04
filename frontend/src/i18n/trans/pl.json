@@ -229,6 +229,7 @@
   },
   "settings": {
     "activeLogo": "Aktualne logo",
+    "addNewFavicon": "Dodaj nowy favicon",
     "addNewLogo": "Dodaj nowe logo",
     "attribute": "Atrybut",
     "chooseAttr": "Wybierz atrybut",
@@ -252,6 +253,7 @@
     "stroke-color": "Kolor obrysu",
     "stroke-width": "Grubość obrysu",
     "symbolization": "Symbolizacja",
+    "tabFavicon": "Favicon",
     "tabLogo": "Logo",
     "tabQgis": "QGIS",
     "user": "Użytkownik",
