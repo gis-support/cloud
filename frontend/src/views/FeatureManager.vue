@@ -1370,7 +1370,14 @@ export default {
             hitTolerance: 5
           }
         );
-        this.selectFeature(feature);
+        if (!feature) {
+          this.selectFeature(feature);
+        } else {
+          if (!feature.properties_) return;
+          else {
+            this.selectFeature(feature);
+          }
+        }
       });
       return {
         setActive(value) {
