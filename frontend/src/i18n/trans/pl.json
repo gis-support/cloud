@@ -163,6 +163,7 @@
     "rotate": "Obróć",
     "rotationValue": "Azymut",
     "showTable": "Pokaż tabelę",
+    "waitForData": "Poczekaj na wczytanie danych",
     "zoomToSelected": "Przybliż do zaznaczonego obiektu",
     "map": {
       "areaMeasure": "Pomiar powierzchni",

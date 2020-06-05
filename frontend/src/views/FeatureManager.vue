@@ -1373,9 +1373,14 @@ export default {
         if (!feature) {
           this.selectFeature(feature);
         } else {
-          if (!feature.properties_) return;
-          else {
-            this.selectFeature(feature);
+          if (this.items.length < 1) {
+            this.$alertify.warning(this.$i18n.t('featureManager.waitForData'));
+            return;
+          } else {
+            if (!feature.properties_) return;
+            else {
+              this.selectFeature(feature);
+            }
           }
         }
       });
@@ -1722,7 +1727,9 @@ export default {
           );
         }
       } else {
-        this.$refs['table-data'].clearSelection();
+        if (this.$refs['table-data']) {
+          this.$refs['table-data'].clearSelection();
+        }
         this.currentFeature = undefined;
         this.indexActiveTab = 0;
         this.getLayerByName('featuresVectorSelection')
