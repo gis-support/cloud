@@ -2171,21 +2171,6 @@ export default {
     this.loadServices();
     await this.createStyle();
 
-    // this.map.addLayer(
-    //   new VectorTileLayer({
-    //     name: 'features',
-    //     renderBuffer: 256,
-    //     source: new VectorTileSource({
-    //       cacheSize: 1,
-    //       format: new MVT(),
-    //       url: `${this.apiUrl}/mvt/${
-    //         this.$route.params.layerId
-    //       }/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
-    //     }),
-    //     style: f => this.styleFeatures(f, true)
-    //   })
-    // );
-
     this.map.addLayer(
       this.createMVTLayer(this.$route.params.layerId, 'features')
     );

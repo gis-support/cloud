@@ -216,6 +216,9 @@ export default {
 .pt-10 {
   padding-top: 10px !important;
 }
+.py-5 {
+  padding: 5px 0 !important;
+}
 .red {
   color: #f22a1f !important;
 }

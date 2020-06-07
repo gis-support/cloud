@@ -256,11 +256,24 @@
     "stroke-color": "Kolor obrysu",
     "stroke-width": "Grubość obrysu",
     "symbolization": "Symbolizacja",
-    "tabLogo": "Logo",
-    "tabQgis": "QGIS",
+    "logo": "Logo",
+    "qgis": "QGIS",
     "user": "Użytkownik",
     "value": "Wartość",
     "visType": "Typ wizualizacji",
-    "width": "Wielkość punktu"
+    "width": "Wielkość punktu",
+    "tags": "Tagi",
+    "tagsList": "Lista tagów",
+    "newTag": "Dodaj nowy tag",
+    "editTag": "Edytuj tag",
+    "tagName": "Nazwa",
+    "saveTag": "Zapisz tag",
+    "tagColor": "Kolor",
+    "tagsTable": {
+      "id": "ID",
+      "tag": "Tag",
+      "color": "Kolor",
+      "actions": "Akcje"
+    }
   }
 }
