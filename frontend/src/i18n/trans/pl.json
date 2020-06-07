@@ -105,6 +105,8 @@
     "saveName": "Zapisz nazwę",
     "saveStyle": "Zapisz styl",
     "services": "Źródła zewnętrzne",
+    "otherLayers": "Pozostałe warstwy",
+    "noOtherLayers": "Brak pozostałych warstw",
     "settings": "Ustawienia",
     "single": "Pojedynczy",
     "startUpload": "Wyślij pliki",
@@ -164,6 +166,8 @@
     "rotationValue": "Azymut",
     "showTable": "Pokaż tabelę",
     "zoomToSelected": "Przybliż do zaznaczonego obiektu",
+    "addLayer": "Dodaj warstwę",
+    "removeLayer": "Usuń warstwę",
     "map": {
       "areaMeasure": "Pomiar powierzchni",
       "buffer": "Bufor",

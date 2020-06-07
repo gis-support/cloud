@@ -192,6 +192,12 @@ export default {
 .mb-0 {
   margin-bottom: 0px !important;
 }
+.mb-5 {
+  margin-bottom: 5px !important;
+}
+.mb-10 {
+  margin-bottom: 10px !important;
+}
 .mr-5 {
   margin-right: 5px !important;
 }
