@@ -1,0 +1,41 @@
+Untag a layer.
+Tag may not be removed from a layer which isn't tagged with it.
+---
+tags:
+  - Layers tags
+summary: Untag a layer
+
+produces:
+  - application/json
+parameters:
+  - name: layer_id
+    in: query
+    description: ID of a layer to be untagged
+    required: true
+    type: string
+  - name: tag_id
+    in: query
+    description: ID of a tag which will be removed from the layer
+    required: true
+    type: int
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  204:
+    description: ok
+  400:
+    description: Request payload lacks obligatory data or data is incorrect.
+
+  403:
+    description: token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

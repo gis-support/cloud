@@ -1,0 +1,56 @@
+Create new tag
+---
+tags:
+  - Layers tags
+summary: Create tag
+
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "name"
+          required: true
+          description: "Name of the new tag. Must be unique among other tags"
+        color:
+          type: string
+          example: "#123456"
+          required: true
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  201:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          example: 1
+          description: "ID of newly created tag"
+  400:
+    description: Request payload lacks obligatory data or tag with such name already exists.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "message"
+  403:
+    description: token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
