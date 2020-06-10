@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+from flask import request
+
 from app.create import create_app
 from psycopg2.sql import SQL, Identifier
 
@@ -11,7 +13,9 @@ SYSTEM_TABLES = [
     'spatial_ref_sys',
     'raster_columns',
     'raster_overviews',
-    'layer_styles'
+    'layer_styles',
+    "tag",
+    "layer_tag"
 ]
 
 
@@ -35,6 +39,8 @@ def app():
         except:
             pass
     app._db.execute_sql("TRUNCATE layer_styles RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE layer_tag RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE tag RESTART IDENTITY CASCADE;")
     app._redis.delete('user_list')
     cur = app._db.execute_sql(
         "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
@@ -43,3 +49,9 @@ def app():
     for table in tables_to_delete:
         app._db.execute_sql('DROP TABLE "{}" cascade'.format(table))
     cur.close()
+
+@pytest.fixture
+def app_request_context(client):
+    with client.application.test_request_context():
+        request.user = "test"
+        yield

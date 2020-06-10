@@ -1,7 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from functools import wraps
 
-from psycopg2.sql import SQL, Identifier, Placeholder
+import psycopg2
+from flask import current_app, request
+from psycopg2.sql import SQL, Identifier
 from psycopg2.extensions import AsIs
 from app.helpers.style import create_qml, create_stylejson
 import os
@@ -45,7 +48,7 @@ class Cloud:
             raise ValueError("invalid layer id")
 
     # Execute SQL queries
-    def execute(self, *args, **kwargs):
+    def execute(self, *args, **kwargs) -> psycopg2.extensions.cursor:
         return self.db.execute_sql(*args, **kwargs)
 
     def get_users_with_layers(self, grantor=True):
@@ -215,3 +218,10 @@ class Cloud:
                 True
             );
         """, (name, create_qml(geom_type), json.dumps(create_stylejson(geom_type),)))
+
+def cloud_decorator(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        cloud = Cloud({"app": current_app, "user": request.user})
+        return f(cloud, *args, **kws)
+    return decorated_function

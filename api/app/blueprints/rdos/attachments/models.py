@@ -1,4 +1,4 @@
-from app.db.general import BaseModel
+from app.db.base_model import BaseModel
 from peewee import TextField
 from playhouse.shortcuts import model_to_dict
 import os

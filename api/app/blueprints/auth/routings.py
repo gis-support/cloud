@@ -4,8 +4,9 @@
 from flask import Blueprint, jsonify, request, current_app, send_from_directory
 from flasgger import swag_from
 from app.docs import path_by
-from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, cloud_decorator, delete_user, admin_only
+from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, delete_user, admin_only
 import os
+from app.helpers.cloud import cloud_decorator
 
 
 mod_auth = Blueprint("auth", __name__)

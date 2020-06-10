@@ -4,7 +4,8 @@
 from flask import Blueprint, jsonify, request
 from flasgger import swag_from
 from app.docs import path_by
-from app.db.general import token_required, cloud_decorator
+from app.db.general import token_required
+from app.helpers.cloud import cloud_decorator
 from app.blueprints.rdos.services.models import Service
 import os
 
