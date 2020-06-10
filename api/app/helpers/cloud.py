@@ -6,6 +6,8 @@ import psycopg2
 from flask import current_app, request
 from psycopg2.sql import SQL, Identifier
 from psycopg2.extensions import AsIs
+
+from app.blueprints.layers.tags.models import LayerTag
 from app.helpers.style import create_qml, create_stylejson
 import os
 import json
@@ -20,6 +22,8 @@ DB_RESTRICTED_USERS = (
 DB_RESTRICTED_TABLES = (
     'spatial_ref_sys',  # Postgis dependency
     'layer_styles'  # QGIS styles source
+    "tag",
+    "layer_tag"
 )
 
 
@@ -167,10 +171,22 @@ class Cloud:
         cursor = self.execute("""
             SELECT DISTINCT table_name FROM information_schema.role_table_grants WHERE grantee = %s
         """, (self.user,))
-        return [{
-            "name": row[0],
-            "id": self.hash_name(row[0])
-        } for row in cursor.fetchall()]
+
+        tags_by_layer_id = LayerTag.get_tags_by_layer_id()
+
+        result = []
+        for row in cursor.fetchall():
+            name = row[0]
+            id_ = self.hash_name(name)
+            tags = tags_by_layer_id.get(id_, [])
+
+            result.append({
+                "name": name,
+                "id": id_,
+                "tags": tags
+            })
+
+        return result
 
     # Check if layer exists by layer name
     def layer_exists(self, layer):
