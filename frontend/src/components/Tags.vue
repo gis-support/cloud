@@ -61,6 +61,7 @@
         </tbody>
       </table>
     </div>
+
     <div class="col-sm-4 pl-0 pr-0 pt-10 section form__wrapper">
       <h4 class="flex-center container__border--bottom container__border--grey mb-0 py-5">
         <div class="p-0 section__header">
@@ -85,12 +86,7 @@
           <div class="form__row--color form__row row py-5">
             <label class="col-sm-2">{{ $i18n.t('settings.tagColor') }}</label>
             <div class="col-sm-10">
-              <verte
-                picker="square"
-                model="rgb"
-                :value="tag.color"
-                v-model="tag.color"
-              />
+              <color-picker v-model="tag.color"></color-picker>
             </div>
           </div>
         </div>
@@ -104,19 +100,18 @@
 </template>
 
 <script>
-import verte from 'verte';
-import 'verte/dist/verte.css';
+import ColorPicker from '@/components/ColorPicker';
 
 export default {
   name: 'Tags',
   components: {
-    verte
+    ColorPicker
   },
   data: () => ({
     editing: false,
     tag: {
       tag: '',
-      color: 'rgb(0,0,0)'
+      color: null
     },
     tags: [],
     columns: ['id', 'tag', 'color', 'actions']
@@ -140,7 +135,7 @@ export default {
       this.tags.push(
         Object.assign(this.tag, { id: Math.ceil(Math.random() * 10) })
       );
-      this.tag = { name: '', color: 'rgb(0,0,0)' };
+      this.tag = { name: '', color: 'rgba(0,0,0,1)' };
     },
     deleteTag(index) {
       this.tags.splice(index, 1);

@@ -270,9 +270,4 @@ export default {
 .text-left {
   text-align: left;
 }
-.verte {
-  display: flex;
-  justify-content: center;
-  top: 5px;
-}
 </style>
