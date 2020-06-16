@@ -57,7 +57,8 @@
       "character varying": "Tekst",
       "real": "Liczba rzeczywista",
       "integer": "Liczba całkowita",
-      "timestamp without time zone": "Data"
+      "timestamp without time zone": "Data",
+      "dictionary": "Słownik"
     },
     "clear": "Wyczyść",
     "close": "Zamknij",
@@ -236,6 +237,7 @@
     "chooseVisualizationType": "Wybierz typ wizualizacji",
     "classify": "Klasyfikuj",
     "database": "Baza danych",
+    "dictField": "Pole słownikowe",
     "fill-color": "Kolor wypełnienia",
     "host": "Host",
     "invalidValue": "Niepoprawna wartość",
@@ -245,6 +247,7 @@
     "layerInfo": "Informacje o warstwie",
     "maxSize": "Maksymalna wartość to 10",
     "minSize": "Minimalna wartość to 1",
+    "newValue": "Nowa wartość",
     "objStyle": "Styl obiektu",
     "password": "Hasło",
     "port": "Port",

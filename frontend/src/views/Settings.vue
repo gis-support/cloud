@@ -115,7 +115,7 @@
               <button
                 type="button"
                 class="btn btn-success"
-                @click="addNewColumn"
+                @click="newColumnType==='dictionary'?openDictionaryModal():addNewColumn"
                 :disabled="!newColumnType || !newColumnName"
               >{{ $i18n.t('default.add') }}</button>
             </div>
@@ -165,6 +165,14 @@
                       :title="$i18n.t('default.delete')"
                       @click="deleteColumn(name)"
                     />
+                    <!--
+                    <i
+                      v-if="value === 'dictionary'"
+                      class="fa fa-pencil fa-lg icon-hover"
+                      :title="$i18n.t('default.edit')"
+                      @click="openDictionaryModal(dictsValues)"
+                    />
+                    -->
                   </td>
                 </tr>
               </tbody>
@@ -522,6 +530,73 @@
         </div>
       </div>
     </div>
+    <modal
+      name="dicts"
+      :draggable="false"
+      width="30%"
+      height="auto"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{ $i18n.t('settings.dictField') }}</h4>
+        </div>
+        <div class="modal-body">
+          <div style="margin-bottom: 100px">
+            <h4>{{ $i18n.t('settings.newValue') }}</h4>
+            <div
+              class="form-group"
+              style="display: flex;"
+            >
+              <label
+                class="control-label col-sm-4"
+                style="position: relative; top: 8px"
+              >{{ $i18n.t('settings.value') }}</label>
+              <input
+                v-model="currentDictValue"
+                class="form-control col-sm-7 mr-5"
+              />
+              <button
+                type="button"
+                class="btn btn-default"
+                :title="$i18n.t('default.add')"
+                @click="currentDictValues.push(currentDictValue)"
+              >
+                <i class="fa fa-plus" />
+              </button>
+            </div>
+            <table>
+              <tbody>{{"aaa"}}</tbody>
+              <tbody>{{"bbb"}}</tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div
+            class="btn-group btn-group-justified"
+            role="group"
+          >
+            <div
+              class="btn-group"
+              role="group"
+            >
+              <button
+                type="button"
+                class="btn btn-success"
+              >{{ $i18n.t("default.save") }}</button>
+            </div>
+            <div
+              class="btn-group"
+              role="group"
+            >
+              <button
+                type="button"
+                class="btn btn-danger"
+              >{{ $i18n.t("default.cancel") }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </modal>
   </div>
 </template>
 
@@ -542,6 +617,8 @@ export default {
     activeTab: 'info-tab',
     categories: [],
     categorizedAttr: undefined,
+    currentDictValue: '',
+    currentDictValues: [],
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
     drag: false,
@@ -874,6 +951,14 @@ export default {
           layerName: this.currentEditedLayer.name
         }
       });
+    },
+    openDictionaryModal(col) {
+      if (col) {
+        //edycja pola kolumny
+      } else {
+        //nowe pole kolumny
+      }
+      this.$modal.show('dicts');
     },
     setActiveTab(tab) {
       this.activeTab = tab;
