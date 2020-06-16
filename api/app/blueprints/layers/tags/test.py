@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 import pytest
 from flask import Response
@@ -92,6 +93,15 @@ class TestTagsEndpoints(BaseTest):
 
     def get_layers(self, client: FlaskClient, token:str):
         return client.get("/api/layers", query_string={"token": token})
+
+    def rename_layer(self, client: FlaskClient, layer_id: str, new_name: str, token: str = None) -> str:
+        if token is None:
+            token = self.get_token(client)
+        query_string = {"token": token}
+
+        data = {"layer_name": new_name}
+
+        return client.post(f"/api/layers/{layer_id}/settings", data=json.dumps(data), query_string=query_string).json["settings"]
 
     def test_post_tag_valid(self, client: FlaskClient):
         result = self.post_tag(client)
@@ -222,3 +232,25 @@ class TestTagsEndpoints(BaseTest):
         layers = self.get_layers(client, token).json["layers"]
 
         assert layers[0]["tags"] == tags
+
+    def test_get_tag_after_layer_name_change(self, client: FlaskClient):
+        tag_data = {"name": "name", "color": "color"}
+
+        token = self.get_token(client)
+        layer_id = self.add_geojson_prg(client, token)
+
+        tag_id = self.post_tag(client, data=tag_data).json["data"]
+        layer_tag_data = {"tag_id": tag_id, "layer_id": layer_id}
+        self.post_layer_tag(client, layer_tag_data)
+
+        new_layer_id = self.rename_layer(client, layer_id, "new name", token)
+
+        layers = self.get_layers(client, token)
+
+        layer = layers.json["layers"][0]
+
+        expected_data = deepcopy(tag_data)
+        expected_data["id"] = tag_id
+
+        assert layer["id"] == new_layer_id
+        assert layer["tags"] == [expected_data]

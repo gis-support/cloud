@@ -8,6 +8,7 @@ import psycopg2
 from flask import Blueprint, jsonify, request, current_app, make_response, Response, send_file
 from flasgger import swag_from
 
+from app.blueprints.layers.tags.models import LayerTag
 from app.db.database import database
 from app.docs import path_by
 from app.db.general import token_required, layer_decorator
@@ -258,7 +259,7 @@ def layers_settings(lid):
             layer_name = data.get('layer_name')
             if layer_name:
                 try:
-                    layer.change_name(layer_name, callback=Attachment.sync)
+                    layer.change_name(layer_name, callbacks=[Attachment.sync, LayerTag.update_layer_id])
                     return jsonify({"settings": layer.lid})
                 except ValueError as e:
                     return jsonify({"error": str(e)}), 400

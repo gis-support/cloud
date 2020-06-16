@@ -50,3 +50,7 @@ class LayerTag(BaseModel):
             result[layer_id].append(row)
 
         return result
+
+    @classmethod
+    def update_layer_id(cls, old_layer_id: str, new_layer_id: str):
+        cls.update(layer_id=new_layer_id).where(cls.layer_id == old_layer_id).execute()
