@@ -8,6 +8,7 @@ import psycopg2
 from flask import Blueprint, jsonify, request, current_app, make_response, Response, send_file
 from flasgger import swag_from
 
+from app.blueprints.layers.dicts.dict import Dict
 from app.blueprints.layers.tags.models import LayerTag
 from app.db.database import database
 from app.docs import path_by
@@ -259,16 +260,97 @@ def layers_settings(lid):
             layer_name = data.get('layer_name')
             if layer_name:
                 try:
-                    layer.change_name(layer_name, callbacks=[Attachment.sync, LayerTag.update_layer_id])
+                    layer.change_name(layer_name, callbacks=[Attachment.sync, LayerTag.update_layer_id, Dict.update_layer_id])
                     return jsonify({"settings": layer.lid})
                 except ValueError as e:
                     return jsonify({"error": str(e)}), 400
             try:
-                layer.add_column(column_name, column_type)
+                if column_type == "dict":
+                    values = data.get("values", [])
+                    layer.add_dict_column(column_name, values)
+                else:
+                    layer.add_column(column_name, column_type)
             except ValueError as e:
                 return jsonify({"error": str(e)}), 400
             return jsonify({"settings": f"{column_name} added"})
         return post(lid=lid)
+
+@mod_layers.route('/layers/<lid>/settings/dicts/values')
+@swag_from(path_by(__file__, 'docs.layers.lid.settings.dicts.values.get.yml'), methods=['GET'])
+@token_required
+def layers_lid_settings_dicts_get(lid: str):
+
+    @layer_decorator(permission="read")
+    def get(layer, lid=None):
+        query = Dict.select().where(Dict.layer_id == layer.lid)
+        result = []
+        for row in query:
+            row_dict = {
+                "values": row.get_values(),
+                "column_name": row.column_name
+            }
+            result.append(row_dict)
+
+        return jsonify({"data": result})
+
+    return get(lid=lid)
+
+
+@mod_layers.route('/layers/<lid>/settings/dicts/<column_name>/values', methods=["GET", "PUT"])
+@swag_from(path_by(__file__, 'docs.layers.lid.settings.dicts.column_name.values.get.yml'), methods=['GET'])
+@swag_from(path_by(__file__, 'docs.layers.lid.settings.dicts.column_name.values.put.yml'), methods=['PUT'])
+@token_required
+def layers_lid_settings_dicts_column_name_get(lid: str, column_name: str):
+
+    @layer_decorator(permission="read")
+    def get(layer, lid=None):
+
+        try:
+            if not layer.column_exists(column_name):
+                return jsonify({"error": f"column {column_name} does not exist"}), 400
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+
+        if (dict_ := Dict.get_or_none(layer_id=layer.lid, column_name=column_name)) is not None:
+            values = dict_.get_values()
+            return jsonify({"data": values})
+        else:
+            return jsonify({"error": f"column {column_name} is not a dictitionary column"}), 400
+
+    @layer_decorator(permission="write")
+    def put(layer, lid=None):
+        try:
+            if not layer.column_exists(column_name):
+                return jsonify({"error": f"column {column_name} does not exist"}), 400
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+
+        if (dict_ := Dict.get_or_none(layer_id=layer.lid, column_name=column_name)) is not None:
+            values = request.get_json(force=True)["data"]
+            current_values = dict_.get_values()
+
+            with current_app._db.atomic():
+                dict_.set_values(values)
+
+                style = layer.get_style()
+
+                if style["renderer"] == "categorized":
+                    removed_values = set(current_values) - set(values)
+
+                    current_categories = style["categories"]
+                    current_categories = [cat for cat in current_categories if cat["value"] not in removed_values]
+
+                    style["categories"] = current_categories
+                    layer.set_style(style)
+
+            return jsonify({"data": style}), 200
+        else:
+            return jsonify({"error": f"column {column_name} is not a dictitionary column"}), 400
+
+    if request.method == "GET":
+        return get(lid=lid)
+    if request.method == "PUT":
+        return put(lid=lid)
 
 
 @mod_layers.route('/layers/<lid>/categories/<attr>', methods=['GET'])

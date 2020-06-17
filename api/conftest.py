@@ -21,7 +21,8 @@ SYSTEM_TABLES = [
     'raster_overviews',
     'layer_styles',
     "tag",
-    "layer_tag"
+    "layer_tag",
+    "dict"
 ]
 
 TEST_ENUM_NAME = "test_enum"
@@ -48,6 +49,7 @@ def app():
     app._db.execute_sql("TRUNCATE layer_styles RESTART IDENTITY;")
     app._db.execute_sql("TRUNCATE layer_tag RESTART IDENTITY;")
     app._db.execute_sql("TRUNCATE tag RESTART IDENTITY CASCADE;")
+    app._db.execute_sql("TRUNCATE dict RESTART IDENTITY CASCADE;")
     app._db.execute_sql(f"DROP TYPE IF EXISTS {TEST_ENUM_NAME} CASCADE;")
 
     app._redis.delete('user_list')
