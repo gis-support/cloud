@@ -235,9 +235,12 @@ class Cloud:
             );
         """, (name, create_qml(geom_type), json.dumps(create_stylejson(geom_type),)))
 
+def get_cloud():
+    return Cloud({"app": current_app, "user": request.user})
+
 def cloud_decorator(f):
     @wraps(f)
     def decorated_function(*args, **kws):
-        cloud = Cloud({"app": current_app, "user": request.user})
+        cloud = get_cloud()
         return f(cloud, *args, **kws)
     return decorated_function
