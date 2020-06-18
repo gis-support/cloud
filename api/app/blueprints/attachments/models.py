@@ -6,6 +6,8 @@ from flask import current_app
 from peewee import AutoField, TextField, DateTimeField
 
 from app.db.base_model import BaseModel
+from app.helpers.files import make_unique_file_name
+
 
 class Attachment(BaseModel):
 
@@ -28,36 +30,24 @@ class Attachment(BaseModel):
             os.mkdir(path)
 
     @classmethod
-    def _save_file(cls, file_name: str, file_content: bytes):
-        file_path = os.path.join(cls._get_attachments_directory_path(), file_name)
-        candidate_file_path = file_path
-        suffix = 0
+    def create_attachment(cls, file_name: str, file_content: bytes, added_by: str, added_at: datetime) -> "cls":
+        directory_path = cls._get_attachments_directory_path()
+        cls._ensure_attachments_directory_exists()
 
-        while os.path.exists(candidate_file_path):
-            base_name, extension = os.path.splitext(file_path)
+        unique_file_name = make_unique_file_name(directory_path, file_name)
 
-            suffix += 1
-            candidate_file_path = f"{base_name}_{suffix}{extension}"
+        attachment = Attachment(file_name=unique_file_name, added_at=added_at, added_by=added_by)
+        attachment.save()
+        attachment._save_file(file_content)
 
-        if suffix > 0:
-            base_name, extension = os.path.splitext(file_path)
-            file_path = f"{base_name}_{suffix}{extension}"
+        return attachment
+
+    def _save_file(self, file_content: bytes):
+        directory_path = self._get_attachments_directory_path()
+        file_path = Path(directory_path, self.file_name)
 
         with open(file_path, "wb") as f:
             f.write(file_content)
-
-        return os.path.split(file_path)[1]
-
-    @classmethod
-    def create_attachment(cls, file_name: str, file_content: bytes, added_by: str, added_at: datetime) -> "cls":
-        cls._ensure_attachments_directory_exists()
-
-        file_name = cls._save_file(file_name, file_content)
-
-        attachment = Attachment(file_name=file_name, added_at=added_at, added_by=added_by)
-        attachment.save()
-
-        return attachment
 
     def _remove_file(self):
         path = self.get_file_path()
