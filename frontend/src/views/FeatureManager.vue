@@ -97,7 +97,7 @@
           </div>
         </div>
         <div
-          v-show="isTableShow"
+          v-if="isTableShow"
           class="navbar-table-content"
         >
           <nav
@@ -1257,6 +1257,14 @@ export default {
         'getCurrentSettings',
         this.$route.params.layerId
       );
+      const bbox = new GeoJSON().readFeature(res.obj.settings.bbox, {
+        featureProjection: 'EPSG:3857',
+        dataProjection: 'EPSG:4326'
+      });
+      this.map.getView().fit(bbox.getGeometry(), {
+        maxZoom: 16,
+        duration: 500
+      });
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async getUsers() {
