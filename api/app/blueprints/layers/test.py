@@ -1,5 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from typing import Any, List
+
+from flask import Response
+from flask.testing import FlaskClient
 
 from app.tests.utils import BaseTest, TEST_DATA_DIR
 import json
@@ -289,6 +293,44 @@ class TestLayers(BaseTest):
 @pytest.mark.layerssettings
 class TestLayersSettings(BaseTest):
 
+    def post_create_column(self, client: FlaskClient, layer_id: str, data: dict, token) -> Response:
+        query_string = {"token": token}
+
+        result = client.post(f"/api/layers/{layer_id}/settings", data=json.dumps(data), query_string=query_string)
+        return result
+
+    def get_columns(self, client: FlaskClient, layer_id: str, token: str) -> Response:
+        query_string = {"token": token}
+
+        result = client.get(f"/api/layers/{layer_id}/settings", query_string=query_string)
+        return result
+
+    def get_dict_column_values(self, client: FlaskClient, layer_id: str, column_name: str, token: str) -> Response:
+        query_string = {"token": token}
+
+        result = client.get(f"/api/layers/{layer_id}/settings/dicts/{column_name}/values", query_string=query_string)
+        return result
+
+    def get_dicts_columns_values(self, client: FlaskClient, layer_id: str, token: str) -> Response:
+        query_string = {"token": token}
+
+        result = client.get(f"/api/layers/{layer_id}/settings/dicts/values", query_string=query_string)
+        return result
+
+    def delete_column(self, client: FlaskClient, layer_id: str, column_name: str, token: str) -> Response:
+        query_string = {"token": token}
+        data = {"column_name": column_name}
+
+        result = client.delete(f"/api/layers/{layer_id}/settings", data=json.dumps(data), query_string=query_string)
+        return result
+
+    def set_dict_column_values(self, client: FlaskClient, layer_id: str, column_name: str, values: List[Any], token: str) -> Response:
+        query_string = {"token": token}
+        data = {"data": values}
+
+        result = client.put(f"/api/layers/{layer_id}/settings/dicts/{column_name}/values", data=json.dumps(data), query_string=query_string)
+        return result
+
     def test_settings_get_correct(self, client):
         token = self.get_token(client)
         lid = self.add_geojson_prg(client, token)
@@ -462,6 +504,119 @@ class TestLayersSettings(BaseTest):
         assert r.json['style']['stroke-color'] == '51,153,204,1'
         assert r.json['style']['stroke-width'] == '1'
         assert r.json['style']['width'] == '2'
+
+    def test_create_dict_column(self, client: FlaskClient):
+        token = self.get_token(client)
+        column_name = "column"
+        column_data = {"column_name": column_name, "column_type": "dict", "values": ["value1", "value2"]}
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        create_result = self.post_create_column(client, layer_id, column_data, token)
+
+        assert create_result.status_code == 200
+        assert create_result.json["settings"] == f"{column_name} added"
+
+    def test_get_dict_column(self, client: FlaskClient):
+        token = self.get_token(client)
+        column_name = "column"
+        column_data = {"column_name": column_name, "column_type": "dict", "values": ["value1", "value2"]}
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        self.post_create_column(client, layer_id, column_data, token)
+
+        get_result = self.get_columns(client, layer_id, token)
+
+        actual_columns = get_result.json["settings"]["columns"]
+        assert column_name in actual_columns.keys()
+        assert actual_columns[column_name] == "dict"
+
+    def test_get_dict_values(self, client: FlaskClient):
+        token = self.get_token(client)
+        column_name = "column"
+        column_values = ["value1", "value2"]
+        column_data = {"column_name": column_name, "column_type": "dict", "values": column_values}
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        self.post_create_column(client, layer_id, column_data, token)
+
+        result = self.get_dict_column_values(client, layer_id, column_name, token)
+
+        assert result.status_code == 200
+        assert result.json["data"] == column_values
+
+    def test_get_all_dicts_values(self, client: FlaskClient):
+        token = self.get_token(client)
+
+        column_1_name = "column1"
+        column_1_values = ["value1", "value2"]
+        column_1_data = {"column_name": column_1_name, "column_type": "dict", "values": column_1_values}
+
+        column_2_name = "column2"
+        column_2_values = ["value3", "value4"]
+        column_2_data = {"column_name": column_2_name, "column_type": "dict", "values": column_2_values}
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        self.post_create_column(client, layer_id, column_1_data, token)
+        self.post_create_column(client, layer_id, column_2_data, token)
+
+
+        result = self.get_dicts_columns_values(client, layer_id, token)
+
+        expected_data = [
+            {
+                "column_name": column_1_name,
+                "values": column_1_values
+            },
+            {
+                "column_name": column_2_name,
+                "values": column_2_values
+            }
+        ]
+
+        assert result.status_code == 200
+        assert result.json["data"] == expected_data
+
+    def test_set_dict_values(self, client: FlaskClient):
+        token = self.get_token(client)
+        column_name = "column"
+        column_values = ["value1", "value2"]
+        column_data = {"column_name": column_name, "column_type": "dict", "values": column_values}
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        self.post_create_column(client, layer_id, column_data, token)
+
+        self.get_dict_column_values(client, layer_id, column_name, token)
+
+        new_values = ["value3", "value4"]
+        self.set_dict_column_values(client, layer_id, column_name, new_values, token)
+
+        result = self.get_dict_column_values(client, layer_id, column_name, token)
+
+        assert result.status_code == 200
+        assert result.json["data"] == new_values
+
+    def test_delete_dict_column(self, client: FlaskClient):
+        token = self.get_token(client)
+        column_name = "column"
+        column_data = {"column_name": column_name, "column_type": "dict", "values": ["value1", "value2"]}
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        self.post_create_column(client, layer_id, column_data, token)
+        delete_result = self.delete_column(client, layer_id, column_name, token)
+
+        assert delete_result.status_code == 200
+        assert delete_result.json["settings"] == f"{column_name} deleted"
+
+        get_result = self.get_columns(client, layer_id, token)
+
+        actual_columns = get_result.json["settings"]["columns"]
+        assert column_name not in actual_columns.keys()
 
 
 @pytest.mark.styles
@@ -800,3 +955,4 @@ class TestMVT(BaseTest):
         lid = r.json['layers']['id']
         r = client.get(f'/api/mvt/{lid}/17/73814/44015?token={token}')
         assert r.status_code == 200
+

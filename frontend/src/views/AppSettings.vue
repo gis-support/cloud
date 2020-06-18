@@ -9,7 +9,7 @@
           <a
             href="#tabLogo"
             data-toggle="tab"
-            @click="setActiveTab('tabLogo')"
+            @click="setActiveTab('logo')"
           >
             <i class="fa fa-image" />
             &nbsp;&nbsp;
@@ -18,13 +18,35 @@
         </li>
         <li>
           <a
+            href="#favicon"
+            data-toggle="tab"
+            @click="setActiveTab('tabFavicon')"
+          >
+            <i class="fa fa-fonticons" />
+            &nbsp;&nbsp;
+            <span>{{ $i18n.t('settings.tabFavicon') }}</span>
+          </a>
+        </li>
+        <li>
+          <a
             href="#qgisLogo"
             data-toggle="tab"
-            @click="setActiveTab('tabQgis')"
+            @click="setActiveTab('qgis')"
+          >
+            <i class="fa fa-quora"></i>
+            &nbsp;&nbsp;
+            <span>{{ $i18n.t('settings.tabQgis') }}</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#tags"
+            data-toggle="tab"
+            @click="setActiveTab('tags')"
           >
             <i class="fa fa-quora" />
             &nbsp;&nbsp;
-            <span>{{ $i18n.t('settings.tabQgis') }}</span>
+            <span>{{ $i18n.t('settings.tags') }}</span>
           </a>
         </li>
       </ul>
@@ -43,15 +65,15 @@
         <div
           class="tab-pane in active"
           id="tabLogo"
-          v-if="activeTab === 'tabLogo'"
+          v-if="activeTab === 'logo'"
         >
           <div>
             <h4 class="text-left">{{ $i18n.t('settings.addNewLogo') }}</h4>
             <file-upload
-              ref="upload"
+              ref="uploadLogo"
               v-model="logo"
               accept="image/*"
-              :post-action="postAction"
+              :post-action="postLogo"
               :multiple="false"
               :drop="true"
               :drop-directory="true"
@@ -78,7 +100,7 @@
         <div
           class="tab-pane in active"
           id="tabQgis"
-          v-if="activeTab === 'tabQgis'"
+          v-if="activeTab === 'qgis'"
         >
           <div>
             <h4>Twoje dane połączenia się do Cloud przez QGIS</h4>
@@ -116,6 +138,48 @@
             </table>
           </div>
         </div>
+        <div
+          class="tab-pane in active"
+          id="tabFavicon"
+          v-if="activeTab === 'tabFavicon'"
+        >
+          <div>
+            <h4 class="text-left">{{ $i18n.t('settings.addNewFavicon') }}</h4>
+            <file-upload
+              ref="uploadFavicon"
+              v-model="favicon"
+              accept="image/*"
+              :post-action="postFavicon"
+              :multiple="false"
+              :drop="true"
+              :drop-directory="true"
+              @input-filter="inputFilter"
+              @input-file="inputFile"
+            >
+              {{this.$i18n.t('upload.uploadLogoMessage')}}
+              <ul>
+                <li
+                  style="color:green"
+                  v-if="favicon"
+                >{{favicon[0].name}}</li>
+              </ul>
+            </file-upload>
+          </div>
+          <button
+            type="button"
+            class="btn btn-success"
+            @click="addFavicon()"
+            :disabled="!favicon"
+            style="float:right"
+          >{{ $i18n.t('default.add') }}</button>
+        </div>
+        <div
+          class="tab-pane in active"
+          id="tabTags"
+          v-if="activeTab === 'tags'"
+        >
+          <Tags />
+        </div>
       </div>
     </div>
   </div>
@@ -123,18 +187,24 @@
 
 <script>
 import FileUpload from 'vue-upload-component';
+import Tags from '@/components/Tags';
 
 export default {
   name: 'AppSettings',
   data: () => ({
     activeTab: 'tabLogo',
+    favicon: undefined,
     logo: undefined,
-    postAction: `${
+    postLogo: `${vm.$store.getters.getApiUrl}/logo?token=${localStorage.getItem(
+      'token'
+    )}`,
+    postFavicon: `${
       vm.$store.getters.getApiUrl
-    }/logo?token=${localStorage.getItem('token')}`
+    }/favicon?token=${localStorage.getItem('token')}`
   }),
   components: {
-    FileUpload
+    FileUpload,
+    Tags
   },
   computed: {
     user() {
@@ -148,8 +218,11 @@ export default {
     }
   },
   methods: {
+    addFavicon() {
+      this.$refs.uploadFavicon.active = true;
+    },
     addLogo() {
-      this.$refs.upload.active = true;
+      this.$refs.uploadLogo.active = true;
     },
     inputFile(newFile, oldFile) {
       if (newFile && oldFile) {
@@ -160,19 +233,17 @@ export default {
         if (newFile.success && !oldFile.success) {
           this.$alertify.success(this.$i18n.t('upload.uploadSuccess'));
           this.logo = undefined;
+          this.favicon = undefined;
         }
       }
     },
     inputFilter(newFile, oldFile, prevent) {
       if (newFile && !oldFile) {
-        if (!/\.(jpeg|jpe|jpg|gif|png)$/i.test(newFile.name)) {
+        if (!/\.(jpeg|jpe|jpg|gif|png|ico)$/i.test(newFile.name)) {
           this.$alertify.error(this.$i18n.t('upload.uploadExtensionError'));
           return prevent();
         }
       }
-    },
-    removeLogo() {
-      this.logo = undefined;
     },
     setActiveTab(tab) {
       this.activeTab = tab;
@@ -248,10 +319,5 @@ export default {
 }
 .text-left {
   text-align: left;
-}
-.verte {
-  display: flex;
-  justify-content: center;
-  top: 5px;
 }
 </style>

@@ -1,0 +1,43 @@
+Tag a layer
+Layer may not be tagged twice with one tag.
+---
+tags:
+  - Layers tags
+summary: Tag a layer
+
+produces:
+  - application/json
+parameters:
+  - name: layer_id
+    in: query
+    description: ID of a layer to be tagged
+    required: true
+    schema:
+      type: string
+  - name: tag_id
+    in: query
+    description: ID of a tag which the layer will be tagged with.
+    required: true
+    schema:
+      type: int
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  204:
+    description: ok
+  400:
+    description: Request payload lacks obligatory data or data is incorrect.
+
+  403:
+    description: token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

@@ -1,0 +1,44 @@
+Delete a tag
+---
+tags:
+  - Layers tags
+summary: Delete a tag
+
+produces:
+  - application/json
+parameters:
+  - in: path
+    name: tag_id
+    required: true
+    schema:
+      type: int
+    example: 1
+
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  204:
+    description: OK
+
+  403:
+    description: token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+  404:
+    description: Tag does not exists
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Tag with ID '1' does not exist"

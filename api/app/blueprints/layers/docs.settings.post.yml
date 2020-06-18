@@ -27,6 +27,11 @@ parameters:
         layer_name:
           type: string
           required: false
+        values:
+          type: array
+          example: ["value 1", 2]
+          description: List of values for a dictionary column (`column_type = dict`)
+          required: false
   - name: token
     in: query
     description: Token

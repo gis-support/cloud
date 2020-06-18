@@ -1,0 +1,50 @@
+Get values of all dictionary-columns of a layer
+---
+tags:
+  - Layers
+summary: Get values of all dictionary-columns of a layer
+produces:
+  - application/json
+
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+responses:
+  200:
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/definitions/Dictionary"
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+
+definitions:
+  Dictionary:
+    type: object
+    properties:
+      column_name:
+        type: string
+        example: "name of the column"
+      values:
+        type: array
+        example: ["value 1", "value 2"]

@@ -5,9 +5,10 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_redis import FlaskRedis
+
+from app.db.connection import create_db
 from app.docs import create_swagger
-from app.db import create_db
-from app.db.general import fill_data
+from app.db.tables import create_tables
 from app.blueprints.auth.routings import mod_auth
 from app.blueprints.layers.routings import mod_layers
 from app.blueprints.features.routings import mod_features
@@ -26,6 +27,7 @@ def create_app(config='development'):
     app.config.from_object(load_config(config))
     app._swagger = create_swagger(app)
     app._db = create_db(app.config)
+    create_tables(app._db)
     app._redis = FlaskRedis(app)
     app._hashids = Hashids(salt=app.config['SECRET_KEY'])
     app.register_blueprint(mod_auth, url_prefix='/api')

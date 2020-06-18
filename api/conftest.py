@@ -1,7 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import uuid
+from typing import Tuple
 
 import pytest
+from flask import request
+
+from flask import request
+from flask.testing import FlaskClient
+from playhouse.postgres_ext import PostgresqlExtDatabase
+
 from app.create import create_app
 from psycopg2.sql import SQL, Identifier
 
@@ -11,9 +19,13 @@ SYSTEM_TABLES = [
     'spatial_ref_sys',
     'raster_columns',
     'raster_overviews',
-    'layer_styles'
+    'layer_styles',
+    "tag",
+    "layer_tag",
+    "dict"
 ]
 
+TEST_ENUM_NAME = "test_enum"
 
 @pytest.fixture()
 def app():
@@ -35,6 +47,11 @@ def app():
         except:
             pass
     app._db.execute_sql("TRUNCATE layer_styles RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE layer_tag RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE tag RESTART IDENTITY CASCADE;")
+    app._db.execute_sql("TRUNCATE dict RESTART IDENTITY CASCADE;")
+    app._db.execute_sql(f"DROP TYPE IF EXISTS {TEST_ENUM_NAME} CASCADE;")
+
     app._redis.delete('user_list')
     cur = app._db.execute_sql(
         "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
@@ -43,3 +60,36 @@ def app():
     for table in tables_to_delete:
         app._db.execute_sql('DROP TABLE "{}" cascade'.format(table))
     cur.close()
+
+
+@pytest.fixture
+def app_request_context(client: FlaskClient):
+    with client.application.test_request_context():
+        request.user = "test"
+        yield
+
+
+@pytest.fixture
+def database(client: FlaskClient) -> PostgresqlExtDatabase:
+    return client.application._db
+
+
+@pytest.fixture
+def database_table(client: FlaskClient) -> Tuple[str, str]:
+
+    schema_name = "public"
+    table_name = f"test_table_{uuid.uuid4()}"
+    table_name = table_name.replace("-", "_")
+
+    app = client.application
+    database = app._db
+
+    database.execute_sql(f"CREATE TABLE {schema_name}.{table_name} (id serial);")
+    yield schema_name, table_name
+    database.execute_sql(f"DROP TABLE {schema_name}.{table_name} CASCADE;")
+
+@pytest.fixture
+def app_request_context(client):
+    with client.application.test_request_context():
+        request.user = "test"
+        yield

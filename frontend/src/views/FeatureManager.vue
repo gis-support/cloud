@@ -97,7 +97,7 @@
           </div>
         </div>
         <div
-          v-show="isTableShow"
+          v-if="isTableShow"
           class="navbar-table-content"
         >
           <nav
@@ -577,6 +577,84 @@
           </div>
         </modal>
 
+        <modal
+          name="addLayer"
+          :draggable="true"
+          width="30%"
+          height="70%"
+        >
+          <div class="modal-content dragg-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{ $i18n.t("featureManager.addLayer") }}</h4>
+            </div>
+            <div
+              class="modal-body layer-modal-body"
+              v-if="activeLayer"
+            >
+              <div
+                class="form-group"
+                style="height: 100%"
+              >
+                <div class="pb-10">
+                  <input
+                    type="text"
+                    class="form-control container__input"
+                    v-model="searchLayer"
+                    :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
+                  />
+                </div>
+                <div class="layers-wrapper">
+                  <template v-for="{id, name} in layersFilteredByName">
+                    <div
+                      class="mb-0"
+                      :key="id"
+                    >
+                      <div class="panel-heading pl-0 pr-0">
+                        <h4 class="panel-title flex-center">
+                          <span class="panel-title__names">
+                            <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                            <span
+                              class="bold"
+                              href="#"
+                            >{{ name }}</span>
+                          </span>
+                          <span
+                            id="layers-list-icons"
+                            class="panel-title__tools"
+                          >
+                            <i
+                              class="fa fa-plus-circle fa-lg green"
+                              :title="$i18n.t('featureManager.addLayer')"
+                              @click="addLayer(id, name)"
+                            />
+                          </span>
+                        </h4>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div
+                class="btn-group btn-group-justified"
+                role="group"
+              >
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="$modal.hide('addLayer')"
+                  >{{ $i18n.t("default.close") }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </modal>
+
         <!-- <virtual-table
           style="height: calc(100% - 54px); position: relative;"
           ref="table-data"
@@ -692,7 +770,7 @@
           </ul>
           <div>
             <div
-              v-show="indexActiveTab == 0"
+              v-show="indexActiveTab === 0"
               class="legend-panel right-sub-panel"
             >
               <div class="scroll-tab">
@@ -724,7 +802,7 @@
                         >
                           <input
                             type="checkbox"
-                            @click="setServiceVisibility(service.name)"
+                            @click="setLayerVisibility(service.name)"
                             :value="service.name"
                             v-model="activeServices"
                           />
@@ -737,10 +815,70 @@
                     </span>
                   </ul>
                 </div>
+
+                <div class="others">
+                  <div class="mb-10">
+                    <h4 class="mb-0">{{ $i18n.t("default.otherLayers") }}:</h4>
+                    <span
+                      @click="openAddLayerModal"
+                      @mouseover="getLayers"
+                    >
+                      <i
+                        class="fa fa-plus-circle fa-lg green pt-10"
+                        style="margin-right:5px;"
+                      />
+                      <a
+                        class="green section__content--add"
+                      >{{ $i18n.t('featureManager.addLayer') }}</a>
+                    </span>
+                  </div>
+
+                  <draggable
+                    tag="ul"
+                    class="list-group"
+                    :list="otherLayers"
+                    @start="drag=true"
+                    @change="setLayersOrder"
+                    v-if="otherLayers.length > 0"
+                  >
+                    <li
+                      class="list-group-item"
+                      v-for="{id, name} in otherLayers"
+                      :key="name"
+                      :class="{ activeLayer: activeOtherLayers.includes(id) }"
+                    >
+                      <div class="list__element--otherLayer">
+                        <label
+                          class="checkbox-inline mb-0"
+                          :title="name"
+                        >
+                          <input
+                            type="checkbox"
+                            @click="setLayerVisibility(name)"
+                            :value="id"
+                            v-model="activeOtherLayers"
+                          />
+                          <span>{{ name }}</span>
+                        </label>
+                        <i
+                          class="fa fa-minus-circle fa-lg red"
+                          style="margin-right:5px;"
+                          :title="$i18n.t('featureManager.removeLayer')"
+                          @click="removeLayer(name)"
+                        />
+                      </div>
+                    </li>
+                  </draggable>
+                  <span v-else>
+                    <ul class="list-group">
+                      <li class="list-group-item no-item">{{ $i18n.t("default.noOtherLayers") }}</li>
+                    </ul>
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div v-show="indexActiveTab == 1">
+            <div v-show="indexActiveTab === 1">
               <template v-if="permission === 'write'">
                 <template v-if="!editing">
                   <div
@@ -797,7 +935,7 @@
                 />
               </div>
             </div>
-            <div v-show="indexActiveTab == 2">
+            <div v-show="indexActiveTab === 2">
               <AttachmentsPanel
                 ref="attachments-panel"
                 v-if="currentFeature && Object.keys(featureAttachments).length > 0"
@@ -832,7 +970,8 @@ import {
 import {
   VectorTile as VectorTileLayer,
   Vector as VectorLayer,
-  Tile as TileLayer
+  Tile as TileLayer,
+  Group as LayerGroup
 } from 'ol/layer';
 import { Circle, Fill, Stroke, Style, RegularShape, Text } from 'ol/style';
 import {
@@ -853,6 +992,7 @@ import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
+import draggable from 'vuedraggable';
 
 export default {
   components: {
@@ -860,7 +1000,8 @@ export default {
     AttributesPanel,
     FeatureManagerTable,
     FiltersPanel,
-    Datepicker
+    Datepicker,
+    draggable
   },
   data: () => ({
     activeServices: [],
@@ -907,9 +1048,31 @@ export default {
     selectedFieldName: undefined,
     selectedLayerName: undefined,
     selectedRows: [],
-    usersGroup: undefined
+    usersGroup: undefined,
+    activeOtherLayers: [],
+    allOtherLayers: [],
+    otherLayers: [],
+    searchLayer: ''
   }),
   computed: {
+    layersOutOfProject() {
+      if (!this.allOtherLayers) {
+        return false;
+      }
+      const ids = this.otherLayers.map(l => l.id);
+      return this.allOtherLayers.filter(
+        layer =>
+          !ids.includes(layer.id) && layer.id !== this.$route.params.layerId
+      );
+    },
+    layersFilteredByName() {
+      if (!this.layersOutOfProject) {
+        return false;
+      }
+      return this.layersOutOfProject.filter(layer =>
+        layer.name.toLowerCase().includes(this.searchLayer.toLowerCase())
+      );
+    },
     activeLayer() {
       return this.$store.getters.getActiveLayer;
     },
@@ -966,6 +1129,39 @@ export default {
     }
   },
   methods: {
+    addLayer(id, name) {
+      this.otherLayers.push({ id, name });
+      this.activeOtherLayers.push(id);
+      this.getLayerByName('otherLayers')
+        .getLayers()
+        .getArray()
+        .push(this.createMVTLayer(id, name));
+      this.map.updateSize();
+    },
+    createMVTLayer(id, name) {
+      return new VectorTileLayer({
+        name: name,
+        renderBuffer: 256,
+        source: new VectorTileSource({
+          cacheSize: 1,
+          format: new MVT(),
+          url: `${
+            this.apiUrl
+          }/mvt/${id}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
+        }),
+        style: f => this.styleFeatures(f, true)
+      });
+    },
+    removeLayer(name) {
+      const index = this.otherLayers.map(l => l.name).indexOf(name);
+      this.otherLayers.splice(index, 1);
+      const otherLayersArray = this.getLayerByName('otherLayers')
+        .getLayers()
+        .getArray();
+      const indexGroup = otherLayersArray.map(l => l.get('name')).indexOf(name);
+      otherLayersArray.splice(indexGroup, 1);
+      this.map.updateSize();
+    },
     async createStyle() {
       const r = await this.$store.dispatch(
         'getLayerStyle',
@@ -1037,8 +1233,17 @@ export default {
       }
     },
     async getLayers() {
-      const r = await this.$store.dispatch('getLayers');
-      this.layers = r.body.layers;
+      if (this.allOtherLayers.length === 0) {
+        try {
+          const r = await this.$store.dispatch('getLayers');
+          this.allOtherLayers = r.body.layers;
+        } catch (error) {
+          this.$alertify.error(
+            // this.$i18n.t('default.errorStyle')
+            error
+          );
+        }
+      }
     },
     async getPermissions() {
       const r = await this.$store.dispatch('getPermissions');
@@ -1052,6 +1257,14 @@ export default {
         'getCurrentSettings',
         this.$route.params.layerId
       );
+      const bbox = new GeoJSON().readFeature(res.obj.settings.bbox, {
+        featureProjection: 'EPSG:3857',
+        dataProjection: 'EPSG:4326'
+      });
+      this.map.getView().fit(bbox.getGeometry(), {
+        maxZoom: 16,
+        duration: 500
+      });
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async getUsers() {
@@ -1367,10 +1580,23 @@ export default {
           evt.pixel,
           feat => feat,
           {
-            hitTolerance: 5
+            hitTolerance: 5,
+            layerFilter: layer => layer.get('name') === 'features'
           }
         );
-        this.selectFeature(feature);
+        if (!feature) {
+          this.selectFeature(feature);
+        } else {
+          if (this.items.length < 1) {
+            this.$alertify.warning(this.$i18n.t('featureManager.waitForData'));
+            return;
+          } else {
+            if (!feature.properties_) return;
+            else {
+              this.selectFeature(feature);
+            }
+          }
+        }
       });
       return {
         setActive(value) {
@@ -1480,10 +1706,19 @@ export default {
         .find(i => i.get('name') === name);
     },
     getLayerByName(name) {
-      return this.map
+      const layer = this.map
         .getLayers()
         .getArray()
         .find(l => l.get('name') === name);
+      return layer
+        ? layer
+        : this.map
+            .getLayers()
+            .getArray()
+            .find(l => l.get('name') === 'otherLayers')
+            .getLayers()
+            .getArray()
+            .find(l => l.get('name') === name);
     },
     generateBuffer() {
       this.getLayerByName('buffer')
@@ -1628,6 +1863,9 @@ export default {
     openBufferDialog() {
       this.$modal.show('buffer');
     },
+    openAddLayerModal() {
+      this.$modal.show('addLayer');
+    },
     openColumnFilterDecision() {
       const self = this;
 
@@ -1715,7 +1953,9 @@ export default {
           );
         }
       } else {
-        this.$refs['table-data'].clearSelection();
+        if (this.$refs['table-data']) {
+          this.$refs['table-data'].clearSelection();
+        }
         this.currentFeature = undefined;
         this.indexActiveTab = 0;
         this.getLayerByName('featuresVectorSelection')
@@ -1739,12 +1979,24 @@ export default {
         .addFeature(feature);
       this.indexActiveTab = 1; // change tab in sidepanel
     },
-    setServiceVisibility(serviceName) {
-      if (this.getLayerByName(serviceName).getVisible()) {
-        this.getLayerByName(serviceName).setVisible(false);
+    setLayersOrder(test) {
+      const otherLayersOnMap = this.getLayerByName('otherLayers')
+        .getLayers()
+        .getArray();
+      [...this.otherLayers].reverse().forEach((layer, index) => {
+        otherLayersOnMap
+          .find(l => l.get('name') === layer.name)
+          .setZIndex(index);
+      });
+      this.map.updateSize();
+    },
+    setLayerVisibility(layerName) {
+      if (this.getLayerByName(layerName).getVisible()) {
+        this.getLayerByName(layerName).setVisible(false);
       } else {
-        this.getLayerByName(serviceName).setVisible(true);
+        this.getLayerByName(layerName).setVisible(true);
       }
+      this.map.updateSize();
     },
     showMeasure() {
       if (this.isMeasure) {
@@ -1914,7 +2166,6 @@ export default {
   },
   async mounted() {
     this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
-    this.getLayers();
     this.map = new Map({
       target: 'map',
       layers: [
@@ -1924,6 +2175,9 @@ export default {
           source: new XYZ({
             url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
           })
+        }),
+        new LayerGroup({
+          name: 'otherLayers'
         })
       ],
       view: new View({
@@ -1934,25 +2188,13 @@ export default {
 
     this.initOrtofoto();
     this.getPermissions();
-    await this.getUsers();
-    await this.getSettings();
+    await Promise.all([this.getUsers(), this.getSettings()]);
 
     this.loadServices();
     await this.createStyle();
 
     this.map.addLayer(
-      new VectorTileLayer({
-        name: 'features',
-        renderBuffer: 256,
-        source: new VectorTileSource({
-          cacheSize: 1,
-          format: new MVT(),
-          url: `${this.apiUrl}/mvt/${
-            this.$route.params.layerId
-          }/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
-        }),
-        style: f => this.styleFeatures(f, true)
-      })
+      this.createMVTLayer(this.$route.params.layerId, 'features')
     );
     this.map.addLayer(
       new VectorLayer({
@@ -2205,5 +2447,17 @@ export default {
 .popup-measure {
   opacity: 1;
   font-weight: bold;
+}
+.layer-modal-body {
+  height: calc(100% - 120px);
+}
+.layers-wrapper {
+  overflow: auto;
+  height: calc(100% - 40px);
+}
+.list__element--otherLayer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
