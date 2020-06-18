@@ -335,6 +335,7 @@ export default {
   },
   mounted() {
     this.getUsers();
+    this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
   }
 };
 </script>
