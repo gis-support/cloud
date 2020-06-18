@@ -44,13 +44,13 @@ class TestAttachmentModel:
         result_3 = self.create_attachment(file_name, data)
         assert result_3.file_name == "attachment_2.txt"
 
-    def test_create_attachment_and_get_file_data(self, app_request_context):
+    def test_create_attachment_and_get_file_content(self, app_request_context):
         file_name = "attachment.txt"
         data = b"attachment content"
 
         result = self.create_attachment(file_name, data)
 
-        assert result.get_file_data() == data
+        assert result.get_file_content() == data
 
     def test_create_attachment_and_open_file(self, client: FlaskClient):
         file_name = "attachment.txt"
@@ -63,9 +63,9 @@ class TestAttachmentModel:
         assert actual_path.exists()
         assert expected_path == actual_path
 
-        expected_file_data = data
-        actual_file_data = open(actual_path, "rb").read()
-        assert expected_file_data == actual_file_data
+        expected_file_content = data
+        actual_file_content = open(actual_path, "rb").read()
+        assert expected_file_content == actual_file_content
 
     def test_create_attachment_and_open_file_repeated_name(self, client: FlaskClient):
         file_name = "attachment.txt"
@@ -79,9 +79,9 @@ class TestAttachmentModel:
         assert actual_path.exists()
         assert expected_path == actual_path
 
-        expected_file_data = data
-        actual_file_data = open(actual_path, "rb").read()
-        assert expected_file_data == actual_file_data
+        expected_file_content = data
+        actual_file_content = open(actual_path, "rb").read()
+        assert expected_file_content == actual_file_content
 
     @freeze_time("2020-01-01T10:00:00")
     def test_create_attachment_default_added_at(self, app_request_context):

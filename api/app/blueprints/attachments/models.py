@@ -28,7 +28,7 @@ class Attachment(BaseModel):
             os.mkdir(path)
 
     @classmethod
-    def _save_file(cls, file_name: str, file_data: bytes):
+    def _save_file(cls, file_name: str, file_content: bytes):
         file_path = os.path.join(cls._get_attachments_directory_path(), file_name)
         candidate_file_path = file_path
         suffix = 0
@@ -44,15 +44,15 @@ class Attachment(BaseModel):
             file_path = f"{base_name}_{suffix}{extension}"
 
         with open(file_path, "wb") as f:
-            f.write(file_data)
+            f.write(file_content)
 
         return os.path.split(file_path)[1]
 
     @classmethod
-    def create_attachment(cls, file_name: str, file_data: bytes, added_by: str, added_at: datetime) -> "cls":
+    def create_attachment(cls, file_name: str, file_content: bytes, added_by: str, added_at: datetime) -> "cls":
         cls._ensure_attachments_directory_exists()
 
-        file_name = cls._save_file(file_name, file_data)
+        file_name = cls._save_file(file_name, file_content)
 
         attachment = Attachment(file_name=file_name, added_at=added_at, added_by=added_by)
         attachment.save()
@@ -72,6 +72,6 @@ class Attachment(BaseModel):
         # noinspection PyTypeChecker
         return Path(self._get_attachments_directory_path(), self.file_name)
 
-    def get_file_data(self) -> bytes:
+    def get_file_content(self) -> bytes:
         path = self.get_file_path()
         return path.read_bytes()
