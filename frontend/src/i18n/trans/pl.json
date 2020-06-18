@@ -105,6 +105,8 @@
     "saveName": "Zapisz nazwę",
     "saveStyle": "Zapisz styl",
     "services": "Źródła zewnętrzne",
+    "otherLayers": "Pozostałe warstwy",
+    "noOtherLayers": "Brak pozostałych warstw",
     "settings": "Ustawienia",
     "single": "Pojedynczy",
     "startUpload": "Wyślij pliki",
@@ -163,7 +165,10 @@
     "rotate": "Obróć",
     "rotationValue": "Azymut",
     "showTable": "Pokaż tabelę",
+    "waitForData": "Poczekaj na wczytanie danych",
     "zoomToSelected": "Przybliż do zaznaczonego obiektu",
+    "addLayer": "Dodaj warstwę",
+    "removeLayer": "Usuń warstwę",
     "map": {
       "areaMeasure": "Pomiar powierzchni",
       "buffer": "Bufor",
@@ -259,6 +264,19 @@
     "user": "Użytkownik",
     "value": "Wartość",
     "visType": "Typ wizualizacji",
-    "width": "Wielkość punktu"
+    "width": "Wielkość punktu",
+    "tags": "Tagi",
+    "tagsList": "Lista tagów",
+    "newTag": "Dodaj nowy tag",
+    "editTag": "Edytuj tag",
+    "tagName": "Nazwa",
+    "saveTag": "Zapisz tag",
+    "tagColor": "Kolor",
+    "tagsTable": {
+      "id": "ID",
+      "tag": "Tag",
+      "color": "Kolor",
+      "actions": "Akcje"
+    }
   }
 }

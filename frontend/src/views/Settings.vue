@@ -252,9 +252,8 @@
             >
               <label class="control-label">{{ $i18n.t('settings.stroke-color') }}</label>
               <br />
-              <verte
+              <color-picker
                 model="rgb"
-                :value="strokeColor"
                 v-model="strokeColor"
               />
             </div>
@@ -282,9 +281,8 @@
             >
               <label class="control-label">{{ $i18n.t('settings.fill-color') }}</label>
               <br />
-              <verte
+              <color-picker
                 model="rgb"
-                :value="fillColor"
                 v-model="fillColor"
               />
             </div>
@@ -421,19 +419,13 @@
                       v-if="feat.hasOwnProperty('fill-color')"
                       class="text-centered"
                     >
-                      <verte
-                        model="rgb"
-                        v-model="feat['fill-color-rgba']"
-                      />
+                      <color-picker v-model="feat['fill-color-rgba']" />
                     </td>
                     <td
                       v-if="feat.hasOwnProperty('stroke-color')"
                       class="text-centered"
                     >
-                      <verte
-                        model="rgb"
-                        v-model="feat['stroke-color-rgba']"
-                      />
+                      <color-picker v-model="feat['stroke-color-rgba']" />
                     </td>
                     <td
                       v-if="feat.hasOwnProperty('stroke-width')"
@@ -528,14 +520,13 @@
 <script>
 import _ from 'lodash';
 import draggable from 'vuedraggable';
-import verte from 'verte';
-import 'verte/dist/verte.css';
+import ColorPicker from '@/components/ColorPicker';
 
 export default {
   name: 'Settings',
   components: {
-    verte,
-    draggable
+    draggable,
+    ColorPicker
   },
   data: () => ({
     activeLabels: [],
@@ -958,10 +949,5 @@ export default {
 }
 .text-left {
   text-align: left;
-}
-.verte {
-  display: flex;
-  justify-content: center;
-  top: 5px;
 }
 </style>
