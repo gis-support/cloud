@@ -21,18 +21,6 @@ import math
 import json
 import click
 
-database = PostgresqlExtDatabase(
-    None,
-    register_hstore=False,
-    autorollback=True,
-    field_types={'geometry': 'geometry'}
-)
-
-
-class BaseModel(Model):
-    class Meta:
-        database = database
-
 
 def user_exists(user):
     cur = current_app._db.execute_sql(
@@ -113,14 +101,6 @@ def admin_only(f):
         if request.user != environ.get('DEFAULT_USER'):
             return jsonify({"error": "permission denied"}), 403
         return f(*args, **kws)
-    return decorated_function
-
-
-def cloud_decorator(f):
-    @wraps(f)
-    def decorated_function(*args, **kws):
-        cloud = Cloud({"app": current_app, "user": request.user})
-        return f(cloud, *args, **kws)
     return decorated_function
 
 

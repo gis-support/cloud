@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, jsonify, request
-from app.db.general import token_required, layer_decorator, user_exists, cloud_decorator
+from app.db.general import token_required, layer_decorator, user_exists
 from app.helpers.layer import PERMISSIONS
 from flasgger import swag_from
 from app.docs import path_by
 from os import environ
+from app.helpers.cloud import cloud_decorator
 
 mod_permissions = Blueprint("permissions", __name__)
 

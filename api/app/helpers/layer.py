@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from typing import Iterable, Callable
+
 from app.helpers.cloud import Cloud
 from app.helpers.style import QML_TO_OL, LayerStyle, generate_categories
 from psycopg2.sql import SQL, Identifier, Placeholder
@@ -102,7 +104,8 @@ class Layer(Cloud):
         return cursor.fetchone()[0]
 
     # Change layer name
-    def change_name(self, layer_name, callback=lambda old_lid, new_lid: None):
+    def change_name(self, layer_name, callbacks: Iterable[Callable[[str, str], None]] = None):
+        callbacks = [] or callbacks
         if self.layer_exists(layer_name):
             raise ValueError("layer exists")
         old_lid = self.lid
@@ -114,7 +117,9 @@ class Layer(Cloud):
             UPDATE layer_styles SET f_table_name = %s WHERE f_table_name = %s
         """, (self.name, old_name,))
         self.lid = self.hash_name(self.name)
-        callback(old_lid, self.lid)
+        for callback in callbacks:
+            callback(old_lid, self.lid)
+
 
     # Layer columns
     def settings(self):

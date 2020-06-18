@@ -1,11 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import uuid
+
+import jwt
+import psycopg2
 
 from flask import Blueprint, jsonify, request, current_app, make_response, Response, send_file
 from flasgger import swag_from
+
+from app.blueprints.layers.tags.models import LayerTag
+from app.db.database import database
 from app.docs import path_by
-from app.db.general import token_required, cloud_decorator, layer_decorator
-from app.helpers.cloud import Cloud
+from app.db.general import token_required, layer_decorator
+from app.helpers.cloud import Cloud, cloud_decorator
 from app.helpers.layer import Layer
 from shapely.geometry import shape
 from psycopg2.sql import SQL, Identifier, Placeholder
@@ -21,7 +28,7 @@ from io import BytesIO
 import json
 
 mod_layers = Blueprint("layers", __name__)
-
+from app.blueprints.layers.tags import routings
 
 GDAL_TO_PG = {
     "String": "character varying",
@@ -252,7 +259,7 @@ def layers_settings(lid):
             layer_name = data.get('layer_name')
             if layer_name:
                 try:
-                    layer.change_name(layer_name, callback=Attachment.sync)
+                    layer.change_name(layer_name, callbacks=[Attachment.sync, LayerTag.update_layer_id])
                     return jsonify({"settings": layer.lid})
                 except ValueError as e:
                     return jsonify({"error": str(e)}), 400
