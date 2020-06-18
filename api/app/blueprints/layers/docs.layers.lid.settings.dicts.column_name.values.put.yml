@@ -1,0 +1,63 @@
+Replace values of a dictionary-column
+---
+tags:
+  - Layers
+summary: Replace values of a dictionary-column
+produces:
+  - application/json
+
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - name: column_name
+    in: path
+    description: Name of the column
+    required: true
+    type: string
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          example: ["value 1", 2]
+          description: List of values for a dictionary column (`column_type = dict`)
+          required: false
+
+responses:
+  204:
+    description: OK
+
+  400:
+    description: Column does not exist or column is not a dictionary column
+
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+
+definitions:
+  Dictionary:
+    type: object
+    properties:
+      column_name:
+        type: string
+        example: "name of the column"
+      values:
+        type: array
+        example: ["value 1", "value 2"]

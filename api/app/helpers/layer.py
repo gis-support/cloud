@@ -1,7 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from typing import Iterable, Callable
+import uuid
+from typing import Iterable, Callable, List, Any
 
+from app.blueprints.layers.dicts.dict import Dict
+from app.db import enumerators
 from app.helpers.cloud import Cloud
 from app.helpers.style import QML_TO_OL, LayerStyle, generate_categories
 from psycopg2.sql import SQL, Identifier, Placeholder
@@ -124,7 +127,11 @@ class Layer(Cloud):
     # Layer columns
     def settings(self):
         cursor = self.execute(
-            "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = %s AND column_name != 'geometry'", (self.name,))
+            "SELECT t1.column_name, t1.data_type, t1.udt_name, t2.typcategory "
+            "FROM information_schema.columns t1 "
+            "JOIN pg_catalog.pg_type t2 "
+            "ON (t1.udt_name = t2.typname )"
+            "WHERE t1.table_name = %s AND t1.column_name != 'geometry'", (self.name,))
         settings = {
             "id": self.lid,
             "name": self.name,
@@ -133,7 +140,14 @@ class Layer(Cloud):
             "columns": {}
         }
         for row in cursor.fetchall():
-            settings['columns'][row[0]] = row[1]
+            name = row[0]
+            type_ = row[1]
+            if type_ == "USER-DEFINED":
+                dict = Dict.get_or_none(column_name=name)
+                if dict is not None:
+                    type_ = "dict"
+
+            settings['columns'][name] = type_
         return settings
 
     def categories(self, attr):
@@ -159,12 +173,36 @@ class Layer(Cloud):
         self.execute(
             SQL("ALTER TABLE {} ADD COLUMN {} %s").format(Identifier(self.name), Identifier(column_name)), (AsIs(column_type),))
 
+    def add_dict_column(self, column_name: str, values: List[Any] = None):
+        if self.column_exists(column_name):
+            raise ValueError("column exists")
+
+        values = [] or values
+
+        with self.db.atomic():
+            enumerator_name = f"{column_name}_{uuid.uuid4()}"
+            enumerator_name = enumerator_name.replace("-", "_")
+            enumerators.create_enumerator(enumerator_name, values)
+
+            sql = SQL("ALTER TABLE {} ADD COLUMN {} {};").format(Identifier(self.name), Identifier(column_name),
+                                                                SQL(enumerator_name))
+
+            Dict.create(layer_id=self.lid, column_name=column_name, enumerator_name=enumerator_name)
+
+            self.execute(sql)
+
     # Remove layer column
     def remove_column(self, column_name):
         if not self.column_exists(column_name):
             raise ValueError("column not exists")
-        self.execute(
-            SQL("ALTER TABLE {} DROP COLUMN {}").format(Identifier(self.name), Identifier(column_name)))
+
+        with self.db.atomic():
+            self.execute(
+                SQL("ALTER TABLE {} DROP COLUMN {}").format(Identifier(self.name), Identifier(column_name)))
+
+            if (dict_ := Dict.get_or_none(layer_id=self.lid, column_name=column_name)) is not None:
+                enumerators.drop_enumerator(dict_.enumerator_name)
+                dict_.delete_instance()
 
     # Check existence of column
     def column_exists(self, column_name):
@@ -363,3 +401,4 @@ class Layer(Cloud):
                 'distance': row[1]
             })
         return result
+

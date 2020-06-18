@@ -1,0 +1,47 @@
+Get values of a dictionary-column of a layer
+---
+tags:
+  - Layers
+summary: Get values of a dictionary-column of a layer
+produces:
+  - application/json
+
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - name: column_name
+    in: path
+    description: Name of the column
+    required: true
+    type: string
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+responses:
+  200:
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/definitions/Dictionary"
+  400:
+    description: Column does not exist or column is not a dictionary column
+
+
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
