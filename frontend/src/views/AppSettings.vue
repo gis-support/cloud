@@ -9,22 +9,33 @@
           <a
             href="#tabLogo"
             data-toggle="tab"
-            @click="setActiveTab('tabLogo')"
+            @click="setActiveTab('logo')"
           >
             <i class="fa fa-image" />
             &nbsp;&nbsp;
-            <span>{{ $i18n.t('settings.tabLogo') }}</span>
+            <span>{{ $i18n.t('settings.logo') }}</span>
           </a>
         </li>
         <li>
           <a
             href="#qgisLogo"
             data-toggle="tab"
-            @click="setActiveTab('tabQgis')"
+            @click="setActiveTab('qgis')"
           >
             <i class="fa fa-quora" />
             &nbsp;&nbsp;
-            <span>{{ $i18n.t('settings.tabQgis') }}</span>
+            <span>{{ $i18n.t('settings.qgis') }}</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#tags"
+            data-toggle="tab"
+            @click="setActiveTab('tags')"
+          >
+            <i class="fa fa-quora" />
+            &nbsp;&nbsp;
+            <span>{{ $i18n.t('settings.tags') }}</span>
           </a>
         </li>
       </ul>
@@ -43,7 +54,7 @@
         <div
           class="tab-pane in active"
           id="tabLogo"
-          v-if="activeTab === 'tabLogo'"
+          v-if="activeTab === 'logo'"
         >
           <div>
             <h4 class="text-left">{{ $i18n.t('settings.addNewLogo') }}</h4>
@@ -78,7 +89,7 @@
         <div
           class="tab-pane in active"
           id="tabQgis"
-          v-if="activeTab === 'tabQgis'"
+          v-if="activeTab === 'qgis'"
         >
           <div>
             <h4>Twoje dane połączenia się do Cloud przez QGIS</h4>
@@ -116,6 +127,14 @@
             </table>
           </div>
         </div>
+
+        <div
+          class="tab-pane in active"
+          id="tabTags"
+          v-if="activeTab === 'tags'"
+        >
+          <Tags />
+        </div>
       </div>
     </div>
   </div>
@@ -123,18 +142,20 @@
 
 <script>
 import FileUpload from 'vue-upload-component';
+import Tags from '@/components/Tags';
 
 export default {
   name: 'AppSettings',
   data: () => ({
-    activeTab: 'tabLogo',
+    activeTab: 'logo',
     logo: undefined,
     postAction: `${
       vm.$store.getters.getApiUrl
     }/logo?token=${localStorage.getItem('token')}`
   }),
   components: {
-    FileUpload
+    FileUpload,
+    Tags
   },
   computed: {
     user() {
@@ -248,10 +269,5 @@ export default {
 }
 .text-left {
   text-align: left;
-}
-.verte {
-  display: flex;
-  justify-content: center;
-  top: 5px;
 }
 </style>

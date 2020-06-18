@@ -192,6 +192,12 @@ export default {
 .mb-0 {
   margin-bottom: 0px !important;
 }
+.mb-5 {
+  margin-bottom: 5px !important;
+}
+.mb-10 {
+  margin-bottom: 10px !important;
+}
 .mr-5 {
   margin-right: 5px !important;
 }
@@ -209,6 +215,9 @@ export default {
 }
 .pt-10 {
   padding-top: 10px !important;
+}
+.py-5 {
+  padding: 5px 0 !important;
 }
 .red {
   color: #f22a1f !important;
