@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import shutil
 import uuid
+from datetime import datetime
 from typing import Tuple
 
 import pytest
@@ -22,7 +24,8 @@ SYSTEM_TABLES = [
     'layer_styles',
     "tag",
     "layer_tag",
-    "dict"
+    "dict",
+    "attachment",
 ]
 
 TEST_ENUM_NAME = "test_enum"
@@ -50,6 +53,7 @@ def app():
     app._db.execute_sql("TRUNCATE layer_tag RESTART IDENTITY;")
     app._db.execute_sql("TRUNCATE tag RESTART IDENTITY CASCADE;")
     app._db.execute_sql("TRUNCATE dict RESTART IDENTITY CASCADE;")
+    app._db.execute_sql(f"TRUNCATE attachment_qgis RESTART IDENTITY CASCADE;")
     app._db.execute_sql(f"DROP TYPE IF EXISTS {TEST_ENUM_NAME} CASCADE;")
 
     app._redis.delete('user_list')
@@ -88,8 +92,15 @@ def database_table(client: FlaskClient) -> Tuple[str, str]:
     yield schema_name, table_name
     database.execute_sql(f"DROP TABLE {schema_name}.{table_name} CASCADE;")
 
-@pytest.fixture
+@pytest.fixture()
 def app_request_context(client):
     with client.application.test_request_context():
         request.user = "test"
         yield
+
+@pytest.fixture(autouse=True)
+def temp_uploads_path(client, tmpdir_factory):
+    temp_dir = tmpdir_factory.mktemp("TEMP_UPLOADS")
+    client.application.config["UPLOADS"] = temp_dir
+    yield temp_dir
+    shutil.rmtree(temp_dir)
