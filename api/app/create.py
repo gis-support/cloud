@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+from typing import List
+
 from flask import Flask
 from flask_cors import CORS
 from flask_redis import FlaskRedis
@@ -37,8 +39,16 @@ def create_app(config='development'):
     init_rdos(app)
     # CLI
     # app.cli.add_command(fill_data)
+
+    create_directiories([
+        app.config["UPLOADS"]
+    ])
+
     return app
 
+def create_directiories(directories: List[str]):
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
 
 def load_config(config):
     if config == 'production':
