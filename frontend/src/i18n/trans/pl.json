@@ -58,7 +58,7 @@
       "real": "Liczba rzeczywista",
       "integer": "Liczba całkowita",
       "timestamp without time zone": "Data",
-      "dictionary": "Słownik"
+      "dict": "Słownik"
     },
     "clear": "Wyczyść",
     "close": "Zamknij",
@@ -95,6 +95,7 @@
     "noData": "Brak danych",
     "noLayers": "Brak warstw",
     "noServices": "Brak źródeł zewnętrznych",
+    "ordinalNumber": "Lp",
     "password": "Hasło",
     "point": "Punkt",
     "polygon": "Poligon",
@@ -118,7 +119,8 @@
     "triangle": "Trójkąt",
     "username": "Nazwa użytkownika",
     "users": "Użytkownicy",
-    "yes": "Tak"
+    "yes": "Tak",
+    "value": "Wartość"
   },
   "featureManager": {
     "addAttachment": "Dodaj załącznik",
@@ -243,6 +245,7 @@
     "chooseVisualizationType": "Wybierz typ wizualizacji",
     "classify": "Klasyfikuj",
     "database": "Baza danych",
+    "deleteValue": "Usuń wartość",
     "dictField": "Pole słownikowe",
     "fill-color": "Kolor wypełnienia",
     "host": "Host",
@@ -268,6 +271,7 @@
     "tabQgis": "QGIS",
     "user": "Użytkownik",
     "value": "Wartość",
+    "valueExists": "Ta wartość już istnieje",
     "visType": "Typ wizualizacji",
     "width": "Wielkość punktu",
     "tags": "Tagi",

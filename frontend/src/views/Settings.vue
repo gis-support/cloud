@@ -115,7 +115,7 @@
               <button
                 type="button"
                 class="btn btn-success"
-                @click="newColumnType==='dictionary'?openDictionaryModal():addNewColumn"
+                @click="newColumnType==='dict'?openDictionaryModal():addNewColumn()"
                 :disabled="!newColumnType || !newColumnName"
               >{{ $i18n.t('default.add') }}</button>
             </div>
@@ -165,14 +165,12 @@
                       :title="$i18n.t('default.delete')"
                       @click="deleteColumn(name)"
                     />
-                    <!--
                     <i
-                      v-if="value === 'dictionary'"
+                      v-if="value === 'dict'"
                       class="fa fa-pencil fa-lg icon-hover"
                       :title="$i18n.t('default.edit')"
-                      @click="openDictionaryModal(dictsValues)"
+                      @click="openDictionaryModal(name)"
                     />
-                    -->
                   </td>
                 </tr>
               </tbody>
@@ -527,13 +525,14 @@
       :draggable="false"
       width="30%"
       height="auto"
+      @before-close="closeDictModal"
     >
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">{{ $i18n.t('settings.dictField') }}</h4>
+          <h4 class="modal-title">{{ $i18n.t('settings.dictField') + ": " + currentDictName }}</h4>
         </div>
         <div class="modal-body">
-          <div style="margin-bottom: 100px">
+          <div>
             <h4>{{ $i18n.t('settings.newValue') }}</h4>
             <div
               class="form-group"
@@ -551,15 +550,44 @@
                 type="button"
                 class="btn btn-default"
                 :title="$i18n.t('default.add')"
-                @click="currentDictValues.push(currentDictValue)"
+                @click="currentDictValues.includes(currentDictValue)?$alertify.error($i18n.t('settings.valueExists')):currentDictValues.push(currentDictValue);currentDictValue=''"
               >
                 <i class="fa fa-plus" />
               </button>
             </div>
-            <table>
-              <tbody>{{"aaa"}}</tbody>
-              <tbody>{{"bbb"}}</tbody>
-            </table>
+            <div style="min-height:300px; max-height:300px; overflow-y:auto">
+              <table class="table table-striped table-bordered table-hover">
+                <thead v-if="currentDictValues.length > 0">
+                  <tr role="row">
+                    <th class="text-centered">{{ $i18n.t('default.ordinalNumber') }}</th>
+                    <th class="text-centered">{{ $i18n.t('default.value') }}</th>
+                    <th class="text-centered">{{ $i18n.t('default.actions') }}</th>
+                  </tr>
+                </thead>
+                <draggable
+                  tag="tbody"
+                  :list="currentDictValues"
+                  @start="drag=true"
+                  @end="drag=false"
+                >
+                  <tr
+                    v-for="(dV, idx) in currentDictValues"
+                    :key="idx"
+                  >
+                    <td class="text-centered">{{ idx+1 }}</td>
+                    <td class="text-centered">{{ dV }}</td>
+                    <td class="text-centered">
+                      <i
+                        @click="currentDictValues.splice(idx,1)"
+                        style="cursor: pointer"
+                        :title="$i18n.t('settings.deleteValue')"
+                        class="fa fa-trash"
+                      />
+                    </td>
+                  </tr>
+                </draggable>
+              </table>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -574,6 +602,7 @@
               <button
                 type="button"
                 class="btn btn-success"
+                @click="isDictNew?addNewColumn():editColumn()"
               >{{ $i18n.t("default.save") }}</button>
             </div>
             <div
@@ -583,6 +612,7 @@
               <button
                 type="button"
                 class="btn btn-danger"
+                @click="$modal.hide('dicts')"
               >{{ $i18n.t("default.cancel") }}</button>
             </div>
           </div>
@@ -608,6 +638,7 @@ export default {
     activeTab: 'info-tab',
     categories: [],
     categorizedAttr: undefined,
+    currentDictName: undefined,
     currentDictValue: '',
     currentDictValues: [],
     currentEditedLayer: undefined,
@@ -615,6 +646,7 @@ export default {
     drag: false,
     fillColor: '255,254,255,0.4',
     isColumnsVisible: true,
+    isDictNew: true,
     isMounted: false,
     labelsAll: [],
     layerType: undefined,
@@ -644,7 +676,9 @@ export default {
       const payload = {
         body: {
           column_name: this.newColumnName,
-          column_type: this.newColumnType
+          column_type: this.newColumnType,
+          values:
+            this.newColumnType === 'dict' ? this.currentDictValues : undefined
         },
         lid: this.currentLayerSettings.id
       };
@@ -656,6 +690,7 @@ export default {
         this.newColumnName = undefined;
         this.newColumnType = '';
         this.$alertify.success(this.$i18n.t('dashboard.modal.columnAdded'));
+        this.$modal.hide('dicts');
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
@@ -701,6 +736,20 @@ export default {
             cancel: this.$i18n.t('default.cancel')
           }
         });
+    },
+    async editColumn() {
+      console.log('Request edycji kolumny');
+    },
+    async getDictValues() {
+      const dictValues = await this.$store.dispatch('getDictsValues', {
+        lid: this.currentEditedLayer.id,
+        column_name: this.currentDictName
+      });
+      if (dictValues.status === 200) {
+        this.currentDictValues = dictValues.body.data;
+      } else {
+        //błund
+      }
     },
     async loadStyle() {
       const lid = this.currentEditedLayer.id;
@@ -922,6 +971,10 @@ export default {
         }
       }
     },
+    closeDictModal() {
+      this.currentDictValue = undefined;
+      this.currentDictValues = [];
+    },
     formatColor(rgba) {
       return rgba.substring(
         // get rgba between ()
@@ -945,9 +998,12 @@ export default {
     },
     openDictionaryModal(col) {
       if (col) {
-        //edycja pola kolumny
+        this.isDictNew = false;
+        this.currentDictName = col;
+        this.getDictValues();
       } else {
-        //nowe pole kolumny
+        this.isDictNew = true;
+        this.currentDictName = this.newColumnName;
       }
       this.$modal.show('dicts');
     },

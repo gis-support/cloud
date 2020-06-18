@@ -130,6 +130,19 @@ export default {
         return err.response;
       }
     },
+    async getDictsValues(ctx, payload) {
+      try {
+        const response = await swagger.apis.Layers.get_api_layers__lid__settings_dicts__column_name__values(
+          {
+            lid: payload.lid,
+            column_name: payload.column_name
+          }
+        );
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async getFeatureAttachments(ctx, payload) {
       try {
         const response = await swagger.apis.Attachments.get_api_layers__lid__features__fid__attachments(

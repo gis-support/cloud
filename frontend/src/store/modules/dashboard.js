@@ -22,13 +22,7 @@ export default {
       process.env.VUE_APP_PROD_HOST_URL == "localhost"
         ? `http://localhost:5001/api`
         : `https://${process.env.VUE_APP_PROD_HOST_URL}/api`,
-    columnTypes: [
-      "character varying",
-      "real",
-      "integer",
-      "timestamp without time zone",
-      "dictionary"
-    ],
+    columnTypes: ["character varying", "real", "integer", "timestamp without time zone", "dict"],
     services: []
   },
   actions: {
