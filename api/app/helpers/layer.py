@@ -30,7 +30,8 @@ TYPES = {
     'character varying': str,
     'real': (int, float),
     'integer': int,
-    'timestamp without time zone': (int, float)
+    'timestamp without time zone': (int, float, datetime),
+    "dict": str
 }
 
 
@@ -228,7 +229,13 @@ class Layer(Cloud):
         if with_types:
             names = {}
             for c in cursor.fetchall():
-                names[c[0]] = c[1]
+                name = c[0]
+                type_ = c[1]
+                if type_ == "USER-DEFINED":
+                    if Dict.select().where(Dict.layer_id == self.lid, Dict.column_name == name).exists():
+                        type_ = "dict"
+
+                names[name] = type_
             return names
         return [c[0] for c in cursor.fetchall()]
 
@@ -278,13 +285,25 @@ class Layer(Cloud):
         # Validation
         error = False
         for i in range(1, len(columns)):
+            value = values[i]
+            column_name = columns[i]
+
             if isinstance(values[i], type(None)):
                 continue
-            elif not isinstance(values[i], TYPES[columns_with_types[columns[i]]]):
-                error = f"value '{values[i]}' invalid type of column '{columns[i]}' ({columns_with_types[columns[i]]})"
+
+            if columns_with_types[column_name] == "dict":
+                dict_ = Dict.get(layer_id=self.lid, column_name=column_name)
+                allowed_values = dict_.get_values()
+                if value not in allowed_values:
+                    error = f"value '{value}' is not allowed for dict-column '{column_name}'. allowed values: '{allowed_values}'"
+
+            elif not isinstance(value, TYPES[columns_with_types[column_name]]):
+                error = f"value '{values[i]}' invalid type of column '{column_name}' ({columns_with_types[column_name]})"
                 break
-            elif columns_with_types[columns[i]] == 'timestamp without time zone':
-                values[i] = datetime.fromtimestamp(values[i])
+
+            elif columns_with_types[column_name] == 'timestamp without time zone':
+                values[i] = datetime.fromtimestamp(value)
+
         if error:
             raise ValueError(error)
         query_string = SQL("INSERT INTO {} ({}) values ({})  RETURNING id;").format(
@@ -296,25 +315,40 @@ class Layer(Cloud):
         return self.as_geojson_by_fid(cursor.fetchone()[0])
 
     # Edit existing feature
+
     def edit_feature(self, fid, columns, values, columns_with_types):
         # Validation
         error = False
         for i in range(1, len(columns)):
-            if isinstance(values[i], type(None)):
+            value = values[i]
+            column_name = columns[i]
+
+            if isinstance(value, type(None)):
                 continue
-            elif not isinstance(values[i], TYPES[columns_with_types[columns[i]]]):
-                error = f"value '{values[i]}' invalid type of column '{columns[i]}' ({columns_with_types[columns[i]]})"
+
+            if columns_with_types[column_name] == "dict":
+                dict_ = Dict.get(layer_id=self.lid, column_name=column_name)
+                allowed_values = dict_.get_values()
+                if value not in allowed_values:
+                    error = f"value '{value}' is not allowed for dict-column '{column_name}'. allowed values: '{allowed_values}'"
+
+            elif not isinstance(value, TYPES[columns_with_types[column_name]]):
+                error = f"value '{value}' invalid type of column '{column_name}' ({columns_with_types[column_name]})"
                 break
-            elif columns_with_types[columns[i]] == 'timestamp without time zone':
-                values[i] = datetime.fromtimestamp(values[i])
+
+            elif columns_with_types[column_name] == 'timestamp without time zone':
+                values[i] = datetime.fromtimestamp(value)
+
         if error:
             raise ValueError(error)
+
         query_string = SQL("UPDATE {} SET {} WHERE id=%s").format(
             Identifier(self.name),
             SQL(', ').join(
                 map(lambda c: SQL("{} = %s").format(Identifier(c)), columns))
         )
         self.execute(query_string, *[values + [fid]])
+
         return self.as_geojson_by_fid(fid)
 
     # Delete feature
