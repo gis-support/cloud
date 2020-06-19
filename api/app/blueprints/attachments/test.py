@@ -12,7 +12,7 @@ from app.blueprints.attachments.models import Attachment
 class TestAttachmentModel:
 
     @staticmethod
-    def create_attachment(file_name: str, data: bytes, added_by: str = "test", added_at: datetime = None):
+    def create_attachment(file_name: str = "name", data: bytes = b"", added_by: str = "test", added_at: datetime = None):
         added_at = added_at or datetime.now()
 
         result_file_name = Attachment.create_attachment(file_name, data, added_by, added_at)
@@ -85,17 +85,11 @@ class TestAttachmentModel:
 
     @freeze_time("2020-01-01T10:00:00")
     def test_create_attachment_default_added_at(self, app_request_context):
-        file_name = "attachment.txt"
-        data = b"attachment content"
-
-        result = self.create_attachment(file_name, data)
+        result = self.create_attachment()
         assert result.added_at == datetime.fromisoformat("2020-01-01T10:00:00")
 
     def test_delete_attachment_check_file(self, app_request_context):
-        file_name = "attachment.txt"
-        data = b"attachment content"
-
-        result = self.create_attachment(file_name, data)
+        result = self.create_attachment()
         file_path = result.get_file_path()
         result.delete_instance()
 
