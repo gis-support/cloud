@@ -156,11 +156,35 @@ export default {
         return err.response;
       }
     },
+    async getLayerDictsValues(ctx, lid) {
+      try {
+        const response = await swagger.apis.Layers.get_api_layers__lid__settings_dicts_values({
+          lid
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async getLayerStyle(ctx, lid) {
       try {
         const response = await swagger.apis.Layers.get_api_layers__lid__style({
           lid
         });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async putDictsValues(ctx, payload) {
+      try {
+        const response = await swagger.apis.Layers.put_api_layers__lid__settings_dicts__column_name__values(
+          {
+            lid: payload.lid,
+            column_name: payload.column_name,
+            body: payload.body
+          }
+        );
         return response;
       } catch (err) {
         return err.response;

@@ -738,7 +738,27 @@ export default {
         });
     },
     async editColumn() {
-      console.log('Request edycji kolumny');
+      const payload = {
+        body: {
+          column_name: this.newColumnName,
+          column_type: this.newColumnType,
+          values:
+            this.newColumnType === 'dict' ? this.currentDictValues : undefined
+        },
+        lid: this.currentLayerSettings.id
+      };
+      const r = await this.$store.dispatch('putDictsValues', {
+        lid: this.currentEditedLayer.id,
+        column_name: this.currentDictName,
+        body: { data: this.currentDictValues }
+      });
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('settings.columnEdited'));
+        this.checkStyle(r.obj.data);
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+      this.$modal.hide('dicts');
     },
     async getDictValues() {
       const dictValues = await this.$store.dispatch('getDictsValues', {
@@ -748,7 +768,7 @@ export default {
       if (dictValues.status === 200) {
         this.currentDictValues = dictValues.body.data;
       } else {
-        //błund
+        this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
     async loadStyle() {
@@ -943,6 +963,23 @@ export default {
         this.categorizedAttr = undefined;
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    checkStyle(style) {
+      if (
+        style.renderer === 'categorized' &&
+        style.attribute === this.categorizedAttr &&
+        this.symbolizationType === 'categorized'
+      ) {
+        const categories = [];
+        for (let cat of style.categories) {
+          categories.push(cat.value);
+        }
+        for (let cat of this.categories) {
+          if (!categories.includes(cat.value)) {
+            this.categories.splice(this.categories.indexOf(cat), 1);
+          }
+        }
       }
     },
     checkValue(e, model, idx, arr) {

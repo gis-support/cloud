@@ -296,6 +296,18 @@
                         v-model="newFeatureProperties[name]"
                         format="dd.MM.yyyy"
                       ></Datepicker>
+                      <select
+                        v-else-if="featureTypes[name] === 'dict'"
+                        class="form-control"
+                        v-model="newFeatureProperties[name]"
+                      >
+                        <option
+                          v-for="(dV, idx) in dictValues.find(d => d.column_name === name).values"
+                          v-text="dV"
+                          :value="dV"
+                          :key="idx"
+                        />
+                      </select>
                     </div>
                   </template>
                 </div>
@@ -932,6 +944,7 @@
                   ref="attributes-panel"
                   :editing="editing"
                   :fields="currentFeature"
+                  :dictValues="dictValues"
                 />
               </div>
             </div>
@@ -1020,6 +1033,7 @@ export default {
     currentBaseLayer: 'OpenStreetMap',
     currentColumnFilters: [],
     currentFeature: undefined,
+    dictValues: [],
     labels: [],
     layers: ['layer1', 'layer2', 'layer3'],
     layerType: undefined,
@@ -2337,6 +2351,15 @@ export default {
 
     this.createSelectInteraction();
 
+    const lDV = await this.$store.dispatch(
+      'getLayerDictsValues',
+      this.$route.params.layerId
+    );
+    if (lDV.status === 200) {
+      this.dictValues = lDV.obj.data;
+    } else {
+      this.$alertify.error(this.$i18n.t('default.getDictsValuesError'));
+    }
     const r = await this.$store.dispatch(
       'getLayer',
       this.$route.params.layerId
