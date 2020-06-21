@@ -80,8 +80,10 @@ export default {
   border-radius: 50%;
   display: inline-block;
   cursor: pointer;
+  border: 1px solid rgb(158, 158, 158);
 }
 .picker {
+  z-index: 10;
   position: absolute;
 }
 </style>
