@@ -8,6 +8,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_redis import FlaskRedis
 
+from app.blueprints.attachments.routings import mod_attachments_qgis
 from app.db.connection import create_db
 from app.docs import create_swagger
 from app.db.tables import create_tables
@@ -36,6 +37,7 @@ def create_app(config='development'):
     app.register_blueprint(mod_layers, url_prefix='/api')
     app.register_blueprint(mod_features, url_prefix='/api')
     app.register_blueprint(mod_permissions, url_prefix='/api')
+    app.register_blueprint(mod_attachments_qgis, url_prefix="/api")
     init_rdos(app)
     # CLI
     # app.cli.add_command(fill_data)

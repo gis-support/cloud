@@ -1,0 +1,40 @@
+Download attachments
+---
+
+tags:
+  - QGIS Attachments
+
+summary: Upload attachments
+
+produces:
+  - application/json
+
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+  - name: ids
+    in: query
+    description: IDs of attachments as comma-separated list. At least one is required
+    required: true
+    type: string
+    example: "1,2,3"
+
+
+responses:
+  200:
+    description: Downloads file if single ID was given, ZIP-archived files otherwise.
+
+
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+

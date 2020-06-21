@@ -44,6 +44,7 @@ class Attachment(BaseModel):
 
     def _save_file(self, file_content: bytes):
         directory_path = self._get_attachments_directory_path()
+        # noinspection PyTypeChecker
         file_path = Path(directory_path, self.file_name)
 
         with open(file_path, "wb") as f:
