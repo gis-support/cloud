@@ -3,6 +3,7 @@
 import shutil
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Tuple
 
 import pytest
@@ -14,6 +15,8 @@ from playhouse.postgres_ext import PostgresqlExtDatabase
 
 from app.create import create_app
 from psycopg2.sql import SQL, Identifier
+
+from app.tests.utils import TEST_DATA_DIR
 
 SYSTEM_TABLES = [
     'geography_columns',
@@ -104,3 +107,7 @@ def temp_uploads_path(client, tmpdir_factory):
     client.application.config["UPLOADS"] = temp_dir
     yield temp_dir
     shutil.rmtree(temp_dir)
+
+@pytest.fixture(scope="session")
+def resources_directory() -> Path:
+    return Path(TEST_DATA_DIR)
