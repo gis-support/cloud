@@ -8,6 +8,8 @@ docker/db/prod_dumps/*
 api/import/*
 .pytest_cache
 
+api/uploads/*
+
 .DS_Store
 frontend/node_modules
 frontend/dist

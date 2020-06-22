@@ -20,7 +20,11 @@ class Config(object):
     SECRET_KEY = 'test'
     DEBUG = False
     TESTING = False
-    STATIC = op.join(op.dirname(op.dirname(op.realpath(__file__))), 'static')
+
+    ROOT_DIRECTORY = op.abspath(op.dirname(op.dirname(__file__)))
+
+    STATIC = op.join(ROOT_DIRECTORY, 'static')
+    UPLOADS = op.join(ROOT_DIRECTORY, "uploads")
 
 
 class DevelopmentConfig(Config):

@@ -1,0 +1,69 @@
+Download attachments metadata
+---
+
+tags:
+  - QGIS Attachments
+
+summary: Upload attachments
+
+produces:
+  - application/json
+
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+  - name: ids
+    in: query
+    description: IDs of attachments as comma-separated list
+    required: false
+    type: string
+    example: "1,2,3"
+
+
+responses:
+  200:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/definitions/AttachmentMetadata"
+
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+
+definitions:
+
+  AttachmentMetadata:
+    type: "object"
+    properties:
+      attachment_id:
+        type: integer
+        example: 1
+        description: "ID of created attachment"
+      file_name:
+        type: string
+        example: "file_name.txt"
+        description: "Name of the file"
+      added_by:
+        type: string
+        example: "admin"
+        description: "Name of user who uploaded the file"
+      added_at:
+        type: string
+        example: "Thu, 18 Jun 2020 13:55:52 GMT"
+        description: "Date of upload"
+
