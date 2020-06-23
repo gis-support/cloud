@@ -41,6 +41,15 @@ responses:
   204:
     description: OK
 
+  400:
+    description: Tag with such name already exists.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "message"
+
   403:
     description: token required
     schema:
