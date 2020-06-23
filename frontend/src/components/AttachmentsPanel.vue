@@ -143,6 +143,7 @@
                 class="form-group d-flex"
                 style="flex-direction: column; margin-bottom: 0"
               >
+                <!--
                 <div class="full-width pb-10">
                   <label class="control-label col-sm-4">{{ $i18n.t("default.name") }}</label>
                   <div class="col-sm-8">
@@ -184,8 +185,49 @@
                     />
                   </div>
                 </div>
+                -->
+                <div class="pt-10">
+                  <file-upload
+                    ref="upload"
+                    v-model="files"
+                    :multiple="true"
+                    :drop="true"
+                    :drop-directory="true"
+                    @input-filter="fileFilter"
+                  >
+                    {{this.$i18n.t('upload.defaultMessage')}}
+                    <ul>
+                      <li
+                        v-for="(file,idx) in files"
+                        :key="idx"
+                      >
+                        {{file.name}}
+                        <i
+                          class="icon-li fa fa-times fa-lg ml-5"
+                          @click="removeFile(file)"
+                        />
+                      </li>
+                    </ul>
+                  </file-upload>
+                </div>
               </div>
             </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-default"
+                data-dismiss="modal"
+                @click="clearUploadFiles"
+                ref="closeModalBtn"
+              >{{ $i18n.t('default.cancel') }}</button>
+              <button
+                type="button"
+                class="btn btn-success"
+                @click="sendFiles"
+                :disabled="files.length < 1"
+              >{{ $i18n.t('default.save') }}</button>
+            </div>
+            <!--
             <div class="modal-footer">
               <div
                 class="btn-group btn-group-justified"
@@ -214,6 +256,7 @@
                 </div>
               </div>
             </div>
+            -->
           </div>
         </div>
       </div>
@@ -222,7 +265,11 @@
 </template>
 
 <script>
+import FileUpload from 'vue-upload-component';
 export default {
+  components: {
+    FileUpload
+  },
   props: {
     lid: {
       type: String,
@@ -245,8 +292,12 @@ export default {
     attachmentLink: undefined,
     // attachmentModes: ['public', 'default'],
     attachmentName: undefined,
+    files: [],
     isAttachmentAdding: false,
-    isAttachmentPublic: ''
+    isAttachmentPublic: '',
+    postAction: `${
+      vm.$store.getters.getApiUrl
+    }/attachments_qgis?token=${localStorage.getItem('token')}`
     // usersGroup: undefined,
   }),
   computed: {
@@ -296,6 +347,10 @@ export default {
         this.usersGroup = this.usersWithGroups[this.user];
       }
     },
+    clearUploadFiles() {
+      this.files = [];
+      this.isAttachmentAdding = false;
+    },
     deleteLink(item) {
       this.$alertify
         .confirm(
@@ -325,6 +380,53 @@ export default {
           }
         });
     },
+    fileFilter: function(newFile, oldFile, prevent) {
+      let ext = newFile.name.substr(newFile.name.lastIndexOf('.'));
+      if (newFile && !oldFile) {
+        for (file of this.files) {
+          if (newFile.name === file.name && newFile.size === file.size) {
+            this.$alertify.error(this.$i18n.t('upload.uploadDuplicate'));
+            return prevent();
+          }
+        }
+      }
+    },
+    removeFile(file) {
+      let fileIndex = this.files.indexOf(file);
+      if (fileIndex > -1) {
+        this.files = this.files.filter(f => f != file);
+      }
+    },
+    sendFiles() {
+      let data = [];
+      for (file of this.files) {
+        data.push({ content: file, name: file.file.name });
+      }
+      console.log(data);
+      /*
+      this.$http
+        .post(this.postAction, data)
+        .then(r => {
+          this.$refs.closeModalBtn.click();
+          if (r.status === 201) {
+            vm.$alertify.success(
+              vm.$i18n.t('upload.uploadSuccess') +
+                ' ' +
+                r.data.original_file_name
+            );
+            //TODO: Dodanie pliku do listy załączników
+          } else {
+            vm.$alertify.error(
+              vm.$i18n.t('upload.uploadError') + ' ' + newFile.name
+            );
+          }
+        })
+        .catch(err => {
+          this.$refs.closeModalBtn.click();
+          this.$alertify.error(this.$i18n.t('upload.uploadError'));
+        });
+      */
+    },
     toggleAttachmentAdding(vis) {
       this.isAttachmentAdding = vis;
 
@@ -344,5 +446,38 @@ export default {
 .control-label {
   position: relative;
   top: 8px;
+}
+.files-list li {
+  width: 120px;
+  list-style: none;
+}
+.file-uploads {
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  display: inline-block;
+  min-height: 100px;
+  width: 100%;
+  border: 1px solid lightgray;
+}
+.file-uploads.file-uploads-html4 input[type='file'] {
+  opacity: 0;
+  font-size: 20em;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.file-uploads.file-uploads-html5 input[type='file'] {
+  overflow: hidden;
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  z-index: -1;
+  opacity: 0;
 }
 </style>
