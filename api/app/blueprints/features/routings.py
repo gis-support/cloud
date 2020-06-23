@@ -3,6 +3,9 @@
 
 from flask import Blueprint, jsonify, request
 from flasgger import swag_from
+
+from app.blueprints.layers.layers_attachments import LayerAttachmentsManager
+from app.db.database import database
 from app.docs import path_by
 from app.db.general import token_required, layer_decorator
 from app.helpers.layer import Layer, TYPES
@@ -82,6 +85,15 @@ def features_id(lid, fid):
         """
         @layer_decorator(permission="write")
         def delete(layer, lid=None):
-            layer.delete_feature(fid)
+            with database.atomic():
+
+                if LayerAttachmentsManager.does_layer_have_attachments_column(layer):
+                    manager = LayerAttachmentsManager(layer)
+                    attachments = manager.get_attachments_of_object(fid)
+                    for attachment in attachments:
+                        attachment.delete_instance()
+
+                layer.delete_feature(fid)
+
             return jsonify({"fid": fid}), 200
         return delete(lid=lid)
