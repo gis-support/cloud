@@ -338,7 +338,7 @@ class TestLayersSettings(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['settings']['id'] == lid
-        assert len(r.json['settings']['columns'].keys()) == 30
+        assert len(r.json['settings']['columns'].keys()) == 31
 
     def test_settings_delete_correct(self, client):
         token = self.get_token(client)
@@ -353,7 +353,7 @@ class TestLayersSettings(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['settings']['id'] == lid
-        assert len(r.json['settings']['columns'].keys()) == 29
+        assert len(r.json['settings']['columns'].keys()) == 30
 
     def test_settings_delete_not_exists_column(self, client):
         token = self.get_token(client)
@@ -403,7 +403,7 @@ class TestLayersSettings(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['settings']['id'] == lid
-        assert len(r.json['settings']['columns'].keys()) == 31
+        assert len(r.json['settings']['columns'].keys()) == 32
         assert r.json['settings']['columns'][new_column['column_name']
                                              ] == new_column['column_type']
 
