@@ -29,16 +29,25 @@
             :key="tag.id"
           >
             <td
+              style="max-width: 300px;"
               class="text-center"
               v-for="column of filteredColumns"
               :key="`${tag.id}_${column}`"
-            >{{tag[column]}}</td>
+            >
+              <div
+                class="text-overflow"
+                :title="tag[column]"
+                v-text="tag[column]"
+              ></div>
+            </td>
             <td
+              style="max-width: 100px;"
               class="text-center"
               :key="`${tag.id}_color`"
             >
               <span
                 class="dot"
+                :title="tag.color"
                 :style="{backgroundColor: tag.color}"
               ></span>
             </td>
@@ -194,5 +203,10 @@ export default {
   width: 20px;
   border-radius: 50%;
   display: inline-block;
+}
+.text-overflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
