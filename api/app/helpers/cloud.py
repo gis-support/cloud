@@ -197,7 +197,9 @@ class Cloud:
 
     # Create new layer by name and fields
     def create_layer(self, name, fields, geom_type):
-        columns = ["id"] + [f["name"] for f in fields]
+        id_column_name = "id"
+
+        columns = [id_column_name] + [f["name"] for f in fields]
         types = [AsIs(f) for f in ["serial"] + [f["type"] for f in fields]]
         table_string = SQL("""
             CREATE TABLE {} ({})
@@ -205,35 +207,37 @@ class Cloud:
             Identifier(name),
             SQL(', ').join(map(lambda c: SQL("{} %s").format(Identifier(c)), columns))
         )
-        self.execute(table_string, *[types])
-        self.execute(SQL("""
-            GRANT ALL PRIVILEGES ON TABLE {} TO {};
-        """).format(Identifier(name), Identifier(self.user)))
-        self.execute(SQL("""
-            ALTER TABLE {} OWNER TO {};
-        """).format(Identifier(name), Identifier(self.user)))
-        self.execute("""
-            INSERT INTO layer_styles (
-                f_table_catalog,
-                f_table_schema,
-                f_table_name,
-                f_geometry_column,
-                stylename,
-                styleqml,
-                stylejson,
-                useasdefault
-            )
-            VALUES (
-                'cloud',
-                'public',
-                %s,
-                'geometry',
-                'default',
-                %s,
-                %s,
-                True
-            );
-        """, (name, create_qml(geom_type), json.dumps(create_stylejson(geom_type),)))
+        with self.db.atomic():
+            self.execute(table_string, *[types])
+            self.execute(SQL("""
+                GRANT ALL PRIVILEGES ON TABLE {} TO {};
+            """).format(Identifier(name), Identifier(self.user)))
+            self.execute(SQL("""
+                ALTER TABLE {} OWNER TO {};
+            """).format(Identifier(name), Identifier(self.user)))
+            self.execute("""
+                INSERT INTO layer_styles (
+                    f_table_catalog,
+                    f_table_schema,
+                    f_table_name,
+                    f_geometry_column,
+                    stylename,
+                    styleqml,
+                    stylejson,
+                    useasdefault
+                )
+                VALUES (
+                    'cloud',
+                    'public',
+                    %s,
+                    'geometry',
+                    'default',
+                    %s,
+                    %s,
+                    True
+                );
+            """, (name, create_qml(geom_type), json.dumps(create_stylejson(geom_type),)))
+            self.execute(SQL("ALTER TABLE {} ADD PRIMARY KEY ({});").format(Identifier(name), Identifier(id_column_name)))
 
 def get_cloud():
     return Cloud({"app": current_app, "user": request.user})
