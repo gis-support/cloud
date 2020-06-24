@@ -13,7 +13,7 @@ from app.docs import path_by
 @swag_from(path_by(__file__, 'docs/tags.get.yml'), methods=['GET'])
 @token_required
 def tags_get():
-    query = Tag.select()
+    query = Tag.select().order_by(Tag.id)
     result = list(query.dicts())
 
     return jsonify({"data": result})
