@@ -130,7 +130,11 @@ export default {
       this.editing = true;
       this.tag = { ...tag };
     },
-    saveEditing() {
+    async saveEditing() {
+      const r = await this.$store.dispatch('editTag', {
+        body: this.tag,
+        tag_id: this.tag.id
+      });
       this.tags[this.tags.map(tag => tag.id).indexOf(this.tag.id)] = this.tag;
       this.tag = { name: '', color: 'rgba(0,0,0,1)' };
       this.editing = false;

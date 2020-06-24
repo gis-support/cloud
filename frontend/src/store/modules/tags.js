@@ -31,7 +31,19 @@ export default {
         return err;
       }
     },
-    async getTags(ctx, payload) {
+    async editTag(ctx, payload) {
+      try {
+        const { body, tag_id } = payload;
+        const response = await swagger.apis["Layers tags"].put_api_tags__tag_id_({
+          body,
+          tag_id
+        });
+        return response;
+      } catch (err) {
+        return err;
+      }
+    },
+    async getTags(ctx) {
       try {
         const response = await swagger.apis["Layers tags"].get_api_tags();
         return response;
