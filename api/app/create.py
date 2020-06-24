@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+from typing import List
+
 from flask import Flask
 from flask_cors import CORS
 from flask_redis import FlaskRedis
 
+from app.blueprints.attachments.routings import mod_attachments_qgis
 from app.db.connection import create_db
 from app.docs import create_swagger
 from app.db.tables import create_tables
@@ -34,11 +37,20 @@ def create_app(config='development'):
     app.register_blueprint(mod_layers, url_prefix='/api')
     app.register_blueprint(mod_features, url_prefix='/api')
     app.register_blueprint(mod_permissions, url_prefix='/api')
+    app.register_blueprint(mod_attachments_qgis, url_prefix="/api")
     init_rdos(app)
     # CLI
     # app.cli.add_command(fill_data)
+
+    create_directiories([
+        app.config["UPLOADS"]
+    ])
+
     return app
 
+def create_directiories(directories: List[str]):
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
 
 def load_config(config):
     if config == 'production':

@@ -1,0 +1,93 @@
+Upload attachments
+Allows to attach file to a feature immediately.
+---
+
+tags:
+  - QGIS Attachments
+
+summary: Upload attachments
+
+produces:
+  - application/json
+
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+  - name: feature_id
+    in: query
+    description: ID of feature to which uploaded file should be attached
+    required: false
+    type: string
+  - name: layer_id
+    in: query
+    description: ID of layer containing `feature_id`
+    required: false
+    type: string
+  - name: body
+    in: body
+    description: Files
+    required: True
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/definitions/AttachmentUpload"
+
+responses:
+  201:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/definitions/AttachmentsUploadResult"
+
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+
+definitions:
+
+  AttachmentUpload:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        example: "file_name.txt"
+        description: "Name of the file"
+      content:
+        type: "string"
+        example: "base64"
+        description: "Base64 encoded file content"
+
+  AttachmentsUploadResult:
+    type: "object"
+    properties:
+      attachment_id:
+        type: integer
+        example: 1
+        description: "ID of created attachment"
+      original_file_name:
+        type: string
+        example: "file_name.txt"
+        description: "Name of the uploaded file"
+      saved_as:
+        type: string
+        example: "file_name_1.txt"
+        description: "Name under which the file was saved. File names in API must be unique, so suffix may be necessary"
+

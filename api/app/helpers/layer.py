@@ -4,6 +4,7 @@ import uuid
 from typing import Iterable, Callable, List, Any
 
 from app.blueprints.layers.dicts.dict import Dict
+from app.blueprints.layers.utils import ATTACHMENTS_COLUMN_NAME
 from app.db import enumerators
 from app.helpers.cloud import Cloud
 from app.helpers.style import QML_TO_OL, LayerStyle, generate_categories
@@ -143,10 +144,14 @@ class Layer(Cloud):
         for row in cursor.fetchall():
             name = row[0]
             type_ = row[1]
+
             if type_ == "USER-DEFINED":
                 dict = Dict.get_or_none(column_name=name)
                 if dict is not None:
                     type_ = "dict"
+
+            if name == ATTACHMENTS_COLUMN_NAME:
+                type_ = "attachments"
 
             settings['columns'][name] = type_
         return settings

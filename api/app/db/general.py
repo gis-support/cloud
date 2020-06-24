@@ -91,6 +91,7 @@ def token_required(f):
             return jsonify({"error": "invalid token"}), 403
         current_app._redis.set(random_uuid, user, ex=60*60*8)
         request.user = user
+
         return f(*args, **kws)
     return decorated_function
 

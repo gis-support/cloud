@@ -115,7 +115,7 @@
               <button
                 type="button"
                 class="btn btn-success"
-                @click="addNewColumn"
+                @click="newColumnType==='dict'?openDictionaryModal():addNewColumn()"
                 :disabled="!newColumnType || !newColumnName"
               >{{ $i18n.t('default.add') }}</button>
             </div>
@@ -164,6 +164,12 @@
                       class="fa fa-trash fa-lg red icon-hover"
                       :title="$i18n.t('default.delete')"
                       @click="deleteColumn(name)"
+                    />
+                    <i
+                      v-if="value === 'dict'"
+                      class="fa fa-pencil fa-lg icon-hover"
+                      :title="$i18n.t('default.edit')"
+                      @click="openDictionaryModal(name)"
                     />
                   </td>
                 </tr>
@@ -514,6 +520,105 @@
         </div>
       </div>
     </div>
+    <modal
+      name="dicts"
+      :draggable="false"
+      width="30%"
+      height="auto"
+      @before-close="closeDictModal"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{ $i18n.t('settings.dictField') + ": " + currentDictName }}</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+            <h4>{{ $i18n.t('settings.newValue') }}</h4>
+            <div
+              class="form-group"
+              style="display: flex;"
+            >
+              <label
+                class="control-label col-sm-4"
+                style="position: relative; top: 8px"
+              >{{ $i18n.t('settings.value') }}</label>
+              <input
+                v-model="currentDictValue"
+                class="form-control col-sm-7 mr-5"
+              />
+              <button
+                type="button"
+                class="btn btn-default"
+                :title="$i18n.t('default.add')"
+                @click="currentDictValues.includes(currentDictValue)?$alertify.error($i18n.t('settings.valueExists')):currentDictValues.push(currentDictValue);currentDictValue=''"
+              >
+                <i class="fa fa-plus" />
+              </button>
+            </div>
+            <div style="min-height:300px; max-height:300px; overflow-y:auto">
+              <table class="table table-striped table-bordered table-hover">
+                <thead v-if="currentDictValues.length > 0">
+                  <tr role="row">
+                    <th class="text-centered">{{ $i18n.t('default.ordinalNumber') }}</th>
+                    <th class="text-centered">{{ $i18n.t('default.value') }}</th>
+                    <th class="text-centered">{{ $i18n.t('default.actions') }}</th>
+                  </tr>
+                </thead>
+                <draggable
+                  tag="tbody"
+                  :list="currentDictValues"
+                  @start="drag=true"
+                  @end="drag=false"
+                >
+                  <tr
+                    v-for="(dV, idx) in currentDictValues"
+                    :key="idx"
+                  >
+                    <td class="text-centered">{{ idx+1 }}</td>
+                    <td class="text-centered">{{ dV }}</td>
+                    <td class="text-centered">
+                      <i
+                        @click="currentDictValues.splice(idx,1)"
+                        style="cursor: pointer"
+                        :title="$i18n.t('settings.deleteValue')"
+                        class="fa fa-trash"
+                      />
+                    </td>
+                  </tr>
+                </draggable>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div
+            class="btn-group btn-group-justified"
+            role="group"
+          >
+            <div
+              class="btn-group"
+              role="group"
+            >
+              <button
+                type="button"
+                class="btn btn-success"
+                @click="isDictNew?addNewColumn():editColumn()"
+              >{{ $i18n.t("default.save") }}</button>
+            </div>
+            <div
+              class="btn-group"
+              role="group"
+            >
+              <button
+                type="button"
+                class="btn btn-danger"
+                @click="$modal.hide('dicts')"
+              >{{ $i18n.t("default.cancel") }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </modal>
   </div>
 </template>
 
@@ -533,11 +638,15 @@ export default {
     activeTab: 'info-tab',
     categories: [],
     categorizedAttr: undefined,
+    currentDictName: undefined,
+    currentDictValue: '',
+    currentDictValues: [],
     currentEditedLayer: undefined,
     currentLayerSettings: undefined,
     drag: false,
     fillColor: '255,254,255,0.4',
     isColumnsVisible: true,
+    isDictNew: true,
     isMounted: false,
     labelsAll: [],
     layerType: undefined,
@@ -567,7 +676,9 @@ export default {
       const payload = {
         body: {
           column_name: this.newColumnName,
-          column_type: this.newColumnType
+          column_type: this.newColumnType,
+          values:
+            this.newColumnType === 'dict' ? this.currentDictValues : undefined
         },
         lid: this.currentLayerSettings.id
       };
@@ -579,6 +690,7 @@ export default {
         this.newColumnName = undefined;
         this.newColumnType = '';
         this.$alertify.success(this.$i18n.t('dashboard.modal.columnAdded'));
+        this.$modal.hide('dicts');
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
@@ -624,6 +736,40 @@ export default {
             cancel: this.$i18n.t('default.cancel')
           }
         });
+    },
+    async editColumn() {
+      const payload = {
+        body: {
+          column_name: this.newColumnName,
+          column_type: this.newColumnType,
+          values:
+            this.newColumnType === 'dict' ? this.currentDictValues : undefined
+        },
+        lid: this.currentLayerSettings.id
+      };
+      const r = await this.$store.dispatch('putDictsValues', {
+        lid: this.currentEditedLayer.id,
+        column_name: this.currentDictName,
+        body: { data: this.currentDictValues }
+      });
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('settings.columnEdited'));
+        this.checkStyle(r.obj.data);
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+      this.$modal.hide('dicts');
+    },
+    async getDictValues() {
+      const dictValues = await this.$store.dispatch('getDictsValues', {
+        lid: this.currentEditedLayer.id,
+        column_name: this.currentDictName
+      });
+      if (dictValues.status === 200) {
+        this.currentDictValues = dictValues.body.data;
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
     },
     async loadStyle() {
       const lid = this.currentEditedLayer.id;
@@ -819,6 +965,23 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+    checkStyle(style) {
+      if (
+        style.renderer === 'categorized' &&
+        style.attribute === this.categorizedAttr &&
+        this.symbolizationType === 'categorized'
+      ) {
+        const categories = [];
+        for (let cat of style.categories) {
+          categories.push(cat.value);
+        }
+        for (let cat of this.categories) {
+          if (!categories.includes(cat.value)) {
+            this.categories.splice(this.categories.indexOf(cat), 1);
+          }
+        }
+      }
+    },
     checkValue(e, model, idx, arr) {
       const charCode = e.which ? e.which : e.keyCode;
       if (
@@ -845,6 +1008,10 @@ export default {
         }
       }
     },
+    closeDictModal() {
+      this.currentDictValue = undefined;
+      this.currentDictValues = [];
+    },
     formatColor(rgba) {
       return rgba.substring(
         // get rgba between ()
@@ -865,6 +1032,17 @@ export default {
           layerName: this.currentEditedLayer.name
         }
       });
+    },
+    openDictionaryModal(col) {
+      if (col) {
+        this.isDictNew = false;
+        this.currentDictName = col;
+        this.getDictValues();
+      } else {
+        this.isDictNew = true;
+        this.currentDictName = this.newColumnName;
+      }
+      this.$modal.show('dicts');
     },
     setActiveTab(tab) {
       this.activeTab = tab;

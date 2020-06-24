@@ -257,7 +257,7 @@ class TestPermissions(BaseTest):
         assert r.status_code == 200
         assert r.json
         assert r.json['settings']['id'] == lid
-        assert len(r.json['settings']['columns'].keys()) == 30
+        assert len(r.json['settings']['columns'].keys()) == 31
         # Get settings for normal user
         r = client.get(
             f'/api/layers/{lid}/features/{1}/attachments?token={token}')
