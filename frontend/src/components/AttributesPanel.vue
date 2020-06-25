@@ -40,6 +40,19 @@
             v-model="attributes.properties[key]"
             format="dd-MM-yyyy"
           ></Datepicker>
+          <select
+            v-else-if="featureTypes[key] === 'dict'"
+            class="form-control"
+            v-model="attributes.properties[key]"
+          >
+            <option :value="null"></option>
+            <option
+              v-for="(dV, idx) in dictValues.find(d => d.column_name === key).values"
+              v-text="dV"
+              :value="dV"
+              :key="idx"
+            />
+          </select>
           <!--
           <input
             class="form-control col-sm-7"
@@ -74,6 +87,10 @@ export default {
   },
   components: { Datepicker },
   props: {
+    dictValues: {
+      type: Array,
+      required: true
+    },
     editing: {
       type: Boolean,
       required: true

@@ -48,7 +48,7 @@ class TestTagsEndpoints(BaseTest):
         "color": "#123456"
     }
 
-    def post_tag(self, client: FlaskClient, token: str=None, data: dict=None) -> Response:
+    def post_tag(self, client: FlaskClient, token: str = None, data: dict = None) -> Response:
         if data is None:
             data = self.valid_tag_post_data
         if token is None:
@@ -57,21 +57,25 @@ class TestTagsEndpoints(BaseTest):
         result = client.post("/api/tags", query_string={"token": token}, data=json.dumps(data))
         return result
 
-    def get_tags(self, client: FlaskClient, token: str=None) -> Response:
+    def get_tags(self, client: FlaskClient, token: str = None) -> Response:
         if token is None:
             token = self.get_token(client)
 
         result = client.get("/api/tags", query_string={"token": token})
         return result
 
-    def delete_tag(self, client: FlaskClient, tag_id: int, token: str=None) -> Response:
+    def edit_tag(self, client: FlaskClient, tag_id: int, data: dict, token: str) -> Response:
+        result = client.put(f"/api/tags/{tag_id}", query_string={"token": token}, data=json.dumps(data))
+        return result
+
+    def delete_tag(self, client: FlaskClient, tag_id: int, token: str = None) -> Response:
         if token is None:
             token = self.get_token(client)
 
         result = client.delete(f"/api/tags/{tag_id}", query_string={"token": token})
         return result
 
-    def post_layer_tag(self, client: FlaskClient, data: dict, token: str=None) -> Response:
+    def post_layer_tag(self, client: FlaskClient, data: dict, token: str = None) -> Response:
         if token is None:
             token = self.get_token(client)
         query_string = {"token": token}
@@ -81,7 +85,7 @@ class TestTagsEndpoints(BaseTest):
         result = client.post("/api/tags/layers", query_string=query_string)
         return result
 
-    def delete_layer_tag(self, client: FlaskClient, data: dict, token: str=None) -> Response:
+    def delete_layer_tag(self, client: FlaskClient, data: dict, token: str = None) -> Response:
         if token is None:
             token = self.get_token(client)
         query_string = {"token": token}
@@ -91,7 +95,7 @@ class TestTagsEndpoints(BaseTest):
         result = client.delete("/api/tags/layers", query_string=query_string)
         return result
 
-    def get_layers(self, client: FlaskClient, token:str):
+    def get_layers(self, client: FlaskClient, token: str):
         return client.get("/api/layers", query_string={"token": token})
 
     def rename_layer(self, client: FlaskClient, layer_id: str, new_name: str, token: str = None) -> str:
@@ -186,6 +190,55 @@ class TestTagsEndpoints(BaseTest):
         ]
 
         assert actual_data == expected_data
+
+    def test_create_and_edit_tag(self, client: FlaskClient):
+        token = self.get_token(client)
+
+        tag_data = {"name": "name", "color": "color"}
+        tag_id = self.post_tag(client, token, tag_data).json["data"]
+
+        new_data = {"name": "new_name", "color": "new_color"}
+        self.edit_tag(client, tag_id, new_data, token)
+
+        tags = self.get_tags(client).json["data"]
+
+        expected_data = deepcopy(new_data)
+        expected_data["id"] = tag_id
+        assert tags[0] == expected_data
+
+    def test_try_set_name_to_already_taken_by_other_tag(self, client: FlaskClient):
+        token = self.get_token(client)
+
+        tag_1_data = {"name": "name", "color": "color"}
+        self.post_tag(client, token, tag_1_data)
+
+        tag_2_data = {"name": "name_2", "color": "color"}
+        tag_2_id = self.post_tag(client, token, tag_2_data).json["data"]
+
+        new_data_2 = {"name": "name", "color": "new_color"}
+        result = self.edit_tag(client, tag_2_id, new_data_2, token)
+
+        assert result.status_code == 400
+
+        actual_error_message = result.json["error"]
+        expected_error_message = f"tag with name 'name' already exists"
+
+        assert actual_error_message == expected_error_message
+
+    def test_try_set_name_to_same(self, client: FlaskClient):
+        token = self.get_token(client)
+
+        tag_data = {"name": "name", "color": "color"}
+        tag_id = self.post_tag(client, token, tag_data).json["data"]
+
+        new_data = {"name": "name", "color": "new_color"}
+        self.edit_tag(client, tag_id, new_data, token)
+
+        tags = self.get_tags(client).json["data"]
+
+        expected_data = deepcopy(new_data)
+        expected_data["id"] = tag_id
+        assert tags[0] == expected_data
 
     def test_delete_tag_bad_token(self, client: FlaskClient):
         result = self.delete_tag(client, 0, token="")

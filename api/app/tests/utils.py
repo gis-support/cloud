@@ -5,8 +5,9 @@ import json
 import os
 from io import BytesIO
 import uuid
+from pathlib import Path
 
-TEST_DATA_DIR = os.path.dirname(os.path.abspath(__file__))
+TEST_DATA_DIR = str(Path(Path(__file__).parent, "resources").absolute())
 
 
 class BaseTest:

@@ -1,0 +1,69 @@
+Replace tag data
+---
+tags:
+  - Layers tags
+summary: Replace tag data
+
+produces:
+  - application/json
+parameters:
+  - in: path
+    name: tag_id
+    required: true
+    schema:
+      type: int
+    example: 1
+
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "name"
+          required: true
+          description: "Name of the new tag. Must be unique among other tags"
+        color:
+          type: string
+          example: "#123456"
+          required: true
+
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  204:
+    description: OK
+
+  400:
+    description: Tag with such name already exists.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "message"
+
+  403:
+    description: token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+  404:
+    description: Tag does not exists
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Tag with ID '1' does not exist"

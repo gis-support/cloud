@@ -13,7 +13,7 @@
           >
             <i class="fa fa-image" />
             &nbsp;&nbsp;
-            <span>{{ $i18n.t('settings.logo') }}</span>
+            <span>{{ $i18n.t('settings.tabLogo') }}</span>
           </a>
         </li>
         <li>
@@ -35,7 +35,7 @@
           >
             <i class="fa fa-quora"></i>
             &nbsp;&nbsp;
-            <span>{{ $i18n.t('settings.qgis') }}</span>
+            <span>{{ $i18n.t('settings.tabQgis') }}</span>
           </a>
         </li>
         <li>
