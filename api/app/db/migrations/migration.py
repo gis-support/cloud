@@ -7,7 +7,7 @@ class Migration(BaseModel):
     """Model przechowujący nazwy dotychczas wykonanych skryptów migracyjnych"""
 
     class Meta:
-        table_name = "versions"
+        table_name = "migration"
         schema = "system"
 
     id = AutoField(primary_key=True)
