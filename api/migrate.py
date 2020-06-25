@@ -33,12 +33,10 @@ def main(app):
 
     with app._db.atomic():
 
-        create_tables(app._db)
-
         script: Path
         for script in scripts_to_be_executed:
 
-            print(f"{script.name}...", end="")
+            print(f"{script.name}... ", end="")
 
             try:
                 if script.name.endswith(".py"):
@@ -49,9 +47,10 @@ def main(app):
                 print("")
                 raise
             else:
-                print("\t\tDONE")
+                print("\33[32m", "OK", '\33[0m')
 
         insert_migrations(scripts_to_be_executed)
+        create_tables(app._db)
 
     return 0
 
