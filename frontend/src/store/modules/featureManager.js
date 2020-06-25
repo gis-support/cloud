@@ -95,6 +95,16 @@ export default {
         return err.response;
       }
     },
+    async deleteFileAttachments(ctx, ids) {
+      try {
+        const response = await swagger.apis["QGIS Attachments"].delete_api_attachments_qgis({
+          ids: ids
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async downloadLayer(ctx, payload) {
       try {
         const response = await swagger.apis.Export.post_api_layers__lid__export_geojson({
@@ -115,6 +125,16 @@ export default {
           fid: payload.fid
         });
         ctx.commit("editFeatureInActiveLayer", payload);
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async getAttachmentsMeta(ctx, ids) {
+      try {
+        const response = await swagger.apis["QGIS Attachments"].get_api_attachments_qgis_metadata({
+          params: { ids: ids }
+        });
         return response;
       } catch (err) {
         return err.response;

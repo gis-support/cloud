@@ -12,7 +12,7 @@
       />
       {{ $i18n.t(`featureManager.addAttachment`) }}
     </button>
-    <div v-if="featureAttachments">
+    <div v-if="featureAttachments || filesAttachments">
       <h4>{{ $i18n.t(`featureManager.attachmentsTitlepublic`) }}:</h4>
       <div
         v-if="
@@ -69,6 +69,98 @@
           </div>
         </template>
       </span>
+      <div v-if="isfilesAttachmentsLoaded">
+        <h4>{{ "Załączniki" }}:</h4>
+        <div v-if="filesAttachments.length > 0">
+          <button
+            class="btn btn-link green"
+            v-if="permission === 'write'"
+            :disabled="checkedIds.length < 1"
+          >
+            <i
+              class="fa fa-download"
+              aria-hidden="true"
+            />
+            {{ $i18n.t(`featureManager.checkedDownload`) }}
+          </button>
+          <button
+            class="btn btn-link red"
+            v-if="permission === 'write'"
+            :disabled="checkedIds.length < 1"
+            @click="deleteFileAttachments(checkedIds.join(','))"
+          >
+            <i
+              class="fa fa-trash"
+              aria-hidden="true"
+            />
+            {{ $i18n.t(`featureManager.checkedDelete`) }}
+          </button>
+        </div>
+        <div
+          v-if="filesAttachments.length < 1"
+          class="empty-sub-panel"
+        >
+          <i
+            class="fa fa-paperclip"
+            aria-hidden="true"
+          />
+          {{ $i18n.t("default.noAttachments") }}
+        </div>
+        <template
+          v-else
+          v-for="att in filesAttachments"
+        >
+          <div
+            class="media"
+            :key="att.id"
+          >
+            <div class="media-left">
+              <h3>
+                <i
+                  class="fa fa-paperclip"
+                  aria-hidden="true"
+                />
+              </h3>
+            </div>
+            <div class="media-body">
+              <h5 class="media-heading">
+                <span>
+                  <input
+                    type="checkbox"
+                    id="checkbox"
+                    :value="att.id"
+                    v-model="checkedIds"
+                  />
+                  {{ att.file_name }}
+                  <i
+                    class="fa fa-trash"
+                    aria-hidden="true"
+                    style="cursor:pointer"
+                    :title="$i18n.t('featureManager.deleteAttachment')"
+                    @click="deleteFileAttachments(att.id)"
+                  />
+                </span>
+              </h5>
+              <h6 class="media-heading">
+                <span>{{"Autor: " + att.added_by }}</span>
+              </h6>
+              <h6 class="media-heading">
+                <span>{{"Data: " + (new Date(Date.parse(att.added_at))).toLocaleDateString("pl-PL") }}</span>
+              </h6>
+            </div>
+          </div>
+        </template>
+      </div>
+      <div
+        class="loading-overlay pt-10 pb-10"
+        style="text-align: center"
+        v-else
+      >
+        <div class="loading-indicator mb-10">
+          <h4>{{ $i18n.t("default.loading") }}</h4>
+          <i class="fa fa-lg fa-spin fa-spinner" />
+        </div>
+      </div>
     </div>
     <div v-if="usersGroup !== 'default'">
       <h4>{{ $i18n.t(`featureManager.attachmentsTitleGroup`) }}{{ usersGroup }}:</h4>
@@ -204,7 +296,7 @@
                         {{file.name}}
                         <i
                           class="icon-li fa fa-times fa-lg ml-5"
-                          @click="removeFile(file)"
+                          @click.stop="removeFile(file)"
                         />
                       </li>
                     </ul>
@@ -271,6 +363,10 @@ export default {
     FileUpload
   },
   props: {
+    attachmentsIds: {
+      type: String,
+      default: ''
+    },
     lid: {
       type: String,
       default: ''
@@ -291,10 +387,16 @@ export default {
   data: () => ({
     attachmentLink: undefined,
     // attachmentModes: ['public', 'default'],
+    attachementsData: [],
     attachmentName: undefined,
+    checkedIds: [],
+    dataFiles: [],
     files: [],
+    filesAttachments: [],
     isAttachmentAdding: false,
     isAttachmentPublic: '',
+    isfilesAttachmentsLoaded: true,
+    isFilePrepared: false,
     postAction: `${
       vm.$store.getters.getApiUrl
     }/attachments_qgis?token=${localStorage.getItem('token')}`
@@ -340,6 +442,51 @@ export default {
         this.toggleAttachmentAdding(false);
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async deleteFileAttachments(ids) {
+      this.$alertify
+        .confirm(
+          this.$i18n.t('featureManager.deleteAttachmentConfirm'),
+          async () => {
+            const r = await this.$store.dispatch('deleteFileAttachments', ids);
+            if (r.status === 204) {
+              const idsToDelete = ids.toString().split(',');
+              this.filesAttachments = this.filesAttachments.filter(fA => {
+                return !idsToDelete.includes(fA.id.toString());
+              });
+              this.$emit('deleteIds', idsToDelete);
+            } else {
+              this.$alertify.error(this.$i18n.t('default.error'));
+            }
+          },
+          () => {}
+        )
+        .set({ title: this.$i18n.t('featureManager.deleteAttachmentHeader') })
+        .set({
+          labels: {
+            ok: this.$i18n.t('default.delete'),
+            cancel: this.$i18n.t('default.cancel')
+          }
+        });
+    },
+    async getAttachmentsMeta() {
+      this.isfilesAttachmentsLoaded = false;
+      this.filesAttachments = [];
+      if (this.attachmentsIds) {
+        const r = await this.$store.dispatch(
+          'getAttachmentsMeta',
+          this.attachmentsIds
+        );
+        if (r.status === 200) {
+          this.filesAttachments = r.obj.data;
+          this.isfilesAttachmentsLoaded = true;
+        } else {
+          //TODO: Obsługa błędu
+          this.isfilesAttachmentsLoaded = true;
+        }
+      } else {
+        this.isfilesAttachmentsLoaded = true;
       }
     },
     async getUsers() {
@@ -391,6 +538,16 @@ export default {
         }
       }
     },
+    getBase64(file, onLoadCallback) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    },
     removeFile(file) {
       let fileIndex = this.files.indexOf(file);
       if (fileIndex > -1) {
@@ -398,34 +555,22 @@ export default {
       }
     },
     sendFiles() {
+      this.isFilePrepared = false;
       let data = [];
       for (file of this.files) {
-        data.push({ content: file, name: file.file.name });
+        const name = file.file.name;
+        var promise = this.getBase64(file.file);
+        promise
+          .then(function(result) {
+            data.push({ content: result, name: name });
+          })
+          .then(() => {
+            if (this.files.length === data.length) {
+              this.dataFiles = data;
+              this.isFilePrepared = true;
+            }
+          });
       }
-      console.log(data);
-      /*
-      this.$http
-        .post(this.postAction, data)
-        .then(r => {
-          this.$refs.closeModalBtn.click();
-          if (r.status === 201) {
-            vm.$alertify.success(
-              vm.$i18n.t('upload.uploadSuccess') +
-                ' ' +
-                r.data.original_file_name
-            );
-            //TODO: Dodanie pliku do listy załączników
-          } else {
-            vm.$alertify.error(
-              vm.$i18n.t('upload.uploadError') + ' ' + newFile.name
-            );
-          }
-        })
-        .catch(err => {
-          this.$refs.closeModalBtn.click();
-          this.$alertify.error(this.$i18n.t('upload.uploadError'));
-        });
-      */
     },
     toggleAttachmentAdding(vis) {
       this.isAttachmentAdding = vis;
@@ -433,6 +578,41 @@ export default {
       this.attachmentLink = '';
       this.attachmentName = '';
       this.isAttachmentPublic = '';
+    }
+  },
+  watch: {
+    isFilePrepared(newValue) {
+      if (newValue) {
+        this.$http
+          .post(
+            this.postAction,
+            { data: this.dataFiles },
+            { params: { feature_id: this.fid, layer_id: this.lid } }
+          )
+          .then(r => {
+            if (r.status === 201) {
+              this.clearUploadFiles();
+              vm.$alertify.success(vm.$i18n.t('upload.uploadSuccess'));
+              const dateNow = new Date(Date.now());
+              const idsToAdd = [];
+              const newAtts = [];
+              const user = this.$store.getters.getUser;
+              for (let idx in r.data.data) {
+                const newAtt = r.data.data[idx];
+                newAtt.added_at = dateNow;
+                newAtt.added_by = user;
+                newAtt.file_name = newAtt.saved_as;
+                newAtt.id = newAtt.attachment_id;
+                newAtts.push(newAtt);
+                idsToAdd.push(newAtt.attachment_id);
+              }
+              this.$emit('addIds', idsToAdd.join(';'));
+              this.filesAttachments = this.filesAttachments.concat(newAtts);
+            } else {
+              vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
+            }
+          });
+      }
     }
   },
   mounted() {
