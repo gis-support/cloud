@@ -20,6 +20,8 @@ def run_sql_migration(app, script: Path):
 
 
 def main(app):
+    Migration.create_table(safe=True)
+
     query_executed_scripts = Migration.select(Migration.script).tuples()
     executed_scripts = [row[0] for row in query_executed_scripts]
 
@@ -56,5 +58,12 @@ def main(app):
 
 
 if __name__ == '__main__':
+    print("DEVELOPMENT")
     app = create_app('development')
+    main(app)
+
+    print("")
+
+    print("TESTING")
+    app = create_app('testing')
     main(app)
