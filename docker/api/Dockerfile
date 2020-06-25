@@ -17,3 +17,6 @@ RUN chmod +x /usr/bin/tests
 COPY ./docker/api/cli.sh /usr/bin/cli
 RUN chmod +x /usr/bin/cli
 COPY ./api ./api
+
+COPY ./docker/api/migrate.sh /usr/bin/migrate
+RUN chmod +x /usr/bin/migrate
