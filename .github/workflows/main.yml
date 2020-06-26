@@ -10,7 +10,7 @@ jobs:
       with:
         host: ${{ secrets.HOST_CLOUD }}
         username: ${{ secrets.USERNAME_CLOUD }}
-        password: ${{ secrets.PASS_CLOUD }}
+        key: ${{ secrets.KEY_CLOUD }}
         port: ${{ secrets.PORT_CLOUD }}
         script_stop: true
         script: |
