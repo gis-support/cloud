@@ -105,6 +105,16 @@ export default {
         return err.response;
       }
     },
+    async downloadFileAttachments(ctx, ids) {
+      try {
+        const response = await swagger.apis["QGIS Attachments"].get_api_attachments_qgis_files({
+          ids: ids
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async downloadLayer(ctx, payload) {
       try {
         const response = await swagger.apis.Export.post_api_layers__lid__export_geojson({
