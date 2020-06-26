@@ -1,0 +1,33 @@
+name: CI
+on: push
+jobs:
+  deploy-cloud:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/deploy-cloud'
+    steps:
+    - name: Cloud deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST_CLOUD }}
+        username: ${{ secrets.USERNAME_CLOUD }}
+        key: ${{ secrets.KEY_CLOUD }}
+        port: ${{ secrets.PORT_CLOUD }}
+        script_stop: true
+        script: |
+          cd cloud
+          sh github_pull.sh
+  deploy-rdos:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/deploy-rdos'
+    steps:
+    - name: RDOS deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST_RDOS }}
+        username: ${{ secrets.USERNAME_RDOS }}
+        key: ${{ secrets.KEY_RDOS }}
+        port: ${{ secrets.PORT_RDOS }}
+        script_stop: true
+        script: |
+          cd cloud
+          sh github_pull.sh
