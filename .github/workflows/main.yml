@@ -15,7 +15,7 @@ jobs:
         script_stop: true
         script: |
           cd cloud
-          sh github_pull.sh
+          sh pull.sh
   deploy-rdos:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/deploy-rdos'
@@ -25,9 +25,9 @@ jobs:
       with:
         host: ${{ secrets.HOST_RDOS }}
         username: ${{ secrets.USERNAME_RDOS }}
-        key: ${{ secrets.KEY_RDOS }}
+        password: ${{ secrets.PASS_CLOUD }}
         port: ${{ secrets.PORT_RDOS }}
         script_stop: true
         script: |
           cd cloud
-          sh github_pull.sh
+          sh pull.sh
