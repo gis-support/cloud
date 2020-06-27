@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from flask.testing import FlaskClient
 
 from app.tests.utils import BaseTest, TEST_DATA_DIR
 from io import BytesIO
@@ -195,3 +196,62 @@ class TestSettings(BaseTest):
         assert r.json
         assert len(r.json['distance']['pk']) == 17
         assert len(r.json['distance']['pn']) == 2
+
+    def test_distance_xlsx_get(self, client: FlaskClient):
+        token = self.get_token(client, admin=True)
+        path = os.path.join(TEST_DATA_DIR, 'layers')
+        # Parki narodowe
+        pn_file_request = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'pn.dbf'), 'rb').read())), 'pn.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'pn.prj'), 'rb').read())), 'pn.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'pn.shx'), 'rb').read())), 'pn.shx'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'pn.shp'), 'rb').read())), 'pn.shp'),
+            'name': 'pn',
+            'epsg': '2180',
+            'encoding': 'cp1250'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=pn_file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid_pn = r.json['layers']['id']
+        # Parki krajobrazowe
+        pk_file_request = {
+            'file[0]': (BytesIO((open(os.path.join(path, 'pk.dbf'), 'rb').read())), 'pk.dbf'),
+            'file[1]': (BytesIO((open(os.path.join(path, 'pk.prj'), 'rb').read())), 'pk.prj'),
+            'file[2]': (BytesIO((open(os.path.join(path, 'pk.shx'), 'rb').read())), 'pk.shx'),
+            'file[3]': (BytesIO((open(os.path.join(path, 'pk.shp'), 'rb').read())), 'pk.shp'),
+            'name': 'pk',
+            'epsg': '2180',
+            'encoding': 'cp1250'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=pk_file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid_pk = r.json['layers']['id']
+        # Warstwa do testów
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct_points.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct_points.geojson'),
+            'name': 'test_points'
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        lid = r.json['layers']['id']
+        fid = 2
+        # Zapisanie ustawień
+        settings = {
+            "pn": lid_pn,
+            "pk": lid_pk
+        }
+        client.put(
+            f'/api/analysis/settings?token={token}', data=json.dumps(settings))
+        # Analiza 100km od punktów z Dolnego Śląska
+        data = {
+            "buffer": 100*1000,
+            "name": "testowy punkt"
+        }
+        r = client.post(
+            f'/api/analysis/distance/{lid}/{fid}/xlsx?token={token}', data=json.dumps(data))
+
+        assert r.status_code == 200
+
+
+
