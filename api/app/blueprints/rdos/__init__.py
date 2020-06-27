@@ -19,7 +19,6 @@ TABLES = [
 
 
 def init_rdos(app):
-    app._db.drop_tables(reversed(TABLES), safe=True, cascade=True)
     app._db.create_tables(TABLES, safe=True)
     app.register_blueprint(mod_attachments, url_prefix='/api')
     app.register_blueprint(mod_services, url_prefix='/api')
