@@ -9,7 +9,7 @@ migrations_path = Path(Config.ROOT_DIRECTORY, "scripts", "migrations")
 def get_scripts() -> List[Path]:
     result: List[Path] = []
     for path in migrations_path.iterdir():
-        if path.name.endswith(".py") or path.name.endswith(".sql"):
+        if path.name.endswith(".py"):
             result.append(path)
 
     return result

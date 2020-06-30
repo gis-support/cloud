@@ -14,11 +14,6 @@ def run_python_migration(app, script: Path):
     module.run_migration(app)
 
 
-def run_sql_migration(app, script: Path):
-    sql = script.read_text()
-    app._db.execute_sql(sql)
-
-
 def main(app):
     Migration.create_table(safe=True)
 
@@ -43,8 +38,6 @@ def main(app):
             try:
                 if script.name.endswith(".py"):
                     run_python_migration(app, script)
-                elif script.name.endswith(".sql"):
-                    run_sql_migration(app, script)
             except:
                 print("")
                 raise
