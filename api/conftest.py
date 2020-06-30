@@ -59,6 +59,10 @@ def app():
     app._db.execute_sql(f"TRUNCATE system.attachment_qgis RESTART IDENTITY CASCADE;")
     app._db.execute_sql(f"DROP TYPE IF EXISTS {TEST_ENUM_NAME} CASCADE;")
 
+    app._db.execute_sql("TRUNCATE attachment RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE settings RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE service RESTART IDENTITY CASCADE;")
+
     app._redis.delete('user_list')
     cur = app._db.execute_sql(
         "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
