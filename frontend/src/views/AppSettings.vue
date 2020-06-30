@@ -33,7 +33,7 @@
             data-toggle="tab"
             @click="setActiveTab('qgis')"
           >
-            <i class="fa fa-quora"></i>
+            <i class="fa">Q</i>
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.tabQgis') }}</span>
           </a>
@@ -44,7 +44,7 @@
             data-toggle="tab"
             @click="setActiveTab('tags')"
           >
-            <i class="fa fa-quora" />
+            <i class="fa fa-tumblr" />
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.tags') }}</span>
           </a>
@@ -192,7 +192,7 @@ import Tags from '@/components/Tags';
 export default {
   name: 'AppSettings',
   data: () => ({
-    activeTab: 'tabLogo',
+    activeTab: 'logo',
     favicon: undefined,
     logo: undefined,
     postLogo: `${vm.$store.getters.getApiUrl}/logo?token=${localStorage.getItem(
