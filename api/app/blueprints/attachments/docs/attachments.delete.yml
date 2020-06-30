@@ -1,4 +1,5 @@
-Delete attachments
+Delete attachments.
+Allows to remove file from a feature immediately.
 ---
 
 tags:
@@ -21,6 +22,16 @@ parameters:
     required: true
     type: string
     example: "1,2,3"
+  - name: feature_id
+    in: query
+    description: ID of feature from which file should be removed
+    required: false
+    type: string
+  - name: layer_id
+    in: query
+    description: ID of layer containing `feature_id`
+    required: false
+    type: string
 
 
 responses:

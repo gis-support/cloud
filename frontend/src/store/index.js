@@ -1,9 +1,10 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
-import authModule from '@/store/modules/auth';
-import dashboardModule from '@/store/modules/dashboard';
-import featureManagerModule from '@/store/modules/featureManager';
-import usersModule from '@/store/modules/users';
+import Vue from "vue";
+import Vuex from "vuex";
+import authModule from "@/store/modules/auth";
+import dashboardModule from "@/store/modules/dashboard";
+import featureManagerModule from "@/store/modules/featureManager";
+import usersModule from "@/store/modules/users";
+import tagsModule from "@/store/modules/tags";
 
 Vue.use(Vuex);
 
@@ -13,5 +14,6 @@ export default new Vuex.Store({
     dashboardModule,
     featureManagerModule,
     usersModule,
-  },
+    tagsModule
+  }
 });

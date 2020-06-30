@@ -1,0 +1,1 @@
+ATTACHMENTS_COLUMN_NAME = "__attachments"

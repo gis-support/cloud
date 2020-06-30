@@ -13,7 +13,7 @@ from app.docs import path_by
 @swag_from(path_by(__file__, 'docs/tags.get.yml'), methods=['GET'])
 @token_required
 def tags_get():
-    query = Tag.select()
+    query = Tag.select().order_by(Tag.id)
     result = list(query.dicts())
 
     return jsonify({"data": result})
@@ -38,8 +38,9 @@ def tags_post():
 
     return jsonify({"data": tag.id}), 201
 
-@mod_layers.route("/tags/<int:tag_id>", methods=["DELETE"])
-@swag_from(path_by(__file__, 'docs/tags.tag_id.delete.yml'), methods=['DELETE'])
+@mod_layers.route("/tags/<int:tag_id>", methods=["PUT", "DELETE"])
+@swag_from(path_by(__file__, 'docs/tags.tag_id.put.yml'), methods=["PUT"])
+@swag_from(path_by(__file__, 'docs/tags.tag_id.delete.yml'), methods=["DELETE"])
 @token_required
 def tags_tag_id_delete(tag_id: int):
     tag = Tag.get_or_none(id=tag_id)
@@ -47,7 +48,16 @@ def tags_tag_id_delete(tag_id: int):
     if tag is None:
         return jsonify({"error": f"tag with ID '{tag_id}' does not exist"}), 404
 
-    tag.delete_instance(recursive=True)
+    if request.method == "PUT":
+        payload = request.get_json(force=True)
+        name = payload["name"]
+
+        if Tag.select().where(Tag.name == name, Tag.id != tag_id).exists():
+            return jsonify({"error": f"tag with name '{name}' already exists"}), 400
+        Tag.update(**payload).where(Tag.id == tag_id).execute()
+
+    if request.method == "DELETE":
+        tag.delete_instance(recursive=True)
 
     return jsonify({}), 204
 

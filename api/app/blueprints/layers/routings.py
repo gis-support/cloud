@@ -9,6 +9,7 @@ from flask import Blueprint, jsonify, request, current_app, make_response, Respo
 from flasgger import swag_from
 
 from app.blueprints.layers.dicts.dict import Dict
+from app.blueprints.layers.layers_attachments import LayerAttachmentsManager
 from app.blueprints.layers.tags.models import LayerTag
 from app.db.database import database
 from app.docs import path_by
@@ -153,7 +154,10 @@ def layers(cloud):
                 cur = current_app._db.cursor()
                 cur.copy_from(tfile, '"{}"'.format(name), null='None', columns=list(
                     map(lambda c: '"{}"'.format(c), columns)))
-        layer = Layer({"app": current_app, "user": request.user, "name": name})
+
+            layer = Layer({"app": current_app, "user": request.user, "name": name})
+            LayerAttachmentsManager.create_attachments_column(layer)
+
         return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
 
 

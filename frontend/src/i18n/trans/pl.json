@@ -289,9 +289,13 @@
     "tagName": "Nazwa",
     "saveTag": "Zapisz tag",
     "tagColor": "Kolor",
+    "deleteTagTitle": "Usuwanie tagu",
+
+    "deleteTagConfirm": "Czy na pewno chcesz usunąć wybrany tag?",
+    "deleteTagError": "Podczas usuwania tagu wystąpił błąd",
     "tagsTable": {
       "id": "ID",
-      "tag": "Tag",
+      "name": "Tag",
       "color": "Kolor",
       "actions": "Akcje"
     }

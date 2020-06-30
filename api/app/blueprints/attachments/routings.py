@@ -6,13 +6,14 @@ from mimetypes import guess_type
 from tempfile import NamedTemporaryFile
 from typing import List, Union, IO
 
-from flask import Blueprint, request, current_app, jsonify, send_file
+from flask import Blueprint, request, current_app, jsonify, send_file, send_from_directory
 
 from app.blueprints.attachments.models import Attachment
+from app.blueprints.layers.layers_attachments import LayerAttachmentsManager, LayerNotSupportedError
 from app.db.general import token_required
 
 from app.docs.utils import swag_from_docs
-
+from app.helpers.layer import Layer
 
 mod_attachments_qgis = Blueprint("attachments_qgis", __name__)
 
@@ -26,6 +27,9 @@ def attachments_post():
     result = []
 
     payload = request.get_json(force=True)
+
+    layer_id = request.args.get("layer_id")
+    feature_id = request.args.get("feature_id")
 
     files = payload["data"]
 
@@ -46,6 +50,21 @@ def attachments_post():
                 "attachment_id": created.id
             })
 
+        if (layer_id is not None) and (feature_id is not None):
+
+            layer = Layer({"app": current_app, "user": request.user, "lid": layer_id})
+            try:
+                layer.check_write()
+            except PermissionError as e:
+                return jsonify({"error": str(e)}), 403
+            try:
+                manager = LayerAttachmentsManager.from_layer(layer)
+            except LayerNotSupportedError as e:
+                return jsonify({"error": str(e)}), 400
+
+            for row in result:
+                manager.add_attachment_to_object(feature_id, row["attachment_id"])
+
     return jsonify({"data": result}), 201
 
 
@@ -61,9 +80,23 @@ def attachments_metadata_get():
     else:
         ids = []
 
+    layer_id = request.args.get("layer_id")
+    feature_id = request.args.get("feature_id")
+
     query = Attachment.select()
     if len(ids) > 0:
         query = query.where(Attachment.id.in_(ids))
+
+    if (layer_id is not None) and (feature_id is not None):
+
+        layer = Layer({"app": current_app, "user": request.user, "lid": layer_id})
+        try:
+            manager = LayerAttachmentsManager.from_layer(layer)
+        except LayerNotSupportedError as e:
+            return jsonify({"error": str(e)}), 400
+
+        attachments_ids = manager.get_attachments_ids_of_object(feature_id)
+        query = query.where(Attachment.id.in_(attachments_ids))
 
     result = list(query.dicts())
     return jsonify({"data": result})
@@ -94,8 +127,8 @@ def attachments_files_get():
         return send_file(result_file.name, mimetype, True, attachment.file_name)
 
     else:
-        attachments = Attachment.select().where(Attachment.id.in_(ids))
-        result_file = get_attachments_as_zip(attachments)
+        query = Attachment.select().where(Attachment.id.in_(ids))
+        result_file = get_attachments_as_zip(list(query))
 
         return send_file(result_file.name, "archive/zip", True, "attachments.zip")
 
@@ -108,6 +141,9 @@ def attachments_delete():
     ids = request.args.get("ids", "")
     ids = ids.split(",")
 
+    layer_id = request.args.get("layer_id")
+    feature_id = request.args.get("feature_id")
+
     if len(ids) == 0 or ids == [""]:
         return jsonify({"error": "at least one ID is required"}), 400
 
@@ -116,6 +152,21 @@ def attachments_delete():
     with current_app._db.atomic():
         for a in attachments:
             a.delete_instance()
+
+    if (layer_id is not None) and (feature_id is not None):
+
+        layer = Layer({"app": current_app, "user": request.user, "lid": layer_id})
+        try:
+            layer.check_write()
+        except PermissionError as e:
+            return jsonify({"error": str(e)}), 403
+        try:
+            manager = LayerAttachmentsManager.from_layer(layer)
+        except LayerNotSupportedError as e:
+            return jsonify({"error": str(e)}), 400
+
+        for a in attachments:
+            manager.remove_attachment_from_object(feature_id, a.id)
 
     return jsonify({}), 204
 

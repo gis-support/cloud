@@ -29,16 +29,25 @@
             :key="tag.id"
           >
             <td
+              style="max-width: 300px;"
               class="text-center"
               v-for="column of filteredColumns"
               :key="`${tag.id}_${column}`"
-            >{{tag[column]}}</td>
+            >
+              <div
+                class="text-overflow"
+                :title="tag[column]"
+                v-text="tag[column]"
+              ></div>
+            </td>
             <td
+              style="max-width: 100px;"
               class="text-center"
               :key="`${tag.id}_color`"
             >
               <span
                 class="dot"
+                :title="tag.color"
                 :style="{backgroundColor: tag.color}"
               ></span>
             </td>
@@ -54,7 +63,7 @@
               <i
                 class="fa fa-trash fa-lg red icon-hover"
                 :title="$i18n.t('default.delete')"
-                @click="deleteTag(index)"
+                @click="deleteTag(index, tag.id)"
               />
             </td>
           </tr>
@@ -79,7 +88,7 @@
               <input
                 style="width: 100%"
                 class="form-control"
-                v-model="tag.tag"
+                v-model="tag.name"
               />
             </div>
           </div>
@@ -91,6 +100,7 @@
           </div>
         </div>
         <button
+          :disabled="!isValidTagName"
           @click.prevent="editing ? saveEditing() : saveTag()"
           class="btn btn-default"
         >{{ $i18n.t('settings.saveTag') }}</button>
@@ -110,15 +120,18 @@ export default {
   data: () => ({
     editing: false,
     tag: {
-      tag: '',
-      color: null
+      name: '',
+      color: 'rgba(0,0,0,1)'
     },
     tags: [],
-    columns: ['id', 'tag', 'color', 'actions']
+    columns: ['id', 'name', 'color', 'actions']
   }),
   computed: {
     filteredColumns() {
       return this.columns.filter(col => col !== 'actions' && col !== 'color');
+    },
+    isValidTagName() {
+      return this.tag.name.length > 0;
     }
   },
   methods: {
@@ -126,20 +139,50 @@ export default {
       this.editing = true;
       this.tag = { ...tag };
     },
-    saveEditing() {
+    async saveEditing() {
+      const r = await this.$store.dispatch('editTag', {
+        body: this.tag,
+        tag_id: this.tag.id
+      });
       this.tags[this.tags.map(tag => tag.id).indexOf(this.tag.id)] = this.tag;
-      this.tag = { name: '', color: '' };
+      this.tag = { name: '', color: 'rgba(0,0,0,1)' };
       this.editing = false;
     },
-    saveTag() {
-      this.tags.push(
-        Object.assign(this.tag, { id: Math.ceil(Math.random() * 10) })
-      );
+    async saveTag() {
+      const r = await this.$store.dispatch('addTag', this.tag);
+      this.tags.push(Object.assign(this.tag, { id: r.body.data }));
       this.tag = { name: '', color: 'rgba(0,0,0,1)' };
     },
-    deleteTag(index) {
-      this.tags.splice(index, 1);
+    async deleteTag(index, id) {
+      this.$alertify
+        .confirm(
+          this.$i18n.t('settings.deleteTagConfirm'),
+          async () => {
+            const r = await this.$store.dispatch('deleteTag', id);
+            if (r.status === 204) {
+              this.$alertify.success(this.$i18n.t('default.deleted'));
+              this.tags.splice(index, 1);
+            } else {
+              this.$alertify.error(this.$i18n.t('settings.deleteTagError'));
+            }
+          },
+          () => {}
+        )
+        .set({ title: this.$i18n.t('settings.deleteTagTitle') })
+        .set({
+          labels: {
+            ok: this.$i18n.t('default.delete'),
+            cancel: this.$i18n.t('default.cancel')
+          }
+        });
+    },
+    async getTags() {
+      const r = await this.$store.dispatch('getTags');
+      this.tags = r.body.data;
     }
+  },
+  created() {
+    this.getTags();
   }
 };
 </script>
@@ -160,5 +203,10 @@ export default {
   width: 20px;
   border-radius: 50%;
   display: inline-block;
+}
+.text-overflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
