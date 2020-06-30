@@ -1,5 +1,5 @@
-import argparse
 import importlib
+from os import environ
 from pathlib import Path
 
 from app.create import create_app
@@ -52,16 +52,7 @@ def main(app):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='''Uruchamia migracje bazy danych.'''
-    )
-    parser.add_argument(
-        '-c', '--config', dest="config",
-        help='Nazwa konfiguracji, dla której powinna zostać uruchomiona migracja.',
-        choices=["production", "development"], default="development", type=str)
-
-    args = parser.parse_args()
-    config = args.config
+    config = environ["CONFIG"]
 
     print(config.upper())
     app = create_app(config)
