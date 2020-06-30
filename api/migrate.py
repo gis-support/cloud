@@ -1,3 +1,4 @@
+import argparse
 import importlib
 from pathlib import Path
 
@@ -51,8 +52,19 @@ def main(app):
 
 
 if __name__ == '__main__':
-    print("DEVELOPMENT")
-    app = create_app('development')
+    parser = argparse.ArgumentParser(
+        description='''Uruchamia migracje bazy danych.'''
+    )
+    parser.add_argument(
+        '-c', '--config', dest="config",
+        help='Nazwa konfiguracji, dla której powinna zostać uruchomiona migracja.',
+        choices=["production", "development"], default="development", type=str)
+
+    args = parser.parse_args()
+    config = args.config
+
+    print(config.upper())
+    app = create_app(config)
     main(app)
 
     print("")
