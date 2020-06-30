@@ -95,7 +95,7 @@ class Layer(Cloud):
         # TODO: self.syncQML()
         style = LayerStyle(data, self.geom_type(), self.columns()).style
         self.execute("""
-            UPDATE layer_styles SET stylejson=%s WHERE f_table_name = %s
+            UPDATE system.layer_styles SET stylejson=%s WHERE f_table_name = %s
         """, (json.dumps(style), self.name,))
         return style
 
@@ -104,7 +104,7 @@ class Layer(Cloud):
 
     def get_style(self):
         cursor = self.execute("""
-            SELECT stylejson FROM layer_styles WHERE f_table_name = %s
+            SELECT stylejson FROM system.layer_styles WHERE f_table_name = %s
         """, (self.name,))
         return cursor.fetchone()[0]
 
@@ -119,7 +119,7 @@ class Layer(Cloud):
         self.execute(
             SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
         self.execute("""
-            UPDATE layer_styles SET f_table_name = %s WHERE f_table_name = %s
+            UPDATE system.layer_styles SET f_table_name = %s WHERE f_table_name = %s
         """, (self.name, old_name,))
         self.lid = self.hash_name(self.name)
         for callback in callbacks:
@@ -257,7 +257,7 @@ class Layer(Cloud):
             DROP TABLE {} CASCADE
         """).format(Identifier(self.name)))
         self.execute("""
-            DELETE FROM layer_styles WHERE f_table_name=%s;
+            DELETE FROM system.layer_styles WHERE f_table_name=%s;
         """, (self.name,))
 
     # Convert layer to GeoJSON

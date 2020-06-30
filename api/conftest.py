@@ -52,12 +52,16 @@ def app():
                 user=Identifier(group.decode('utf-8'))))
         except:
             pass
-    app._db.execute_sql("TRUNCATE layer_styles RESTART IDENTITY;")
-    app._db.execute_sql("TRUNCATE layer_tag RESTART IDENTITY;")
-    app._db.execute_sql("TRUNCATE tag RESTART IDENTITY CASCADE;")
-    app._db.execute_sql("TRUNCATE dict RESTART IDENTITY CASCADE;")
-    app._db.execute_sql(f"TRUNCATE attachment_qgis RESTART IDENTITY CASCADE;")
+    app._db.execute_sql("TRUNCATE system.layer_styles RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE system.layer_tag RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE system.tag RESTART IDENTITY CASCADE;")
+    app._db.execute_sql("TRUNCATE system.dict RESTART IDENTITY CASCADE;")
+    app._db.execute_sql(f"TRUNCATE system.attachment_qgis RESTART IDENTITY CASCADE;")
     app._db.execute_sql(f"DROP TYPE IF EXISTS {TEST_ENUM_NAME} CASCADE;")
+
+    app._db.execute_sql("TRUNCATE attachment RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE settings RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE service RESTART IDENTITY CASCADE;")
 
     app._redis.delete('user_list')
     cur = app._db.execute_sql(

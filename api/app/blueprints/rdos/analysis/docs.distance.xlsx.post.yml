@@ -1,0 +1,48 @@
+Distance analysis
+---
+tags:
+  - Analysis
+summary: Add new attachment to feature
+produces:
+  - application/json
+parameters:
+  - name: lid
+    in: path
+    description: Layer ID
+    required: true
+    type: string
+  - name: fid
+    in: path
+    description: Feature ID
+    required: true
+    type: string
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        buffer:
+          type: number
+          required: true
+        name:
+          type: string
+          required: true
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+responses:
+  200:
+    description: .xlsx file
+
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

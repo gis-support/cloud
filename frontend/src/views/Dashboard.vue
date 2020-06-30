@@ -555,6 +555,9 @@ export default {
       document
         .querySelector('#addLayerWmsModal button.btn.btn-default')
         .click();
+      if (this.isFetching) {
+        return;
+      }
       this.fetchedLayers = [];
       this.selectedLayers = [];
       this.serviceName = '';
