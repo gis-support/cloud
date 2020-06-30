@@ -12,6 +12,7 @@ class Dict(BaseModel):
 
     class Meta:
         table_name = "dict"
+        schema = "system"
         constraints = [
             SQL("CONSTRAINT dict_unique UNIQUE (layer_id, column_name, enumerator_name)")
         ]

@@ -13,6 +13,7 @@ class Attachment(BaseModel):
 
     class Meta:
         table_name = "attachment_qgis"
+        schema = "system"
 
     id = AutoField(primary_key=True)
     file_name = TextField(unique=True)
