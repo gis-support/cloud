@@ -66,41 +66,66 @@
           >
             <div class="panel-heading pl-0 pr-0">
               <h4 class="panel-title flex-center">
-                <span
-                  v-if="val.url"
-                  class="panel-title__names"
-                >
-                  <i
-                    style="margin-right:9px"
-                    class="icon-li fa fa-link fa-lg"
-                  />
-                  <span class="bold panel-title__wms">{{ val.name }}</span>
+                <span style="display:inherit">
                   <span
-                    class="desc-sm"
-                    :title="val.url"
+                    v-if="val.url"
+                    class="panel-title__names"
                   >
-                    <strong>URL</strong>
-                    :{{val.url|maxLength}}
+                    <i
+                      style="margin-right:9px"
+                      class="icon-li fa fa-link fa-lg"
+                    />
+                    <span class="bold panel-title__wms">{{ val.name }}</span>
+                    <span
+                      class="desc-sm"
+                      :title="val.url"
+                    >
+                      <strong>URL</strong>
+                      :{{val.url|maxLength}}
+                    </span>
+                    <span
+                      class="desc-sm"
+                      :title="val.layers"
+                    >
+                      <strong>{{ $i18n.t('default.layers') }}</strong>
+                      : {{ val.layers | maxLength }}
+                    </span>
                   </span>
                   <span
-                    class="desc-sm"
-                    :title="val.layers"
+                    v-else
+                    class="panel-title__names"
                   >
-                    <strong>{{ $i18n.t('default.layers') }}</strong>
-                    : {{ val.layers | maxLength }}
+                    <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                    <span
+                      class="bold"
+                      href="#"
+                      @click="goToManager(val)"
+                    >{{ val.name }}</span>
+                    <span class="desc-sm">{{ val.team }}</span>
                   </span>
-                </span>
-                <span
-                  v-else
-                  class="panel-title__names"
-                >
-                  <i class="icon-li fa fa-map-o fa-lg mr-5" />
-                  <span
-                    class="bold"
-                    href="#"
-                    @click="goToManager(val)"
-                  >{{ val.name }}</span>
-                  <span class="desc-sm">{{ val.team }}</span>
+                  <span style="min-width: 100px">
+                    <vSelect
+                      :disabled="isTagAddings"
+                      class="mySelect"
+                      taggable
+                      push-tags
+                      multiple
+                      maxHeight="10px"
+                      label="name"
+                      placeholder="(Brak tagów)"
+                      :options="tags"
+                      v-model="val.tags"
+                      @input="updateLayerTags(val)"
+                      @option:created="createLayerTag"
+                    >
+                      <template v-slot:option="option">
+                        <span :style="`color: ${option.color}`">{{option.name}}</span>
+                      </template>
+                      <template v-slot:selected-option="option">
+                        <span :style="`color: ${option.color}`">{{option.name}}</span>
+                      </template>
+                    </vSelect>
+                  </span>
                 </span>
                 <span
                   id="layers-list-icons"
@@ -376,6 +401,8 @@
 <script>
 import FileUpload from 'vue-upload-component';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
+import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
 
 export default {
   name: 'Dashboard',
@@ -403,6 +430,7 @@ export default {
     isFetching: false,
     isSendingError: false,
     isServicePublic: false,
+    isTagAddings: false,
     layersAll: undefined,
     pickrComponents: {
       preview: true,
@@ -428,11 +456,13 @@ export default {
     selectedDataExtension: '',
     selectedMapService: '',
     selectedLayers: [],
+    tags: [],
     vectorLayerName: '',
     vectorLayersList: undefined
   }),
   components: {
-    FileUpload
+    FileUpload,
+    vSelect
   },
   computed: {
     featureAttachments() {
@@ -470,6 +500,20 @@ export default {
     }
   },
   methods: {
+    createLayerTag(tag) {
+      this.tags.push(tag);
+      //console.log(tag);
+    },
+    updateLayerTags(val) {
+      this.isTagAddings = true;
+      console.log('TODO: Request aktualizujący tag warstwy ');
+      console.log(`Id: ${val.id}`);
+      console.log(`Name: ${val.name}`);
+      console.log(val.tags);
+      setTimeout(() => {
+        this.isTagAddings = false;
+      }, 5000);
+    },
     async addService() {
       const r = await this.$store.dispatch('addService', {
         layers: this.selectedLayers.join(','),
@@ -515,6 +559,10 @@ export default {
     async getServices() {
       const r = await this.$store.dispatch('getServices');
       this.$store.commit('setServices', r.body.services);
+    },
+    async getTags() {
+      const r = await this.$store.dispatch('getTags');
+      this.tags = r.body.data;
     },
     async fetchWms() {
       if (this.serviceUrl.length < 1) {
@@ -728,12 +776,40 @@ export default {
     this.selectedDataExtension = this.dataFormats[0];
     this.getLayers();
     this.getServices();
+    this.getTags();
     this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
   }
 };
 </script>
 
 <style scoped>
+.mySelect >>> .vs__dropdown-toggle,
+.mySelect >>> .vs__search {
+  background-color: white !important;
+}
+.mySelect >>> .vs__search {
+  margin: 0;
+}
+.mySelect >>> .vs__search::placeholder,
+.mySelect >>> .vs__dropdown-toggle,
+.mySelect >>> .vs__dropdown-menu {
+  text-align: center;
+  padding-bottom: 2px;
+  font-size: 12px;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(60, 60, 60, 0.26);
+}
+
+.mySelect >>> .vs__dropdown-toggle > .vs__actions {
+  display: none;
+}
+
+.mySelect >>> .vs__dropdown-toggle > .vs__selected-options > .vs__selected {
+  background-color: white;
+  margin: 0 2px;
+}
+
 .add-layer {
   display: block;
 }
