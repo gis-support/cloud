@@ -95,10 +95,12 @@ export default {
         return err.response;
       }
     },
-    async deleteFileAttachments(ctx, ids) {
+    async deleteFileAttachments(ctx, payload) {
       try {
         const response = await swagger.apis["QGIS Attachments"].delete_api_attachments_qgis({
-          ids: ids
+          ids: payload.ids,
+          layer_id: payload.lid,
+          feature_id: payload.fid
         });
         return response;
       } catch (err) {

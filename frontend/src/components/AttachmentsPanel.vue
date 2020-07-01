@@ -400,7 +400,11 @@ export default {
             ? this.$i18n.t('featureManager.deleteAttachmentsConfirm')
             : this.$i18n.t('featureManager.deleteAttachmentConfirm'),
           async () => {
-            const r = await this.$store.dispatch('deleteFileAttachments', ids);
+            const r = await this.$store.dispatch('deleteFileAttachments', {
+              ids: ids,
+              lid: this.lid,
+              fid: this.fid
+            });
             if (r.status === 204) {
               const idsToDelete = ids.toString().split(',');
               this.filesAttachments = this.filesAttachments.filter(fA => {
