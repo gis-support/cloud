@@ -1271,37 +1271,13 @@ export default {
       });
       if (r.status === 200) {
         this.$modal.hide('distance');
-        const data = JSON.stringify(r.body);
-        const blob = new Blob([data], { type: 'text/plain' });
-        const e = document.createEvent('MouseEvents');
-        const a = document.createElement('a');
-        a.download = `${this.layerName}.xlsx`;
-        a.href = window.URL.createObjectURL(blob);
-        a.dataset.downloadurl = [
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          a.download,
-          a.href
-        ].join(':');
-        e.initEvent(
-          'click',
-          true,
-          false,
-          window,
-          0,
-          0,
-          0,
-          0,
-          0,
-          false,
-          false,
-          false,
-          false,
-          0,
-          null
-        );
-        a.dispatchEvent(e);
+        const blob = new Blob([r.data]);
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', `${this.layerName}.xlsx`);
+        link.click();
       } else {
-        this.$alertify.error(this.$i18n.t('featureManager.downloadXlsxError'));
+        this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
     async getLayers() {
