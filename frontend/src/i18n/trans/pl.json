@@ -54,6 +54,7 @@
     "categorized": "Kategoryzowany",
     "chooseFiles": "Wybierz pliki",
     "columnsTypes": {
+      "attachments": "Załączniki",
       "character varying": "Tekst",
       "real": "Liczba rzeczywista",
       "integer": "Liczba całkowita",
