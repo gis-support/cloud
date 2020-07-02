@@ -510,9 +510,7 @@ export default {
       console.log(`Id: ${val.id}`);
       console.log(`Name: ${val.name}`);
       console.log(val.tags);
-      setTimeout(() => {
-        this.isTagAddings = false;
-      }, 5000);
+      this.isTagAddings = false;
     },
     async addService() {
       const r = await this.$store.dispatch('addService', {
