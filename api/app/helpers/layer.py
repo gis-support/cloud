@@ -1,14 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import uuid
+from tempfile import NamedTemporaryFile
 from typing import Iterable, Callable, List, Any
+
+import openpyxl
+from psycopg2.extras import RealDictCursor
 
 from app.blueprints.layers.dicts.dict import Dict
 from app.blueprints.layers.utils import ATTACHMENTS_COLUMN_NAME
 from app.db import enumerators
 from app.helpers.cloud import Cloud
 from app.helpers.style import QML_TO_OL, LayerStyle, generate_categories
-from psycopg2.sql import SQL, Identifier, Placeholder
+from psycopg2.sql import SQL, Identifier, Placeholder, Literal
 from psycopg2.extensions import AsIs
 from xml.dom import minidom
 from datetime import datetime
@@ -229,7 +233,11 @@ class Layer(Cloud):
     # Column lists
     def columns(self, with_types=False):
         cursor = self.execute(SQL("""
-            SELECT column_name, data_type FROM information_schema.columns WHERE table_name = %s AND column_name NOT IN %s
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_name = %s
+                AND column_name NOT IN %s
+            ORDER BY ordinal_position;
         """), (self.name, RESTRICTED_COLUMNS,))
         if with_types:
             names = {}
@@ -259,6 +267,37 @@ class Layer(Cloud):
         self.execute("""
             DELETE FROM system.layer_styles WHERE f_table_name=%s;
         """, (self.name,))
+
+    def get_features(self, ids: List[int] = None):
+
+        where = SQL("true")
+        if ids is not None:
+            ids_sql = list(map(Literal, ids))
+            ids_sql = SQL(",").join(ids_sql)
+            where = SQL("id IN ({})").format(ids_sql)
+            if len(ids) == 0:
+                where = SQL("false")
+
+        columns = self.columns()
+        columns_sql = list(map(Identifier, columns))
+        columns_sql = [SQL("id"), SQL("ST_AsGeoJSON(geometry) as geometry")] + columns_sql
+
+        sql = SQL("SELECT {} FROM public.{} WHERE {}").format(
+            SQL(",").join(columns_sql),
+            Identifier(self.name),
+            where
+        )
+
+        connection = self.db.connection()
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
+        cursor.execute(sql)
+
+        while (row := cursor.fetchone()) is not None:
+            for column, value in row.items():
+                if column == "geometry":
+                    row[column] = json.loads(value)
+
+            yield row
 
     # Convert layer to GeoJSON
     def as_geojson(self):
@@ -440,4 +479,32 @@ class Layer(Cloud):
                 'distance': row[1]
             })
         return result
+
+def get_features_as_xlsx(layer: Layer, features_ids: List[int]) -> NamedTemporaryFile:
+    columns = layer.columns()
+    columns = [column for column in columns if column != ATTACHMENTS_COLUMN_NAME]
+    columns = ["id"] + columns
+
+    columns_with_order = {column: order for order, column in enumerate(columns)}
+
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+
+    sheet.append(columns)
+
+    features = list(layer.get_features(features_ids))
+    for feature in features:
+
+        feature.pop(ATTACHMENTS_COLUMN_NAME)
+        feature.pop("geometry")
+
+        feature = dict(sorted(feature.items(), key=lambda x: columns_with_order[x[0]]))
+
+        values = list(feature.values())
+        sheet.append(values)
+
+    result = NamedTemporaryFile(suffix=".xlsx")
+    workbook.save(result.name)
+
+    return result
 

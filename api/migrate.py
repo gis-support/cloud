@@ -1,4 +1,5 @@
 import importlib
+from os import environ
 from pathlib import Path
 
 from app.create import create_app
@@ -51,8 +52,10 @@ def main(app):
 
 
 if __name__ == '__main__':
-    print("DEVELOPMENT")
-    app = create_app('development')
+    config = environ["CONFIG"]
+
+    print(config.upper())
+    app = create_app(config)
     main(app)
 
     print("")

@@ -17,29 +17,29 @@
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main">
-        <span
-          class="add-layer"
-          data-toggle="modal"
-          data-target="#addLayerModal"
-          data-type="vectorLayer"
-        >
+        <span class="add-layer">
           <i
             class="fa fa-plus-circle fa-lg green pt-10"
             style="margin-right:5px;"
           />
-          <a class="green section__content--add">{{ $i18n.t('dashboard.list.addLayer') }}</a>
+          <a
+            data-toggle="modal"
+            data-target="#addLayerModal"
+            data-type="vectorLayer"
+            class="green section__content--add"
+          >{{ $i18n.t('dashboard.list.addLayer') }}</a>
         </span>
-        <span
-          class="add-layer"
-          data-toggle="modal"
-          data-target="#addLayerWmsModal"
-          data-type="externalLayer"
-        >
+        <span class="add-layer">
           <i
             class="fa fa-plus-circle fa-lg green pt-10"
             style="margin-right:5px;"
           />
-          <a class="green section__content--add">{{ $i18n.t('dashboard.list.addService') }}</a>
+          <a
+            data-toggle="modal"
+            data-target="#addLayerWmsModal"
+            data-type="externalLayer"
+            class="green section__content--add"
+          >{{ $i18n.t('dashboard.list.addService') }}</a>
         </span>
 
         <div
