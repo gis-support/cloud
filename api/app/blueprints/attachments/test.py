@@ -144,9 +144,10 @@ class TestAttachmentRoutings(BaseTest):
         result = client.get("/api/attachments_qgis/files", query_string=query_string)
         return result
 
-    def delete_attachments(self, client: FlaskClient, ids: List[int], token: str) -> Response:
+    def delete_attachments(self, client: FlaskClient, ids: List[int], token: str,
+                           layer_id: str = None, feature_id: int = None) -> Response:
         ids_param = ",".join(map(str, ids))
-        query_string = {"token": token, "ids": ids_param}
+        query_string = {"token": token, "ids": ids_param, "layer_id": layer_id, "feature_id": feature_id}
 
         result = client.delete("/api/attachments_qgis", query_string=query_string)
         return result
@@ -301,6 +302,29 @@ class TestAttachmentRoutings(BaseTest):
         properties = feature["properties"]
         assert "__attachments" in properties.keys()
         assert properties["__attachments"] == f"{attachment_1_id};{attachment_2_id}"
+
+    def test_create_attachments_for_feature_and_delete(self, client: FlaskClient, resources_directory):
+        token = self.get_token(client)
+
+        file_1 = Path(resources_directory, "images", "logo.png")
+        file_2 = Path(resources_directory, "images", "logo.png")
+        lid = self.add_geojson_prg(client, token)
+        fid = 1
+
+        result = self.create_attachments(client, [file_1, file_2], token, lid, 1)
+        actual_data = result.json["data"]
+
+        attachment_1_id = actual_data[0]["attachment_id"]
+        attachment_2_id = actual_data[1]["attachment_id"]
+
+        result = self.delete_attachments(client, [attachment_1_id, attachment_2_id], token, lid, fid)
+
+        assert result.status_code == 204
+
+        feature = client.get(f'/api/layers/{lid}/features/{fid}?token={token}').json
+        properties = feature["properties"]
+        assert "__attachments" in properties.keys()
+        assert properties["__attachments"] == ""
 
     def test_new_layer_has_attachments_column(self, client: FlaskClient):
         token = self.get_token(client)

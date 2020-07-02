@@ -44,6 +44,7 @@ services:
       - CONTAINER_BASENAME
       - APP_DEV_DB_PORT
       - APP_DEV_HOST_URL
+      - CONFIG=development
     depends_on:
       - db
       - redis
