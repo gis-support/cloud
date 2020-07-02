@@ -446,20 +446,19 @@
         <modal
           name="distance"
           :draggable="true"
-          width="30%"
-          height="80%"
-          @before-close="closeDistanceDialog"
+          width="35%"
+          height="auto"
+          @before-close="bufferValue = undefined; selectedFieldName = undefined;"
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.map.distance") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t("featureManager.distanceAnalysis") }}</h4>
             </div>
             <div
               class="modal-body"
               v-if="activeLayer"
             >
-              <div style="margin-bottom: 100px">
-                <h4>{{ $i18n.t("featureManager.distanceAnalysis") }}</h4>
+              <div style="margin-bottom: 50px">
                 <div
                   class="form-group"
                   style="display: flex;"
@@ -469,7 +468,7 @@
                     style="position: relative; top: 8px"
                   >
                     {{
-                    $i18n.t("featureManager.bufferValue")
+                    $i18n.t("featureManager.bufferValue") + " [m]"
                     }}
                   </label>
                   <input
@@ -503,17 +502,33 @@
                     />
                   </select>
                 </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div
+                class="btn-group btn-group-justified"
+                role="group"
+              >
                 <div
-                  style="float: right"
                   class="btn-group"
                   role="group"
                 >
                   <button
                     :disabled="!bufferValue || !selectedFieldName"
                     type="button"
-                    class="btn btn-default"
+                    class="btn btn-success"
                     @click="generateDistance"
                   >{{ $i18n.t("featureManager.download") }}</button>
+                </div>
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="$modal.hide('distance')"
+                  >{{ $i18n.t("default.close") }}</button>
                 </div>
               </div>
             </div>
@@ -523,7 +538,7 @@
           name="rotation"
           :draggable="true"
           width="30%"
-          height="30%"
+          height="auto"
           @before-close="rotationValue = 0"
         >
           <div class="modal-content dragg-content">
@@ -1038,7 +1053,6 @@ export default {
     currentFeature: undefined,
     dictValues: [],
     labels: [],
-    layers: ['layer1', 'layer2', 'layer3'],
     layerType: undefined,
     draw: undefined,
     editing: false,
@@ -1247,6 +1261,26 @@ export default {
         this.selectedRows = [];
       } else {
         this.$i18n.t('featureManager.downloadError');
+      }
+    },
+    async generateDistance() {
+      const r = await this.$store.dispatch('distanceAnalysisXlsx', {
+        lid: this.$route.params.layerId,
+        fid: this.currentFeature.properties.id,
+        body: {
+          buffer: parseFloat(this.bufferValue),
+          name: this.selectedFieldName
+        }
+      });
+      if (r.status === 200) {
+        this.$modal.hide('distance');
+        const blob = new Blob([r.data]);
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', `${this.layerName}.xlsx`);
+        link.click();
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
     async getLayers() {
@@ -1543,13 +1577,6 @@ export default {
       this.isBuffer = false;
       this.selectedLayerName = undefined;
     },
-    closeDistanceDialog() {
-      this.getLayerByName('buffer')
-        .getSource()
-        .clear();
-      this.bufferValue = undefined;
-      this.selectedFieldName = undefined;
-    },
     changeBaseLayer(layerName) {
       this.map
         .getLayers()
@@ -1779,30 +1806,6 @@ export default {
           );
           this.isBuffer = true;
         }
-      } else {
-        this.$alertify.error(
-          this.$i18n.t('featureManager.bufferGenerateError')
-        );
-      }
-    },
-    generateDistance() {
-      this.getLayerByName('buffer')
-        .getSource()
-        .clear();
-      let buffer = turfBuffer(this.currentFeature, this.bufferValue / 1000, {
-        units: 'kilometers'
-      });
-      if (buffer) {
-        let bufferFeature = new GeoJSON().readFeature(buffer, {
-          featureProjection: 'EPSG:3857',
-          dataProjection: 'EPSG:4326'
-        });
-        if (bufferFeature) {
-          this.getLayerByName('buffer')
-            .getSource()
-            .addFeature(bufferFeature);
-        }
-        //Bufor wygenerowany, można wysłać request
       } else {
         this.$alertify.error(
           this.$i18n.t('featureManager.bufferGenerateError')

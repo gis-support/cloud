@@ -117,6 +117,18 @@ export default {
         return err.response;
       }
     },
+    async distanceAnalysisXlsx(ctx, payload) {
+      try {
+        const response = await swagger.apis.Analysis.post_api_analysis_distance__lid___fid__xlsx({
+          lid: payload.lid,
+          fid: payload.fid,
+          body: payload.body
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async downloadLayer(ctx, payload) {
       try {
         const response = await swagger.apis.Export.post_api_layers__lid__export_geojson({
