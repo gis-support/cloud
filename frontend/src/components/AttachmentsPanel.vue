@@ -1,6 +1,7 @@
 <template>
   <div class="attachments-panel right-sub-panel">
     <div v-if="featureAttachments || filesAttachments">
+      <!--
       <h4>{{ $i18n.t(`featureManager.attachmentsTitlepublic`) }}:</h4>
       <div
         v-if="
@@ -57,70 +58,73 @@
           </div>
         </template>
       </span>
+      -->
       <div
         class="pt-10 pb-10"
         v-if="isfilesAttachmentsLoaded"
       >
         <h4>{{ "Załączniki" }}:</h4>
-        <div
-          v-if="filesAttachments.length < 1"
-          class="empty-sub-panel"
-        >
-          <i
-            class="fa fa-paperclip"
-            aria-hidden="true"
-          />
-          {{ $i18n.t("default.noAttachments") }}
-        </div>
-        <template
-          v-else
-          v-for="att in filesAttachments"
-        >
+        <div style="overflow-y: auto; max-height: 50vh">
           <div
-            class="media"
-            :key="att.id"
+            v-if="filesAttachments.length < 1"
+            class="empty-sub-panel"
           >
-            <div class="media-left">
-              <h3>
-                <i
-                  class="fa fa-paperclip"
-                  aria-hidden="true"
-                />
-              </h3>
-            </div>
-            <div class="media-body">
-              <h5 class="media-heading">
-                <span>
-                  <input
-                    class="mr-5"
-                    type="checkbox"
-                    id="checkbox"
-                    :value="att.id"
-                    v-model="checkedIds"
-                  />
-                  <span
-                    class="mr-5"
-                    style="cursor:pointer"
-                    @click="downloadFileAttachments(att.id.toString())"
-                  >{{ att.file_name }}</span>
-                  <i
-                    class="fa fa-trash"
-                    aria-hidden="true"
-                    style="cursor:pointer"
-                    :title="$i18n.t('featureManager.deleteAttachment')"
-                    @click="deleteFileAttachments(att.id)"
-                  />
-                </span>
-              </h5>
-              <h6 class="media-heading">
-                <span>{{"Autor: " + att.added_by }}</span>
-              </h6>
-              <h6 class="media-heading">
-                <span>{{"Data: " + (new Date(Date.parse(att.added_at))).toLocaleDateString("pl-PL") }}</span>
-              </h6>
-            </div>
+            <i
+              class="fa fa-paperclip"
+              aria-hidden="true"
+            />
+            {{ $i18n.t("default.noAttachments") }}
           </div>
-        </template>
+          <template
+            v-else
+            v-for="att in filesAttachments"
+          >
+            <div
+              class="media"
+              :key="att.id"
+            >
+              <div class="media-left">
+                <h3>
+                  <i
+                    class="fa fa-paperclip"
+                    aria-hidden="true"
+                  />
+                </h3>
+              </div>
+              <div class="media-body">
+                <h5 class="media-heading">
+                  <span>
+                    <input
+                      class="mr-5"
+                      type="checkbox"
+                      id="checkbox"
+                      :value="att.id"
+                      v-model="checkedIds"
+                    />
+                    <span
+                      class="mr-5"
+                      style="cursor:pointer"
+                      @click="downloadFileAttachments(att.id.toString())"
+                    >{{ att.file_name }}</span>
+                    <i
+                      class="fa fa-trash"
+                      aria-hidden="true"
+                      style="cursor:pointer"
+                      :title="$i18n.t('featureManager.deleteAttachment')"
+                      @click="deleteFileAttachments(att.id)"
+                    />
+                  </span>
+                </h5>
+                <h6 class="media-heading">
+                  <span>{{"Autor: " + att.added_by }}</span>
+                </h6>
+                <h6 class="media-heading">
+                  <span>{{"Data: " + (new Date(Date.parse(att.added_at))).toLocaleDateString("pl-PL") }}</span>
+                </h6>
+              </div>
+            </div>
+          </template>
+        </div>
       </div>
       <div
         class="loading-overlay pt-10 pb-10"
@@ -275,7 +279,7 @@
                     >
                       {{file.name}}
                       <i
-                        class="icon-li fa fa-times fa-lg ml-5"
+                        class="icon-li fa fa-times fa-lg ml-5 delete-file-icon"
                         @click.stop="removeFile(file)"
                       />
                     </li>
@@ -449,7 +453,7 @@ export default {
       if (this.attachmentsIds) {
         const r = await this.$store.dispatch(
           'getAttachmentsMeta',
-          this.attachmentsIds
+          this.attachmentsIds.replaceAll(';', ',')
         );
         if (r.status === 200) {
           this.filesAttachments = r.obj.data;
@@ -599,6 +603,10 @@ export default {
 .control-label {
   position: relative;
   top: 8px;
+}
+.delete-file-icon {
+  z-index: 2;
+  position: relative;
 }
 .files-list li {
   width: 120px;
