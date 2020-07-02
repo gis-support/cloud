@@ -71,6 +71,7 @@ services:
       - APP_PROD_DB_PORT
       - APP_PROD_API_PORT
       - APP_PROD_HOST_URL
+      - CONFIG=production
     depends_on:
       - db
       - redis

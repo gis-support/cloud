@@ -216,7 +216,7 @@ class Cloud:
                 ALTER TABLE {} OWNER TO {};
             """).format(Identifier(name), Identifier(self.user)))
             self.execute("""
-                INSERT INTO layer_styles (
+                INSERT INTO system.layer_styles (
                     f_table_catalog,
                     f_table_schema,
                     f_table_name,
