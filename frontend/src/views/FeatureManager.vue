@@ -1924,11 +1924,7 @@ export default {
       layer.changed();
     },
     rotateMapByAngle(angle) {
-      let radians =
-        (angle * Math.PI * 2) / 360 + this.map.getView().getRotation();
-      if (radians > Math.PI * 2) {
-        radians -= Math.PI * 2;
-      }
+      let radians = (angle * Math.PI * 2) / 360;
       this.map.getView().setRotation(radians);
     },
     saveFile(r) {
