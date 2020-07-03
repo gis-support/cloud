@@ -322,7 +322,7 @@
                     >
                       <button
                         type="button"
-                        class="btn btn-danger"
+                        class="btn btn-success"
                         @click="saveNewFeature"
                       >{{ $i18n.t("default.save") }}</button>
                     </div>
@@ -332,7 +332,7 @@
                     >
                       <button
                         type="button"
-                        class="btn btn-default"
+                        class="btn btn-danger"
                         @click="clearFeatureAdding"
                       >{{ $i18n.t("default.cancel") }}</button>
                     </div>
