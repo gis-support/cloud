@@ -352,11 +352,74 @@
           <i class="fa fa-table" />
         </button>
         <modal
+          name="bufferTable"
+          :draggable="true"
+          width="70%"
+          height="auto"
+          @before-close="closeBufferTableDialog()"
+        >
+          <div class="modal-content dragg-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{ $i18n.t("featureManager.bufferTable") }}</h4>
+            </div>
+            <div
+              class="modal-body"
+              style="padding-bottom:0"
+            >
+              <div style="height: 32vh">
+                <BufferTable
+                  v-if="bufferFeatures.length > 0"
+                  ref="buffer-data"
+                  :columns="bufferColumns"
+                  :items="bufferFeatures"
+                />
+                <div
+                  class="loading-overlay pt-10 pb-10"
+                  style="text-align: center"
+                  v-else
+                >
+                  <div class="loading-indicator">
+                    <h4>{{ "Brak danych" }}</h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div
+                class="btn-group btn-group-justified"
+                role="group"
+              >
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    :disabled="bufferFeatures.length < 1"
+                    type="button"
+                    class="btn btn-success"
+                    @click="downloadObjectsArray"
+                  >{{ $i18n.t("featureManager.downloadList") }}</button>
+                </div>
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="$modal.hide('bufferTable')"
+                  >{{ $i18n.t("default.close") }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </modal>
+        <modal
           name="buffer"
           :draggable="true"
-          width="30%"
-          height="80%"
-          @before-close="closeBufferDialog"
+          width="35%"
+          height="auto"
+          @before-close="closeBufferDialog()"
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
@@ -377,7 +440,7 @@
                     style="position: relative; top: 8px"
                   >
                     {{
-                    $i18n.t("featureManager.bufferValue")
+                    $i18n.t("featureManager.bufferValue") + " [m]"
                     }}
                   </label>
                   <input
@@ -417,27 +480,43 @@
                     style="max-width: 75%"
                     class="form-control"
                     :disabled="!isBuffer"
-                    v-model="selectedLayerName"
+                    v-model="selectedLayer"
                   >
                     <option
                       v-for="(layer, idx) of layers"
                       v-text="layer.name"
                       :key="idx"
-                      :value="layer.name"
+                      :value="layer"
                     />
                   </select>
                 </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div
+                class="btn-group btn-group-justified"
+                role="group"
+              >
                 <div
-                  style="float: right"
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    :disabled="!selectedLayer"
+                    type="button"
+                    class="btn btn-success"
+                    @click="generateObjectsArray"
+                  >{{ $i18n.t("featureManager.generateList") }}</button>
+                </div>
+                <div
                   class="btn-group"
                   role="group"
                 >
                   <button
                     type="button"
-                    class="btn btn-default"
-                    :disabled="!selectedLayerName"
-                    @click="generateObjectsArray"
-                  >{{ $i18n.t("featureManager.generate") }}</button>
+                    class="btn btn-danger"
+                    @click="$modal.hide('buffer')"
+                  >{{ $i18n.t("default.close") }}</button>
                 </div>
               </div>
             </div>
@@ -448,7 +527,7 @@
           :draggable="true"
           width="35%"
           height="auto"
-          @before-close="bufferValue = undefined; selectedFieldName = undefined;"
+          @before-close="bufferValue = undefined; selectedFieldName = undefined; bufferFeatureGeometry = undefined"
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
@@ -788,7 +867,7 @@
             >
               <a
                 href="#"
-                @click="indexActiveTab = 2"
+                @click="indexActiveTab = 2;$refs['attachments-panel'].getAttachmentsMeta()"
               >
                 <i class="fa fa-info" />
                 {{ $i18n.t("featureManager.informations") }}
@@ -846,10 +925,7 @@
                 <div class="others">
                   <div class="mb-10">
                     <h4 class="mb-0">{{ $i18n.t("default.otherLayers") }}:</h4>
-                    <span
-                      @click="openAddLayerModal"
-                      @mouseover="getLayers"
-                    >
+                    <span @click="openAddLayerModal">
                       <i
                         class="fa fa-plus-circle fa-lg green pt-10"
                         style="margin-right:5px;"
@@ -967,10 +1043,13 @@
               <AttachmentsPanel
                 ref="attachments-panel"
                 v-if="currentFeature && Object.keys(featureAttachments).length > 0"
+                :attachmentsIds="currentFeature.properties.__attachments"
                 :lid="$route.params.layerId"
                 :fid="currentFeature.properties.id"
                 :permission="permission"
                 :users-group="usersGroup"
+                @addIds="addIds"
+                @deleteIds="deleteIds"
               />
             </div>
           </div>
@@ -1017,6 +1096,7 @@ import { optionsFromCapabilities } from 'ol/source/WMTS';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
+import BufferTable from '@/components/BufferTable.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
 import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
@@ -1026,6 +1106,7 @@ export default {
   components: {
     AttachmentsPanel,
     AttributesPanel,
+    BufferTable,
     FeatureManagerTable,
     FiltersPanel,
     Datepicker,
@@ -1035,7 +1116,16 @@ export default {
     activeServices: [],
     addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
+    bufferColumns: [
+      {
+        head: true,
+        sortable: true,
+        filter: true
+      }
+    ],
     bufferDialog: false,
+    bufferFeatureGeometry: undefined,
+    bufferFeatures: [],
     bufferValue: undefined,
     columnFilterDecisionDialogView: false,
     columns: [
@@ -1056,6 +1146,7 @@ export default {
     editingDataCopy: undefined,
     indexActiveTab: 0,
     isBuffer: false,
+    isBufferTableShowing: false,
     isDrawing: false,
     isInfoDialogVisible: false,
     isMeasure: false,
@@ -1074,7 +1165,7 @@ export default {
     searchItemValue: '',
     selectedColumnFilters: [],
     selectedFieldName: undefined,
-    selectedLayerName: undefined,
+    selectedLayer: undefined,
     selectedRows: [],
     usersGroup: undefined,
     activeOtherLayers: [],
@@ -1260,6 +1351,61 @@ export default {
         this.$i18n.t('featureManager.downloadError');
       }
     },
+    async downloadObjectsArray() {
+      const r = await this.$store.dispatch('bufferAnalysis', {
+        lid: this.selectedLayer.id,
+        body: this.bufferFeatureGeometry,
+        responseType: 'xlsx'
+      });
+      if (r.status === 200) {
+        const blob = new Blob([r.data]);
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', `${this.selectedLayer.name}_bufor.xlsx`);
+        link.click();
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async generateObjectsArray() {
+      const r = await this.$store.dispatch('bufferAnalysis', {
+        lid: this.selectedLayer.id,
+        body: this.bufferFeatureGeometry,
+        responseType: 'json'
+      });
+      if (r.status === 200) {
+        this.isBufferTableShowing = true;
+        if (r.body.data.length > 0) {
+          Object.keys(r.body.data[0]).forEach(el => {
+            this.bufferColumns.push({
+              key: el,
+              name: el,
+              sortable: true,
+              filter: true
+            });
+          });
+          r.body.data.forEach(feat => {
+            const tempItem = {};
+            Object.entries(feat).forEach(([k, v]) => {
+              if (this.featureTypes[k] === 'timestamp without time zone') {
+                tempItem[k] = moment(v).isValid()
+                  ? moment(v)
+                      .locale('pl')
+                      .format('L')
+                  : '';
+              } else {
+                tempItem[k] = v;
+              }
+            });
+            this.bufferFeatures.push(tempItem);
+          });
+        }
+        this.$modal.hide('buffer');
+        this.$modal.show('bufferTable');
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
     async generateDistance() {
       const r = await this.$store.dispatch('distanceAnalysisXlsx', {
         lid: this.$route.params.layerId,
@@ -1274,7 +1420,7 @@ export default {
         const blob = new Blob([r.data]);
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        link.setAttribute('download', `${this.layerName}.xlsx`);
+        link.setAttribute('download', `${this.layerName}_dystans.xlsx`);
         link.click();
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -1284,6 +1430,10 @@ export default {
       if (this.allOtherLayers.length === 0) {
         try {
           const r = await this.$store.dispatch('getLayers');
+          const layers = r.body.layers;
+          this.layers = layers.filter(
+            layer => layer.id !== this.$route.params.layerId
+          );
           this.allOtherLayers = r.body.layers;
         } catch (error) {
           this.$alertify.error(
@@ -1398,6 +1548,19 @@ export default {
         this.$refs['table-data'].$recompute('windowItems'); // update table data
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    addIds(ids) {
+      if (this.currentFeature.properties.__attachments) {
+        this.currentFeature.properties.__attachments += `;${ids}`;
+        this.items.find(
+          i => i.id === this.currentFeature.properties.id
+        ).__attachments += `;${ids}`;
+      } else {
+        this.currentFeature.properties.__attachments = ids;
+        this.items.find(
+          i => i.id === this.currentFeature.properties.id
+        ).__attachments = ids;
       }
     },
     formatDate(feature) {
@@ -1554,12 +1717,25 @@ export default {
       this.newFeatureProperties = {};
     },
     closeBufferDialog() {
+      if (!this.isBufferTableShowing) {
+        this.getLayerByName('buffer')
+          .getSource()
+          .clear();
+        this.bufferValue = undefined;
+        this.isBuffer = false;
+        this.selectedLayer = undefined;
+      }
+    },
+    closeBufferTableDialog() {
       this.getLayerByName('buffer')
         .getSource()
         .clear();
       this.bufferValue = undefined;
       this.isBuffer = false;
-      this.selectedLayerName = undefined;
+      this.selectedLayer = undefined;
+      this.bufferFeatureGeometry = undefined;
+      this.bufferFeatures = [];
+      this.isBufferTableShowing = false;
     },
     changeBaseLayer(layerName) {
       this.map
@@ -1647,6 +1823,14 @@ export default {
           return active;
         }
       };
+    },
+    deleteIds(idsToDelete) {
+      const ids = this.currentFeature.properties.__attachments.split(';');
+      const diff = ids.filter(x => !idsToDelete.includes(x));
+      this.currentFeature.properties.__attachments = diff.join(';');
+      this.items.find(
+        i => i.id === this.currentFeature.properties.id
+      ).__attachments = diff.join(';');
     },
     drawFeatureEnd() {
       this.isDrawing = false;
@@ -1769,6 +1953,7 @@ export default {
         units: 'kilometers'
       });
       if (buffer) {
+        this.bufferFeatureGeometry = { geometry: buffer.geometry };
         let bufferFeature = new GeoJSON().readFeature(buffer, {
           featureProjection: 'EPSG:3857',
           dataProjection: 'EPSG:4326'
@@ -1787,9 +1972,6 @@ export default {
           this.$i18n.t('featureManager.bufferGenerateError')
         );
       }
-    },
-    generateObjectsArray() {
-      //Bufor wygenerowany, warstwa wybrana. Można wysłać request.
     },
     goToSettings() {
       this.$router.push({
@@ -2179,6 +2361,7 @@ export default {
   },
   async mounted() {
     this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
+    this.getLayers();
     this.map = new Map({
       target: 'map',
       layers: [
