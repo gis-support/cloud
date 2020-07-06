@@ -213,6 +213,15 @@
   overflow-x: hidden;
 }
 
+.vscroll .table-scroll-bar-modal {
+  position: absolute;
+  width: 15px;
+  right: 30px;
+  bottom: 0px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .vscroll .table-data {
   height: 100%;
   overflow-y: hidden;

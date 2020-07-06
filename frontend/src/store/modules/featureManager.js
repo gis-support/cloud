@@ -56,6 +56,18 @@ export default {
         return err.response;
       }
     },
+    async bufferAnalysis(ctx, payload) {
+      try {
+        const response = await swagger.apis.Analysis.post_api_analysis_intersection__lid_({
+          lid: payload.lid,
+          body: payload.body,
+          response_type: payload.responseType
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async categorizeFeatures(ctx, payload) {
       try {
         // eslint-disable-next-line no-underscore-dangle
