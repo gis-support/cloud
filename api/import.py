@@ -9,7 +9,7 @@ import requests
 IMPORT_PATH = "/api/import/"
 API_USER = "admin"
 API_PASS = "admin"
-API_URL = "https://cloud.gis.support/api"
+API_URL = "https://rdos-cloud.gis-support.pl/api"
 
 
 def validate_config():
@@ -56,8 +56,8 @@ def upload_layers(layers):
                     print(f"Error: {r.json()['error']}")
                 else:
                     print(f"Success style: {r.json()}")
-        except:
-            print('Error on server side')
+        except Exception as e:
+            print(e)
 
 
 if __name__ == '__main__':
