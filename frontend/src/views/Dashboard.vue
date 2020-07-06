@@ -217,18 +217,6 @@
               </select>
             </div>
             <div class="pt-10">
-              <ul>
-                <li
-                  v-for="(file,idx) in files"
-                  :key="idx"
-                >
-                  {{file.name}}
-                  <i
-                    class="icon-li fa fa-times fa-lg ml-5"
-                    @click="removeFile(file)"
-                  />
-                </li>
-              </ul>
               <file-upload
                 ref="upload"
                 v-model="files"
@@ -236,7 +224,21 @@
                 :drop="true"
                 :drop-directory="true"
                 @input-filter="fileFilter"
-              >{{this.$i18n.t('upload.defaultMessage')}}</file-upload>
+              >
+                {{this.$i18n.t('upload.defaultMessage')}}
+                <ul>
+                  <li
+                    v-for="(file,idx) in files"
+                    :key="idx"
+                  >
+                    {{file.name}}
+                    <i
+                      class="icon-li fa fa-times fa-lg ml-5 delete-file-icon"
+                      @click="removeFile(file)"
+                    />
+                  </li>
+                </ul>
+              </file-upload>
             </div>
           </div>
           <div class="modal-footer">
@@ -863,6 +865,10 @@ export default {
   height: calc(100% - 76px);
   padding-left: 0px;
   padding-right: 0px;
+}
+.delete-file-icon {
+  z-index: 2;
+  position: relative;
 }
 .desc-sm {
   color: #b5b5b5;
