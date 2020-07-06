@@ -58,8 +58,10 @@ if __name__ == '__main__':
     app = create_app(config)
     main(app)
 
-    print("")
 
-    print("TESTING")
-    app = create_app('testing')
-    main(app)
+    if config.lower() != "production":
+        print("")
+
+        print("TESTING")
+        app = create_app('testing')
+        main(app)
