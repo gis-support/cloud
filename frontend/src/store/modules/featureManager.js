@@ -95,6 +95,28 @@ export default {
         return err.response;
       }
     },
+    async deleteFileAttachments(ctx, payload) {
+      try {
+        const response = await swagger.apis["QGIS Attachments"].delete_api_attachments_qgis({
+          ids: payload.ids,
+          layer_id: payload.lid,
+          feature_id: payload.fid
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async downloadFileAttachments(ctx, ids) {
+      try {
+        const response = await swagger.apis["QGIS Attachments"].get_api_attachments_qgis_files({
+          ids: ids
+        });
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async distanceAnalysisXlsx(ctx, payload) {
       try {
         const response = await swagger.apis.Analysis.post_api_analysis_distance__lid___fid__xlsx({
@@ -127,6 +149,16 @@ export default {
           fid: payload.fid
         });
         ctx.commit("editFeatureInActiveLayer", payload);
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
+    async getAttachmentsMeta(ctx, ids) {
+      try {
+        const response = await swagger.apis["QGIS Attachments"].get_api_attachments_qgis_metadata({
+          ids: ids
+        });
         return response;
       } catch (err) {
         return err.response;

@@ -788,7 +788,7 @@
             >
               <a
                 href="#"
-                @click="indexActiveTab = 2"
+                @click="indexActiveTab = 2;$refs['attachments-panel'].getAttachmentsMeta()"
               >
                 <i class="fa fa-info" />
                 {{ $i18n.t("featureManager.informations") }}
@@ -967,10 +967,13 @@
               <AttachmentsPanel
                 ref="attachments-panel"
                 v-if="currentFeature && Object.keys(featureAttachments).length > 0"
+                :attachmentsIds="currentFeature.properties.__attachments"
                 :lid="$route.params.layerId"
                 :fid="currentFeature.properties.id"
                 :permission="permission"
                 :users-group="usersGroup"
+                @addIds="addIds"
+                @deleteIds="deleteIds"
               />
             </div>
           </div>
@@ -1400,6 +1403,19 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     },
+    addIds(ids) {
+      if (this.currentFeature.properties.__attachments) {
+        this.currentFeature.properties.__attachments += `;${ids}`;
+        this.items.find(
+          i => i.id === this.currentFeature.properties.id
+        ).__attachments += `;${ids}`;
+      } else {
+        this.currentFeature.properties.__attachments = ids;
+        this.items.find(
+          i => i.id === this.currentFeature.properties.id
+        ).__attachments = ids;
+      }
+    },
     formatDate(feature) {
       const copy = JSON.parse(JSON.stringify(feature));
       Object.entries(copy.properties).forEach(([k, v]) => {
@@ -1647,6 +1663,14 @@ export default {
           return active;
         }
       };
+    },
+    deleteIds(idsToDelete) {
+      const ids = this.currentFeature.properties.__attachments.split(';');
+      const diff = ids.filter(x => !idsToDelete.includes(x));
+      this.currentFeature.properties.__attachments = diff.join(';');
+      this.items.find(
+        i => i.id === this.currentFeature.properties.id
+      ).__attachments = diff.join(';');
     },
     drawFeatureEnd() {
       this.isDrawing = false;
