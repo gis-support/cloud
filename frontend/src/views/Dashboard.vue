@@ -103,19 +103,21 @@
                     >{{ val.name }}</span>
                     <span class="desc-sm">{{ val.team }}</span>
                   </span>
-                  <span style="min-width: 100px">
+                  <span
+                    v-if="val.tags"
+                    style="min-width: 100px"
+                  >
                     <vSelect
+                      :v-if="tags.length > 0"
                       :disabled="isTagAddings"
                       class="mySelect"
-                      taggable
-                      push-tags
                       multiple
                       maxHeight="10px"
                       label="name"
                       placeholder="(Brak tagów)"
-                      :options="tags"
-                      v-model="val.tags"
-                      @input="updateLayerTags(val)"
+                      :options="tags.filter(t => !val.tags.find(vT => vT.id === t.id))"
+                      :value="val.tags"
+                      @input="updateLayerTags(val, $event)"
                       @option:created="createLayerTag"
                     >
                       <template v-slot:option="option">
@@ -124,6 +126,7 @@
                       <template v-slot:selected-option="option">
                         <span :style="`color: ${option.color}`">{{option.name}}</span>
                       </template>
+                      <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
                     </vSelect>
                   </span>
                 </span>
@@ -501,16 +504,40 @@ export default {
   },
   methods: {
     createLayerTag(tag) {
-      this.tags.push(tag);
-      //console.log(tag);
+      //
     },
-    updateLayerTags(val) {
+    async updateLayerTags(val, e) {
       this.isTagAddings = true;
-      console.log('TODO: Request aktualizujący tag warstwy ');
-      console.log(`Id: ${val.id}`);
-      console.log(`Name: ${val.name}`);
-      console.log(val.tags);
-      this.isTagAddings = false;
+      const payload = { lid: val.id };
+      if (e.length > val.tags.length) {
+        const tag = e.filter(t => !val.tags.includes(t))[0];
+        payload.tid = tag.id;
+        const r = await this.$store.dispatch('tagLayer', payload);
+        if (r.status === 204) {
+          this.filteredLayersAll.find(l => l.id === val.id).tags.push(tag);
+          this.$alertify.success(this.$i18n.t('settings.tagAdded'));
+          this.isTagAddings = false;
+        } else {
+          this.$alertify.error(this.$i18n.t('settings.tagError'));
+          this.isTagAddings = false;
+        }
+      } else {
+        const tag = val.tags.filter(t => !e.includes(t))[0];
+        payload.tid = tag.id;
+        const r = await this.$store.dispatch('untagLayer', payload);
+        if (r.status === 204) {
+          this.filteredLayersAll.find(
+            l => l.id === val.id
+          ).tags = this.filteredLayersAll
+            .find(l => l.id === val.id)
+            .tags.filter(t => t.id !== tag.id);
+          this.$alertify.success(this.$i18n.t('settings.tagDeleted'));
+          this.isTagAddings = false;
+        } else {
+          this.$alertify.error(this.$i18n.t('settings.tagError'));
+          this.isTagAddings = false;
+        }
+      }
     },
     async addService() {
       const r = await this.$store.dispatch('addService', {
