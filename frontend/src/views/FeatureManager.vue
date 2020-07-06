@@ -2006,6 +2006,7 @@ export default {
                   visible: false,
                   name: 'Ortofotomapa',
                   group: 'baselayers',
+                  zIndex: -1000,
                   source: new WMTS({
                     url:
                       'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
