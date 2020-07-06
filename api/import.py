@@ -9,7 +9,7 @@ import requests
 IMPORT_PATH = "/api/import/"
 API_USER = "admin"
 API_PASS = "admin"
-API_URL = "https://rdos-cloud.gis-support.pl/api"
+API_URL = "https://cloud.gis.support/api"
 
 
 def validate_config():
