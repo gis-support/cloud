@@ -322,7 +322,7 @@
                     >
                       <button
                         type="button"
-                        class="btn btn-danger"
+                        class="btn btn-success"
                         @click="saveNewFeature"
                       >{{ $i18n.t("default.save") }}</button>
                     </div>
@@ -332,7 +332,7 @@
                     >
                       <button
                         type="button"
-                        class="btn btn-default"
+                        class="btn btn-danger"
                         @click="clearFeatureAdding"
                       >{{ $i18n.t("default.cancel") }}</button>
                     </div>
@@ -1948,11 +1948,7 @@ export default {
       layer.changed();
     },
     rotateMapByAngle(angle) {
-      let radians =
-        (angle * Math.PI * 2) / 360 + this.map.getView().getRotation();
-      if (radians > Math.PI * 2) {
-        radians -= Math.PI * 2;
-      }
+      let radians = (angle * Math.PI * 2) / 360;
       this.map.getView().setRotation(radians);
     },
     saveFile(r) {

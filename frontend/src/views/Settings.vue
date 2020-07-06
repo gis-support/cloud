@@ -489,7 +489,7 @@
             <thead>
               <tr role="row">
                 <th class="text-centered">{{ $i18n.t('default.active') }}</th>
-                <th class="text-centered">{{ $i18n.t('default.attributes') }}</th>
+                <th class="text-centered">{{ $i18n.t('default.attribute') }}</th>
               </tr>
             </thead>
             <draggable
