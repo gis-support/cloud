@@ -1,7 +1,6 @@
 <template>
   <div class="attachments-panel right-sub-panel">
     <div v-if="featureAttachments || filesAttachments">
-      <!--
       <h4>{{ $i18n.t(`featureManager.attachmentsTitlepublic`) }}:</h4>
       <div
         v-if="
@@ -58,7 +57,6 @@
           </div>
         </template>
       </span>
-      -->
       <div
         class="pt-10 pb-10"
         v-if="isfilesAttachmentsLoaded"
@@ -588,6 +586,9 @@ export default {
             } else {
               vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
             }
+          })
+          .catch(err => {
+            vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
           });
       }
     }

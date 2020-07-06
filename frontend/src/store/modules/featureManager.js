@@ -96,7 +96,6 @@ export default {
       }
     },
     async deleteFileAttachments(ctx, payload) {
-      console.log(payload);
       try {
         const response = await swagger.apis["QGIS Attachments"].delete_api_attachments_qgis({
           ids: payload.ids,
