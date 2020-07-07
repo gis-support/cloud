@@ -214,6 +214,18 @@
             </div>
           </div>
           <div class="modal-footer">
+            <span
+              class="file-sending"
+              v-if="isFileSending"
+            >
+              <button
+                type="button"
+                class="btn"
+              >
+                <i class="fa fa-spin fa-spinner" />
+              </button>
+              <span>{{ $i18n.t('upload.fileSending') }}</span>
+            </span>
             <button
               type="button"
               class="btn btn-default"
@@ -225,7 +237,7 @@
               type="button"
               class="btn btn-success"
               @click="sendVectorLayer"
-              :disabled="!vectorLayerName"
+              :disabled="!vectorLayerName || isFileSending"
             >{{ $i18n.t('default.save') }}</button>
           </div>
         </div>
@@ -387,7 +399,7 @@ export default {
       {
         text: 'ESRI Shapefile',
         value: 'shapefile',
-        extensions: ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.qpj']
+        extensions: ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.qpj', '.qix']
       },
       { text: 'GeoJSON', value: 'geojson', extensions: ['.geojson'] },
       { text: 'GML', value: 'gml', extensions: ['.gml'] }
@@ -403,6 +415,7 @@ export default {
     files: [],
     isEpsgAutomatic: true,
     isFetching: false,
+    isFileSending: false,
     isSendingError: false,
     isServicePublic: false,
     layersAll: undefined,
@@ -567,10 +580,12 @@ export default {
       this.serviceUrl = '';
     },
     clearUploadFiles() {
-      this.files = [];
-      this.vectorLayerName = '';
-      this.selectedDataExtension = this.dataFormats[0];
-      this.isEpsgAutomatic = true;
+      if (!this.isFileSending) {
+        this.files = [];
+        this.vectorLayerName = '';
+        this.selectedDataExtension = this.dataFormats[0];
+        this.isEpsgAutomatic = true;
+      }
     },
     deleteLayer(el) {
       this.$alertify
@@ -678,6 +693,7 @@ export default {
       this.isSendingError = false;
     },
     sendVectorLayer() {
+      this.isFileSending = true;
       let formData = new FormData();
       for (const [index, file] of this.files.entries()) {
         formData.append(`file[${index}]`, file.file);
@@ -693,6 +709,7 @@ export default {
           }
         })
         .then(r => {
+          this.isFileSending = false;
           this.$refs.closeModalBtn.click();
           if (r.status === 201) {
             vm.$alertify.success(
@@ -790,6 +807,15 @@ export default {
 .files-list li {
   width: 120px;
   list-style: none;
+}
+.file-sending > button {
+  background-color: white;
+  cursor: default;
+  padding-top: 0;
+}
+.file-sending > span {
+  margin-right: 30px;
+  font-weight: bold;
 }
 .file-uploads {
   overflow: hidden;
