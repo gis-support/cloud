@@ -108,17 +108,17 @@
                     style="min-width: 100px"
                   >
                     <vSelect
-                      :v-if="tags.length > 0"
-                      :disabled="isTagAddings"
-                      class="mySelect"
+                      taggable
                       multiple
-                      maxHeight="10px"
+                      class="mySelect"
                       label="name"
+                      maxHeight="10px"
                       placeholder="(Brak tagów)"
+                      :disabled="isTagAddings"
                       :options="tags.filter(t => !val.tags.find(vT => vT.id === t.id))"
                       :value="val.tags"
+                      :v-if="tags.length > 0"
                       @input="updateLayerTags(val, $event)"
-                      @option:created="createLayerTag"
                     >
                       <template v-slot:option="option">
                         <span :style="`color: ${option.color}`">{{option.name}}</span>
@@ -505,23 +505,49 @@ export default {
     }
   },
   methods: {
-    createLayerTag(tag) {
-      //
-    },
     async updateLayerTags(val, e) {
       this.isTagAddings = true;
       const payload = { lid: val.id };
       if (e.length > val.tags.length) {
         const tag = e.filter(t => !val.tags.includes(t))[0];
-        payload.tid = tag.id;
-        const r = await this.$store.dispatch('tagLayer', payload);
-        if (r.status === 204) {
-          this.filteredLayersAll.find(l => l.id === val.id).tags.push(tag);
-          this.$alertify.success(this.$i18n.t('settings.tagAdded'));
-          this.isTagAddings = false;
-        } else {
+        if (!tag) {
           this.$alertify.error(this.$i18n.t('settings.tagError'));
           this.isTagAddings = false;
+          return;
+        } else if (!tag.id) {
+          const r = await this.$store.dispatch('addTag', {
+            color: '#000000',
+            name: tag.name
+          });
+          if (r.status === 201) {
+            tag.id = r.body.data;
+            tag.color = '#000000';
+            this.tags.push(tag);
+            payload.tid = tag.id;
+            const rr = await this.$store.dispatch('tagLayer', payload);
+            if (rr.status === 204) {
+              this.filteredLayersAll.find(l => l.id === val.id).tags.push(tag);
+              this.$alertify.success(this.$i18n.t('settings.tagAdded'));
+              this.isTagAddings = false;
+            } else {
+              this.$alertify.error(this.$i18n.t('settings.tagError'));
+              this.isTagAddings = false;
+            }
+          } else {
+            this.isTagAddings = false;
+            this.$alertify.error(this.$i18n.t('settings.tagError'));
+          }
+        } else {
+          payload.tid = tag.id;
+          const r = await this.$store.dispatch('tagLayer', payload);
+          if (r.status === 204) {
+            this.filteredLayersAll.find(l => l.id === val.id).tags.push(tag);
+            this.$alertify.success(this.$i18n.t('settings.tagAdded'));
+            this.isTagAddings = false;
+          } else {
+            this.$alertify.error(this.$i18n.t('settings.tagError'));
+            this.isTagAddings = false;
+          }
         }
       } else {
         const tag = val.tags.filter(t => !e.includes(t))[0];
