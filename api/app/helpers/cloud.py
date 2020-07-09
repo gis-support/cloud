@@ -216,7 +216,7 @@ class Cloud:
                 ALTER TABLE {} OWNER TO {};
             """).format(Identifier(name), Identifier(self.user)))
             self.execute("""
-                INSERT INTO system.layer_styles (
+                INSERT INTO public.layer_styles (
                     f_table_catalog,
                     f_table_schema,
                     f_table_name,
@@ -237,10 +237,13 @@ class Cloud:
                     True
                 );
             """, (name, create_qml(geom_type), json.dumps(create_stylejson(geom_type),)))
-            self.execute(SQL("ALTER TABLE {} ADD PRIMARY KEY ({});").format(Identifier(name), Identifier(id_column_name)))
+            self.execute(SQL("ALTER TABLE {} ADD PRIMARY KEY ({});").format(
+                Identifier(name), Identifier(id_column_name)))
+
 
 def get_cloud():
     return Cloud({"app": current_app, "user": request.user})
+
 
 def cloud_decorator(f):
     @wraps(f)
