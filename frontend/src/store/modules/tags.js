@@ -60,6 +60,28 @@ export default {
       } catch (err) {
         return err;
       }
+    },
+    async tagLayer(ctx, payload) {
+      try {
+        const response = await swagger.apis["Layers tags"].post_api_tags_layers({
+          layer_id: payload.lid,
+          tag_id: payload.tid
+        });
+        return response;
+      } catch (err) {
+        return err;
+      }
+    },
+    async untagLayer(ctx, payload) {
+      try {
+        const response = await swagger.apis["Layers tags"].delete_api_tags_layers({
+          layer_id: payload.lid,
+          tag_id: payload.tid
+        });
+        return response;
+      } catch (err) {
+        return err;
+      }
     }
   },
   getters: {

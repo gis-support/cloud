@@ -66,41 +66,69 @@
           >
             <div class="panel-heading pl-0 pr-0">
               <h4 class="panel-title flex-center">
-                <span
-                  v-if="val.url"
-                  class="panel-title__names"
-                >
-                  <i
-                    style="margin-right:9px"
-                    class="icon-li fa fa-link fa-lg"
-                  />
-                  <span class="bold panel-title__wms">{{ val.name }}</span>
+                <span style="display:inherit">
                   <span
-                    class="desc-sm"
-                    :title="val.url"
+                    v-if="val.url"
+                    class="panel-title__names"
                   >
-                    <strong>URL</strong>
-                    :{{val.url|maxLength}}
+                    <i
+                      style="margin-right:9px"
+                      class="icon-li fa fa-link fa-lg"
+                    />
+                    <span class="bold panel-title__wms">{{ val.name }}</span>
+                    <span
+                      class="desc-sm"
+                      :title="val.url"
+                    >
+                      <strong>URL</strong>
+                      :{{val.url|maxLength}}
+                    </span>
+                    <span
+                      class="desc-sm"
+                      :title="val.layers"
+                    >
+                      <strong>{{ $i18n.t('default.layers') }}</strong>
+                      : {{ val.layers | maxLength }}
+                    </span>
                   </span>
                   <span
-                    class="desc-sm"
-                    :title="val.layers"
+                    v-else
+                    class="panel-title__names"
                   >
-                    <strong>{{ $i18n.t('default.layers') }}</strong>
-                    : {{ val.layers | maxLength }}
+                    <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                    <span
+                      class="bold"
+                      href="#"
+                      @click="goToManager(val)"
+                    >{{ val.name }}</span>
+                    <span class="desc-sm">{{ val.team }}</span>
                   </span>
-                </span>
-                <span
-                  v-else
-                  class="panel-title__names"
-                >
-                  <i class="icon-li fa fa-map-o fa-lg mr-5" />
                   <span
-                    class="bold"
-                    href="#"
-                    @click="goToManager(val)"
-                  >{{ val.name }}</span>
-                  <span class="desc-sm">{{ val.team }}</span>
+                    v-if="val.tags"
+                    style="min-width: 100px"
+                  >
+                    <vSelect
+                      taggable
+                      multiple
+                      class="mySelect"
+                      label="name"
+                      maxHeight="10px"
+                      placeholder="(Brak tagów)"
+                      :disabled="isTagAddings"
+                      :options="tags.filter(t => !val.tags.find(vT => vT.id === t.id))"
+                      :value="val.tags"
+                      :v-if="tags.length > 0"
+                      @input="updateLayerTags(val, $event)"
+                    >
+                      <template v-slot:option="option">
+                        <span :style="`color: ${option.color}`">{{option.name}}</span>
+                      </template>
+                      <template v-slot:selected-option="option">
+                        <span :style="`color: ${option.color}`">{{option.name}}</span>
+                      </template>
+                      <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
+                    </vSelect>
+                  </span>
                 </span>
                 <span
                   id="layers-list-icons"
@@ -390,6 +418,8 @@
 <script>
 import FileUpload from 'vue-upload-component';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
+import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
 
 export default {
   name: 'Dashboard',
@@ -418,6 +448,7 @@ export default {
     isFileSending: false,
     isSendingError: false,
     isServicePublic: false,
+    isTagAddings: false,
     layersAll: undefined,
     pickrComponents: {
       preview: true,
@@ -443,11 +474,13 @@ export default {
     selectedDataExtension: '',
     selectedMapService: '',
     selectedLayers: [],
+    tags: [],
     vectorLayerName: '',
     vectorLayersList: undefined
   }),
   components: {
-    FileUpload
+    FileUpload,
+    vSelect
   },
   computed: {
     featureAttachments() {
@@ -485,6 +518,68 @@ export default {
     }
   },
   methods: {
+    async updateLayerTags(val, e) {
+      this.isTagAddings = true;
+      const payload = { lid: val.id };
+      if (e.length > val.tags.length) {
+        const tag = e.filter(t => !val.tags.includes(t))[0];
+        if (!tag) {
+          this.$alertify.error(this.$i18n.t('settings.tagError'));
+          this.isTagAddings = false;
+          return;
+        } else if (!tag.id) {
+          const r = await this.$store.dispatch('addTag', {
+            color: '#000000',
+            name: tag.name
+          });
+          if (r.status === 201) {
+            tag.id = r.body.data;
+            tag.color = '#000000';
+            this.tags.push(tag);
+            payload.tid = tag.id;
+            const rr = await this.$store.dispatch('tagLayer', payload);
+            if (rr.status === 204) {
+              this.filteredLayersAll.find(l => l.id === val.id).tags.push(tag);
+              this.$alertify.success(this.$i18n.t('settings.tagAdded'));
+              this.isTagAddings = false;
+            } else {
+              this.$alertify.error(this.$i18n.t('settings.tagError'));
+              this.isTagAddings = false;
+            }
+          } else {
+            this.isTagAddings = false;
+            this.$alertify.error(this.$i18n.t('settings.tagError'));
+          }
+        } else {
+          payload.tid = tag.id;
+          const r = await this.$store.dispatch('tagLayer', payload);
+          if (r.status === 204) {
+            this.filteredLayersAll.find(l => l.id === val.id).tags.push(tag);
+            this.$alertify.success(this.$i18n.t('settings.tagAdded'));
+            this.isTagAddings = false;
+          } else {
+            this.$alertify.error(this.$i18n.t('settings.tagError'));
+            this.isTagAddings = false;
+          }
+        }
+      } else {
+        const tag = val.tags.filter(t => !e.includes(t))[0];
+        payload.tid = tag.id;
+        const r = await this.$store.dispatch('untagLayer', payload);
+        if (r.status === 204) {
+          this.filteredLayersAll.find(
+            l => l.id === val.id
+          ).tags = this.filteredLayersAll
+            .find(l => l.id === val.id)
+            .tags.filter(t => t.id !== tag.id);
+          this.$alertify.success(this.$i18n.t('settings.tagDeleted'));
+          this.isTagAddings = false;
+        } else {
+          this.$alertify.error(this.$i18n.t('settings.tagError'));
+          this.isTagAddings = false;
+        }
+      }
+    },
     async addService() {
       const r = await this.$store.dispatch('addService', {
         layers: this.selectedLayers.join(','),
@@ -530,6 +625,10 @@ export default {
     async getServices() {
       const r = await this.$store.dispatch('getServices');
       this.$store.commit('setServices', r.body.services);
+    },
+    async getTags() {
+      const r = await this.$store.dispatch('getTags');
+      this.tags = r.body.data;
     },
     async fetchWms() {
       if (this.serviceUrl.length < 1) {
@@ -585,6 +684,7 @@ export default {
         this.vectorLayerName = '';
         this.selectedDataExtension = this.dataFormats[0];
         this.isEpsgAutomatic = true;
+        this.epsg = '';
       }
     },
     deleteLayer(el) {
@@ -726,6 +826,7 @@ export default {
               );
             }
           } else if (r.status === 400) {
+            this.epsg = '';
             this.isEpsgAutomatic = false;
             this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
           } else {
@@ -735,8 +836,15 @@ export default {
           }
         })
         .catch(err => {
-          this.$refs.closeModalBtn.click();
-          this.$alertify.error(this.$i18n.t('upload.uploadError'));
+          if (err.response.data.error === 'epsg not recognized') {
+            this.$alertify.error(this.$i18n.t('upload.noEpsg'));
+            this.isEpsgAutomatic = false;
+            this.epsg = 2180;
+          } else if (err.response.data.error === 'layer already exists') {
+            this.$alertify.error(this.$i18n.t('upload.nameExistsError'));
+          } else {
+            this.$alertify.error(this.$i18n.t('upload.uploadError'));
+          }
         });
     },
     setAttachmentsLayer(lid) {
@@ -750,12 +858,40 @@ export default {
     this.selectedDataExtension = this.dataFormats[0];
     this.getLayers();
     this.getServices();
+    this.getTags();
     this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
   }
 };
 </script>
 
 <style scoped>
+.mySelect >>> .vs__dropdown-toggle,
+.mySelect >>> .vs__search {
+  background-color: white !important;
+}
+.mySelect >>> .vs__search {
+  margin: 0;
+}
+.mySelect >>> .vs__search::placeholder,
+.mySelect >>> .vs__dropdown-toggle,
+.mySelect >>> .vs__dropdown-menu {
+  text-align: center;
+  padding-bottom: 2px;
+  font-size: 12px;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(60, 60, 60, 0.26);
+}
+
+.mySelect >>> .vs__dropdown-toggle > .vs__actions {
+  display: none;
+}
+
+.mySelect >>> .vs__dropdown-toggle > .vs__selected-options > .vs__selected {
+  background-color: white;
+  margin: 0 2px;
+}
+
 .add-layer {
   display: block;
 }
