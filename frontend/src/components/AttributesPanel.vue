@@ -19,7 +19,7 @@
           type="text"
           v-model="attributes.properties[key]"
           disabled
-          v-if="key === 'id'"
+          v-if="key === 'id' || key === '__attachments'"
         />
         <span v-else>
           <input

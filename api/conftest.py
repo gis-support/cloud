@@ -33,6 +33,7 @@ SYSTEM_TABLES = [
 
 TEST_ENUM_NAME = "test_enum"
 
+
 @pytest.fixture()
 def app():
     app = create_app('testing')
@@ -52,12 +53,17 @@ def app():
                 user=Identifier(group.decode('utf-8'))))
         except:
             pass
-    app._db.execute_sql("TRUNCATE layer_styles RESTART IDENTITY;")
-    app._db.execute_sql("TRUNCATE layer_tag RESTART IDENTITY;")
-    app._db.execute_sql("TRUNCATE tag RESTART IDENTITY CASCADE;")
-    app._db.execute_sql("TRUNCATE dict RESTART IDENTITY CASCADE;")
-    app._db.execute_sql(f"TRUNCATE attachment_qgis RESTART IDENTITY CASCADE;")
+    app._db.execute_sql("TRUNCATE public.layer_styles RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE system.layer_tag RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE system.tag RESTART IDENTITY CASCADE;")
+    app._db.execute_sql("TRUNCATE system.dict RESTART IDENTITY CASCADE;")
+    app._db.execute_sql(
+        f"TRUNCATE system.attachment_qgis RESTART IDENTITY CASCADE;")
     app._db.execute_sql(f"DROP TYPE IF EXISTS {TEST_ENUM_NAME} CASCADE;")
+
+    app._db.execute_sql("TRUNCATE attachment RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE settings RESTART IDENTITY;")
+    app._db.execute_sql("TRUNCATE service RESTART IDENTITY CASCADE;")
 
     app._redis.delete('user_list')
     cur = app._db.execute_sql(
@@ -91,9 +97,11 @@ def database_table(client: FlaskClient) -> Tuple[str, str]:
     app = client.application
     database = app._db
 
-    database.execute_sql(f"CREATE TABLE {schema_name}.{table_name} (id serial);")
+    database.execute_sql(
+        f"CREATE TABLE {schema_name}.{table_name} (id serial);")
     yield schema_name, table_name
     database.execute_sql(f"DROP TABLE {schema_name}.{table_name} CASCADE;")
+
 
 @pytest.fixture()
 def app_request_context(client):
@@ -101,12 +109,14 @@ def app_request_context(client):
         request.user = "test"
         yield
 
+
 @pytest.fixture(autouse=True)
 def temp_uploads_path(client, tmpdir_factory):
     temp_dir = tmpdir_factory.mktemp("TEMP_UPLOADS")
     client.application.config["UPLOADS"] = temp_dir
     yield temp_dir
     shutil.rmtree(temp_dir)
+
 
 @pytest.fixture(scope="session")
 def resources_directory() -> Path:

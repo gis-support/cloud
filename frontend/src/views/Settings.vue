@@ -160,7 +160,7 @@
                   <td class="text-centered">{{ $i18n.t(`default.columnsTypes.${value}`) }}</td>
                   <td class="text-centered">
                     <i
-                      v-if="name !== 'id'"
+                      v-if="name !== 'id' && name != '__attachments'"
                       class="fa fa-trash fa-lg red icon-hover"
                       :title="$i18n.t('default.delete')"
                       @click="deleteColumn(name)"
@@ -489,7 +489,7 @@
             <thead>
               <tr role="row">
                 <th class="text-centered">{{ $i18n.t('default.active') }}</th>
-                <th class="text-centered">{{ $i18n.t('default.attributes') }}</th>
+                <th class="text-centered">{{ $i18n.t('default.attribute') }}</th>
               </tr>
             </thead>
             <draggable

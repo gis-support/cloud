@@ -56,8 +56,8 @@ def upload_layers(layers):
                     print(f"Error: {r.json()['error']}")
                 else:
                     print(f"Success style: {r.json()}")
-        except:
-            print('Error on server side')
+        except Exception as e:
+            print(e)
 
 
 if __name__ == '__main__':

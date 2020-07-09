@@ -82,6 +82,15 @@
                       >{{ $i18n.t('default.settings') }}</span>
                     </a>
                   </li>
+                  <li @click="changePage('help')">
+                    <a>
+                      <i class="fa fa-question-circle" />
+                      &nbsp;&nbsp;
+                      <span
+                        v-bind:class="{'active-route':this.$route.name==='help'}"
+                      >{{ $i18n.t('default.help') }}</span>
+                    </a>
+                  </li>
                   <li @click="logout">
                     <a>
                       <i class="fa fa-sign-out" />

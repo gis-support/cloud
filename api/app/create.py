@@ -30,7 +30,6 @@ def create_app(config='development'):
     app.config.from_object(load_config(config))
     app._swagger = create_swagger(app)
     app._db = create_db(app.config)
-    create_tables(app._db)
     app._redis = FlaskRedis(app)
     app._hashids = Hashids(salt=app.config['SECRET_KEY'])
     app.register_blueprint(mod_auth, url_prefix='/api')

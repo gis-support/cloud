@@ -10,6 +10,7 @@ class Tag(BaseModel):
 
     class Meta:
         table_name = "tag"
+        schema = "system"
 
     id = AutoField(primary_key=True)
     name = TextField(unique=True)
@@ -27,6 +28,7 @@ class LayerTag(BaseModel):
 
     class Meta:
         table_name = "layer_tag"
+        schema = "system"
         constraints = [
             SQL("CONSTRAINT layer_tag_unique UNIQUE (layer_id, tag_id)")
         ]

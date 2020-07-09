@@ -8,6 +8,7 @@ import i18n from "./i18n";
 import api from "./docs/api.json"; // do podglądania api w monuted
 import axios from "axios";
 import VModal from "vue-js-modal";
+import VueYoutube from "vue-youtube";
 
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -23,6 +24,7 @@ Vue.prototype.$http = axios;
 Vue.use(VModal, {
   componentName: "modal"
 });
+Vue.use(VueYoutube);
 
 window.vm = new Vue({
   router,
