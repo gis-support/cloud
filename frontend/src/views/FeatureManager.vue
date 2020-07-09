@@ -1736,6 +1736,13 @@ export default {
       this.bufferFeatureGeometry = undefined;
       this.bufferFeatures = [];
       this.isBufferTableShowing = false;
+      this.bufferColumns = [
+        {
+          head: true,
+          sortable: true,
+          filter: true
+        }
+      ];
     },
     changeBaseLayer(layerName) {
       this.map
