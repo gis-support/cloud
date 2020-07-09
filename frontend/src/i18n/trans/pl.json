@@ -206,6 +206,7 @@
     "automaticEpsg": "Układ współrzędnych określany jest automatycznie",
     "cancelUpload": "Anuluj wysyłanie",
     "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",
+    "fileSending": "Trwa zapisywanie warstwy",
     "nameExistsError": "Warstwa o podanej nazwie już istnieje",
     "uploadLogoMessage": "Przeciągnij obraz lub kliknij i wybierz plik do przesłania",
     "noEpsg": "Nie rozpoznano układu współrzędnych. Wprowadź go ręcznie",
