@@ -1,6 +1,9 @@
 from copy import copy
 from random import randint
 
+DEFAULT_FILL_COLOR = "255,255,255,0.4"
+DEFAULT_STROKE_COLOR = "51,153,204,1"
+
 DEFAULT_POINT_STYLE = """
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis readOnly="0" minScale="1e+8" simplifyDrawingTol="1" styleCategories="AllStyleCategories" labelsEnabled="0" hasScaleBasedVisibilityFlag="0" maxScale="0" simplifyDrawingHints="1" simplifyAlgorithm="0" version="cloud" simplifyLocal="1" simplifyMaxScale="1">
@@ -72,9 +75,16 @@ QML_TO_OL = {
 }
 
 
+def convert_opacity(color):
+    splitted = color.split(',')
+    splitted[3] = str(int((float(splitted[3]) * 100 * 255) / 100))
+    return ','.join(splitted)
+
+
 def create_qml(geom_type, style={}):
-    fill_color = style.get('fill-color', '255,255,255,0.4')
-    stroke_color = style.get('stroke-color', '51,153,204,1')
+    fill_color = convert_opacity(style.get('fill-color', DEFAULT_FILL_COLOR))
+    stroke_color = convert_opacity(
+        style.get('stroke-color', DEFAULT_STROKE_COLOR))
     stroke_width = style.get('stroke-width', '2')
 
     if 'point' in geom_type.lower():
@@ -91,8 +101,8 @@ def create_stylejson(geom_type):
             'labels': [],
             'renderer': 'single',
             'type': 'point',
-            'fill-color': '255,255,255,0.4',
-            'stroke-color': '51,153,204,1',
+            'fill-color': DEFAULT_FILL_COLOR,
+            'stroke-color': DEFAULT_STROKE_COLOR,
             'stroke-width': '1',
             'width': '2'
         }
@@ -101,7 +111,7 @@ def create_stylejson(geom_type):
             'labels': [],
             'renderer': 'single',
             'type': 'line',
-            'stroke-color': '51,153,204,1',
+            'stroke-color': DEFAULT_STROKE_COLOR,
             'stroke-width': '2'
         }
     else:
@@ -109,8 +119,8 @@ def create_stylejson(geom_type):
             'labels': [],
             'renderer': 'single',
             'type': 'polygon',
-            'fill-color': '255,255,255,0.4',
-            'stroke-color': '51,153,204,1',
+            'fill-color': DEFAULT_FILL_COLOR,
+            'stroke-color': DEFAULT_STROKE_COLOR,
             'stroke-width': '2'
         }
 
@@ -119,8 +129,8 @@ def generate_categories(values, geom_type):
     categories = []
     schema = {
         'type': geom_type,
-        'fill-color': '255,255,255,0.4',
-        'stroke-color': '51,153,204,1',
+        'fill-color': DEFAULT_FILL_COLOR,
+        'stroke-color': DEFAULT_STROKE_COLOR,
         'stroke-width': '1',
         'width': '2'
     }

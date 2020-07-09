@@ -99,7 +99,7 @@ class Layer(Cloud):
         # TODO: self.syncQML()
         style = LayerStyle(data, self.geom_type(), self.columns()).style
         self.execute("""
-            UPDATE system.layer_styles SET stylejson=%s WHERE f_table_name = %s
+            UPDATE public.layer_styles SET stylejson=%s WHERE f_table_name = %s
         """, (json.dumps(style), self.name,))
         return style
 
@@ -108,7 +108,7 @@ class Layer(Cloud):
 
     def get_style(self):
         cursor = self.execute("""
-            SELECT stylejson FROM system.layer_styles WHERE f_table_name = %s
+            SELECT stylejson FROM public.layer_styles WHERE f_table_name = %s
         """, (self.name,))
         return cursor.fetchone()[0]
 
@@ -123,14 +123,14 @@ class Layer(Cloud):
         self.execute(
             SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
         self.execute("""
-            UPDATE system.layer_styles SET f_table_name = %s WHERE f_table_name = %s
+            UPDATE public.layer_styles SET f_table_name = %s WHERE f_table_name = %s
         """, (self.name, old_name,))
         self.lid = self.hash_name(self.name)
         for callback in callbacks:
             callback(old_lid, self.lid)
 
-
     # Layer columns
+
     def settings(self):
         cursor = self.execute(
             "SELECT t1.column_name, t1.data_type, t1.udt_name, t2.typcategory "
@@ -195,9 +195,10 @@ class Layer(Cloud):
             enumerators.create_enumerator(enumerator_name, values)
 
             sql = SQL("ALTER TABLE {} ADD COLUMN {} {};").format(Identifier(self.name), Identifier(column_name),
-                                                                SQL(enumerator_name))
+                                                                 SQL(enumerator_name))
 
-            Dict.create(layer_id=self.lid, column_name=column_name, enumerator_name=enumerator_name)
+            Dict.create(layer_id=self.lid, column_name=column_name,
+                        enumerator_name=enumerator_name)
 
             self.execute(sql)
 
@@ -210,7 +211,7 @@ class Layer(Cloud):
             self.execute(
                 SQL("ALTER TABLE {} DROP COLUMN {}").format(Identifier(self.name), Identifier(column_name)))
 
-            if (dict_ := Dict.get_or_none(layer_id=self.lid, column_name=column_name)) is not None:
+            if (dict_:= Dict.get_or_none(layer_id=self.lid, column_name=column_name)) is not None:
                 enumerators.drop_enumerator(dict_.enumerator_name)
                 dict_.delete_instance()
 
@@ -265,7 +266,7 @@ class Layer(Cloud):
             DROP TABLE {} CASCADE
         """).format(Identifier(self.name)))
         self.execute("""
-            DELETE FROM system.layer_styles WHERE f_table_name=%s;
+            DELETE FROM public.layer_styles WHERE f_table_name=%s;
         """, (self.name,))
 
     def get_features(self, ids: List[int] = None):
@@ -280,7 +281,8 @@ class Layer(Cloud):
 
         columns = self.columns()
         columns_sql = list(map(Identifier, columns))
-        columns_sql = [SQL("id"), SQL("ST_AsGeoJSON(geometry) as geometry")] + columns_sql
+        columns_sql = [SQL("id"), SQL(
+            "ST_AsGeoJSON(geometry) as geometry")] + columns_sql
 
         sql = SQL("SELECT {} FROM public.{} WHERE {}").format(
             SQL(",").join(columns_sql),
@@ -292,7 +294,7 @@ class Layer(Cloud):
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         cursor.execute(sql)
 
-        while (row := cursor.fetchone()) is not None:
+        while (row:= cursor.fetchone()) is not None:
             for column, value in row.items():
                 if column == "geometry":
                     row[column] = json.loads(value)
@@ -480,12 +482,15 @@ class Layer(Cloud):
             })
         return result
 
+
 def get_features_as_xlsx(layer: Layer, features_ids: List[int]) -> NamedTemporaryFile:
     columns = layer.columns()
-    columns = [column for column in columns if column != ATTACHMENTS_COLUMN_NAME]
+    columns = [column for column in columns if column !=
+               ATTACHMENTS_COLUMN_NAME]
     columns = ["id"] + columns
 
-    columns_with_order = {column: order for order, column in enumerate(columns)}
+    columns_with_order = {column: order for order,
+                          column in enumerate(columns)}
 
     workbook = openpyxl.Workbook()
     sheet = workbook.active
@@ -498,7 +503,8 @@ def get_features_as_xlsx(layer: Layer, features_ids: List[int]) -> NamedTemporar
         feature.pop(ATTACHMENTS_COLUMN_NAME)
         feature.pop("geometry")
 
-        feature = dict(sorted(feature.items(), key=lambda x: columns_with_order[x[0]]))
+        feature = dict(
+            sorted(feature.items(), key=lambda x: columns_with_order[x[0]]))
 
         values = list(feature.values())
         sheet.append(values)
@@ -507,4 +513,3 @@ def get_features_as_xlsx(layer: Layer, features_ids: List[int]) -> NamedTemporar
     workbook.save(result.name)
 
     return result
-
