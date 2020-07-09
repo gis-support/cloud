@@ -37,11 +37,15 @@ export const HELP = {
     },
     {
       Tytul: "Kolumny w warstwie wektorowej",
+      "LINK YOUTUBE": "https://youtu.be/VjNBHCm6SaE",
       OPIS:
-        "W instruktażu zostały omówione następujące procedury:\n-Dodawanie nowej kolumny do warstwy wektorowej\n-Usuwanie kolumny z warstwy wektorowej"
+        "W instruktażu zostały omówione następujące procedury:\n- Dodawanie nowej kolumny do warstwy wektorowej\n- Usuwanie kolumny z warstwy wektorowej\n- Zmiana nazwy danej warstwy"
     },
     {
-      Tytul: "Narzędzia tabeli atrybutów warstwy wektorowej"
+      Tytul: "Narzędzia tabeli atrybutów warstwy wektorowej",
+      "LINK YOUTUBE": "https://youtu.be/LMKzMNdNam8",
+      OPIS:
+        "W instruktażu zostały omówione następujące procedury:\n- Filtrowanie tabeli atrybutów\n- Zaznaczanie obiektów w tabeli atrybutów\n- Przybliżanie mapy do zaznaczonego obiektu w tabeli atrybutów\n- Wyszukiwanie obiektów w tabeli\n- Sortowanie obiektów w tabeli"
     },
     {
       Tytul: "Zarządzanie podkładem i warstwami w Feature Managerze",
@@ -51,21 +55,24 @@ export const HELP = {
     },
     {
       Tytul: "Edycja warstwy wektorowej",
+      "LINK YOUTUBE": "https://youtu.be/VHNi2I_zoeo",
       OPIS:
         "W instruktażu zostały omówione następujące procedury: \n- Edytowanie atrybutów warstwy wektorowej \n- Dodawanie nowego obiektu do warstwy wektorowej\n- Usuwanie obiektu z warstwy wektorowej"
     },
     {
-      Tytul: "Narzędzie pomiarów (odległość, powierzchnia)",
+      Tytul: "Narzędzie pomiarów",
       "LINK YOUTUBE": "https://youtu.be/w6hBiCWFXbw",
       OPIS:
         "W instruktażu zostały zaprezentowane narzędzia pomiaru odległości, powierzchni i obwodu."
     },
     {
       Tytul: "Narzędzie buforu",
+      "LINK YOUTUBE": "https://youtu.be/_fbG-A9ejE0",
       OPIS: 'W instruktażu została przedstawiona procedura korzystania z narzędzia "Bufor".'
     },
     {
       Tytul: "Analiza odległości",
+      "LINK YOUTUBE": "https://youtu.be/TP3vQiPlR9Q",
       OPIS:
         'W instruktażu została przedstawiona procedura korzystania z narzędzia "Analiza odległości".'
     },
@@ -76,10 +83,16 @@ export const HELP = {
         "W instruktażu została przedstawiona procedura dodawania, otwierania i usuwania załącznika zewnętrznego dodanego do warstwy wektorowej."
     },
     {
-      Tytul: "Pobieranie warstwy wektorowej"
+      Tytul: "Pobieranie warstwy wektorowej",
+      "LINK YOUTUBE": "https://youtu.be/q2GhlIgjlnA",
+      OPIS:
+        "W instruktażu została przedstawiona procedura pobierania warstw wektorowych w formacie Geojson."
     },
     {
-      Tytul: "Zmiana logo i favicon"
+      Tytul: "Panel ustawień",
+      "LINK YOUTUBE": "https://youtu.be/RxQOiHXmpxE",
+      OPIS:
+        "W instruktażu zostały omówione następujące procedury:\n- Zmiana logo\n- Zmiana favicon\n- Informacje do połączenia się z danymi w QGIS"
     },
     {
       Tytul: "Użytkownicy i grupy",
