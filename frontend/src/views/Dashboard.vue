@@ -571,6 +571,7 @@ export default {
       this.vectorLayerName = '';
       this.selectedDataExtension = this.dataFormats[0];
       this.isEpsgAutomatic = true;
+      this.epsg = '';
     },
     deleteLayer(el) {
       this.$alertify
@@ -709,6 +710,7 @@ export default {
               );
             }
           } else if (r.status === 400) {
+            this.epsg = '';
             this.isEpsgAutomatic = false;
             this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
           } else {
@@ -718,8 +720,15 @@ export default {
           }
         })
         .catch(err => {
-          this.$refs.closeModalBtn.click();
-          this.$alertify.error(this.$i18n.t('upload.uploadError'));
+          if (err.response.data.error === 'epsg not recognized') {
+            this.$alertify.error(this.$i18n.t('upload.noEpsg'));
+            this.isEpsgAutomatic = false;
+            this.epsg = 2180;
+          } else if (err.response.data.error === 'layer already exists') {
+            this.$alertify.error(this.$i18n.t('upload.nameExistsError'));
+          } else {
+            this.$alertify.error(this.$i18n.t('upload.uploadError'));
+          }
         });
     },
     setAttachmentsLayer(lid) {
