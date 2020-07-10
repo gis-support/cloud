@@ -447,6 +447,7 @@
                     class="form-control col-sm-7"
                     v-model="bufferValue"
                     type="number"
+                    @input="clearBufferDialog"
                   />
                 </div>
                 <div
@@ -455,7 +456,7 @@
                   role="group"
                 >
                   <button
-                    :disabled="!bufferValue"
+                    :disabled="!bufferValue || bufferValue <= 0"
                     type="button"
                     class="btn btn-default"
                     @click="generateBuffer"
@@ -1831,6 +1832,13 @@ export default {
     cancelEditing() {
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
+    },
+    clearBufferDialog() {
+      this.getLayerByName('buffer')
+        .getSource()
+        .clear();
+      this.selectedLayer = undefined;
+      this.isBuffer = false;
     },
     clearFeatureAdding() {
       this.isDrawing = false;
