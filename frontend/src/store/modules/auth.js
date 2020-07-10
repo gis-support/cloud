@@ -1,26 +1,27 @@
-import Swagger from 'swagger-client';
-import api from '@/docs/api.json';
+import Swagger from "swagger-client";
+import api from "@/docs/api.json";
 
 const swagger = new Swagger({
   spec: api,
-  requestInterceptor: (r) => {
+  requestInterceptor: r => {
     const request = r;
-    if (!request.url.includes('https') && process.env.VUE_APP_PROD_HOST_URL != 'localhost') {
-      request.url = request.url.replace('http', 'https');
+    if (!request.url.includes("https") && process.env.VUE_APP_PROD_HOST_URL != "localhost") {
+      request.url = request.url.replace("http", "https");
     }
-    if (request.url.includes('/login')) {
+    if (request.url.includes("/login")) {
       return request;
     }
-    request.headers.Authorization = localStorage.getItem('token');
+    request.headers.Authorization = localStorage.getItem("token");
     return request;
-  },
+  }
 }).client;
 
 export default {
   state: {
-    defaultGroup: '',
-    token: localStorage.getItem('token') || '',
-    user: localStorage.getItem('user') || '',
+    defaultGroup: "",
+    token: localStorage.getItem("token") || "",
+    user: localStorage.getItem("user") || "",
+    isRdos: process.env.VUE_APP_PROD_HOST_URL == "rdos-cloud.gis-support.pl"
   },
   mutations: {
     setToken(state, token) {
@@ -30,19 +31,19 @@ export default {
       state.user = email;
     },
     logOut(state) {
-      state.token = '';
-      state.user = '';
+      state.token = "";
+      state.user = "";
     },
     setDefaultGroup(state, group) {
       state.defaultGroup = group;
-    },
+    }
   },
   actions: {
     async checkToken(ctx) {
       try {
         const r = await swagger.apis.Auth.get_api_check_token();
-        ctx.commit('setToken', localStorage.getItem('token'));
-        ctx.commit('setUser', localStorage.getItem('user'));
+        ctx.commit("setToken", localStorage.getItem("token"));
+        ctx.commit("setUser", localStorage.getItem("user"));
         return r;
       } catch (err) {
         return err.response;
@@ -61,19 +62,17 @@ export default {
         const response = await swagger.apis.Auth.post_api_login({
           body: payload
         });
-        const {
-          token
-        } = response.obj;
-        ctx.commit('setToken', token);
-        ctx.commit('setUser', payload.user);
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', payload.user);
+        const { token } = response.obj;
+        ctx.commit("setToken", token);
+        ctx.commit("setUser", payload.user);
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", payload.user);
         return response;
       } catch (err) {
-        ctx.commit('setToken', '');
-        ctx.commit('setUser', '');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        ctx.commit("setToken", "");
+        ctx.commit("setUser", "");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         return err.response;
       }
     },
@@ -86,7 +85,7 @@ export default {
       } catch (err) {
         return err.response;
       }
-    },
+    }
   },
   getters: {
     getDefaultGroup(state) {
@@ -98,5 +97,8 @@ export default {
     getUser(state) {
       return state.user;
     },
-  },
+    getIsRdos(state) {
+      return state.isRdos;
+    }
+  }
 };
