@@ -121,10 +121,16 @@
                       @input="updateLayerTags(val, $event)"
                     >
                       <template v-slot:option="option">
-                        <span :style="`color: ${option.color}`">{{option.name}}</span>
+                        <span
+                          :style="`color: ${option.color};width: 50px; overflow:hidden`"
+                          :title="option.name"
+                        >{{option.name}}</span>
                       </template>
                       <template v-slot:selected-option="option">
-                        <span :style="`color: ${option.color}`">{{option.name}}</span>
+                        <span
+                          :style="`color: ${option.color};max-width: 10vh;overflow:hidden;white-space:nowrap`"
+                          :title="option.name"
+                        >{{option.name}}</span>
                       </template>
                       <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
                     </vSelect>
@@ -874,8 +880,8 @@ export default {
   margin: 0;
 }
 .mySelect >>> .vs__search::placeholder,
-.mySelect >>> .vs__dropdown-toggle,
-.mySelect >>> .vs__dropdown-menu {
+.mySelect >>> .vs__dropdown-toggle {
+  max-width: 80vh;
   text-align: center;
   padding-bottom: 2px;
   font-size: 12px;
@@ -884,13 +890,27 @@ export default {
   border-bottom: 1px solid rgba(60, 60, 60, 0.26);
 }
 
+.mySelect >>> .vs__dropdown-menu {
+  max-height: 30vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 30vh;
+  font-size: 12px;
+  padding-bottom: 2px;
+}
+
+.mySelect >>> .vs__dropdown-menu > .vs__dropdown-option {
+  width: 30vh;
+  overflow: hidden;
+}
+
 .mySelect >>> .vs__dropdown-toggle > .vs__actions {
   display: none;
 }
 
 .mySelect >>> .vs__dropdown-toggle > .vs__selected-options > .vs__selected {
   background-color: white;
-  margin: 0 2px;
+  margin: 1px 2px;
 }
 
 .add-layer {
