@@ -836,6 +836,7 @@ export default {
           }
         })
         .catch(err => {
+          this.isFileSending = false;
           if (err.response.data.error === 'epsg not recognized') {
             this.$alertify.error(this.$i18n.t('upload.noEpsg'));
             this.isEpsgAutomatic = false;

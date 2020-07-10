@@ -1113,6 +1113,7 @@ export default {
     draggable
   },
   data: () => ({
+    activeLayerName: '',
     activeServices: [],
     addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
@@ -1212,7 +1213,9 @@ export default {
       return this.$store.getters.getCurrentFeaturesTypes;
     },
     layerName() {
-      return this.$store.getters.getLayerName;
+      return this.$store.getters.getLayerName
+        ? this.$store.getters.getLayerName
+        : this.activeLayerName;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
@@ -1556,6 +1559,9 @@ export default {
         try {
           const r = await this.$store.dispatch('getLayers');
           const layers = r.body.layers;
+          this.activeLayerName = layers.filter(
+            layer => layer.id === this.$route.params.layerId
+          )[0].name;
           this.layers = layers.filter(
             layer => layer.id !== this.$route.params.layerId
           );
