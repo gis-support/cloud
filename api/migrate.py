@@ -58,7 +58,6 @@ if __name__ == '__main__':
     app = create_app(config)
     main(app)
 
-
     if config.lower() != "production":
         print("")
 
