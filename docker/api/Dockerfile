@@ -21,5 +21,3 @@ COPY ./api ./api
 COPY ./docker/api/migrate.sh /usr/bin/migrate
 RUN chmod +x /usr/bin/migrate
 
-COPY ./docker/api/init_database.sh /usr/bin/init_database
-RUN chmod +x /usr/bin/init_database
