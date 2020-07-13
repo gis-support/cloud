@@ -68,9 +68,8 @@ class TestLayers(BaseTest):
         }
         r = client.post('/api/layers?token={}'.format(token), data=file_request,
                         follow_redirects=True, content_type='multipart/form-data')
-        assert r.status_code == 201
-        assert r.json
-        assert r.json['layers']['features'] == 2
+        assert r.status_code == 400
+        assert r.json["error"] == "layer has at least one feature with empty geometry"
 
     def test_layers_post_shapefile(self, client):
         token = self.get_token(client)

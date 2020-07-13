@@ -126,13 +126,13 @@ def layers(cloud):
                 for feature in layer:
                     the_geom = feature.GetGeometryRef()
 
-                    if transform and the_geom is not None:
+                    if the_geom is None:
+                        return jsonify({"error": "layer has at least one feature with empty geometry"}), 400
+
+                    if transform:
                         the_geom.Transform(transform)
 
-                    if the_geom is None:
-                        ewkt = f"SRID=4326;{geom_type} EMPTY"
-                    else:
-                        ewkt = f"SRID=4326;{the_geom.ExportToWkt()}"
+                    ewkt = f"SRID=4326;{the_geom.ExportToWkt()}"
 
                     feature_string = ''
                     if len(columns) == 1:
