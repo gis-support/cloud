@@ -584,7 +584,7 @@ export default {
       if (this.attachmentsIds) {
         const r = await this.$store.dispatch(
           'getAttachmentsMeta',
-          this.attachmentsIds.replaceAll(';', ',')
+          this.attachmentsIds.split(';').join(',')
         );
         if (r.status === 200) {
           this.filesAttachments = r.obj.data;
