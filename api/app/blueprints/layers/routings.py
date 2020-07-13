@@ -125,17 +125,24 @@ def layers(cloud):
                 count_features = 0
                 for feature in layer:
                     the_geom = feature.GetGeometryRef()
-                    if transform:
+
+                    if transform and the_geom is not None:
                         the_geom.Transform(transform)
+
+                    if the_geom is None:
+                        ewkt = f"SRID=4326;{geom_type} EMPTY"
+                    else:
+                        ewkt = f"SRID=4326;{the_geom.ExportToWkt()}"
+
                     feature_string = ''
                     if len(columns) == 1:
                         # W przypadku braku atrybutów
-                        feature_string += 'SRID=4326;%s\n' % feature.GetGeometryRef().ExportToWkt()
+                        feature_string += ewkt + "\n"
                     else:
                         for idx, column in enumerate(columns):
                             # Pierwszy wiersz to geometria
                             if idx == 0:
-                                feature_string += 'SRID=4326;%s\t' % feature.GetGeometryRef().ExportToWkt()
+                                feature_string += ewkt + "\t"
                             else:
                                 field = feature.GetField(column)
                                 if isinstance(field, str):
