@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from flask.testing import FlaskClient
+
 from app.tests.utils import BaseTest, TEST_DATA_DIR
 import json
 import pytest
 import os
-from io import BytesIO
 
 
 @pytest.mark.permissions
@@ -234,6 +235,16 @@ class TestPermissions(BaseTest):
         assert r.status_code == 403
         assert r.json
         assert r.json['error'] == 'access denied'
+
+    def test_change_admin_permission(self, client: FlaskClient):
+        token_admin = self.get_token(client)
+        lid = self.add_geojson_prg(client, token_admin)
+
+        r = client.put(f'/api/permissions/{lid}?token={token_admin}',
+                       data=json.dumps({'user': self.DEFAULT_PASS, 'permission': 'read'}))
+
+        assert r.status_code == 400
+        assert r.json["error"] == "administrator permissions can not be changed"
 
     def test_permissions_RL_43(self, client):
         # New admin user
