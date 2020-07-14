@@ -21,7 +21,7 @@ DB_RESTRICTED_USERS = (
 
 DB_RESTRICTED_TABLES = (
     'spatial_ref_sys',  # Postgis dependency
-    'layer_styles'  # QGIS styles source
+    'layer_styles',  # QGIS styles source
     "tag",
     "layer_tag"
 )
@@ -169,8 +169,10 @@ class Cloud:
     # Layers list
     def get_layers(self):
         cursor = self.execute("""
-            SELECT DISTINCT table_name FROM information_schema.role_table_grants WHERE grantee = %s
-        """, (self.user,))
+            SELECT DISTINCT table_name FROM information_schema.role_table_grants
+            WHERE grantee = %s
+            AND table_name NOT IN %s
+        """, (self.user, DB_RESTRICTED_TABLES))
 
         tags_by_layer_id = LayerTag.get_tags_by_layer_id()
 

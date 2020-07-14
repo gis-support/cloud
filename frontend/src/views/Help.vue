@@ -57,7 +57,7 @@
             />
           </div>
           <div class="help-desc">
-            <h5>{{activeDescription}}</h5>
+            <h5 class="desc">{{activeDescription}}</h5>
           </div>
         </div>
       </div>
@@ -117,6 +117,10 @@ export default {
   padding-top: 40px;
   height: calc(100vh - 56px);
 }
+.desc {
+  font-family: 'Open Sans';
+  font-size: 14px;
+}
 .help-title {
   text-align: center;
 }
@@ -126,8 +130,9 @@ export default {
   min-height: 55vh;
 }
 .help-desc {
+  padding-left: 25px;
+  padding-right: 25px;
   text-align: center;
-  margin-top: 50px;
   white-space: pre-line;
 }
 .nav-layout-sidebar {

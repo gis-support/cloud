@@ -32,6 +32,9 @@ def create_app(config='development'):
     app._db = create_db(app.config)
     app._redis = FlaskRedis(app)
     app._hashids = Hashids(salt=app.config['SECRET_KEY'])
+
+    create_tables(app._db)
+
     app.register_blueprint(mod_auth, url_prefix='/api')
     app.register_blueprint(mod_layers, url_prefix='/api')
     app.register_blueprint(mod_features, url_prefix='/api')

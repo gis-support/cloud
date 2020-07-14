@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS public.layer_styles (
     update_time timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT layer_styles_pkey PRIMARY KEY (id)
 );
+GRANT SELECT on layer_styles to public;
+
 create or replace function tilebbox (z int, x int, y int, srid int = 3857)
     returns geometry
     language plpgsql immutable as
