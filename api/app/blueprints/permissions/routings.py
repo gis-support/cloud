@@ -8,6 +8,7 @@ from flasgger import swag_from
 from app.docs import path_by
 from os import environ
 from app.helpers.cloud import cloud_decorator
+from app.helpers.users import is_admin
 
 mod_permissions = Blueprint("permissions", __name__)
 
@@ -27,9 +28,14 @@ def permissions(cloud):
 @layer_decorator(permission="owner")
 def permissions_by_layer_id(layer, lid):
     data = request.get_json(force=True)
+
+    user = data.get("user", "")
+    if is_admin(user):
+        return jsonify({"error": "administrator permissions can not be changed"}), 400
+
     if data.get('permission') not in PERMISSIONS:
         return jsonify({"error": "permission invalid"}), 400
-    if not user_exists(data.get('user')):
+    if not user_exists(user):
         return jsonify({"error": "user not exists"}), 400
     layer.grant(user=data['user'], permission=data['permission'])
     return jsonify({"permissions": {"user": data['user'], "permission": data["permission"]}})
