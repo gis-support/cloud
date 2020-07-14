@@ -55,6 +55,22 @@ class TestLayers(BaseTest):
         assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [
             16.714467009, 53.299132461]
 
+    def test_add_layer_with_features_with_empty_geometry(self, client):
+        name = "test"
+        file = "correct_with_empty_geom.geojson"
+
+        token = self.get_token(client)
+
+        path = os.path.join(TEST_DATA_DIR, 'layers', file)
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), file),
+            'name': name
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+        assert r.status_code == 400
+        assert r.json["error"] == "layer has at least one feature with empty geometry"
+
     def test_layers_post_shapefile(self, client):
         token = self.get_token(client)
         path = os.path.join(TEST_DATA_DIR, 'layers')

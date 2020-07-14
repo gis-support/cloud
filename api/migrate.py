@@ -46,7 +46,6 @@ def main(app):
                 print("\33[32m", "OK", '\33[0m')
 
         insert_migrations(scripts_to_be_executed)
-        create_tables(app._db)
 
     return 0
 
@@ -57,7 +56,6 @@ if __name__ == '__main__':
     print(config.upper())
     app = create_app(config)
     main(app)
-
 
     if config.lower() != "production":
         print("")

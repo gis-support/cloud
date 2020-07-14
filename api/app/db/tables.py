@@ -12,7 +12,6 @@ def create_tables(database: PostgresqlExtDatabase):
         LayerTag,
         Dict,
         Attachment,
-        Migration
     ]
 
     database.create_tables(models)
