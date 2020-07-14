@@ -447,6 +447,7 @@
                     class="form-control col-sm-7"
                     v-model="bufferValue"
                     type="number"
+                    @input="clearBufferDialog"
                   />
                 </div>
                 <div
@@ -455,7 +456,7 @@
                   role="group"
                 >
                   <button
-                    :disabled="!bufferValue"
+                    :disabled="!bufferValue || bufferValue <= 0"
                     type="button"
                     class="btn btn-default"
                     @click="generateBuffer"
@@ -1113,6 +1114,7 @@ export default {
     draggable
   },
   data: () => ({
+    activeLayerName: '',
     activeServices: [],
     addFeatureDialog: false,
     baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
@@ -1212,7 +1214,9 @@ export default {
       return this.$store.getters.getCurrentFeaturesTypes;
     },
     layerName() {
-      return this.$store.getters.getLayerName;
+      return this.$store.getters.getLayerName
+        ? this.$store.getters.getLayerName
+        : this.activeLayerName;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
@@ -1251,11 +1255,7 @@ export default {
     addLayer(id, name) {
       this.otherLayers.push({ id, name });
       this.activeOtherLayers.push(id);
-      this.getLayerByName('otherLayers')
-        .getLayers()
-        .getArray()
-        .push(this.createMVTLayer(id, name));
-      this.map.updateSize();
+      this.createOtherMVTLayer(id, name);
     },
     createMVTLayer(id, name) {
       return new VectorTileLayer({
@@ -1280,6 +1280,135 @@ export default {
       const indexGroup = otherLayersArray.map(l => l.get('name')).indexOf(name);
       otherLayersArray.splice(indexGroup, 1);
       this.map.updateSize();
+    },
+    async createOtherMVTLayer(id, name) {
+      const r = await this.$store.dispatch('getLayerStyle', id);
+      if (r.status === 200) {
+        const otherLabels = r.obj.style.labels;
+        const otherLayerStyle = r.obj.style;
+        let otherLayerType = undefined;
+        if (otherLayerStyle.renderer === 'single') {
+          otherLayerType = r.obj.style.type;
+        }
+        const otherLayer = new VectorTileLayer({
+          name: name,
+          renderBuffer: 256,
+          source: new VectorTileSource({
+            cacheSize: 1,
+            format: new MVT(),
+            url: `${
+              this.apiUrl
+            }/mvt/${id}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
+          }),
+          style: feature => {
+            const styles = [];
+            const labelsToShow = [];
+            otherLabels.forEach(el => {
+              labelsToShow.push(feature.getProperties()[el]);
+            });
+            const featStyle = new Style({
+              text: new Text({
+                text: labelsToShow.join(' '),
+                fill: new Fill({ color: 'white' }),
+                stroke: new Stroke({ color: 'black', width: 4 }),
+                offsetY: -10
+              })
+            });
+            if (otherLayerType) {
+              const stroke = new Stroke({
+                color: `rgba(${otherLayerStyle['stroke-color']})`,
+                width: `${otherLayerStyle['stroke-width']}`
+              });
+              const fill = new Fill({
+                color: `rgba(${otherLayerStyle['fill-color']})`
+              });
+              if (otherLayerType === 'point') {
+                featStyle.setImage(
+                  new Circle({
+                    fill,
+                    stroke,
+                    radius: otherLayerStyle.width
+                  })
+                );
+              } else if (
+                otherLayerStyle === 'square' ||
+                otherLayerStyle === 'triangle'
+              ) {
+                featStyle.setImage(
+                  new RegularShape({
+                    fill,
+                    stroke,
+                    points: otherLayerType === 'square' ? 4 : 3,
+                    radius: otherLayerStyle.width,
+                    angle: otherLayerType === 'square' ? Math.PI / 4 : 0
+                  })
+                );
+              } else if (
+                otherLayerType === 'polygon' ||
+                otherLayerType === 'line'
+              ) {
+                featStyle.setFill(fill);
+                featStyle.setStroke(stroke);
+              } else if (
+                otherLayerType === 'dashed' ||
+                otherLayerType === 'dotted'
+              ) {
+                const lineDash =
+                  otherLayerType === 'dashed' ? [10, 10] : [1, 10];
+                stroke.setLineDash(lineDash);
+                featStyle.setStroke(stroke);
+              }
+            } else {
+              const attr = feature.get(otherLayerStyle.attribute);
+              const filteredFeat = otherLayerStyle.categories.find(
+                el => el.value == attr
+              );
+              if (filteredFeat) {
+                const stroke = new Stroke({
+                  color: `rgba(${filteredFeat['stroke-color']})`,
+                  width: `${filteredFeat['stroke-width']}`
+                });
+                const fill = new Fill({
+                  color: `rgba(${filteredFeat['fill-color']})`
+                });
+                if (filteredFeat.type === 'point') {
+                  featStyle.setImage(
+                    new Circle({
+                      fill,
+                      stroke,
+                      radius: filteredFeat.width
+                    })
+                  );
+                } else {
+                  featStyle.setFill(fill);
+                  featStyle.setStroke(stroke);
+                }
+              } else {
+                featStyle.setImage(
+                  new Circle({
+                    fill: new Fill({
+                      color: [250, 250, 250, 0.4]
+                    }),
+                    stroke: new Stroke({
+                      color: [51, 153, 204, 1],
+                      width: 1
+                    }),
+                    radius: 2
+                  })
+                );
+              }
+            }
+            return featStyle;
+          }
+        });
+        this.getLayerByName('otherLayers')
+          .getLayers()
+          .getArray()
+          .push(otherLayer);
+        this.map.updateSize();
+      } else {
+        this.$alertify.error(this.$i18n.t('default.errorStyle'));
+      }
     },
     async createStyle() {
       const r = await this.$store.dispatch(
@@ -1431,6 +1560,9 @@ export default {
         try {
           const r = await this.$store.dispatch('getLayers');
           const layers = r.body.layers;
+          this.activeLayerName = layers.filter(
+            layer => layer.id === this.$route.params.layerId
+          )[0].name;
           this.layers = layers.filter(
             layer => layer.id !== this.$route.params.layerId
           );
@@ -1707,6 +1839,13 @@ export default {
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
     },
+    clearBufferDialog() {
+      this.getLayerByName('buffer')
+        .getSource()
+        .clear();
+      this.selectedLayer = undefined;
+      this.isBuffer = false;
+    },
     clearFeatureAdding() {
       this.isDrawing = false;
       this.addFeatureDialog = false;
@@ -1736,6 +1875,13 @@ export default {
       this.bufferFeatureGeometry = undefined;
       this.bufferFeatures = [];
       this.isBufferTableShowing = false;
+      this.bufferColumns = [
+        {
+          head: true,
+          sortable: true,
+          filter: true
+        }
+      ];
     },
     changeBaseLayer(layerName) {
       this.map
@@ -2006,6 +2152,7 @@ export default {
                   visible: false,
                   name: 'Ortofotomapa',
                   group: 'baselayers',
+                  zIndex: -1000,
                   source: new WMTS({
                     url:
                       'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',

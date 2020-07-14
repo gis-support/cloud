@@ -1,85 +1,28 @@
 <template>
   <div class="attachments-panel right-sub-panel">
     <div v-if="featureAttachments || filesAttachments">
-      <h4>{{ $i18n.t(`featureManager.attachmentsTitlepublic`) }}:</h4>
-      <div
-        v-if="
+      <!-- Początek załączników publicznych -->
+      <span v-if="isRdos">
+        <h4>{{ $i18n.t(`featureManager.attachmentsTitlepublic`) }}:</h4>
+        <div
+          v-if="
           !Object.keys(featureAttachments).includes(defaultGroup) ||
             featureAttachments[defaultGroup].length === 0
         "
-        class="empty-sub-panel"
-      >
-        <i
-          class="fa fa-paperclip"
-          aria-hidden="true"
-        />
-        {{ $i18n.t("default.noAttachments") }}
-      </div>
-      <span v-else>
-        <template v-for="item in featureAttachments[defaultGroup]">
-          <div
-            class="media"
-            :key="item.link"
-          >
-            <div class="media-left">
-              <h3>
-                <i
-                  class="fa fa-paperclip"
-                  aria-hidden="true"
-                />
-              </h3>
-            </div>
-            <div class="media-body">
-              <h5 class="media-heading">
-                <a
-                  :href="item.link"
-                  target="_blank"
-                >
-                  <span>{{ item.name }}</span>
-                </a>
-              </h5>
-              <span
-                style="opacity:0.4;"
-                v-if="permission === 'write'"
-              >
-                <button
-                  class="btn btn-link action"
-                  :title="$i18n.t('featureManager.deleteLink')"
-                  @click="deleteLink(item)"
-                >
-                  <i
-                    class="fa fa-trash"
-                    aria-hidden="true"
-                  />
-                </button>
-              </span>
-            </div>
-          </div>
-        </template>
-      </span>
-      <div
-        class="pt-10 pb-10"
-        v-if="isfilesAttachmentsLoaded"
-      >
-        <h4>{{ "Załączniki" }}:</h4>
-        <div style="overflow-y: auto; max-height: 50vh">
-          <div
-            v-if="filesAttachments.length < 1"
-            class="empty-sub-panel"
-          >
-            <i
-              class="fa fa-paperclip"
-              aria-hidden="true"
-            />
-            {{ $i18n.t("default.noAttachments") }}
-          </div>
-          <template
-            v-else
-            v-for="att in filesAttachments"
-          >
+          class="empty-sub-panel"
+        >
+          <i
+            class="fa fa-paperclip"
+            aria-hidden="true"
+          />
+          {{ $i18n.t("default.noAttachments") }}
+        </div>
+        <!-- Lista załączników publicznych -->
+        <span v-else>
+          <template v-for="(item, idx) in featureAttachments[defaultGroup]">
             <div
               class="media"
-              :key="att.id"
+              :key="idx"
             >
               <div class="media-left">
                 <h3>
@@ -91,167 +34,353 @@
               </div>
               <div class="media-body">
                 <h5 class="media-heading">
-                  <span>
-                    <input
-                      class="mr-5"
-                      type="checkbox"
-                      id="checkbox"
-                      :value="att.id"
-                      v-model="checkedIds"
-                    />
-                    <span
-                      class="mr-5"
-                      style="cursor:pointer"
-                      @click="downloadFileAttachments(att.id.toString())"
-                    >{{ att.file_name }}</span>
+                  <a
+                    :href="item.link"
+                    target="_blank"
+                  >
+                    <span>{{ item.name }}</span>
+                  </a>
+                </h5>
+                <span
+                  style="opacity:0.4;"
+                  v-if="permission === 'write'"
+                >
+                  <button
+                    class="btn btn-link action"
+                    :title="$i18n.t('featureManager.deleteLink')"
+                    @click="deleteLink(item)"
+                  >
                     <i
                       class="fa fa-trash"
                       aria-hidden="true"
-                      style="cursor:pointer"
-                      :title="$i18n.t('featureManager.deleteAttachment')"
-                      @click="deleteFileAttachments(att.id)"
                     />
-                  </span>
-                </h5>
-                <h6 class="media-heading">
-                  <span>{{"Autor: " + att.added_by }}</span>
-                </h6>
-                <h6 class="media-heading">
-                  <span>{{"Data: " + (new Date(Date.parse(att.added_at))).toLocaleDateString("pl-PL") }}</span>
-                </h6>
+                  </button>
+                </span>
               </div>
             </div>
           </template>
-        </div>
-      </div>
-      <div
-        class="loading-overlay pt-10 pb-10"
-        style="text-align: center"
-        v-else
-      >
-        <div class="loading-indicator mb-10">
-          <h4>{{ $i18n.t("default.loading") }}</h4>
-          <i class="fa fa-lg fa-spin fa-spinner" />
-        </div>
-      </div>
-      <hr />
-      <div
-        class="btn-group btn-group-justified"
-        role="group"
-      >
-        <div
-          class="btn-group"
-          role="group"
-        >
-          <button
-            class="btn btn-link"
-            @click="toggleAttachmentAdding(true)"
-            v-if="permission === 'write' && isfilesAttachmentsLoaded"
-          >
-            <i
-              class="fa fa-plus-circle"
-              aria-hidden="true"
-            />
-            {{ $i18n.t(`featureManager.addAttachment`) }}
-          </button>
-        </div>
-        <div
-          class="btn-group"
-          role="group"
-        >
-          <button
-            class="btn btn-link green"
-            v-if="permission === 'write' && filesAttachments.length > 0"
-            :disabled="checkedIds.length < 1"
-            @click="downloadFileAttachments(checkedIds.join(','))"
-          >
-            <i
-              class="fa fa-download"
-              aria-hidden="true"
-            />
-            {{ $i18n.t(`featureManager.checkedDownload`) }}
-          </button>
-        </div>
-        <div
-          class="btn-group"
-          role="group"
-        >
-          <button
-            class="btn btn-link red"
-            v-if="permission === 'write' && filesAttachments.length > 0"
-            :disabled="checkedIds.length < 1"
-            @click="deleteFileAttachments(checkedIds.join(','))"
-          >
-            <i
-              class="fa fa-trash"
-              aria-hidden="true"
-            />
-            {{ $i18n.t(`featureManager.checkedDelete`) }}
-          </button>
-        </div>
-      </div>
-    </div>
-    <div v-if="usersGroup !== 'default'">
-      <h4>{{ $i18n.t(`featureManager.attachmentsTitleGroup`) }}{{ usersGroup }}:</h4>
-      <div
-        v-if="featureAttachments &&
+        </span>
+        <hr />
+        <!-- Lista załączników grupowych -->
+        <div v-if="usersGroup !== 'default'">
+          <h4>
+            <span>{{ $i18n.t(`featureManager.attachmentsTitleGroup`) + ": "}}</span>
+            <span style="color:#d74b4b">{{ usersGroup }}</span>
+          </h4>
+          <div
+            v-if="featureAttachments &&
           !Object.keys(featureAttachments).includes(usersGroup) ||
           featureAttachments[usersGroup].filter(el => el.group !== defaultGroup).length === 0
         "
-        class="empty-sub-panel"
-      >
-        <i
-          class="fa fa-paperclip"
-          aria-hidden="true"
-        />
-        {{ $i18n.t("default.noAttachments") }}
-      </div>
-      <span v-else>
-        <template
-          v-for="item in featureAttachments[usersGroup].filter(el => el.group !== defaultGroup)"
+            class="empty-sub-panel"
+          >
+            <i
+              class="fa fa-paperclip"
+              aria-hidden="true"
+            />
+            {{ $i18n.t("default.noAttachments") }}
+          </div>
+          <span v-else>
+            <template
+              v-for="(item, idx) in featureAttachments[usersGroup].filter(el => el.group !== defaultGroup)"
+            >
+              <div
+                class="media"
+                :key="idx"
+              >
+                <div class="media-left">
+                  <h3>
+                    <i
+                      class="fa fa-paperclip"
+                      aria-hidden="true"
+                    />
+                  </h3>
+                </div>
+                <div class="media-body">
+                  <h5 class="media-heading">
+                    <a
+                      :href="item.link"
+                      target="_blank"
+                    >
+                      <span>{{ item.name }}</span>
+                    </a>
+                  </h5>
+                  <span style="opacity:0.4;">
+                    <button
+                      class="btn btn-link action"
+                      :title="$i18n.t('featureManager.deleteLink')"
+                      @click="deleteLink(item)"
+                    >
+                      <i
+                        class="fa fa-trash"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </template>
+          </span>
+          <hr />
+        </div>
+        <div
+          class="btn-group"
+          role="group"
         >
           <div
-            class="media"
-            :key="item.link"
+            class="btn-group"
+            role="group"
           >
-            <div class="media-left">
-              <h3>
-                <i
-                  class="fa fa-paperclip"
-                  aria-hidden="true"
-                />
-              </h3>
-            </div>
-            <div class="media-body">
-              <h5 class="media-heading">
-                <a
-                  :href="item.link"
-                  target="_blank"
-                >
-                  <span>{{ item.name }}</span>
-                </a>
-              </h5>
-              <span style="opacity:0.4;">
-                <button
-                  class="btn btn-link action"
-                  :title="$i18n.t('featureManager.deleteLink')"
-                  @click="deleteLink(item)"
-                >
-                  <i
-                    class="fa fa-trash"
-                    aria-hidden="true"
-                  />
-                </button>
-              </span>
-            </div>
+            <button
+              class="btn btn-link"
+              @click="toggleAttachmentAdding(true)"
+              v-if="permission === 'write' && isfilesAttachmentsLoaded"
+            >
+              <i
+                class="fa fa-plus-circle"
+                aria-hidden="true"
+              />
+              {{ $i18n.t(`featureManager.addAttachment`) }}
+            </button>
           </div>
-        </template>
+        </div>
       </span>
+      <!-- Koniec załączników publicznych -->
+
+      <!-- Początek załączników plikowych -->
+      <span v-else>
+        <div
+          class="pt-10 pb-10"
+          v-if="isfilesAttachmentsLoaded"
+        >
+          <h4>{{ "Załączniki" }}:</h4>
+          <div style="overflow-y: auto; max-height: 50vh">
+            <div
+              v-if="filesAttachments.length < 1"
+              class="empty-sub-panel"
+            >
+              <i
+                class="fa fa-paperclip"
+                aria-hidden="true"
+              />
+              {{ $i18n.t("default.noAttachments") }}
+            </div>
+            <template
+              v-else
+              v-for="att in filesAttachments"
+            >
+              <div
+                class="media"
+                :key="att.id"
+              >
+                <div class="media-left">
+                  <h3>
+                    <i
+                      class="fa fa-paperclip"
+                      aria-hidden="true"
+                    />
+                  </h3>
+                </div>
+                <div class="media-body">
+                  <h5 class="media-heading">
+                    <span>
+                      <input
+                        class="mr-5"
+                        type="checkbox"
+                        id="checkbox"
+                        :value="att.id"
+                        v-model="checkedIds"
+                      />
+                      <span
+                        class="mr-5"
+                        style="cursor:pointer"
+                        @click="downloadFileAttachments(att.id.toString())"
+                      >{{ att.file_name }}</span>
+                      <i
+                        class="fa fa-trash"
+                        aria-hidden="true"
+                        style="cursor:pointer"
+                        :title="$i18n.t('featureManager.deleteAttachment')"
+                        @click="deleteFileAttachments(att.id)"
+                      />
+                    </span>
+                  </h5>
+                  <h6 class="media-heading">
+                    <span>{{"Autor: " + att.added_by }}</span>
+                  </h6>
+                  <h6 class="media-heading">
+                    <span>{{"Data: " + (new Date(Date.parse(att.added_at))).toLocaleDateString("pl-PL") }}</span>
+                  </h6>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div
+          class="loading-overlay pt-10 pb-10"
+          style="text-align: center"
+          v-else
+        >
+          <div class="loading-indicator mb-10">
+            <h4>{{ $i18n.t("default.loading") }}</h4>
+            <i class="fa fa-lg fa-spin fa-spinner" />
+          </div>
+        </div>
+
+        <div
+          class="btn-group btn-group-justified"
+          role="group"
+        >
+          <div
+            class="btn-group"
+            role="group"
+          >
+            <button
+              class="btn btn-link"
+              @click="toggleFileAttachmentAdding(true)"
+              v-if="permission === 'write' && isfilesAttachmentsLoaded"
+            >
+              <i
+                class="fa fa-plus-circle"
+                aria-hidden="true"
+              />
+              {{ $i18n.t(`featureManager.addAttachment`) }}
+            </button>
+          </div>
+          <div
+            class="btn-group"
+            role="group"
+          >
+            <button
+              class="btn btn-link green"
+              v-if="permission === 'write' && filesAttachments.length > 0"
+              :disabled="checkedIds.length < 1"
+              @click="downloadFileAttachments(checkedIds.join(','))"
+            >
+              <i
+                class="fa fa-download"
+                aria-hidden="true"
+              />
+              {{ $i18n.t(`featureManager.checkedDownload`) }}
+            </button>
+          </div>
+          <div
+            class="btn-group"
+            role="group"
+          >
+            <button
+              class="btn btn-link red"
+              v-if="permission === 'write' && filesAttachments.length > 0"
+              :disabled="checkedIds.length < 1"
+              @click="deleteFileAttachments(checkedIds.join(','))"
+            >
+              <i
+                class="fa fa-trash"
+                aria-hidden="true"
+              />
+              {{ $i18n.t(`featureManager.checkedDelete`) }}
+            </button>
+          </div>
+        </div>
+      </span>
+      <!-- Koniec załączników plikowych -->
     </div>
 
+    <!-- Modal załączników publicznych -->
     <div
       class="modal-mask"
       v-if="isAttachmentAdding"
+    >
+      <div class="modal-wrapper">
+        <div class="modal-dialog modal-md">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">{{ $i18n.t("featureManager.addAttachmentTitle") }}</h4>
+            </div>
+            <div class="modal-body">
+              <div
+                class="form-group d-flex"
+                style="flex-direction: column; margin-bottom: 0"
+              >
+                <div class="full-width pb-10">
+                  <label class="control-label col-sm-4">{{ $i18n.t("default.name") }}</label>
+                  <div class="col-sm-8">
+                    <input
+                      class="full-width form-control"
+                      type="text"
+                      v-model="attachmentName"
+                    />
+                  </div>
+                </div>
+
+                <div class="full-width pb-10">
+                  <label
+                    class="control-label col-sm-4"
+                  >{{ $i18n.t("featureManager.attachmentGroup") }}</label>
+                  <div class="col-sm-8">
+                    <select
+                      class="form-control"
+                      v-model="isAttachmentPublic"
+                    >
+                      <option
+                        v-if="usersGroup !== defaultGroup"
+                        :value="false"
+                      >{{ usersGroup }}</option>
+                      <option :value="true">{{ defaultGroup }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="full-width pb-10">
+                  <label
+                    class="control-label col-sm-4"
+                  >{{ $i18n.t("featureManager.attachmentLink") }}</label>
+                  <div class="col-sm-8">
+                    <input
+                      class="full-width form-control"
+                      type="text"
+                      v-model="attachmentLink"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div
+                class="btn-group btn-group-justified"
+                role="group"
+              >
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    :disabled="!attachmentName || !attachmentLink"
+                    @click="addAttachment"
+                  >{{ $i18n.t("default.save") }}</button>
+                </div>
+                <div
+                  class="btn-group"
+                  role="group"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="toggleAttachmentAdding(false)"
+                  >{{ $i18n.t("default.cancel") }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal załączników plikowych -->
+    <div
+      class="modal-mask"
+      v-if="isFileAttachmentAdding"
     >
       <div class="modal-wrapper">
         <div class="modal-dialog modal-dialog-centered">
@@ -345,6 +474,7 @@ export default {
     files: [],
     filesAttachments: [],
     isAttachmentAdding: false,
+    isFileAttachmentAdding: false,
     isAttachmentPublic: '',
     isfilesAttachmentsLoaded: true,
     isFilePrepared: false,
@@ -362,6 +492,9 @@ export default {
         return [];
       }
       return this.$store.getters.getFeatureAttachments[this.lid][this.fid];
+    },
+    isRdos() {
+      return this.$store.getters.getIsRdos;
     },
     user() {
       return this.$store.getters.getUser;
@@ -451,7 +584,7 @@ export default {
       if (this.attachmentsIds) {
         const r = await this.$store.dispatch(
           'getAttachmentsMeta',
-          this.attachmentsIds.replaceAll(';', ',')
+          this.attachmentsIds.split(';').join(',')
         );
         if (r.status === 200) {
           this.filesAttachments = r.obj.data;
@@ -471,7 +604,7 @@ export default {
     },
     clearUploadFiles() {
       this.files = [];
-      this.isAttachmentAdding = false;
+      this.isFileAttachmentAdding = false;
     },
     deleteLink(item) {
       this.$alertify
@@ -553,6 +686,9 @@ export default {
       this.attachmentLink = '';
       this.attachmentName = '';
       this.isAttachmentPublic = '';
+    },
+    toggleFileAttachmentAdding(vis) {
+      this.isFileAttachmentAdding = vis;
     }
   },
   watch: {
@@ -588,7 +724,14 @@ export default {
             }
           })
           .catch(err => {
-            vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
+            if (
+              err.response.data.error ===
+              'layer does not contain column __attachments'
+            ) {
+              vm.$alertify.error(vm.$i18n.t('upload.noColumnError'));
+            } else {
+              vm.$alertify.error(vm.$i18n.t('upload.uploadError'));
+            }
           });
       }
     }
