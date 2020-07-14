@@ -15,7 +15,7 @@ def run_migration(app):
         for color in colors:
             qml = qml.replace(color, convert_opacity(color))
         u_sql = """ UPDATE public.layer_styles SET styleqml = %s WHERE id = %s; """
-        app._db.execute_sql(sql, (qml, row[0]))
+        app._db.execute_sql(u_sql, (qml, row[0]))
 
 
 def convert_opacity(color):
