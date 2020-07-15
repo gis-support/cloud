@@ -54,7 +54,7 @@ def projects_project_id_get(project_id: int):
     return jsonify({"data": result})
 
 
-@mod_projects.route("/api/projects", methods=["POST"])
+@mod_projects.route("/projects", methods=["POST"])
 @token_required
 @swag_from_docs("projects.post.yml")
 def projects_post():
