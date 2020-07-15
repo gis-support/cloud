@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /api
-pipenv --three --site-packages && pipenv install --skip-lock && pipenv run python run.py
+pipenv --python 3.8.3 --site-packages && pipenv install --skip-lock && pipenv run python run.py
