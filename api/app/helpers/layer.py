@@ -114,20 +114,21 @@ class Layer(Cloud):
 
     # Change layer name
     def change_name(self, layer_name, callbacks: Iterable[Callable[[str, str], None]] = None):
-        callbacks = [] or callbacks
-        if self.layer_exists(layer_name):
-            raise ValueError("layer exists")
-        old_lid = self.lid
-        old_name = self.name
-        self.name = layer_name
-        self.execute(
-            SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
-        self.execute("""
-            UPDATE public.layer_styles SET f_table_name = %s WHERE f_table_name = %s
-        """, (self.name, old_name,))
-        self.lid = self.hash_name(self.name)
-        for callback in callbacks:
-            callback(old_lid, self.lid)
+        with self.db.atomic():
+            callbacks = [] or callbacks
+            if self.layer_exists(layer_name):
+                raise ValueError("layer exists")
+            old_lid = self.lid
+            old_name = self.name
+            self.name = layer_name
+            self.execute(
+                SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
+            self.execute("""
+                UPDATE public.layer_styles SET f_table_name = %s WHERE f_table_name = %s
+            """, (self.name, old_name,))
+            self.lid = self.hash_name(self.name)
+            for callback in callbacks:
+                callback(old_lid, self.lid)
 
     # Layer columns
 
