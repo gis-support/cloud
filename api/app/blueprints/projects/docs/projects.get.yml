@@ -1,0 +1,69 @@
+Get all projects
+---
+tags:
+  - Projects
+summary: Get all projects
+
+produces:
+  - application/json
+
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  200:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: "array"
+          items:
+            oneOf:
+              - $ref: "#/definitions/ProjectGet"
+  403:
+    description: token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+
+definitions:
+  ProjectGet:
+    type: "object"
+    properties:
+      id:
+        example: 1
+        description: "ID of the project"
+      name:
+        example: "name"
+        description: "Name of the project"
+      active_layer_id:
+        example: "6On03GwRvYx77Xr9NRb2JMrxjrbe2gQ1M38Xok"
+      additional_layers_ids:
+        type: array
+        example: ["RPVbnD55NxqMEb12k43bN0vQjRyk", "2Ay1xG6Y6Y6LrNyJM3LjVnVyKeNMp"]
+      map_center:
+        type: object
+        properties:
+          type:
+            example: "Point"
+          coordinates:
+            example: [21,52]
+      map_zoom:
+        example: 1
+      permission_to_active_layer:
+        example: True
+        description: "Does user have permission to project`s active layer"
+      permission_to_each_additional_layer:
+        example: True
+        description: "Does user have permission to project`s each additional layer"
+
