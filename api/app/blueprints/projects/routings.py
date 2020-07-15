@@ -26,12 +26,13 @@ def projects_get():
     for project in query:
         project_dict = model_to_dict(project)
 
-        project_dict["permission_to_each_layer"] = does_user_have_permission_to_each_additional_layer(user_name, project)
+        project_dict["permission_to_each_additional_layer"] = does_user_have_permission_to_each_additional_layer(user_name, project)
         project_dict["permission_to_active_layer"] = does_user_have_permission_to_active_layer(user_name, project)
         project_dict.pop("owner_name")
         result.append(project_dict)
 
     return jsonify({"data": result})
+
 
 @mod_projects.route("/projects/<int:project_id>")
 @token_required
@@ -48,7 +49,7 @@ def projects_project_id_get(project_id: int):
         return jsonify({"error": "permission denied for project`s active layer"}),  403
 
     result = model_to_dict(project)
-    result["permission_to_each_layer"] = does_user_have_permission_to_each_additional_layer(user_name, project)
+    result["permission_to_each_additional_layer"] = does_user_have_permission_to_each_additional_layer(user_name, project)
     result.pop("owner_name")
 
     return jsonify({"data": result})
