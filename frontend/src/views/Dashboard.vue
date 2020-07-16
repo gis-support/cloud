@@ -234,6 +234,7 @@
                 {{this.$i18n.t('upload.defaultMessage')}}
                 <ul>
                   <li
+                    style="list-style-position: inside"
                     v-for="(file,idx) in files"
                     :key="idx"
                   >

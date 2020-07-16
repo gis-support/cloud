@@ -401,6 +401,7 @@
                   {{this.$i18n.t('upload.defaultMessage')}}
                   <ul>
                     <li
+                      style="list-style-position: inside"
                       v-for="(file,idx) in files"
                       :key="idx"
                     >
@@ -665,7 +666,7 @@ export default {
     sendFiles() {
       this.isFilePrepared = false;
       let data = [];
-      for (file of this.files) {
+      for (let file of this.files) {
         const name = file.file.name;
         var promise = this.getBase64(file.file);
         promise
