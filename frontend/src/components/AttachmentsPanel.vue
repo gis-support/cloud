@@ -494,7 +494,6 @@ export default {
       return this.$store.getters.getFeatureAttachments[this.lid][this.fid];
     },
     isRdos() {
-      return true;
       return this.$store.getters.getIsRdos;
     },
     user() {
