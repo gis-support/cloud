@@ -11,6 +11,7 @@ from flasgger import swag_from
 from app.blueprints.layers.dicts.dict import Dict
 from app.blueprints.layers.layers_attachments import LayerAttachmentsManager
 from app.blueprints.layers.tags.models import LayerTag
+from app.blueprints.projects.models import Project
 from app.db.database import database
 from app.docs import path_by
 from app.db.general import token_required, layer_decorator
@@ -271,7 +272,14 @@ def layers_settings(lid):
             layer_name = data.get('layer_name')
             if layer_name:
                 try:
-                    layer.change_name(layer_name, callbacks=[Attachment.sync, LayerTag.update_layer_id, Dict.update_layer_id])
+                    layer.change_name(layer_name, callbacks=[
+                        Attachment.sync,
+                        LayerTag.update_layer_id,
+                        Dict.update_layer_id,
+                        Project.update_active_layer_id,
+                        Project.update_additional_layers_ids
+                    ])
+
                     return jsonify({"settings": layer.lid})
                 except ValueError as e:
                     return jsonify({"error": str(e)}), 400

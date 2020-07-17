@@ -203,6 +203,7 @@
     "register": "Zarejestruj"
   },
   "upload": {
+    "accessDenied": "Brak uprawnień",
     "automaticEpsg": "Układ współrzędnych określany jest automatycznie",
     "cancelUpload": "Anuluj wysyłanie",
     "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",

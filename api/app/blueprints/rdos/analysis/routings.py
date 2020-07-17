@@ -71,6 +71,8 @@ def analysis_distance_xlsx(lid, fid):
 
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
+        except PermissionError as e:
+            return jsonify({"error": str(e)}), 403
 
         file_name = f"{feature_name} ({layer.name}) - analiza odległości.xlsx"
         return send_file(file.name, as_attachment=True, attachment_filename=file_name)

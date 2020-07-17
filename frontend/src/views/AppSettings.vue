@@ -83,7 +83,7 @@
               {{this.$i18n.t('upload.uploadLogoMessage')}}
               <ul>
                 <li
-                  style="color:green"
+                  style="color:green;list-style-position: inside"
                   v-if="logo"
                 >{{logo[0].name}}</li>
               </ul>
@@ -159,7 +159,7 @@
               {{this.$i18n.t('upload.uploadLogoMessage')}}
               <ul>
                 <li
-                  style="color:green"
+                  style="color:green;list-style-position: inside"
                   v-if="favicon"
                 >{{favicon[0].name}}</li>
               </ul>
