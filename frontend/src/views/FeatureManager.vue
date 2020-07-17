@@ -761,6 +761,67 @@
             </div>
           </div>
         </modal>
+        <modal
+          name="saveProject"
+          :draggable="true"
+          width="30%"
+          height="auto"
+          @before-close="projectName=''"
+        >
+          <div class="modal-content dragg-content">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4
+                  class="modal-title"
+                >{{ project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`) }}</h4>
+              </div>
+              <div class="modal-body">
+                <div
+                  class="form-group"
+                  style="display: flex;"
+                >
+                  <label
+                    class="control-label col-sm-4"
+                    style="position: relative; top: 8px"
+                  >{{ $i18n.t(`default.name`) }}</label>
+                  <input
+                    class="form-control col-sm-7"
+                    v-model="projectName"
+                    type="text"
+                  />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <div
+                  class="btn-group btn-group-justified"
+                  role="group"
+                >
+                  <div
+                    class="btn-group"
+                    role="group"
+                  >
+                    <button
+                      :disabled="!projectName"
+                      type="button"
+                      class="btn btn-success"
+                      @click="saveProject"
+                    >{{ $i18n.t("default.save") }}</button>
+                  </div>
+                  <div
+                    class="btn-group"
+                    role="group"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      @click="$modal.hide('saveProject')"
+                    >{{ $i18n.t("default.close") }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </modal>
 
         <!-- <virtual-table
           style="height: calc(100% - 54px); position: relative;"
@@ -830,6 +891,24 @@
                 </div>
               </div>
             </div>
+          </div>
+          <div style="margin-bottom:30px">
+            <h5
+              v-if="project"
+              style="margin-bottom:5px"
+              class="col-sm-20"
+            >{{`Aktywny projekt: ${project.name}`}}</h5>
+            <button
+              style="padding:0"
+              class="btn-link green"
+              @click="$modal.show('saveProject');projectName=project?project.name:''"
+            >
+              <i
+                class="fa fa-save"
+                aria-hidden="true"
+              />
+              {{ $i18n.t(`featureManager.saveProject`) }}
+            </button>
           </div>
 
           <ul
@@ -1162,6 +1241,9 @@ export default {
     measureType: undefined,
     newFeatureProperties: {},
     permission: [],
+    //project: { name: 'Nazwa projektu' },
+    project: undefined,
+    projectName: '',
     rotationValue: 0,
     searchCount: 0,
     searchItemValue: '',
@@ -1582,6 +1664,13 @@ export default {
       );
       this.permission = usersPerms.users[this.user];
     },
+    async getProject() {
+      const r = await this.$store.dispatch(
+        'getProject',
+        this.$route.query.projectId
+      );
+      console.log(r.obj.data);
+    },
     async getSettings() {
       const res = await this.$store.dispatch(
         'getCurrentSettings',
@@ -1680,6 +1769,41 @@ export default {
         this.$refs['table-data'].$recompute('windowItems'); // update table data
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async saveProject() {
+      const otherLayersIds = [];
+      for (let layer of this.otherLayers) {
+        otherLayersIds.push(layer.id);
+      }
+      const payload = {
+        active_layer_id: this.$route.params.layerId,
+        additional_layers_ids: otherLayersIds,
+        map_center: {
+          coordinates: this.map.getView().getCenter(),
+          type: 'Point'
+        },
+        map_zoom: this.map.getView().getZoom(),
+        name: this.projectName
+      };
+      if (this.project) {
+        payload.id = this.project.id;
+        const r = await this.$store.dispatch('putProject', payload);
+        if (r.status === 204) {
+          this.$alertify.success(this.$i18n.t('featureManager.projectSaved'));
+          this.project = payload;
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
+      } else {
+        const r = await this.$store.dispatch('postProject', payload);
+        if (r.status === 201) {
+          this.$alertify.success(this.$i18n.t('featureManager.projectCreated'));
+          this.project = payload;
+          this.project.id = r.body.data;
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
       }
     },
     addIds(ids) {
@@ -2525,7 +2649,8 @@ export default {
       ],
       view: new View({
         center: fromLonLat([this.mapCenter.lon, this.mapCenter.lat]),
-        zoom: this.mapZoom
+        zoom: this.mapZoom,
+        constrainResolution: true
       })
     });
 
@@ -2722,6 +2847,11 @@ export default {
       this.$alertify.error(this.$i18n.t('default.error'));
     }
     this.searchCount = this.items.length;
+  },
+  beforeMount() {
+    if (this.$route.query.projectId) {
+      this.getProject();
+    }
   }
 };
 </script>
