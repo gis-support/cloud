@@ -624,6 +624,12 @@ export default {
                 aid: item.id,
                 attachType: item.group
               });
+            } else if (r.status === 403) {
+              if (r.body.error === 'access denied, not an owner') {
+                this.$alertify.error(this.$i18n.t('upload.accessDenied'));
+              }
+            } else {
+              this.$alertify.error(this.$i18n.t('default.error'));
             }
           },
           () => {}
