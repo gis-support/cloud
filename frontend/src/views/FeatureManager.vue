@@ -711,19 +711,35 @@
                   />
                 </div>
                 <div class="layers-wrapper">
-                  <template v-for="{id, name} in layersFilteredByName">
+                  <template v-for="(layer, idx) in layersFilteredByName">
                     <div
                       class="mb-0"
-                      :key="id"
+                      :key="idx"
                     >
                       <div class="panel-heading pl-0 pr-0">
                         <h4 class="panel-title flex-center">
-                          <span class="panel-title__names">
+                          <span
+                            v-if="layer.url"
+                            class="panel-title__names"
+                          >
+                            <i
+                              style="margin-right:9px"
+                              class="icon-li fa fa-link fa-lg"
+                            />
+                            <span
+                              class="bold"
+                              href="#"
+                            >{{ layer.name }} ({{ layer.layers | maxLength }})</span>
+                          </span>
+                          <span
+                            v-else
+                            class="panel-title__names"
+                          >
                             <i class="icon-li fa fa-map-o fa-lg mr-5" />
                             <span
                               class="bold"
                               href="#"
-                            >{{ name }}</span>
+                            >{{ layer.name }}</span>
                           </span>
                           <span
                             id="layers-list-icons"
@@ -732,7 +748,7 @@
                             <i
                               class="fa fa-plus-circle fa-lg green"
                               :title="$i18n.t('featureManager.addLayer')"
-                              @click="addLayer(id, name)"
+                              @click="addLayer(layer)"
                             />
                           </span>
                         </h4>
@@ -893,36 +909,6 @@
                     >{{ name }}</li>
                   </ul>
                 </div>
-                <div class="services">
-                  <h4>{{ $i18n.t("default.services") }}:</h4>
-                  <ul class="list-group">
-                    <span v-if="services.length > 0">
-                      <li
-                        class="list-group-item"
-                        v-for="service in services"
-                        :key="service.name"
-                        :class="{ activeLayer: activeServices.includes(service.name) }"
-                      >
-                        <label
-                          class="checkbox-inline mb-0"
-                          :title="service.layers"
-                        >
-                          <input
-                            type="checkbox"
-                            @click="setLayerVisibility(service.name)"
-                            :value="service.name"
-                            v-model="activeServices"
-                          />
-                          {{ service.name }} ({{ service.layers | maxLength }})
-                        </label>
-                      </li>
-                    </span>
-                    <span v-else>
-                      <li class="list-group-item no-item">{{ $i18n.t("default.noServices") }}</li>
-                    </span>
-                  </ul>
-                </div>
-
                 <div class="others">
                   <div class="mb-10">
                     <h4 class="mb-0">{{ $i18n.t("default.otherLayers") }}:</h4>
@@ -1156,6 +1142,7 @@ export default {
     isTableShow: true,
     items: [],
     layers: [],
+    layersAll: [],
     layerStyle: undefined,
     measureTooltip: undefined,
     measureTooltipElement: undefined,
@@ -1177,11 +1164,11 @@ export default {
   }),
   computed: {
     layersOutOfProject() {
-      if (!this.allOtherLayers) {
+      if (!this.layersAll) {
         return false;
       }
       const ids = this.otherLayers.map(l => l.id);
-      return this.allOtherLayers.filter(
+      return this.layersAll.filter(
         layer =>
           !ids.includes(layer.id) && layer.id !== this.$route.params.layerId
       );
@@ -1225,6 +1212,9 @@ export default {
       return this.$store.getters.getMapZoom;
     },
     services() {
+      if (this.$store.getters.getServices.length < 1) {
+        this.getServices();
+      }
       return this.$store.getters.getServices;
     },
     showMeasureTitle() {
@@ -1252,10 +1242,14 @@ export default {
     }
   },
   methods: {
-    addLayer(id, name) {
-      this.otherLayers.push({ id, name });
-      this.activeOtherLayers.push(id);
-      this.createOtherMVTLayer(id, name);
+    addLayer(layer) {
+      this.otherLayers.push({ id: layer.id, name: layer.name });
+      this.activeOtherLayers.push(layer.id);
+      if (Number.isInteger(layer.id)) {
+        this.createServiceLayer(layer);
+      } else {
+        this.createOtherMVTLayer(layer.id, layer.name);
+      }
     },
     createMVTLayer(id, name) {
       return new VectorTileLayer({
@@ -1270,6 +1264,24 @@ export default {
         }),
         style: f => this.styleFeatures(f, true)
       });
+    },
+    createServiceLayer(layer) {
+      const serviceLayer = new TileLayer({
+        name: layer.name,
+        visible: true,
+        source: new TileWMS({
+          url: layer.url,
+          params: {
+            LAYERS: layer.layers,
+            TILED: true,
+            SRS: 'EPSG:2180'
+          }
+        })
+      });
+      this.getLayerByName('otherLayers')
+        .getLayers()
+        .getArray()
+        .push(serviceLayer);
     },
     removeLayer(name) {
       const index = this.otherLayers.map(l => l.name).indexOf(name);
@@ -1581,6 +1593,10 @@ export default {
         el => el.id === this.$route.params.layerId
       );
       this.permission = usersPerms.users[this.user];
+    },
+    async getServices() {
+      const r = await this.$store.dispatch('getServices');
+      this.$store.commit('setServices', r.body.services);
     },
     async getSettings() {
       const res = await this.$store.dispatch(
@@ -2091,6 +2107,19 @@ export default {
             .getArray()
             .find(l => l.get('name') === name);
     },
+    getLayersAll() {
+      let layersAll = [];
+      if (this.allOtherLayers && this.services) {
+        layersAll = [...this.allOtherLayers, ...this.services].sort((a, b) =>
+          a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        );
+      } else if (this.allOtherLayers) {
+        layersAll = this.allOtherLayers;
+      } else if (this.services) {
+        layersAll = this.services;
+      }
+      return layersAll;
+    },
     generateBuffer() {
       this.getLayerByName('buffer')
         .getSource()
@@ -2187,24 +2216,6 @@ export default {
         return true;
       }
       return false;
-    },
-    loadServices() {
-      this.services.forEach(service => {
-        this.map.addLayer(
-          new TileLayer({
-            name: service.name,
-            visible: false,
-            source: new TileWMS({
-              url: service.url,
-              params: {
-                LAYERS: service.layers,
-                TILED: true,
-                SRS: 'EPSG:2180'
-              }
-            })
-          })
-        );
-      });
     },
     openBufferDialog() {
       this.$modal.show('buffer');
@@ -2533,7 +2544,6 @@ export default {
     this.getPermissions();
     await Promise.all([this.getUsers(), this.getSettings()]);
 
-    this.loadServices();
     await this.createStyle();
 
     this.map.addLayer(
@@ -2722,6 +2732,14 @@ export default {
       this.$alertify.error(this.$i18n.t('default.error'));
     }
     this.searchCount = this.items.length;
+  },
+  watch: {
+    services() {
+      this.layersAll = this.getLayersAll();
+    },
+    allOtherLayers() {
+      this.layersAll = this.getLayersAll();
+    }
   }
 };
 </script>
