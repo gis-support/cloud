@@ -30,7 +30,7 @@ export default {
     },
     async getProject(ctx, id) {
       try {
-        const response = await swagger.apis.Projects.get_api_projects({
+        const response = await swagger.apis.Projects.get_api_projects__project_id_({
           project_id: id
         });
         return response;
@@ -56,13 +56,11 @@ export default {
         return err;
       }
     },
-    async putProject(ctx, payload) {
-      const pid = payload.id;
-      delete payload.id;
+    async putProject(ctx, data) {
       try {
         const response = await swagger.apis.Projects.put_api_projects__project_id_({
-          project_id: pid,
-          body: payload
+          project_id: data.pid,
+          body: data.payload
         });
         return response;
       } catch (err) {

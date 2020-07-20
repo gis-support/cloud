@@ -5,13 +5,18 @@
       style="font-weight: 600"
     >{{"Brak projektów"}}</div>
     <div
+      style="cursor:pointer"
       v-else
       v-for="(project, idx) in projects"
       :key="idx"
+      :title="project.name"
       class="well well-sm project-element flex-center"
       @click="openProject(project)"
     >
-      <span class="project-text">{{project.name}}</span>
+      <span
+        style="overflow:hidden"
+        class="project-text"
+      >{{project.name}}</span>
       <span
         id="layers-list-icons"
         class="panel-title__tools"
@@ -19,7 +24,7 @@
         <i
           class="fa fa-trash fa-lg red icon-hover"
           :title="$i18n.t('default.delete')"
-          @click="deleteProject(project.id)"
+          @click.stop="deleteProject(project.id)"
         />
       </span>
     </div>
@@ -60,7 +65,7 @@ export default {
     },
     openProject(project) {
       this.$router.push({
-        name: 'feature_manager',
+        name: 'project_manager',
         query: {
           projectId: project.id
         }
@@ -75,6 +80,8 @@ export default {
 }
 .projects-panel {
   min-height: calc(100vh - 56px);
+  border-left: 0;
+  box-shadow: none;
 }
 .project-text {
   font-weight: 600;

@@ -895,8 +895,9 @@
           <div style="margin-bottom:30px">
             <h5
               v-if="project"
-              style="margin-bottom:5px"
+              style="margin-bottom:5px;overflow:hidden"
               class="col-sm-20"
+              :title="project.name"
             >{{`Aktywny projekt: ${project.name}`}}</h5>
             <button
               style="padding:0"
@@ -907,7 +908,7 @@
                 class="fa fa-save"
                 aria-hidden="true"
               />
-              {{ $i18n.t(`featureManager.saveProject`) }}
+              {{ project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`) }}
             </button>
           </div>
 
@@ -1649,6 +1650,16 @@ export default {
             layer => layer.id !== this.$route.params.layerId
           );
           this.allOtherLayers = r.body.layers;
+          if (this.project) {
+            for (let oL of this.project.additional_layers_ids) {
+              if (oL !== this.$route.params.layerId) {
+                this.addLayer(
+                  oL,
+                  this.layersOutOfProject.find(l => l.id === oL).name
+                );
+              }
+            }
+          }
         } catch (error) {
           this.$alertify.error(
             // this.$i18n.t('default.errorStyle')
@@ -1669,7 +1680,9 @@ export default {
         'getProject',
         this.$route.query.projectId
       );
-      console.log(r.obj.data);
+      this.$route.params.layerId = r.obj.data.active_layer_id;
+      this.project = r.obj.data;
+      this.init();
     },
     async getSettings() {
       const res = await this.$store.dispatch(
@@ -1680,10 +1693,15 @@ export default {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326'
       });
-      this.map.getView().fit(bbox.getGeometry(), {
-        maxZoom: 16,
-        duration: 500
-      });
+      if (this.project) {
+        this.map.getView().setCenter(this.project.map_center.coordinates);
+        this.map.getView().setZoom(this.project.map_zoom);
+      } else {
+        this.map.getView().fit(bbox.getGeometry(), {
+          maxZoom: 16,
+          duration: 500
+        });
+      }
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async getUsers() {
@@ -1787,11 +1805,13 @@ export default {
         name: this.projectName
       };
       if (this.project) {
-        payload.id = this.project.id;
-        const r = await this.$store.dispatch('putProject', payload);
+        const data = { pid: this.project.id, payload: payload };
+        const r = await this.$store.dispatch('putProject', data);
         if (r.status === 204) {
           this.$alertify.success(this.$i18n.t('featureManager.projectSaved'));
-          this.project = payload;
+          this.project = data.payload;
+          this.project.id = data.pid;
+          this.$modal.hide('saveProject');
         } else {
           this.$alertify.error(this.$i18n.t('default.error'));
         }
@@ -1801,6 +1821,7 @@ export default {
           this.$alertify.success(this.$i18n.t('featureManager.projectCreated'));
           this.project = payload;
           this.project.id = r.body.data;
+          this.$modal.hide('saveProject');
         } else {
           this.$alertify.error(this.$i18n.t('default.error'));
         }
@@ -2628,75 +2649,57 @@ export default {
         maxZoom: 16,
         duration: 500
       });
-    }
-  },
-  async mounted() {
-    this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
-    this.getLayers();
-    this.map = new Map({
-      target: 'map',
-      layers: [
-        new TileLayer({
-          name: 'OpenStreetMap',
-          group: 'baselayers',
-          source: new XYZ({
-            url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-          })
-        }),
-        new LayerGroup({
-          name: 'otherLayers'
-        })
-      ],
-      view: new View({
-        center: fromLonLat([this.mapCenter.lon, this.mapCenter.lat]),
-        zoom: this.mapZoom,
-        constrainResolution: true
-      })
-    });
-
-    this.initOrtofoto();
-    this.getPermissions();
-    await Promise.all([this.getUsers(), this.getSettings()]);
-
-    this.loadServices();
-    await this.createStyle();
-
-    this.map.addLayer(
-      this.createMVTLayer(this.$route.params.layerId, 'features')
-    );
-    this.map.addLayer(
-      new VectorLayer({
-        name: 'featuresVector',
-        visible: false,
-        source: new VectorSource({}),
-        style: feature => {
-          const geometry = feature.getGeometry();
-          let styles = [
-            new Style({
-              fill: new Fill({
-                color: 'rgba(255, 77, 77, 0.5)'
-              }),
-              stroke: new Stroke({
-                color: 'rgba(255, 77, 77, 0.5)',
-                width: 2
-              }),
-              image: new Circle({
-                radius: 5,
-                stroke: new Stroke({
-                  color: 'rgba(255, 0, 0, 1)'
-                }),
-                fill: new Fill({
-                  color: 'rgba(255, 77, 77, 1)'
-                })
-              })
+    },
+    async init() {
+      this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
+      this.getLayers();
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            name: 'OpenStreetMap',
+            group: 'baselayers',
+            source: new XYZ({
+              url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
             })
-          ];
-          if (
-            !(geometry instanceof Point) &&
-            !(geometry instanceof MultiPoint)
-          ) {
-            styles.push(
+          }),
+          new LayerGroup({
+            name: 'otherLayers'
+          })
+        ],
+        view: new View({
+          center: fromLonLat([this.mapCenter.lon, this.mapCenter.lat]),
+          zoom: this.mapZoom,
+          constrainResolution: true
+        })
+      });
+
+      this.initOrtofoto();
+      this.getPermissions();
+      await Promise.all([this.getUsers(), this.getSettings()]);
+
+      this.loadServices();
+      await this.createStyle();
+
+      this.map.addLayer(
+        this.createMVTLayer(this.$route.params.layerId, 'features')
+      );
+      this.map.addLayer(
+        new VectorLayer({
+          name: 'featuresVector',
+          visible: false,
+          source: new VectorSource({}),
+          style: feature => {
+            const geometry = feature.getGeometry();
+            let styles = [
               new Style({
+                fill: new Fill({
+                  color: 'rgba(255, 77, 77, 0.5)'
+                }),
+                stroke: new Stroke({
+                  color: 'rgba(255, 77, 77, 0.5)',
+                  width: 2
+                }),
                 image: new Circle({
                   radius: 5,
                   stroke: new Stroke({
@@ -2705,152 +2708,172 @@ export default {
                   fill: new Fill({
                     color: 'rgba(255, 77, 77, 1)'
                   })
-                }),
-                geometry: () => {
-                  let coordinates = geometry.getCoordinates();
-                  if (
-                    geometry instanceof Polygon ||
-                    geometry instanceof MultiLineString
-                  ) {
-                    coordinates = coordinates.flat();
-                  } else if (geometry instanceof MultiPolygon) {
-                    coordinates = coordinates.flat(2);
-                  }
-                  return new MultiPoint(coordinates);
-                }
+                })
               })
-            );
-          }
-          return styles;
-        }
-      })
-    );
-    this.map.addLayer(
-      new VectorLayer({
-        name: 'buffer',
-        visible: true,
-        source: new VectorSource({}),
-        style: new Style({
-          stroke: new Stroke({
-            color: 'rgba(37, 81, 122, 1)',
-            width: 2
-          }),
-          fill: new Fill({
-            color: 'rgba(37, 81, 122, 0.3)'
-          })
-        })
-      })
-    );
-    this.map.addLayer(
-      new VectorLayer({
-        name: 'measurement',
-        source: new VectorSource({}),
-        style: feature => {
-          const geometry = feature.getGeometry();
-          const styles = [];
-          if (geometry instanceof LineString) {
-            geometry.forEachSegment((start, end) => {
-              const line = new LineString([start, end]);
+            ];
+            if (
+              !(geometry instanceof Point) &&
+              !(geometry instanceof MultiPoint)
+            ) {
               styles.push(
                 new Style({
-                  geometry: line,
+                  image: new Circle({
+                    radius: 5,
+                    stroke: new Stroke({
+                      color: 'rgba(255, 0, 0, 1)'
+                    }),
+                    fill: new Fill({
+                      color: 'rgba(255, 77, 77, 1)'
+                    })
+                  }),
+                  geometry: () => {
+                    let coordinates = geometry.getCoordinates();
+                    if (
+                      geometry instanceof Polygon ||
+                      geometry instanceof MultiLineString
+                    ) {
+                      coordinates = coordinates.flat();
+                    } else if (geometry instanceof MultiPolygon) {
+                      coordinates = coordinates.flat(2);
+                    }
+                    return new MultiPoint(coordinates);
+                  }
+                })
+              );
+            }
+            return styles;
+          }
+        })
+      );
+      this.map.addLayer(
+        new VectorLayer({
+          name: 'buffer',
+          visible: true,
+          source: new VectorSource({}),
+          style: new Style({
+            stroke: new Stroke({
+              color: 'rgba(37, 81, 122, 1)',
+              width: 2
+            }),
+            fill: new Fill({
+              color: 'rgba(37, 81, 122, 0.3)'
+            })
+          })
+        })
+      );
+      this.map.addLayer(
+        new VectorLayer({
+          name: 'measurement',
+          source: new VectorSource({}),
+          style: feature => {
+            const geometry = feature.getGeometry();
+            const styles = [];
+            if (geometry instanceof LineString) {
+              geometry.forEachSegment((start, end) => {
+                const line = new LineString([start, end]);
+                styles.push(
+                  new Style({
+                    geometry: line,
+                    stroke: new Stroke({
+                      color: 'rgba(37, 81, 122, 1)',
+                      width: 2
+                    }),
+                    fill: new Fill({
+                      color: 'rgba(37, 81, 122, 0.3)'
+                    }),
+                    text: new Text({
+                      text: this.formatLength(line),
+                      font: '15px sans-serif',
+                      fill: new Fill({ color: 'black' }),
+                      placement: 'line',
+                      stroke: new Stroke({
+                        color: 'rgba(37, 81, 122, 0.3)',
+                        width: 3
+                      }),
+                      offsetX: -20,
+                      offsetY: 20
+                    }),
+                    image: new Circle({
+                      radius: 5,
+                      stroke: new Stroke({
+                        color: '#25517a'
+                      }),
+                      fill: new Fill({
+                        color: 'rgba(37, 81, 122, 0.5)'
+                      })
+                    })
+                  })
+                );
+              });
+            } else {
+              styles.push(
+                new Style({
                   stroke: new Stroke({
                     color: 'rgba(37, 81, 122, 1)',
                     width: 2
                   }),
                   fill: new Fill({
                     color: 'rgba(37, 81, 122, 0.3)'
-                  }),
-                  text: new Text({
-                    text: this.formatLength(line),
-                    font: '15px sans-serif',
-                    fill: new Fill({ color: 'black' }),
-                    placement: 'line',
-                    stroke: new Stroke({
-                      color: 'rgba(37, 81, 122, 0.3)',
-                      width: 3
-                    }),
-                    offsetX: -20,
-                    offsetY: 20
-                  }),
-                  image: new Circle({
-                    radius: 5,
-                    stroke: new Stroke({
-                      color: '#25517a'
-                    }),
-                    fill: new Fill({
-                      color: 'rgba(37, 81, 122, 0.5)'
-                    })
                   })
                 })
               );
-            });
-          } else {
-            styles.push(
-              new Style({
-                stroke: new Stroke({
-                  color: 'rgba(37, 81, 122, 1)',
-                  width: 2
-                }),
-                fill: new Fill({
-                  color: 'rgba(37, 81, 122, 0.3)'
-                })
-              })
-            );
+            }
+            return styles;
           }
-          return styles;
-        }
-      })
-    );
+        })
+      );
 
-    this.createSelectInteraction();
+      this.createSelectInteraction();
 
-    const lDV = await this.$store.dispatch(
-      'getLayerDictsValues',
-      this.$route.params.layerId
-    );
-    if (lDV.status === 200) {
-      this.dictValues = lDV.obj.data;
-    } else {
-      this.$alertify.error(this.$i18n.t('default.getDictsValuesError'));
-    }
-    const r = await this.$store.dispatch(
-      'getLayer',
-      this.$route.params.layerId
-    );
-    if (r.status === 200) {
-      this.$store.commit('setActiveLayer', r.obj);
-      Object.keys(r.obj.features[0].properties).forEach(el => {
-        this.columns.push({
-          key: el,
-          name: el,
-          sortable: true,
-          filter: true
+      const lDV = await this.$store.dispatch(
+        'getLayerDictsValues',
+        this.$route.params.layerId
+      );
+      if (lDV.status === 200) {
+        this.dictValues = lDV.obj.data;
+      } else {
+        this.$alertify.error(this.$i18n.t('default.getDictsValuesError'));
+      }
+      const r = await this.$store.dispatch(
+        'getLayer',
+        this.$route.params.layerId
+      );
+      if (r.status === 200) {
+        this.$store.commit('setActiveLayer', r.obj);
+        Object.keys(r.obj.features[0].properties).forEach(el => {
+          this.columns.push({
+            key: el,
+            name: el,
+            sortable: true,
+            filter: true
+          });
         });
-      });
-      r.obj.features.forEach(feat => {
-        const tempItem = {};
-        Object.entries(feat.properties).forEach(([k, v]) => {
-          if (this.featureTypes[k] === 'timestamp without time zone') {
-            tempItem[k] = moment(v).isValid()
-              ? moment(v)
-                  .locale('pl')
-                  .format('L')
-              : '';
-          } else {
-            tempItem[k] = v;
-          }
+        r.obj.features.forEach(feat => {
+          const tempItem = {};
+          Object.entries(feat.properties).forEach(([k, v]) => {
+            if (this.featureTypes[k] === 'timestamp without time zone') {
+              tempItem[k] = moment(v).isValid()
+                ? moment(v)
+                    .locale('pl')
+                    .format('L')
+                : '';
+            } else {
+              tempItem[k] = v;
+            }
+          });
+          this.items.push(tempItem);
         });
-        this.items.push(tempItem);
-      });
-    } else {
-      this.$alertify.error(this.$i18n.t('default.error'));
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+      this.searchCount = this.items.length;
     }
-    this.searchCount = this.items.length;
   },
-  beforeMount() {
+  async mounted() {
     if (this.$route.query.projectId) {
       this.getProject();
+    } else {
+      this.init();
     }
   }
 };

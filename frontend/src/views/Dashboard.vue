@@ -6,6 +6,7 @@
         <div class="layout layout-stack-sm layout-main-left">
           <!-- TABELA PROJEKTÓW -->
           <div
+            style="border-left: 0; box-shadow:none"
             class="col-sm-4 col-sm-push-8 layout-sidebar projects-panel"
             v-if="projectsGetting"
           >
@@ -21,7 +22,10 @@
           />
           <!-- KONIEC TABELI PROJEKTÓW -->
           <!-- TABELA WARSTW -->
-          <div class="col-sm-8 col-sm-pull-4 layout-main">
+          <div
+            style="border-right: 1px solid #ccc; box-shadow: inset 8px 0px 15px -10px rgba(0, 0, 0, 0.2)"
+            class="col-sm-8 col-sm-pull-4 layout-main"
+          >
             <h2 class="flex-center container__border--bottom container__border--grey mb-0">
               <div class="p-0 container__border--bottom container__border--red section__header">
                 <i class="fa fa-database" />
