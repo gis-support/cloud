@@ -7,14 +7,34 @@
           <i class="fa fa-database" />
           <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.layersList') }}</span>
         </div>
-        <div class="p-0">
-          <input
-            type="text"
-            class="form-control container__input"
-            v-model="searchLayer"
-            :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
-          />
-        </div>
+        <span class="flex-center">
+          <div class="p-0 mr-5">
+            <vSelect
+              class="tagFilter"
+              label="name"
+              style="width: 300px"
+              v-model="searchTag"
+              :placeholder="$i18n.t('dashboard.placeholder.tagsFilter')"
+              :options="tags"
+            >
+              <template v-slot:option="option">
+                <span :style="`color: ${option.color}`">{{option.name}}</span>
+              </template>
+              <template v-slot:selected-option="option">
+                <span :style="`color: ${option.color}`">{{option.name}}</span>
+              </template>
+              <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
+            </vSelect>
+          </div>
+          <div class="p-0">
+            <input
+              type="text"
+              class="form-control container__input"
+              v-model="searchLayer"
+              :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
+            />
+          </div>
+        </span>
       </h2>
       <div class="section__content heading-block heading-block-main">
         <span class="add-layer">
@@ -476,6 +496,7 @@ export default {
       vm.$store.getters.getApiUrl
     }/layers?token=${localStorage.getItem('token')}`,
     searchLayer: '',
+    searchTag: '',
     serviceUrl: '',
     serviceName: '',
     selectedDataExtension: '',
@@ -497,8 +518,15 @@ export default {
       if (!this.layersAll) {
         return false;
       }
-      return this.layersAll.filter(layer =>
+      const filtereByName = this.layersAll.filter(layer =>
         layer.name.toLowerCase().includes(this.searchLayer.toLowerCase())
+      );
+      if (!this.searchTag) {
+        return filtereByName;
+      }
+      return filtereByName.filter(
+        layer =>
+          layer.tags && layer.tags.find(tag => tag.id === this.searchTag.id)
       );
     },
     servicesList() {
@@ -912,6 +940,24 @@ export default {
 .mySelect >>> .vs__dropdown-toggle > .vs__selected-options > .vs__selected {
   background-color: white;
   margin: 1px 2px;
+}
+
+.tagFilter >>> .vs__search::placeholder,
+.tagFilter >>> .vs__dropdown-toggle {
+  height: 34px;
+  max-width: 80vh;
+  padding-bottom: 2px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.tagFilter >>> .vs__dropdown-menu {
+  font-size: 12px;
+  overflow-x: hidden;
+}
+
+.tagFilter >>> .vs__dropdown-menu > .vs__dropdown-option {
+  overflow: hidden;
 }
 
 .add-layer {
