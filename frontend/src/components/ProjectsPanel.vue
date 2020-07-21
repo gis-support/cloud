@@ -1,5 +1,11 @@
 <template>
   <div class="col-sm-4 col-sm-push-8 layout-sidebar projects-panel">
+    <h2 class="flex-center container__border--bottom container__border--grey mb-12">
+      <div class="p-0 container__border--bottom container__border--red section__header">
+        <i class="fa fa-database" />
+        <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.projectsList') }}</span>
+      </div>
+    </h2>
     <div
       v-if="projects.length < 1"
       style="font-weight: 600"
@@ -86,5 +92,9 @@ export default {
 .project-text {
   font-weight: 600;
   cursor: pointer;
+}
+.section__header {
+  padding-bottom: 15px;
+  margin-bottom: -1px;
 }
 </style> 

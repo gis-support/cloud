@@ -43,11 +43,13 @@
     "title": {
       "vectorLayersList": "Lista warstw wektorowych",
       "layersList": "Lista warstw",
+      "projectsList": "Lista projektów",
       "externalSourcesList": "Lista źródeł zewnętrznych"
     }
   },
   "default": {
     "actions": "Akcje",
+    "additionalLayerAccessDenied": "Brak uprawnień do części z warstw",
     "active": "Aktywny",
     "attribute": "Atrybut",
     "add": "Dodaj",

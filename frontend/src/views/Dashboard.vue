@@ -23,7 +23,7 @@
           <!-- KONIEC TABELI PROJEKTÓW -->
           <!-- TABELA WARSTW -->
           <div
-            style="border-right: 1px solid #ccc; box-shadow: inset 8px 0px 15px -10px rgba(0, 0, 0, 0.2)"
+            style="border-right: 1px solid #ccc"
             class="col-sm-8 col-sm-pull-4 layout-main"
           >
             <h2 class="flex-center container__border--bottom container__border--grey mb-0">

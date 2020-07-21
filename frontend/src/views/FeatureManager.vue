@@ -892,24 +892,37 @@
               </div>
             </div>
           </div>
-          <div style="margin-bottom:30px">
-            <h5
-              v-if="project"
-              style="margin-bottom:5px;overflow:hidden"
-              class="col-sm-20"
-              :title="project.name"
-            >{{`Aktywny projekt: ${project.name}`}}</h5>
-            <button
-              style="padding:0"
-              class="btn-link green"
-              @click="$modal.show('saveProject');projectName=project?project.name:''"
+          <div
+            class="flex-center"
+            style="margin-bottom:30px"
+          >
+            <div>
+              <h4
+                v-if="project"
+                style="margin-bottom:5px;overflow:hidden"
+                class="col-sm-20"
+                :title="project.name"
+              >
+                <i class="fa fa-database title__icon" />
+                {{project.name}}
+              </h4>
+            </div>
+            <div
+              class="btn-group btn-group-sm"
+              role="group"
+              style=" display: flex;"
             >
-              <i
-                class="fa fa-save"
-                aria-hidden="true"
-              />
-              {{ project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`) }}
-            </button>
+              <a
+                class="btn btn-default"
+                @click="$modal.show('saveProject');projectName=project?project.name:''"
+                :title="project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`)"
+              >
+                <i
+                  v-bind:class="{'fa-plus': !project, 'fa-save': project}"
+                  class="fa fa-lg fa-plus icon-hover"
+                />
+              </a>
+            </div>
           </div>
 
           <ul
@@ -1653,10 +1666,7 @@ export default {
           if (this.project) {
             for (let oL of this.project.additional_layers_ids) {
               if (oL !== this.$route.params.layerId) {
-                this.addLayer(
-                  oL,
-                  this.layersOutOfProject.find(l => l.id === oL).name
-                );
+                this.addLayer(this.layersOutOfProject.find(l => l.id === oL));
               }
             }
           }
@@ -1682,6 +1692,11 @@ export default {
       );
       this.$route.params.layerId = r.obj.data.active_layer_id;
       this.project = r.obj.data;
+      if (!this.project.permission_to_each_additional_layer) {
+        this.$alertify.error(
+          this.$i18n.t('default.additionalLayerAccessDenied')
+        );
+      }
       this.init();
     },
     async getSettings() {
