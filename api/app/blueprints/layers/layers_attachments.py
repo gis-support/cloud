@@ -47,11 +47,17 @@ class LayerAttachmentsManager:
         return cls(layer)
 
     def _serialize_attachments_column_value(self, attachments_ids: List[int]) -> str:
+        if len(attachments_ids) == 0:
+            return ""
+
         ids_str = map(str, attachments_ids)
         serialized = self.serializer_separator.join(ids_str)
         return serialized
 
     def _deserialize_attachments_column_value(self, column_value: str) -> List[int]:
+        if column_value is None or column_value == "":
+            return []
+
         split = column_value.split(self.serializer_separator)
         ids = map(int, split)
         return list(ids)
@@ -69,8 +75,6 @@ class LayerAttachmentsManager:
             raise IndexError(f"object of ID '{object_id}' does not exists")
 
         value = row[0]
-        if value is None:
-            return []
 
         ids = self._deserialize_attachments_column_value(value)
         return ids
