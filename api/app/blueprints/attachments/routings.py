@@ -43,6 +43,18 @@ def attachments_post():
             except binascii.Error:
                 return jsonify({"error": f"error decoding content of file '{name}'"}), 400
 
+            if (layer_id is not None) and (feature_id is not None):
+
+                try:
+                    layer = Layer({"app": current_app, "user": request.user, "lid": layer_id})
+                    layer.check_write()
+                except PermissionError as e:
+                    return jsonify({"error": str(e)}), 403
+                try:
+                    manager = LayerAttachmentsManager.from_layer(layer)
+                except LayerNotSupportedError as e:
+                    return jsonify({"error": str(e)}), 400
+
             created = Attachment.create_attachment(name, content, request.user, added_at)
             result.append({
                 "original_file_name": name,
@@ -50,20 +62,9 @@ def attachments_post():
                 "attachment_id": created.id
             })
 
-        if (layer_id is not None) and (feature_id is not None):
-
-            layer = Layer({"app": current_app, "user": request.user, "lid": layer_id})
-            try:
-                layer.check_write()
-            except PermissionError as e:
-                return jsonify({"error": str(e)}), 403
-            try:
-                manager = LayerAttachmentsManager.from_layer(layer)
-            except LayerNotSupportedError as e:
-                return jsonify({"error": str(e)}), 400
-
-            for row in result:
-                manager.add_attachment_to_object(feature_id, row["attachment_id"])
+            if (layer_id is not None) and (feature_id is not None):
+                for row in result:
+                    manager.add_attachment_to_object(feature_id, row["attachment_id"])
 
     return jsonify({"data": result}), 201
 
@@ -150,23 +151,26 @@ def attachments_delete():
     attachments = Attachment.select().where(Attachment.id.in_(ids))
 
     with current_app._db.atomic():
+
+        if (layer_id is not None) and (feature_id is not None):
+
+            try:
+                layer = Layer({"app": current_app, "user": request.user, "lid": layer_id})
+                layer.check_write()
+            except PermissionError as e:
+                return jsonify({"error": str(e)}), 403
+            try:
+                manager = LayerAttachmentsManager.from_layer(layer)
+            except LayerNotSupportedError as e:
+                return jsonify({"error": str(e)}), 400
+
+            for a in attachments:
+                manager.remove_attachment_from_object(feature_id, a.id)
+
         for a in attachments:
             a.delete_instance()
 
-    if (layer_id is not None) and (feature_id is not None):
 
-        layer = Layer({"app": current_app, "user": request.user, "lid": layer_id})
-        try:
-            layer.check_write()
-        except PermissionError as e:
-            return jsonify({"error": str(e)}), 403
-        try:
-            manager = LayerAttachmentsManager.from_layer(layer)
-        except LayerNotSupportedError as e:
-            return jsonify({"error": str(e)}), 400
-
-        for a in attachments:
-            manager.remove_attachment_from_object(feature_id, a.id)
 
     return jsonify({}), 204
 
