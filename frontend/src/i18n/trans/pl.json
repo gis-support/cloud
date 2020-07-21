@@ -38,7 +38,8 @@
     },
     "placeholder": {
       "layersFilter": "Filtr warstw",
-      "externalSourcesFilter": "Filtr źródeł"
+      "externalSourcesFilter": "Filtr źródeł",
+      "tagsFilter": "Filtr tagów"
     },
     "title": {
       "vectorLayersList": "Lista warstw wektorowych",
