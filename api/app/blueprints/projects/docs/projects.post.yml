@@ -1,0 +1,74 @@
+Create new project
+---
+tags:
+  - Projects
+summary: Create project
+
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "name"
+          required: true
+          description: "Name of the project"
+        active_layer_id:
+          type: string
+          example: "6On03GwRvYx77Xr9NRb2JMrxjrbe2gQ1M38Xok"
+          required: true
+        additional_layers_ids:
+          type: array
+          example: [
+            "Ybmjyo7NX5ybjmmwqYBNxe8qng9pV5NRB6g",
+            "7k207J4v3pKbbYrxBvMnOErKjrMLnAQgE78YqD"
+          ]
+        map_center:
+          type: object
+          properties:
+            type:
+              example: "Point"
+            coordinates:
+              example: [21,52]
+          required: true
+        map_zoom:
+          example: 1
+          required: true
+
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  201:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          example: 1
+          description: "ID of newly created project"
+  400:
+    description: Request payload lacks obligatory data.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "message"
+  403:
+    description: token required or permission denied to active/additional layer
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
