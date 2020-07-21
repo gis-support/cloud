@@ -1,170 +1,194 @@
 <template>
-  <div class="dashboard container align-center">
-    <!-- TABELA WARSTW -->
-    <div class="col-sm-12 pl-0 pr-0 section">
-      <h2 class="flex-center container__border--bottom container__border--grey mb-0">
-        <div class="p-0 container__border--bottom container__border--red section__header">
-          <i class="fa fa-database" />
-          <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.layersList') }}</span>
-        </div>
-        <div class="p-0">
-          <input
-            type="text"
-            class="form-control container__input"
-            v-model="searchLayer"
-            :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
-          />
-        </div>
-      </h2>
-      <div class="section__content heading-block heading-block-main">
-        <span class="add-layer">
-          <i
-            class="fa fa-plus-circle fa-lg green pt-10"
-            style="margin-right:5px;"
-          />
-          <a
-            data-toggle="modal"
-            data-target="#addLayerModal"
-            data-type="vectorLayer"
-            class="green section__content--add"
-          >{{ $i18n.t('dashboard.list.addLayer') }}</a>
-        </span>
-        <span class="add-layer">
-          <i
-            class="fa fa-plus-circle fa-lg green pt-10"
-            style="margin-right:5px;"
-          />
-          <a
-            data-toggle="modal"
-            data-target="#addLayerWmsModal"
-            data-type="externalLayer"
-            class="green section__content--add"
-          >{{ $i18n.t('dashboard.list.addService') }}</a>
-        </span>
-
-        <div
-          class="loading-overlay pt-10 pb-10"
-          v-if="!layersAll"
-        >
-          <div class="loading-indicator mb-10">
-            <h4>{{ $i18n.t('default.loading') }}</h4>
-            <i class="fa fa-lg fa-spin fa-spinner" />
-          </div>
-        </div>
-
-        <div
-          v-if="filteredLayersAll.length == 0"
-          class="pt-10 pb-10"
-        >{{ $i18n.t('default.noLayers') }}</div>
-        <template
-          v-else
-          v-for="(val, key) in filteredLayersAll"
-        >
+  <span>
+    <div class="mainnav"></div>
+    <div class="dashboard content">
+      <div class="container">
+        <div class="layout layout-stack-sm layout-main-left">
+          <!-- TABELA PROJEKTÓW -->
           <div
-            class="mb-0"
-            :key="key"
+            style="border-left: 0; box-shadow:none"
+            class="col-sm-4 col-sm-push-8 layout-sidebar projects-panel"
+            v-if="projectsGetting"
           >
-            <div class="panel-heading pl-0 pr-0">
-              <h4 class="panel-title flex-center">
-                <span style="display:inherit">
-                  <span
-                    v-if="val.url"
-                    class="panel-title__names"
-                  >
-                    <i
-                      style="margin-right:9px"
-                      class="icon-li fa fa-link fa-lg"
-                    />
-                    <span class="bold panel-title__wms">{{ val.name }}</span>
-                    <span
-                      class="desc-sm"
-                      :title="val.url"
-                    >
-                      <strong>URL</strong>
-                      :{{val.url|maxLength}}
-                    </span>
-                    <span
-                      class="desc-sm"
-                      :title="val.layers"
-                    >
-                      <strong>{{ $i18n.t('default.layers') }}</strong>
-                      : {{ val.layers | maxLength }}
-                    </span>
-                  </span>
-                  <span
-                    v-else
-                    class="panel-title__names"
-                  >
-                    <i class="icon-li fa fa-map-o fa-lg mr-5" />
-                    <span
-                      class="bold"
-                      href="#"
-                      @click="goToManager(val)"
-                    >{{ val.name }}</span>
-                    <span class="desc-sm">{{ val.team }}</span>
-                  </span>
-                  <span
-                    v-if="val.tags"
-                    style="min-width: 100px"
-                  >
-                    <vSelect
-                      taggable
-                      multiple
-                      class="mySelect"
-                      label="name"
-                      maxHeight="10px"
-                      placeholder="(Brak tagów)"
-                      :disabled="isTagAddings"
-                      :options="tags.filter(t => !val.tags.find(vT => vT.id === t.id))"
-                      :value="val.tags"
-                      :v-if="tags.length > 0"
-                      @input="updateLayerTags(val, $event)"
-                    >
-                      <template v-slot:option="option">
-                        <span
-                          :style="`color: ${option.color};width: 50px; overflow:hidden`"
-                          :title="option.name"
-                        >{{option.name}}</span>
-                      </template>
-                      <template v-slot:selected-option="option">
-                        <span
-                          :style="`color: ${option.color};max-width: 10vh;overflow:hidden;white-space:nowrap`"
-                          :title="option.name"
-                        >{{option.name}}</span>
-                      </template>
-                      <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
-                    </vSelect>
-                  </span>
-                </span>
-                <span
-                  id="layers-list-icons"
-                  class="panel-title__tools"
-                >
-                  <i
-                    v-if="!val.url"
-                    class="fa fa-cog fa-lg yellow icon-hover"
-                    data-toggle="modal"
-                    data-target="#layerSettingsModal"
-                    data-placement="top"
-                    :title="$i18n.t('default.settings')"
-                    @click="setEditedLayer('vector', val.id)"
-                  />
-                  <i
-                    class="fa fa-trash fa-lg red icon-hover"
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    :title="$i18n.t('default.delete')"
-                    @click="val.url?deleteService(val.id):deleteLayer(val)"
-                  />
-                </span>
-              </h4>
+            <div class="loading-indicator mb-10">
+              <h4>{{ $i18n.t('default.loading') }}</h4>
+              <i class="fa fa-lg fa-spin fa-spinner" />
             </div>
           </div>
-        </template>
+          <ProjectsPanel
+            v-else
+            :projects="projects"
+            @deleteProject="deleteProject"
+          />
+          <!-- KONIEC TABELI PROJEKTÓW -->
+          <!-- TABELA WARSTW -->
+          <div
+            style="border-right: 1px solid #ccc"
+            class="col-sm-8 col-sm-pull-4 layout-main"
+          >
+            <h2 class="flex-center container__border--bottom container__border--grey mb-0">
+              <div class="p-0 container__border--bottom container__border--red section__header">
+                <i class="fa fa-database" />
+                <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.layersList') }}</span>
+              </div>
+              <div class="p-0">
+                <input
+                  type="text"
+                  class="form-control container__input"
+                  v-model="searchLayer"
+                  :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
+                />
+              </div>
+            </h2>
+            <div class="section__content heading-block heading-block-main">
+              <span class="add-layer">
+                <i
+                  class="fa fa-plus-circle fa-lg green pt-10"
+                  style="margin-right:5px;"
+                />
+                <a
+                  data-toggle="modal"
+                  data-target="#addLayerModal"
+                  data-type="vectorLayer"
+                  class="green section__content--add"
+                >{{ $i18n.t('dashboard.list.addLayer') }}</a>
+              </span>
+              <span class="add-layer">
+                <i
+                  class="fa fa-plus-circle fa-lg green pt-10"
+                  style="margin-right:5px;"
+                />
+                <a
+                  data-toggle="modal"
+                  data-target="#addLayerWmsModal"
+                  data-type="externalLayer"
+                  class="green section__content--add"
+                >{{ $i18n.t('dashboard.list.addService') }}</a>
+              </span>
+              <div
+                class="loading-overlay pt-10 pb-10"
+                v-if="!layersAll"
+              >
+                <div class="loading-indicator mb-10">
+                  <h4>{{ $i18n.t('default.loading') }}</h4>
+                  <i class="fa fa-lg fa-spin fa-spinner" />
+                </div>
+              </div>
+              <div
+                v-if="filteredLayersAll.length == 0"
+                class="pt-10 pb-10"
+              >{{ $i18n.t('default.noLayers') }}</div>
+              <template
+                v-else
+                v-for="(val, key) in filteredLayersAll"
+              >
+                <div
+                  class="mb-0"
+                  :key="key"
+                >
+                  <div class="panel-heading pl-0 pr-0">
+                    <h4 class="panel-title flex-center">
+                      <span style="display:inherit">
+                        <span
+                          v-if="val.url"
+                          class="panel-title__names"
+                        >
+                          <i
+                            style="margin-right:9px"
+                            class="icon-li fa fa-link fa-lg"
+                          />
+                          <span class="bold panel-title__wms">{{ val.name }}</span>
+                          <span
+                            class="desc-sm"
+                            :title="val.url"
+                          >
+                            <strong>URL</strong>
+                            :{{val.url|maxLength}}
+                          </span>
+                          <span
+                            class="desc-sm"
+                            :title="val.layers"
+                          >
+                            <strong>{{ $i18n.t('default.layers') }}</strong>
+                            : {{ val.layers | maxLength }}
+                          </span>
+                        </span>
+                        <span
+                          v-else
+                          class="panel-title__names"
+                        >
+                          <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                          <span
+                            class="bold"
+                            href="#"
+                            @click="goToManager(val)"
+                          >{{ val.name }}</span>
+                          <span class="desc-sm">{{ val.team }}</span>
+                        </span>
+                        <span
+                          v-if="val.tags"
+                          style="min-width: 100px"
+                        >
+                          <vSelect
+                            taggable
+                            multiple
+                            class="mySelect"
+                            label="name"
+                            maxHeight="10px"
+                            placeholder="(Brak tagów)"
+                            :disabled="isTagAddings"
+                            :options="tags.filter(t => !val.tags.find(vT => vT.id === t.id))"
+                            :value="val.tags"
+                            :v-if="tags.length > 0"
+                            @input="updateLayerTags(val, $event)"
+                          >
+                            <template v-slot:option="option">
+                              <span
+                                :style="`color: ${option.color};width: 50px; overflow:hidden`"
+                                :title="option.name"
+                              >{{option.name}}</span>
+                            </template>
+                            <template v-slot:selected-option="option">
+                              <span
+                                :style="`color: ${option.color};max-width: 10vh;overflow:hidden;white-space:nowrap`"
+                                :title="option.name"
+                              >{{option.name}}</span>
+                            </template>
+                            <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
+                          </vSelect>
+                        </span>
+                      </span>
+                      <span
+                        id="layers-list-icons"
+                        class="panel-title__tools"
+                      >
+                        <i
+                          v-if="!val.url"
+                          class="fa fa-cog fa-lg yellow icon-hover"
+                          data-toggle="modal"
+                          data-target="#layerSettingsModal"
+                          data-placement="top"
+                          :title="$i18n.t('default.settings')"
+                          @click="setEditedLayer('vector', val.id)"
+                        />
+                        <i
+                          class="fa fa-trash fa-lg red icon-hover"
+                          data-toggle="tooltip"
+                          data-placement="top"
+                          :title="$i18n.t('default.delete')"
+                          @click="val.url?deleteService(val.id):deleteLayer(val)"
+                        />
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+          <!-- KONIEC TABELI WARSTW -->
+        </div>
       </div>
     </div>
-    <!-- KONIEC TABELI WARSTW -->
-
     <!--MODAL DODAWANIA WARSTW-->
     <div
       class="modal fade"
@@ -419,7 +443,7 @@
       </div>
     </div>
     <!--KONIEC MODALA-->
-  </div>
+  </span>
 </template>
 
 <script>
@@ -475,6 +499,8 @@ export default {
     postAction: `${
       vm.$store.getters.getApiUrl
     }/layers?token=${localStorage.getItem('token')}`,
+    projects: [],
+    projectsGetting: true,
     searchLayer: '',
     serviceUrl: '',
     serviceName: '',
@@ -487,6 +513,7 @@ export default {
   }),
   components: {
     FileUpload,
+    ProjectsPanel: () => import('@/components/ProjectsPanel'),
     vSelect
   },
   computed: {
@@ -629,6 +656,11 @@ export default {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
     },
+    async getProjects() {
+      const r = await this.$store.dispatch('getProjects');
+      this.projects = r.body.data;
+      this.projectsGetting = false;
+    },
     async getServices() {
       const r = await this.$store.dispatch('getServices');
       this.$store.commit('setServices', r.body.services);
@@ -718,6 +750,9 @@ export default {
             cancel: this.$i18n.t('default.cancel')
           }
         });
+    },
+    deleteProject(pid) {
+      this.projects = this.projects.filter(p => p.id !== pid);
     },
     fileFilter: function(newFile, oldFile, prevent) {
       let ext = newFile.name.substr(newFile.name.lastIndexOf('.'));
@@ -865,6 +900,7 @@ export default {
     this.selectedMapService = this.mapServices[0];
     this.selectedDataExtension = this.dataFormats[0];
     this.getLayers();
+    this.getProjects();
     this.getServices();
     this.getTags();
     this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
@@ -935,10 +971,9 @@ export default {
   line-height: 29px;
   font-size: 12px;
 }
-.dashboard.container {
-  height: calc(100% - 76px);
-  padding-left: 0px;
-  padding-right: 0px;
+.dashboard .container {
+  width: 97%;
+  top: 0;
 }
 .delete-file-icon {
   z-index: 2;
