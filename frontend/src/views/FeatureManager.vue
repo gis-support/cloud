@@ -711,19 +711,35 @@
                   />
                 </div>
                 <div class="layers-wrapper">
-                  <template v-for="{id, name} in layersFilteredByName">
+                  <template v-for="(layer, idx) in layersFilteredByName">
                     <div
                       class="mb-0"
-                      :key="id"
+                      :key="idx"
                     >
                       <div class="panel-heading pl-0 pr-0">
                         <h4 class="panel-title flex-center">
-                          <span class="panel-title__names">
+                          <span
+                            v-if="layer.url"
+                            class="panel-title__names"
+                          >
+                            <i
+                              style="margin-right:9px"
+                              class="icon-li fa fa-link fa-lg"
+                            />
+                            <span
+                              class="bold"
+                              href="#"
+                            >{{ layer.name }} ({{ layer.layers | maxLength }})</span>
+                          </span>
+                          <span
+                            v-else
+                            class="panel-title__names"
+                          >
                             <i class="icon-li fa fa-map-o fa-lg mr-5" />
                             <span
                               class="bold"
                               href="#"
-                            >{{ name }}</span>
+                            >{{ layer.name }}</span>
                           </span>
                           <span
                             id="layers-list-icons"
@@ -732,7 +748,7 @@
                             <i
                               class="fa fa-plus-circle fa-lg green"
                               :title="$i18n.t('featureManager.addLayer')"
-                              @click="addLayer(id, name)"
+                              @click="addLayer(layer)"
                             />
                           </span>
                         </h4>
@@ -756,6 +772,67 @@
                     class="btn btn-danger"
                     @click="$modal.hide('addLayer')"
                   >{{ $i18n.t("default.close") }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </modal>
+        <modal
+          name="saveProject"
+          :draggable="true"
+          width="30%"
+          height="auto"
+          @before-close="projectName=''"
+        >
+          <div class="modal-content dragg-content">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4
+                  class="modal-title"
+                >{{ project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`) }}</h4>
+              </div>
+              <div class="modal-body">
+                <div
+                  class="form-group"
+                  style="display: flex;"
+                >
+                  <label
+                    class="control-label col-sm-4"
+                    style="position: relative; top: 8px"
+                  >{{ $i18n.t(`default.name`) }}</label>
+                  <input
+                    class="form-control col-sm-7"
+                    v-model="projectName"
+                    type="text"
+                  />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <div
+                  class="btn-group btn-group-justified"
+                  role="group"
+                >
+                  <div
+                    class="btn-group"
+                    role="group"
+                  >
+                    <button
+                      :disabled="!projectName"
+                      type="button"
+                      class="btn btn-success"
+                      @click="saveProject"
+                    >{{ $i18n.t("default.save") }}</button>
+                  </div>
+                  <div
+                    class="btn-group"
+                    role="group"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      @click="$modal.hide('saveProject')"
+                    >{{ $i18n.t("default.close") }}</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -831,6 +908,38 @@
               </div>
             </div>
           </div>
+          <div
+            class="flex-center"
+            style="margin-bottom:30px"
+          >
+            <div>
+              <h4
+                v-if="project"
+                style="margin-bottom:5px;overflow:hidden"
+                class="col-sm-20"
+                :title="project.name"
+              >
+                <i class="fa fa-database title__icon" />
+                {{project.name}}
+              </h4>
+            </div>
+            <div
+              class="btn-group btn-group-sm"
+              role="group"
+              style=" display: flex;"
+            >
+              <a
+                class="btn btn-default"
+                @click="$modal.show('saveProject');projectName=project?project.name:''"
+                :title="project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`)"
+              >
+                <i
+                  v-bind:class="{'fa-plus': !project, 'fa-save': project}"
+                  class="fa fa-lg fa-plus icon-hover"
+                />
+              </a>
+            </div>
+          </div>
 
           <ul
             class="nav nav-tabs nav-justified"
@@ -893,36 +1002,6 @@
                     >{{ name }}</li>
                   </ul>
                 </div>
-                <div class="services">
-                  <h4>{{ $i18n.t("default.services") }}:</h4>
-                  <ul class="list-group">
-                    <span v-if="services.length > 0">
-                      <li
-                        class="list-group-item"
-                        v-for="service in services"
-                        :key="service.name"
-                        :class="{ activeLayer: activeServices.includes(service.name) }"
-                      >
-                        <label
-                          class="checkbox-inline mb-0"
-                          :title="service.layers"
-                        >
-                          <input
-                            type="checkbox"
-                            @click="setLayerVisibility(service.name)"
-                            :value="service.name"
-                            v-model="activeServices"
-                          />
-                          {{ service.name }} ({{ service.layers | maxLength }})
-                        </label>
-                      </li>
-                    </span>
-                    <span v-else>
-                      <li class="list-group-item no-item">{{ $i18n.t("default.noServices") }}</li>
-                    </span>
-                  </ul>
-                </div>
-
                 <div class="others">
                   <div class="mb-10">
                     <h4 class="mb-0">{{ $i18n.t("default.otherLayers") }}:</h4>
@@ -1156,12 +1235,16 @@ export default {
     isTableShow: true,
     items: [],
     layers: [],
+    layersAll: [],
     layerStyle: undefined,
     measureTooltip: undefined,
     measureTooltipElement: undefined,
     measureType: undefined,
     newFeatureProperties: {},
     permission: [],
+    //project: { name: 'Nazwa projektu' },
+    project: undefined,
+    projectName: '',
     rotationValue: 0,
     searchCount: 0,
     searchItemValue: '',
@@ -1177,11 +1260,11 @@ export default {
   }),
   computed: {
     layersOutOfProject() {
-      if (!this.allOtherLayers) {
+      if (!this.layersAll) {
         return false;
       }
       const ids = this.otherLayers.map(l => l.id);
-      return this.allOtherLayers.filter(
+      return this.layersAll.filter(
         layer =>
           !ids.includes(layer.id) && layer.id !== this.$route.params.layerId
       );
@@ -1225,6 +1308,9 @@ export default {
       return this.$store.getters.getMapZoom;
     },
     services() {
+      if (this.$store.getters.getServices.length < 1) {
+        this.getServices();
+      }
       return this.$store.getters.getServices;
     },
     showMeasureTitle() {
@@ -1252,10 +1338,14 @@ export default {
     }
   },
   methods: {
-    addLayer(id, name) {
-      this.otherLayers.push({ id, name });
-      this.activeOtherLayers.push(id);
-      this.createOtherMVTLayer(id, name);
+    addLayer(layer) {
+      this.otherLayers.push({ id: layer.id, name: layer.name });
+      this.activeOtherLayers.push(layer.id);
+      if (Number.isInteger(layer.id)) {
+        this.createServiceLayer(layer);
+      } else {
+        this.createOtherMVTLayer(layer.id, layer.name);
+      }
     },
     createMVTLayer(id, name) {
       return new VectorTileLayer({
@@ -1270,6 +1360,24 @@ export default {
         }),
         style: f => this.styleFeatures(f, true)
       });
+    },
+    createServiceLayer(layer) {
+      const serviceLayer = new TileLayer({
+        name: layer.name,
+        visible: true,
+        source: new TileWMS({
+          url: layer.url,
+          params: {
+            LAYERS: layer.layers,
+            TILED: true,
+            SRS: 'EPSG:2180'
+          }
+        })
+      });
+      this.getLayerByName('otherLayers')
+        .getLayers()
+        .getArray()
+        .push(serviceLayer);
     },
     removeLayer(name) {
       const index = this.otherLayers.map(l => l.name).indexOf(name);
@@ -1582,6 +1690,24 @@ export default {
       );
       this.permission = usersPerms.users[this.user];
     },
+    async getServices() {
+      const r = await this.$store.dispatch('getServices');
+      this.$store.commit('setServices', r.body.services);
+    },
+    async getProject() {
+      const r = await this.$store.dispatch(
+        'getProject',
+        this.$route.query.projectId
+      );
+      this.$route.params.layerId = r.obj.data.active_layer_id;
+      this.project = r.obj.data;
+      if (!this.project.permission_to_each_additional_layer) {
+        this.$alertify.error(
+          this.$i18n.t('default.additionalLayerAccessDenied')
+        );
+      }
+      this.init();
+    },
     async getSettings() {
       const res = await this.$store.dispatch(
         'getCurrentSettings',
@@ -1591,10 +1717,15 @@ export default {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326'
       });
-      this.map.getView().fit(bbox.getGeometry(), {
-        maxZoom: 16,
-        duration: 500
-      });
+      if (this.project) {
+        this.map.getView().setCenter(this.project.map_center.coordinates);
+        this.map.getView().setZoom(this.project.map_zoom);
+      } else {
+        this.map.getView().fit(bbox.getGeometry(), {
+          maxZoom: 16,
+          duration: 500
+        });
+      }
       this.$store.commit('setCurrentFeaturesTypes', res.obj.settings.columns);
     },
     async getUsers() {
@@ -1680,6 +1811,44 @@ export default {
         this.$refs['table-data'].$recompute('windowItems'); // update table data
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async saveProject() {
+      const otherLayersIds = [];
+      for (let layer of this.otherLayers) {
+        otherLayersIds.push(layer.id);
+      }
+      const payload = {
+        active_layer_id: this.$route.params.layerId,
+        additional_layers_ids: otherLayersIds,
+        map_center: {
+          coordinates: this.map.getView().getCenter(),
+          type: 'Point'
+        },
+        map_zoom: this.map.getView().getZoom(),
+        name: this.projectName
+      };
+      if (this.project) {
+        const data = { pid: this.project.id, payload: payload };
+        const r = await this.$store.dispatch('putProject', data);
+        if (r.status === 204) {
+          this.$alertify.success(this.$i18n.t('featureManager.projectSaved'));
+          this.project = data.payload;
+          this.project.id = data.pid;
+          this.$modal.hide('saveProject');
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
+      } else {
+        const r = await this.$store.dispatch('postProject', payload);
+        if (r.status === 201) {
+          this.$alertify.success(this.$i18n.t('featureManager.projectCreated'));
+          this.project = payload;
+          this.project.id = r.body.data;
+          this.$modal.hide('saveProject');
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
       }
     },
     addIds(ids) {
@@ -2091,6 +2260,19 @@ export default {
             .getArray()
             .find(l => l.get('name') === name);
     },
+    getLayersAll() {
+      let layersAll = [];
+      if (this.allOtherLayers && this.services) {
+        layersAll = [...this.allOtherLayers, ...this.services].sort((a, b) =>
+          a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        );
+      } else if (this.allOtherLayers) {
+        layersAll = this.allOtherLayers;
+      } else if (this.services) {
+        layersAll = this.services;
+      }
+      return layersAll;
+    },
     generateBuffer() {
       this.getLayerByName('buffer')
         .getSource()
@@ -2187,24 +2369,6 @@ export default {
         return true;
       }
       return false;
-    },
-    loadServices() {
-      this.services.forEach(service => {
-        this.map.addLayer(
-          new TileLayer({
-            name: service.name,
-            visible: false,
-            source: new TileWMS({
-              url: service.url,
-              params: {
-                LAYERS: service.layers,
-                TILED: true,
-                SRS: 'EPSG:2180'
-              }
-            })
-          })
-        );
-      });
     },
     openBufferDialog() {
       this.$modal.show('buffer');
@@ -2504,74 +2668,56 @@ export default {
         maxZoom: 16,
         duration: 500
       });
-    }
-  },
-  async mounted() {
-    this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
-    this.getLayers();
-    this.map = new Map({
-      target: 'map',
-      layers: [
-        new TileLayer({
-          name: 'OpenStreetMap',
-          group: 'baselayers',
-          source: new XYZ({
-            url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-          })
-        }),
-        new LayerGroup({
-          name: 'otherLayers'
-        })
-      ],
-      view: new View({
-        center: fromLonLat([this.mapCenter.lon, this.mapCenter.lat]),
-        zoom: this.mapZoom
-      })
-    });
-
-    this.initOrtofoto();
-    this.getPermissions();
-    await Promise.all([this.getUsers(), this.getSettings()]);
-
-    this.loadServices();
-    await this.createStyle();
-
-    this.map.addLayer(
-      this.createMVTLayer(this.$route.params.layerId, 'features')
-    );
-    this.map.addLayer(
-      new VectorLayer({
-        name: 'featuresVector',
-        visible: false,
-        source: new VectorSource({}),
-        style: feature => {
-          const geometry = feature.getGeometry();
-          let styles = [
-            new Style({
-              fill: new Fill({
-                color: 'rgba(255, 77, 77, 0.5)'
-              }),
-              stroke: new Stroke({
-                color: 'rgba(255, 77, 77, 0.5)',
-                width: 2
-              }),
-              image: new Circle({
-                radius: 5,
-                stroke: new Stroke({
-                  color: 'rgba(255, 0, 0, 1)'
-                }),
-                fill: new Fill({
-                  color: 'rgba(255, 77, 77, 1)'
-                })
-              })
+    },
+    async init() {
+      this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
+      this.getLayers();
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            name: 'OpenStreetMap',
+            group: 'baselayers',
+            source: new XYZ({
+              url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
             })
-          ];
-          if (
-            !(geometry instanceof Point) &&
-            !(geometry instanceof MultiPoint)
-          ) {
-            styles.push(
+          }),
+          new LayerGroup({
+            name: 'otherLayers'
+          })
+        ],
+        view: new View({
+          center: fromLonLat([this.mapCenter.lon, this.mapCenter.lat]),
+          zoom: this.mapZoom,
+          constrainResolution: true
+        })
+      });
+
+      this.initOrtofoto();
+      this.getPermissions();
+      await Promise.all([this.getUsers(), this.getSettings()]);
+
+      await this.createStyle();
+
+      this.map.addLayer(
+        this.createMVTLayer(this.$route.params.layerId, 'features')
+      );
+      this.map.addLayer(
+        new VectorLayer({
+          name: 'featuresVector',
+          visible: false,
+          source: new VectorSource({}),
+          style: feature => {
+            const geometry = feature.getGeometry();
+            let styles = [
               new Style({
+                fill: new Fill({
+                  color: 'rgba(255, 77, 77, 0.5)'
+                }),
+                stroke: new Stroke({
+                  color: 'rgba(255, 77, 77, 0.5)',
+                  width: 2
+                }),
                 image: new Circle({
                   radius: 5,
                   stroke: new Stroke({
@@ -2580,148 +2726,195 @@ export default {
                   fill: new Fill({
                     color: 'rgba(255, 77, 77, 1)'
                   })
-                }),
-                geometry: () => {
-                  let coordinates = geometry.getCoordinates();
-                  if (
-                    geometry instanceof Polygon ||
-                    geometry instanceof MultiLineString
-                  ) {
-                    coordinates = coordinates.flat();
-                  } else if (geometry instanceof MultiPolygon) {
-                    coordinates = coordinates.flat(2);
-                  }
-                  return new MultiPoint(coordinates);
-                }
+                })
               })
-            );
-          }
-          return styles;
-        }
-      })
-    );
-    this.map.addLayer(
-      new VectorLayer({
-        name: 'buffer',
-        visible: true,
-        source: new VectorSource({}),
-        style: new Style({
-          stroke: new Stroke({
-            color: 'rgba(37, 81, 122, 1)',
-            width: 2
-          }),
-          fill: new Fill({
-            color: 'rgba(37, 81, 122, 0.3)'
-          })
-        })
-      })
-    );
-    this.map.addLayer(
-      new VectorLayer({
-        name: 'measurement',
-        source: new VectorSource({}),
-        style: feature => {
-          const geometry = feature.getGeometry();
-          const styles = [];
-          if (geometry instanceof LineString) {
-            geometry.forEachSegment((start, end) => {
-              const line = new LineString([start, end]);
+            ];
+            if (
+              !(geometry instanceof Point) &&
+              !(geometry instanceof MultiPoint)
+            ) {
               styles.push(
                 new Style({
-                  geometry: line,
+                  image: new Circle({
+                    radius: 5,
+                    stroke: new Stroke({
+                      color: 'rgba(255, 0, 0, 1)'
+                    }),
+                    fill: new Fill({
+                      color: 'rgba(255, 77, 77, 1)'
+                    })
+                  }),
+                  geometry: () => {
+                    let coordinates = geometry.getCoordinates();
+                    if (
+                      geometry instanceof Polygon ||
+                      geometry instanceof MultiLineString
+                    ) {
+                      coordinates = coordinates.flat();
+                    } else if (geometry instanceof MultiPolygon) {
+                      coordinates = coordinates.flat(2);
+                    }
+                    return new MultiPoint(coordinates);
+                  }
+                })
+              );
+            }
+            return styles;
+          }
+        })
+      );
+      this.map.addLayer(
+        new VectorLayer({
+          name: 'buffer',
+          visible: true,
+          source: new VectorSource({}),
+          style: new Style({
+            stroke: new Stroke({
+              color: 'rgba(37, 81, 122, 1)',
+              width: 2
+            }),
+            fill: new Fill({
+              color: 'rgba(37, 81, 122, 0.3)'
+            })
+          })
+        })
+      );
+      this.map.addLayer(
+        new VectorLayer({
+          name: 'measurement',
+          source: new VectorSource({}),
+          style: feature => {
+            const geometry = feature.getGeometry();
+            const styles = [];
+            if (geometry instanceof LineString) {
+              geometry.forEachSegment((start, end) => {
+                const line = new LineString([start, end]);
+                styles.push(
+                  new Style({
+                    geometry: line,
+                    stroke: new Stroke({
+                      color: 'rgba(37, 81, 122, 1)',
+                      width: 2
+                    }),
+                    fill: new Fill({
+                      color: 'rgba(37, 81, 122, 0.3)'
+                    }),
+                    text: new Text({
+                      text: this.formatLength(line),
+                      font: '15px sans-serif',
+                      fill: new Fill({ color: 'black' }),
+                      placement: 'line',
+                      stroke: new Stroke({
+                        color: 'rgba(37, 81, 122, 0.3)',
+                        width: 3
+                      }),
+                      offsetX: -20,
+                      offsetY: 20
+                    }),
+                    image: new Circle({
+                      radius: 5,
+                      stroke: new Stroke({
+                        color: '#25517a'
+                      }),
+                      fill: new Fill({
+                        color: 'rgba(37, 81, 122, 0.5)'
+                      })
+                    })
+                  })
+                );
+              });
+            } else {
+              styles.push(
+                new Style({
                   stroke: new Stroke({
                     color: 'rgba(37, 81, 122, 1)',
                     width: 2
                   }),
                   fill: new Fill({
                     color: 'rgba(37, 81, 122, 0.3)'
-                  }),
-                  text: new Text({
-                    text: this.formatLength(line),
-                    font: '15px sans-serif',
-                    fill: new Fill({ color: 'black' }),
-                    placement: 'line',
-                    stroke: new Stroke({
-                      color: 'rgba(37, 81, 122, 0.3)',
-                      width: 3
-                    }),
-                    offsetX: -20,
-                    offsetY: 20
-                  }),
-                  image: new Circle({
-                    radius: 5,
-                    stroke: new Stroke({
-                      color: '#25517a'
-                    }),
-                    fill: new Fill({
-                      color: 'rgba(37, 81, 122, 0.5)'
-                    })
                   })
                 })
               );
-            });
-          } else {
-            styles.push(
-              new Style({
-                stroke: new Stroke({
-                  color: 'rgba(37, 81, 122, 1)',
-                  width: 2
-                }),
-                fill: new Fill({
-                  color: 'rgba(37, 81, 122, 0.3)'
-                })
-              })
-            );
+            }
+            return styles;
           }
-          return styles;
+        })
+      );
+
+      this.createSelectInteraction();
+
+      const lDV = await this.$store.dispatch(
+        'getLayerDictsValues',
+        this.$route.params.layerId
+      );
+      if (lDV.status === 200) {
+        this.dictValues = lDV.obj.data;
+      } else {
+        this.$alertify.error(this.$i18n.t('default.getDictsValuesError'));
+      }
+      const r = await this.$store.dispatch(
+        'getLayer',
+        this.$route.params.layerId
+      );
+      if (r.status === 200) {
+        this.$store.commit('setActiveLayer', r.obj);
+        Object.keys(r.obj.features[0].properties).forEach(el => {
+          this.columns.push({
+            key: el,
+            name: el,
+            sortable: true,
+            filter: true
+          });
+        });
+        r.obj.features.forEach(feat => {
+          const tempItem = {};
+          Object.entries(feat.properties).forEach(([k, v]) => {
+            if (this.featureTypes[k] === 'timestamp without time zone') {
+              tempItem[k] = moment(v).isValid()
+                ? moment(v)
+                    .locale('pl')
+                    .format('L')
+                : '';
+            } else {
+              tempItem[k] = v;
+            }
+          });
+          this.items.push(tempItem);
+        });
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
+      this.searchCount = this.items.length;
+    }
+  },
+  async mounted() {
+    if (this.$route.query.projectId) {
+      this.getProject();
+    } else {
+      this.init();
+    }
+  },
+  watch: {
+    services() {
+      this.layersAll = this.getLayersAll();
+      if (this.project) {
+        for (let oL of this.project.additional_layers_ids) {
+          if (oL !== this.$route.params.layerId) {
+            this.addLayer(this.layersOutOfProject.find(l => l.id === oL));
+          }
         }
-      })
-    );
-
-    this.createSelectInteraction();
-
-    const lDV = await this.$store.dispatch(
-      'getLayerDictsValues',
-      this.$route.params.layerId
-    );
-    if (lDV.status === 200) {
-      this.dictValues = lDV.obj.data;
-    } else {
-      this.$alertify.error(this.$i18n.t('default.getDictsValuesError'));
-    }
-    const r = await this.$store.dispatch(
-      'getLayer',
-      this.$route.params.layerId
-    );
-    if (r.status === 200) {
-      this.$store.commit('setActiveLayer', r.obj);
-      Object.keys(r.obj.features[0].properties).forEach(el => {
-        this.columns.push({
-          key: el,
-          name: el,
-          sortable: true,
-          filter: true
-        });
-      });
-      r.obj.features.forEach(feat => {
-        const tempItem = {};
-        Object.entries(feat.properties).forEach(([k, v]) => {
-          if (this.featureTypes[k] === 'timestamp without time zone') {
-            tempItem[k] = moment(v).isValid()
-              ? moment(v)
-                  .locale('pl')
-                  .format('L')
-              : '';
-          } else {
-            tempItem[k] = v;
+      }
+    },
+    allOtherLayers() {
+      this.layersAll = this.getLayersAll();
+      if (this.project) {
+        for (let oL of this.project.additional_layers_ids) {
+          if (oL !== this.$route.params.layerId) {
+            this.addLayer(this.layersOutOfProject.find(l => l.id === oL));
           }
-        });
-        this.items.push(tempItem);
-      });
-    } else {
-      this.$alertify.error(this.$i18n.t('default.error'));
+        }
+      }
     }
-    this.searchCount = this.items.length;
   }
 };
 </script>

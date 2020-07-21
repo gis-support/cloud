@@ -114,20 +114,21 @@ class Layer(Cloud):
 
     # Change layer name
     def change_name(self, layer_name, callbacks: Iterable[Callable[[str, str], None]] = None):
-        callbacks = [] or callbacks
-        if self.layer_exists(layer_name):
-            raise ValueError("layer exists")
-        old_lid = self.lid
-        old_name = self.name
-        self.name = layer_name
-        self.execute(
-            SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
-        self.execute("""
-            UPDATE public.layer_styles SET f_table_name = %s WHERE f_table_name = %s
-        """, (self.name, old_name,))
-        self.lid = self.hash_name(self.name)
-        for callback in callbacks:
-            callback(old_lid, self.lid)
+        with self.db.atomic():
+            callbacks = [] or callbacks
+            if self.layer_exists(layer_name):
+                raise ValueError("layer exists")
+            old_lid = self.lid
+            old_name = self.name
+            self.name = layer_name
+            self.execute(
+                SQL("ALTER TABLE {} RENAME TO {}").format(Identifier(old_name), Identifier(self.name)))
+            self.execute("""
+                UPDATE public.layer_styles SET f_table_name = %s WHERE f_table_name = %s
+            """, (self.name, old_name,))
+            self.lid = self.hash_name(self.name)
+            for callback in callbacks:
+                callback(old_lid, self.lid)
 
     # Layer columns
 
@@ -448,6 +449,10 @@ class Layer(Cloud):
             pk_layer_name = self.unhash_name(names[1])
         except ValueError:
             raise ValueError("invalid pk layer in settings")
+        # # Sprawdzenie czy użytkownik ma dostęp do warstw PN i PK - na razie bez sprawdzania
+        # permitted_user_layers = set([layer['id'] for layer in self.get_layers()])
+        # if permitted_user_layers.intersection(names) != set(names):
+        #     raise PermissionError('user has no access to settings layers')
         # Parki narodowe
         pn_cursor = self.execute(SQL("""
             SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 2180), ST_Transform(b.geometry, 2180))

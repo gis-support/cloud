@@ -200,6 +200,24 @@ class TestGroups(BaseTest):
         assert r.json
         assert r.json['error'] == 'group restricted'
 
+    def test_groups_CGS_7(self, client):
+        # Admin token
+        token = self.get_token(client, admin=True)
+        # Creating new user
+        new_user, password = self.create_user(client)
+        # Creating new group
+        client.post(
+            f'/api/users/groups?token={token}', data=json.dumps({'group': 'CGS-7'}))
+        # Changing user assignment from default to newly created group
+        r = client.put(
+            f'/api/users?token={token}', data=json.dumps({'user': new_user, 'group': 'CGS-7'}))
+        assert r.status_code == 200
+        assert r.json['users'] == 'user assigned'
+        # Checking new user group after changes
+        r = client.get(
+            f'/api/users?token={token}')
+        assert r.status_code == 200
+        assert r.json['users'][new_user] == 'CGS-7'
 
 @pytest.mark.auth
 class TestLogo(BaseTest):

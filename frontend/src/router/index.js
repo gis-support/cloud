@@ -27,6 +27,14 @@ const routes = [
     props: true
   },
   {
+    path: "/feature_manager",
+    name: "project_manager",
+    component: () => import(/* webpackChunkName: "dashboard" */ "../views/FeatureManager.vue"),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: "/login",
     name: "login",
     component: () => import(/* webpackChunkName: "login" */ "../views/Login.vue")

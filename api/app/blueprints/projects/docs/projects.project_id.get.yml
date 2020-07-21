@@ -1,0 +1,44 @@
+Get project
+---
+tags:
+  - Projects
+summary: Get project
+
+produces:
+  - application/json
+parameters:
+  - in: path
+    name: project_id
+    required: true
+    schema:
+      type: int
+    example: 1
+
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+
+responses:
+  204:
+    description: OK
+
+  403:
+    description: token required or permission denied for active layer
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+
+  404:
+    description: Project does not exist
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Project does not exist"
