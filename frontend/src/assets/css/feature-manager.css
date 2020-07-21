@@ -52,7 +52,7 @@
 
 .right-panel__title {
   display: inline-block;
-  margin-bottom: 30px;
+  margin-bottom: 0;
   line-height: 22px;
   margin-top: 6px;
   padding-left: 0px;
