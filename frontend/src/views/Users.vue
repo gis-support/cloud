@@ -364,6 +364,7 @@ export default {
             });
             if (r.status === 200) {
               this.$alertify.success(this.$i18n.t('default.success'));
+              this.usersWithGroups[this.userToAssign] = this.groupToAssign;
               this.groupToAssign = undefined;
               this.userToAssign = undefined;
             }

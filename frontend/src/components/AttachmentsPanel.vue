@@ -401,6 +401,7 @@
                   {{this.$i18n.t('upload.defaultMessage')}}
                   <ul>
                     <li
+                      style="list-style-position: inside"
                       v-for="(file,idx) in files"
                       :key="idx"
                     >
@@ -623,6 +624,12 @@ export default {
                 aid: item.id,
                 attachType: item.group
               });
+            } else if (r.status === 403) {
+              if (r.body.error === 'access denied, not an owner') {
+                this.$alertify.error(this.$i18n.t('upload.accessDenied'));
+              }
+            } else {
+              this.$alertify.error(this.$i18n.t('default.error'));
             }
           },
           () => {}
@@ -665,7 +672,7 @@ export default {
     sendFiles() {
       this.isFilePrepared = false;
       let data = [];
-      for (file of this.files) {
+      for (let file of this.files) {
         const name = file.file.name;
         var promise = this.getBase64(file.file);
         promise

@@ -17,6 +17,8 @@
       "deleteLayerContent": "Czy na pewno chcesz usunąć warstwę?",
       "deleteColumnTitle": "Usuwanie kolumny",
       "deleteLayerTitle": "Usuwanie warstwy",
+      "deleteProjectContent": "Czy na pewno chcesz usunąć projekt?",
+      "deleteProjectTitle": "Usuwanie projektu",
       "deleteService": "Czy na pewno chcesz usunąć wybrane źródło?",
       "deleteServiceTitle": "Usuwanie źródła zewnętrznego",
       "epsg": "Układ współrzędnych",
@@ -36,16 +38,19 @@
     },
     "placeholder": {
       "layersFilter": "Filtr warstw",
-      "externalSourcesFilter": "Filtr źródeł"
+      "externalSourcesFilter": "Filtr źródeł",
+      "tagsFilter": "Filtr tagów"
     },
     "title": {
       "vectorLayersList": "Lista warstw wektorowych",
       "layersList": "Lista warstw",
+      "projectsList": "Lista projektów",
       "externalSourcesList": "Lista źródeł zewnętrznych"
     }
   },
   "default": {
     "actions": "Akcje",
+    "additionalLayerAccessDenied": "Brak uprawnień do części z warstw",
     "active": "Aktywny",
     "attribute": "Atrybut",
     "add": "Dodaj",
@@ -151,6 +156,7 @@
     "checkedDownload": "Pobierz wybrane",
     "closeTable": "Zamknij tabelę",
     "commentsTitle": "Komentarze",
+    "createProject": "Utwórz projekt",
     "deleteAttachment": "Usuń załącznik",
     "deleteAttachmentConfirm": "Czy na pewno chcesz usunąć załącznik?",
     "deleteAttachmentsConfirm": "Czy na pewno chcesz usunąć wybrane załączniki?",
@@ -176,8 +182,11 @@
     "objectsFilter": "Filtrowanie obiektów",
     "objectsNumber": "Ilość obiektów",
     "ortoError": "Błąd ładowania Ortofotomapy",
+    "projectCreated": "Utworzono projekt",
+    "projectSaved": "Zapisano projekt",
     "rotate": "Obróć",
     "rotationValue": "Azymut",
+    "saveProject": "Zapisz projekt",
     "showTable": "Pokaż tabelę",
     "waitForData": "Poczekaj na wczytanie danych",
     "zoomToSelected": "Przybliż do zaznaczonego obiektu",
@@ -203,6 +212,7 @@
     "register": "Zarejestruj"
   },
   "upload": {
+    "accessDenied": "Brak uprawnień",
     "automaticEpsg": "Układ współrzędnych określany jest automatycznie",
     "cancelUpload": "Anuluj wysyłanie",
     "defaultMessage": "Przeciągnij pliki lub kliknij i wybierz pliki do przesłania",
