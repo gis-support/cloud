@@ -177,12 +177,14 @@ class TestProjects(BaseTest):
         expected_data_1["permission_to_each_additional_layer"] = True
         expected_data_1["permission_to_active_layer"] = True
         expected_data_1["additional_layers_ids"] = []
+        expected_data_1["service_layers_ids"] = []
 
         expected_data_2 = deepcopy(data_2)
         expected_data_2["id"] = project_2_id
         expected_data_2["permission_to_each_additional_layer"] = True
         expected_data_2["permission_to_active_layer"] = True
         expected_data_2["additional_layers_ids"] = []
+        expected_data_2["service_layers_ids"] = []
 
         expected_data = [expected_data_1, expected_data_2]
 
@@ -248,6 +250,7 @@ class TestProjects(BaseTest):
                 "type": "Point"
             },
             "map_zoom": 11,
+            "service_layers_ids": [1, 2]
         }
 
         project_id = self.create_project(client, data, token).json["data"]
@@ -438,6 +441,7 @@ class TestProjects(BaseTest):
         expected_data["id"] = project_id
         expected_data["permission_to_each_additional_layer"] = True
         expected_data["additional_layers_ids"] = []
+        expected_data["service_layers_ids"] = []
 
         assert actual_data == expected_data
 

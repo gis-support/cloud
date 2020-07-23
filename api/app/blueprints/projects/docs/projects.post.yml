@@ -28,6 +28,12 @@ parameters:
             "Ybmjyo7NX5ybjmmwqYBNxe8qng9pV5NRB6g",
             "7k207J4v3pKbbYrxBvMnOErKjrMLnAQgE78YqD"
           ]
+        service_layers_ids:
+          type: array
+          example: [
+            1,
+            2
+          ]
         map_center:
           type: object
           properties:

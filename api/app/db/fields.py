@@ -2,6 +2,7 @@ import json
 
 from peewee import SQL, Field
 from shapely import wkb
+from shapely.geometry import shape
 
 
 class GeometryBareField(Field):
@@ -10,9 +11,11 @@ class GeometryBareField(Field):
     field_type = "geometry"
     db_field = "geometry"
 
-    def db_value(self,value):
+    def db_value(self, value):
+        epsg = value.get("crs", {}).get("properties", {}).get("name", "EPSG:4326")
+        srid = int(epsg.split(":")[1])
         if type(value) is dict:
-            return json.dumps(value)
+            return wkb.dumps(shape(value), hex=True, srid=srid)
         else:
             return value
 
@@ -32,6 +35,14 @@ class GeometryField(GeometryBareField):
         self.geometry_type = geometry_type
         self.srid = srid
         super().__init__(*args, **kwargs)
+
+    def db_value(self, value):
+        epsg = value.get("crs", {}).get("properties", {}).get("name", f"EPSG:{self.srid}")
+        srid = int(epsg.split(":")[1])
+        if type(value) is dict:
+            return wkb.dumps(shape(value), hex=True, srid=srid)
+        else:
+            return value
 
     def ddl_datatype(self, ctx):
         ddl = SQL("{}({}, {})".format(self.field_type, self.geometry_type, self.srid))
