@@ -920,7 +920,7 @@
                 :title="project.name"
               >
                 <i class="fa fa-database title__icon" />
-                {{project.name}}
+                {{project.name | maxLength}}
               </h4>
             </div>
             <div
@@ -1297,9 +1297,7 @@ export default {
       return this.$store.getters.getCurrentFeaturesTypes;
     },
     layerName() {
-      return this.$store.getters.getLayerName
-        ? this.$store.getters.getLayerName
-        : this.activeLayerName;
+      return this.activeLayerName;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
@@ -1820,7 +1818,10 @@ export default {
       }
       const payload = {
         active_layer_id: this.$route.params.layerId,
-        additional_layers_ids: otherLayersIds,
+        additional_layers_ids: otherLayersIds.filter(
+          id => !Number.isInteger(id)
+        ),
+        service_layers_ids: otherLayersIds.filter(id => Number.isInteger(id)),
         map_center: {
           coordinates: this.map.getView().getCenter(),
           type: 'Point'
@@ -1848,6 +1849,19 @@ export default {
           this.$modal.hide('saveProject');
         } else {
           this.$alertify.error(this.$i18n.t('default.error'));
+        }
+      }
+    },
+    addAdditionalLayers() {
+      this.layersAll = this.getLayersAll();
+      if (this.project) {
+        for (let oL of this.project.additional_layers_ids) {
+          if (oL !== this.$route.params.layerId) {
+            this.addLayer(this.layersOutOfProject.find(l => l.id === oL));
+          }
+        }
+        for (let oL of this.project.service_layers_ids) {
+          this.addLayer(this.layersOutOfProject.find(l => l.id === oL));
         }
       }
     },
@@ -2896,24 +2910,10 @@ export default {
   },
   watch: {
     services() {
-      this.layersAll = this.getLayersAll();
-      if (this.project) {
-        for (let oL of this.project.additional_layers_ids) {
-          if (oL !== this.$route.params.layerId) {
-            this.addLayer(this.layersOutOfProject.find(l => l.id === oL));
-          }
-        }
-      }
+      this.addAdditionalLayers();
     },
     allOtherLayers() {
-      this.layersAll = this.getLayersAll();
-      if (this.project) {
-        for (let oL of this.project.additional_layers_ids) {
-          if (oL !== this.$route.params.layerId) {
-            this.addLayer(this.layersOutOfProject.find(l => l.id === oL));
-          }
-        }
-      }
+      this.addAdditionalLayers();
     }
   }
 };
