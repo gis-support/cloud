@@ -51,6 +51,12 @@ definitions:
       additional_layers_ids:
         type: array
         example: ["RPVbnD55NxqMEb12k43bN0vQjRyk", "2Ay1xG6Y6Y6LrNyJM3LjVnVyKeNMp"]
+      service_layers_ids:
+        type: array
+        example: [
+          1,
+          2
+        ]
       map_center:
         type: object
         properties:
