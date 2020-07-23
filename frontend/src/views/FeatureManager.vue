@@ -920,7 +920,7 @@
                 :title="project.name"
               >
                 <i class="fa fa-database title__icon" />
-                {{project.name}}
+                {{project.name | maxLength}}
               </h4>
             </div>
             <div
