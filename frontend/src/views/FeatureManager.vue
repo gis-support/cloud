@@ -1297,9 +1297,7 @@ export default {
       return this.$store.getters.getCurrentFeaturesTypes;
     },
     layerName() {
-      return this.$store.getters.getLayerName
-        ? this.$store.getters.getLayerName
-        : this.activeLayerName;
+      return this.activeLayerName;
     },
     mapCenter() {
       return this.$store.getters.getMapCenter;
