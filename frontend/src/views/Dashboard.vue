@@ -266,7 +266,7 @@
                 />
               </select>
             </div>
-            <div class="pt-10">
+            <div class="pt-10 flex-center">
               <file-upload
                 ref="upload"
                 v-model="files"
@@ -765,6 +765,12 @@ export default {
                 lay => lay.id !== el.id
               );
               this.$alertify.success(this.$i18n.t('default.deleted'));
+            } else if (r.status === 403) {
+              if (r.body.error === 'access denied, not an owner') {
+                this.$alertify.error(this.$i18n.t('default.noAccess'));
+              } else {
+                this.$alertify.error(this.$i18n.t('default.error'));
+              }
             } else {
               this.$alertify.error(this.$i18n.t('default.error'));
             }
@@ -1055,6 +1061,7 @@ export default {
   font-weight: bold;
 }
 .file-uploads {
+  margin: auto;
   overflow: hidden;
   position: relative;
   text-align: center;
