@@ -57,7 +57,7 @@ def projects_project_id_get(project_id: int):
 
 @mod_projects.route("/projects", methods=["POST"])
 @token_required
-@swag_from_docs("projects.post.yml")
+@swag_from_docs("projects.post.yml", methods=["POST"])
 def projects_post():
     user_name = request.user
 
