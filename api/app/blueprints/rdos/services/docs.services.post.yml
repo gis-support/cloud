@@ -1,7 +1,7 @@
 Add new service
 ---
 tags:
-  - Attachments
+  - Services
 summary: Add new attachment to feature
 produces:
   - application/json

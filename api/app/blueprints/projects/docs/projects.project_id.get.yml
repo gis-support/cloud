@@ -22,8 +22,13 @@ parameters:
 
 
 responses:
-  204:
+  200:
     description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          $ref: "#/definitions/ProjectGet"
 
   403:
     description: token required or permission denied for active layer
