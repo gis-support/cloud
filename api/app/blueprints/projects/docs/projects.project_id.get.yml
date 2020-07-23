@@ -28,7 +28,7 @@ responses:
       type: object
       properties:
         data:
-          - $ref: "#/definitions/ProjectGet"
+          $ref: "#/definitions/ProjectGet"
 
   403:
     description: token required or permission denied for active layer
