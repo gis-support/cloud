@@ -14,6 +14,7 @@ class Project(BaseModel):
     owner_name = TextField()
     active_layer_id = TextField()
     additional_layers_ids = BinaryJSONField(default=[])
+    service_layers_ids = BinaryJSONField(default=[])
     map_center = GeometryField("point", 4326)
     map_zoom = IntegerField()
 
