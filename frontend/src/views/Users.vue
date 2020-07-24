@@ -408,7 +408,7 @@ export default {
           }
         });
     },
-    async editPermissions() {
+    async changePermissions() {
       const payload = {
         lid: this.currentPermissions.layId,
         body: {
@@ -433,6 +433,38 @@ export default {
         this.$refs.closeModalBtn.click();
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+      }
+    },
+    async editPermissions() {
+      if (this.currentPermissions.permission === '') {
+        const id = this.currentPermissions.layId;
+        const rr = await this.$store.dispatch('getActiveLayerUsers', id);
+        if (rr.status === 200) {
+          const usersUsedLayer = rr.obj.data;
+          if (usersUsedLayer.includes(this.currentPermissions.username)) {
+            this.$alertify
+              .confirm(
+                this.$i18n.t('users.acceptPermissionsChange'),
+                () => {
+                  this.changePermissions();
+                },
+                () => {}
+              )
+              .set({ title: this.$i18n.t('users.modal.changePermissions') })
+              .set({
+                labels: {
+                  ok: this.$i18n.t('default.yes'),
+                  cancel: this.$i18n.t('default.no')
+                }
+              });
+          } else {
+            this.changePermissions();
+          }
+        } else {
+          this.$alertify.error(this.$i18n.t('default.error'));
+        }
+      } else {
+        this.changePermissions();
       }
     },
     async deleteUser(user) {
