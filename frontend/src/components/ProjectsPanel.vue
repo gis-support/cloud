@@ -15,7 +15,7 @@
       v-else
       v-for="(project, idx) in projects"
       :key="idx"
-      :title="project.permission_to_active_layer?project.name:'Brak uprawnień do warswy głównej'"
+      :title="project.permission_to_active_layer?project.name:$i18n.t('default.mainLayerAccessDenied')"
       class="well well-sm project-element flex-center"
       @click="project.permission_to_active_layer?openProject(project):''"
     >
