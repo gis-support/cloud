@@ -60,6 +60,7 @@ services:
     command: bash -c "./prod_start.sh"
     volumes:
       - ./api/static/logo.png:/api/static/logo.png
+      - ./api/uploads:/api/uploads
     environment:
       - PYTHONUNBUFFERED
       - FLASK_APP

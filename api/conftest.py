@@ -59,6 +59,7 @@ def app():
     app._db.execute_sql("TRUNCATE system.dict RESTART IDENTITY CASCADE;")
     app._db.execute_sql(
         f"TRUNCATE system.attachment_qgis RESTART IDENTITY CASCADE;")
+    app._db.execute_sql("TRUNCATE system.project RESTART IDENTITY CASCADE;")
     app._db.execute_sql(f"DROP TYPE IF EXISTS {TEST_ENUM_NAME} CASCADE;")
 
     app._db.execute_sql("TRUNCATE attachment RESTART IDENTITY;")
