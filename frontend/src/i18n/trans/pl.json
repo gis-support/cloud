@@ -97,6 +97,7 @@
     "logout": "Wyloguj się",
     "name": "Nazwa",
     "newGroupAdded": "Dodano nową grupę użytkowników",
+    "no": "Nie",
     "noAccess": "Brak dostępu",
     "noAttachments": "Brak załączników",
     "noComments": "Brak komentarzy",
@@ -230,6 +231,7 @@
     "uploadDuplicate": "Ten plik został już dodany"
   },
   "users": {
+    "acceptPermissionsChange": "Zmiana tych uprawnień uniemożliwi użytkownikowi otwarcie projektu. Czy chcesz kontynuować?",
     "assignUser": "Przypisz użytkownika",
     "assignUserConfirm": "Czy na pewno chcesz przypisać użytkownika do grupy?",
     "deleteDefaultGroup": "Nie można usunąć domyślnej grupy",

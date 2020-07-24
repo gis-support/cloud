@@ -11,17 +11,19 @@
       style="font-weight: 600"
     >{{"Brak projektów"}}</div>
     <div
-      style="cursor:pointer"
+      v-bind:class="{'project-disabled':!project.permission_to_active_layer, 'project-enabled':project.permission_to_active_layer}"
       v-else
       v-for="(project, idx) in projects"
       :key="idx"
-      :title="project.name"
+      :title="project.permission_to_active_layer?project.name:'Brak uprawnień do warswy głównej'"
       class="well well-sm project-element flex-center"
-      @click="openProject(project)"
+      @click="project.permission_to_active_layer?openProject(project):''"
     >
       <span
         style="overflow:hidden"
         class="project-text"
+        v-bind:class="{'project-title-disabled':!project.permission_to_active_layer}"
+        @click="project.permission_to_active_layer?openProject(project):''"
       >{{project.name}}</span>
       <span
         id="layers-list-icons"
@@ -96,5 +98,15 @@ export default {
 .section__header {
   padding-bottom: 15px;
   margin-bottom: -1px;
+}
+.project-disabled {
+  cursor: not-allowed;
+  border: solid 1px rgba(207, 26, 26, 0.5);
+}
+.project-title-disabled {
+  cursor: not-allowed;
+}
+.project-enabled {
+  cursor: pointer;
 }
 </style> 
