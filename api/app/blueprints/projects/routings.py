@@ -146,3 +146,15 @@ def projects_project_id_delete(project_id: int):
 
     project.delete_instance()
     return jsonify({}), 204
+
+
+@mod_projects.route("/projects/<active_layer_id>/users")
+@token_required
+@swag_from_docs("projects_active_layer_id.users.get.yml")
+def projects_users_active_layer_id(active_layer_id):
+    query = Project.select(Project.owner_name).distinct().where(Project.active_layer_id == active_layer_id).tuples()
+    result = []
+    for row in query:
+        result.append(row[0])
+
+    return jsonify({"data": result})
