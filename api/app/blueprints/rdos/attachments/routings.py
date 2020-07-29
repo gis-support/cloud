@@ -21,7 +21,7 @@ def attachment_delete(lid, fid, aid):
         Delete attachment for feature
         Returns attachments list
         """
-        @layer_decorator(permission="owner")
+        @layer_decorator(permission="write")
         def delete(layer, lid=lid, fid=fid, aid=None):
             return jsonify({"aid": Attachment.delete_attachment(lid, fid, aid)})
         return delete(lid=lid, fid=fid, aid=aid)

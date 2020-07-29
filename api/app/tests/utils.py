@@ -102,3 +102,18 @@ class BaseTest:
         assert r.json['services']['url'] == request['url']
         assert r.json['services']['layers'] == request['layers']
         return r.json['services']['id']
+
+    def create_or_get_group_and_assign_user(self, client, user, group='tescik'):
+        token = self.get_token(client, admin=True)
+        r = client.get(f'/api/users/groups?token={token}')
+        if group not in r.json['groups']:
+            r = client.post(
+                f'/api/users/groups?token={token}', data=json.dumps({'group': group}))
+            assert r.status_code == 201
+            assert r.json['groups'] == 'group added'
+        # Changing user assignment from default to newly created group
+        # print(user, group)
+        r = client.put(
+            f'/api/users?token={token}', data=json.dumps({'user': user, 'group': group}))
+        assert r.status_code == 200
+        assert r.json['users'] == 'user assigned'
