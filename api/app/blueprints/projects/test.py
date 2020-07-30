@@ -512,3 +512,29 @@ class TestProjects(BaseTest):
         result = self.edit_project(client, project_id, update_data, token_1)
         assert result.status_code == 403
         assert result.json["error"] == f"permission denied to layer {layer_2}"
+
+    def test_get_users_using_layer(self, client: FlaskClient):
+        user, password = self.create_user(client)
+        token = self.get_token(client, user, password)
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        data = {
+            "name": "name",
+            "active_layer_id": layer_id,
+            "map_center": {
+                "coordinates": [
+                    21.0,
+                    52.0
+                ],
+                "type": "Point"
+            },
+            "map_zoom": 11,
+        }
+
+        self.create_project(client, data, token)
+
+        result = client.get(f"/api/projects/{layer_id}/users", query_string={"token": token})
+
+        assert result.status_code == 200
+        assert result.json["data"] == [user]

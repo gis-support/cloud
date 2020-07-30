@@ -1337,6 +1337,9 @@ export default {
   },
   methods: {
     addLayer(layer) {
+      if (!layer) {
+        return;
+      }
       this.otherLayers.push({ id: layer.id, name: layer.name });
       this.activeOtherLayers.push(layer.id);
       if (Number.isInteger(layer.id)) {

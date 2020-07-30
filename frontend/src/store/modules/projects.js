@@ -28,6 +28,16 @@ export default {
         return err;
       }
     },
+    async getActiveLayerUsers(ctx, id) {
+      try {
+        const response = await swagger.apis.Projects.get_api_projects__active_layer_id__users({
+          active_layer_id: id
+        });
+        return response;
+      } catch (err) {
+        return err;
+      }
+    },
     async getProject(ctx, id) {
       try {
         const response = await swagger.apis.Projects.get_api_projects__project_id_({
