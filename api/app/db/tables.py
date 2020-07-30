@@ -16,4 +16,9 @@ def create_tables(database: PostgresqlExtDatabase):
         Project,
     ]
 
-    database.create_tables(models)
+    for model in models:
+        try:
+            model.create_table(True)
+        except Exception as e:
+            print(f"ERROR CREATING TABLE {model._meta.table_name}")
+            print(str(e))

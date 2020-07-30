@@ -177,12 +177,14 @@ class TestProjects(BaseTest):
         expected_data_1["permission_to_each_additional_layer"] = True
         expected_data_1["permission_to_active_layer"] = True
         expected_data_1["additional_layers_ids"] = []
+        expected_data_1["service_layers_ids"] = []
 
         expected_data_2 = deepcopy(data_2)
         expected_data_2["id"] = project_2_id
         expected_data_2["permission_to_each_additional_layer"] = True
         expected_data_2["permission_to_active_layer"] = True
         expected_data_2["additional_layers_ids"] = []
+        expected_data_2["service_layers_ids"] = []
 
         expected_data = [expected_data_1, expected_data_2]
 
@@ -248,6 +250,7 @@ class TestProjects(BaseTest):
                 "type": "Point"
             },
             "map_zoom": 11,
+            "service_layers_ids": [1, 2]
         }
 
         project_id = self.create_project(client, data, token).json["data"]
@@ -438,6 +441,7 @@ class TestProjects(BaseTest):
         expected_data["id"] = project_id
         expected_data["permission_to_each_additional_layer"] = True
         expected_data["additional_layers_ids"] = []
+        expected_data["service_layers_ids"] = []
 
         assert actual_data == expected_data
 
@@ -508,3 +512,29 @@ class TestProjects(BaseTest):
         result = self.edit_project(client, project_id, update_data, token_1)
         assert result.status_code == 403
         assert result.json["error"] == f"permission denied to layer {layer_2}"
+
+    def test_get_users_using_layer(self, client: FlaskClient):
+        user, password = self.create_user(client)
+        token = self.get_token(client, user, password)
+
+        layer_id = self.add_geojson_prg(client, token)
+
+        data = {
+            "name": "name",
+            "active_layer_id": layer_id,
+            "map_center": {
+                "coordinates": [
+                    21.0,
+                    52.0
+                ],
+                "type": "Point"
+            },
+            "map_zoom": 11,
+        }
+
+        self.create_project(client, data, token)
+
+        result = client.get(f"/api/projects/{layer_id}/users", query_string={"token": token})
+
+        assert result.status_code == 200
+        assert result.json["data"] == [user]

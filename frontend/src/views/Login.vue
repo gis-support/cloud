@@ -6,20 +6,18 @@
     <div class="container">
       <div class="account-wrapper">
         <div class="account-body">
-          <h3 class="text-center">
-            {{ $i18n.t('login.loginTitle') }}
-          </h3>
+          <h3 class="text-center">{{ $i18n.t('login.loginTitle') }}</h3>
           <div class="form-group">
             <input
               type="text"
               name="email"
               class="form-control"
               id="login-username"
-              :placeholder="$i18n.t('default.email')"
+              :placeholder="$i18n.t('default.login')"
               tabindex="1"
               v-model="email"
               ref="login-username"
-            >
+            />
           </div>
           <div class="form-group">
             <input
@@ -30,7 +28,7 @@
               :placeholder="$i18n.t('default.password')"
               tabindex="2"
               v-model="password"
-            >
+            />
           </div>
           <div class="form-group">
             <button
@@ -53,7 +51,7 @@
 export default {
   data: () => ({
     email: '',
-    password: '',
+    password: ''
   }),
   methods: {
     async loginRequest() {
@@ -67,11 +65,11 @@ export default {
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
-    },
+    }
   },
   mounted() {
     this.$refs['login-username'].focus();
-  },
+  }
 };
 </script>
 
