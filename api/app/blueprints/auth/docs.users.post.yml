@@ -6,6 +6,11 @@ summary: Create new user
 produces:
   - application/json
 parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
   - in: body
     name: body
     required: true

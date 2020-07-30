@@ -1,0 +1,40 @@
+Get users who use a layer as the active layer
+---
+tags:
+  - Projects
+summary: Get users who use a layer as the active layer
+
+produces:
+  - application/json
+
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+  - in: path
+    name: active_layer_id
+    required: true
+    schema:
+      type: string
+    example: "D49LoBOOjvYbqro4Z3rOBOPZmjn2K9ONbpL8AVMn0m95ODvm2o9ExP5"
+
+responses:
+  200:
+    description: OK
+    schema:
+      type: object
+      properties:
+        data:
+          type: "array"
+          example: ["admin", "user1"]
+  403:
+    description: token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"

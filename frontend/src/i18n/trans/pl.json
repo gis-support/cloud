@@ -96,8 +96,10 @@
     "loginError": "Nieprawidłowa nazwa uzytkownika lub hasło",
     "loginSuccess": "Zalogowano",
     "logout": "Wyloguj się",
+    "mainLayerAccessDenied": "Brak uprawnień do warstwy głównej",
     "name": "Nazwa",
     "newGroupAdded": "Dodano nową grupę użytkowników",
+    "no": "Nie",
     "noAccess": "Brak dostępu",
     "noAttachments": "Brak załączników",
     "noComments": "Brak komentarzy",
@@ -231,6 +233,7 @@
     "uploadDuplicate": "Ten plik został już dodany"
   },
   "users": {
+    "acceptPermissionsChange": "Zmiana tych uprawnień uniemożliwi użytkownikowi otwarcie projektu. Czy chcesz kontynuować?",
     "assignUser": "Przypisz użytkownika",
     "assignUserConfirm": "Czy na pewno chcesz przypisać użytkownika do grupy?",
     "deleteDefaultGroup": "Nie można usunąć domyślnej grupy",

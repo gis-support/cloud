@@ -106,7 +106,10 @@
                   class="mb-0"
                   :key="key"
                 >
-                  <div class="panel-heading pl-0 pr-0">
+                  <div
+                    style="padding:9px 15px"
+                    class="panel-heading pl-0 pr-0"
+                  >
                     <h4 class="panel-title flex-center">
                       <span style="display:inherit">
                         <span
@@ -155,7 +158,6 @@
                             class="mySelect"
                             label="name"
                             maxHeight="10px"
-                            placeholder="(Brak tagów)"
                             :disabled="isTagAddings"
                             :options="tags.filter(t => !val.tags.find(vT => vT.id === t.id))"
                             :value="val.tags"
@@ -956,9 +958,15 @@ export default {
   text-align: center;
   padding-bottom: 2px;
   font-size: 12px;
-  border: none;
+  border: 1px solid rgb(235, 235, 235);
+  /*
   border-radius: 0;
   border-bottom: 1px solid rgba(60, 60, 60, 0.26);
+  */
+}
+
+.mySelect >>> .vs__dropdown-toggle:hover {
+  border: 1px solid rgb(190, 190, 190);
 }
 
 .mySelect >>> .vs__dropdown-menu {
@@ -981,7 +989,12 @@ export default {
 
 .mySelect >>> .vs__dropdown-toggle > .vs__selected-options > .vs__selected {
   background-color: white;
-  margin: 1px 2px;
+  margin: auto;
+  margin-right: 2px;
+}
+
+.mySelect >>> .vs__dropdown-toggle > .vs__selected-options > .vs__search {
+  color: white;
 }
 
 .tagFilter >>> .vs__search::placeholder,

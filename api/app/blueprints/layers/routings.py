@@ -11,6 +11,7 @@ from flasgger import swag_from
 from app.blueprints.layers.dicts.dict import Dict
 from app.blueprints.layers.layers_attachments import LayerAttachmentsManager
 from app.blueprints.layers.tags.models import LayerTag
+from app.blueprints.layers.utils import MAX_LAYER_NAME_LENGTH
 from app.blueprints.projects.models import Project
 from app.db.database import database
 from app.docs import path_by
@@ -43,6 +44,12 @@ GDAL_TO_PG = {
 }
 
 
+@mod_layers.route("/layers/max_name_length")
+@swag_from(path_by(__file__, 'docs.layers.max_name_length.get.yml'))
+@token_required
+def layers_max_name_length():
+    return jsonify({"data": MAX_LAYER_NAME_LENGTH})
+
 @mod_layers.route('/layers', methods=['GET', 'POST'])
 @swag_from(path_by(__file__, 'docs.layers.post.yml'), methods=['POST'])
 @swag_from(path_by(__file__, 'docs.layers.get.yml'), methods=['GET'])
@@ -61,6 +68,10 @@ def layers(cloud):
             return jsonify({"error": "name is required"}), 401
         if cloud.layer_exists(name):
             return jsonify({"error": "layer already exists"}), 401
+
+        if len(name) > MAX_LAYER_NAME_LENGTH:
+            return jsonify({"error": f"character limit for table name exceeded ({MAX_LAYER_NAME_LENGTH})"}), 400
+
         temp_path = tempfile.mkdtemp()
         file_paths = []
         for f in files:

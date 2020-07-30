@@ -11,6 +11,8 @@ import pytest
 import os
 from io import BytesIO
 
+MAX_NAME_LENGTH = 60
+
 
 @pytest.mark.layers
 class TestLayers(BaseTest):
@@ -35,6 +37,30 @@ class TestLayers(BaseTest):
         assert r.status_code == 200
         assert r.json['features'][0]['geometry']['coordinates'][0][0][0] == [
             16.714467009, 53.299132461]
+
+    def test_layers_get_max_name_length(self, client: FlaskClient):
+        token = self.get_token(client)
+        r = client.get('/api/layers/max_name_length?token={}'.format(token))
+
+        assert r.status_code == 200
+        assert r.json["data"] == MAX_NAME_LENGTH
+
+    def test_layers_post_geojson_too_long_name(self, client: FlaskClient):
+        token = self.get_token(client)
+
+        name = "a" * 61
+
+        path = os.path.join(TEST_DATA_DIR, 'layers', 'correct.geojson')
+        file_request = {
+            'file[]': (BytesIO(open(path, 'rb').read()), 'correct.geojson'),
+            'name': name
+        }
+        r = client.post('/api/layers?token={}'.format(token), data=file_request,
+                        follow_redirects=True, content_type='multipart/form-data')
+
+        assert r.status_code == 400
+        expected_message = f"character limit for table name exceeded ({MAX_NAME_LENGTH})"
+        assert r.json["error"] == expected_message
 
     def test_layers_post_geojson_prg_transform(self, client):
         token = self.get_token(client)

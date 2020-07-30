@@ -164,7 +164,8 @@ class Cloud:
             WHERE
             pg_user.usename = %s;
         """, (self.user,))
-        return cursor.fetchone()[0]
+        groups = [g[0] for g in cursor.fetchall()]
+        return groups[-1]
 
     # Layers list
     def get_layers(self):
