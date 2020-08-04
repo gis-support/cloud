@@ -268,6 +268,23 @@
                 />
               </select>
             </div>
+            <div
+              style="display: flex"
+              class="pt-10"
+            >
+              <label class="control-label col-sm-4 pl-0">{{ $i18n.t('dashboard.modal.dataCoding') }}</label>
+              <select
+                class="form-control"
+                v-model="selectedDataCoding"
+              >
+                <option
+                  v-for="(dataCoding, idx) of dataCodings"
+                  v-text="dataCoding.text"
+                  :key="idx"
+                  :value="dataCoding.value"
+                />
+              </select>
+            </div>
             <div class="pt-10 flex-center">
               <file-upload
                 ref="upload"
@@ -478,6 +495,16 @@ export default {
   name: 'Dashboard',
   data: vm => ({
     currentEditedLayer: undefined,
+    dataCodings: [
+      {
+        text: 'UTF-8',
+        value: 'utf-8'
+      },
+      {
+        text: 'Windows-1250',
+        value: 'cp1250'
+      }
+    ],
     dataFormats: [
       {
         text: 'ESRI Shapefile',
@@ -527,6 +554,7 @@ export default {
     searchTag: '',
     serviceUrl: '',
     serviceName: '',
+    selectedDataCoding: '',
     selectedDataExtension: '',
     selectedMapService: '',
     selectedLayers: [],
@@ -751,6 +779,7 @@ export default {
       if (!this.isFileSending) {
         this.files = [];
         this.vectorLayerName = '';
+        this.selectedDataCoding = this.dataCodings[0].value;
         this.selectedDataExtension = this.dataFormats[0];
         this.isEpsgAutomatic = true;
         this.epsg = '';
@@ -877,6 +906,7 @@ export default {
         formData.append(`file[${index}]`, file.file);
       }
       formData.append('name', this.vectorLayerName);
+      formData.append('encoding', this.selectedDataCoding);
       if (!this.isEpsgAutomatic) {
         formData.append('epsg', this.epsg);
       }
@@ -934,6 +964,7 @@ export default {
   },
   async mounted() {
     this.selectedMapService = this.mapServices[0];
+    this.selectedDataCoding = this.dataCodings[0].value;
     this.selectedDataExtension = this.dataFormats[0];
     this.getLayers();
     this.getProjects();
