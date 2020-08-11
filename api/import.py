@@ -19,6 +19,8 @@ def validate_config():
         data = json.load(jf)
         for lyr in data['warstwy']:
             layers.append(lyr)
+            if lyr.get('kodowanie') not in ['utf-8', 'cp1250']:
+                break
             for f in lyr['pliki']:
                 if not path.exists(path.join(IMPORT_PATH, f)):
                     invalid = f
@@ -37,7 +39,8 @@ def upload_layers(layers):
     for idx, lyr in enumerate(layers):
         request_body = {
             'name': lyr['nazwa'],
-            'epsg': lyr['uklad']
+            'epsg': lyr['uklad'],
+            'encoding': lyr['kodowanie']
         }
         files = {}
         for i, f in enumerate(lyr['pliki']):

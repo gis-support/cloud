@@ -26,6 +26,14 @@ export default {
     services: []
   },
   actions: {
+    async getLayerMaxNameLength(ctx) {
+      try {
+        const response = await swagger.apis.Layers.get_api_layers_max_name_length();
+        return response;
+      } catch (err) {
+        return err.response;
+      }
+    },
     async addService(ctx, payload) {
       try {
         const response = await swagger.apis.Attachments.post_api_services({

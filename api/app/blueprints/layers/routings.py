@@ -63,7 +63,7 @@ def layers(cloud):
         if not files:
             return jsonify({"error": "file is required"}), 401
         name = request.form.get("name")
-        environ['SHAPE_ENCODING'] = request.form.get("encoding", 'cp1250')
+        environ['SHAPE_ENCODING'] = request.form.get("encoding", 'utf-8')
         if not name:
             return jsonify({"error": "name is required"}), 401
         if cloud.layer_exists(name):
