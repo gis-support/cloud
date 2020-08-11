@@ -335,7 +335,7 @@
               type="button"
               class="btn btn-success"
               @click="sendVectorLayer"
-              :disabled="!vectorLayerName || isFileSending"
+              :disabled="!vectorLayerName || isFileSending || vectorLayerName.length > layerMaxNameLength"
             >{{ $i18n.t('default.save') }}</button>
           </div>
         </div>
@@ -530,6 +530,7 @@ export default {
     isServicePublic: false,
     isTagAddings: false,
     layersAll: undefined,
+    layerMaxNameLength: 60,
     pickrComponents: {
       preview: true,
       opacity: true,
@@ -713,6 +714,10 @@ export default {
     async getLayers() {
       const r = await this.$store.dispatch('getLayers');
       this.vectorLayersList = r.body.layers;
+    },
+    async getLayerMaxNameLength() {
+      const r = await this.$store.dispatch('getLayerMaxNameLength');
+      this.layerMaxNameLength = r.body.data;
     },
     async getProjects() {
       const r = await this.$store.dispatch('getProjects');
@@ -970,6 +975,7 @@ export default {
     this.getProjects();
     this.getServices();
     this.getTags();
+    this.getLayerMaxNameLength();
     this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
   }
 };
