@@ -357,7 +357,7 @@
                   <button
                     type="button"
                     class="btn btn-success"
-                    :disabled="!attachmentName || !attachmentLink"
+                    :disabled="!attachmentName || !attachmentLink || isAttachmentPublic === ''"
                     @click="addAttachment"
                   >{{ $i18n.t("default.save") }}</button>
                 </div>
