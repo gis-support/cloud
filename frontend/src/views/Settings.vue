@@ -83,7 +83,7 @@
               type="button"
               class="btn btn-success"
               @click="saveLayerName"
-              :disabled="!currentEditedLayer.name"
+              :disabled="!currentEditedLayer.name || currentEditedLayer.name.length > layerMaxNameLength"
             >{{ $i18n.t('default.saveName') }}</button>
           </div>
           <div class="pt-10">
@@ -649,6 +649,7 @@ export default {
     isDictNew: true,
     isMounted: false,
     labelsAll: [],
+    layerMaxNameLength: 60,
     layerType: undefined,
     newColumnName: undefined,
     newColumnType: undefined,
@@ -770,6 +771,10 @@ export default {
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
+    },
+    async getLayerMaxNameLength() {
+      const r = await this.$store.dispatch('getLayerMaxNameLength');
+      this.layerMaxNameLength = r.body.data;
     },
     async loadStyle() {
       const lid = this.currentEditedLayer.id;
@@ -1089,6 +1094,7 @@ export default {
     );
 
     this.loadStyle();
+    this.getLayerMaxNameLength();
     this.isMounted = true;
   }
 };
