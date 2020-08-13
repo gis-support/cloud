@@ -776,6 +776,16 @@ export default {
       const r = await this.$store.dispatch('getLayerMaxNameLength');
       this.layerMaxNameLength = r.body.data;
     },
+    async loadColumnsAndLabels() {
+      const r = await this.$store.dispatch(
+        'getLayerColumns',
+        this.currentEditedLayer.id
+      );
+      this.currentLayerSettings = r.body.settings;
+      this.labelsAll = Object.keys(r.body.settings.columns).filter(
+        el => el !== 'id'
+      );
+    },
     async loadStyle() {
       const lid = this.currentEditedLayer.id;
       const styleResponse = await this.$store.dispatch(
@@ -1050,6 +1060,8 @@ export default {
       this.$modal.show('dicts');
     },
     setActiveTab(tab) {
+      this.loadColumnsAndLabels();
+      this.loadStyle();
       this.activeTab = tab;
     },
     toggleColumnsSection(isVisible) {
