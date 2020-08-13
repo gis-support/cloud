@@ -83,7 +83,7 @@
               type="button"
               class="btn btn-success"
               @click="saveLayerName"
-              :disabled="!currentEditedLayer.name || currentEditedLayer.name.length > layerMaxNameLength"
+              :disabled="!currentEditedLayer.name.trim() || currentEditedLayer.name.length > layerMaxNameLength"
             >{{ $i18n.t('default.saveName') }}</button>
           </div>
           <div class="pt-10">
@@ -116,7 +116,7 @@
                 type="button"
                 class="btn btn-success"
                 @click="newColumnType==='dict'?openDictionaryModal():addNewColumn()"
-                :disabled="!newColumnType || !newColumnName"
+                :disabled="!newColumnType || !newColumnName.trim()"
               >{{ $i18n.t('default.add') }}</button>
             </div>
           </div>
