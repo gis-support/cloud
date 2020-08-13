@@ -45,7 +45,7 @@
                       <span :style="`color: ${option.color}`">{{option.name}}</span>
                     </template>
                     <template v-slot:selected-option="option">
-                      <span :style="`color: ${option.color}`">{{option.name}}</span>
+                      <span :style="`color: ${option.color}`">{{option.name|maxInputTagLength}}</span>
                     </template>
                     <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
                   </vSelect>
@@ -595,6 +595,12 @@ export default {
     maxLength: val => {
       if (val.length > 50) {
         return `${val.slice(0, 50)}...`;
+      }
+      return val;
+    },
+    maxInputTagLength: val => {
+      if (val.length > 35) {
+        return `${val.slice(0, 35)}...`;
       }
       return val;
     }
