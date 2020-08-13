@@ -851,6 +851,7 @@ export default {
           'name',
           this.currentEditedLayer.name
         );
+        window.history.pushState(null, '', r.obj.settings);
       } else {
         this.$i18n.t('default.error');
       }
