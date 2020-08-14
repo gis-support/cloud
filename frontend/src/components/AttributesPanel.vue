@@ -22,12 +22,10 @@
           v-if="key === 'id' || key === '__attachments'"
         />
         <span v-else>
-          <input
-            class="form-control col-sm-7"
-            v-model="attributes.properties[key]"
-            v-if="featureTypes[key] === 'real' || featureTypes[key] === 'integer'"
-            @keypress="isNumber($event)"
-            type="number"
+          <InputNumber
+            v-model.number="attributes.properties[key]"
+            v-if="featureTypes[key] === 'integer' || featureTypes[key] === 'real'"
+            :type="featureTypes[key]"
           />
           <input
             class="form-control col-sm-7"
@@ -70,6 +68,7 @@
 
 <script>
 import Datepicker from 'vuejs-datepicker';
+import InputNumber from '@/components/InputNumber';
 import moment from 'moment';
 
 export default {
@@ -85,7 +84,7 @@ export default {
       return value;
     }
   },
-  components: { Datepicker },
+  components: { Datepicker, InputNumber },
   props: {
     dictValues: {
       type: Array,
@@ -106,17 +105,6 @@ export default {
     },
     featureTypes() {
       return this.$store.getters.getCurrentFeaturesTypes;
-    }
-  },
-  methods: {
-    isNumber(evt) {
-      const e = evt || window.event;
-      const charCode = e.which ? e.which : e.keyCode;
-      if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-        e.preventDefault();
-        return false;
-      }
-      return true;
     }
   }
 };
