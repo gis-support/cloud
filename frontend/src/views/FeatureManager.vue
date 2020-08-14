@@ -2564,14 +2564,14 @@ export default {
         labelsToShow.push(f.getProperties()[el]);
       });
       const featStyle = new Style({
-        text: new Text({
-          text: labelsToShow.join(' '),
-          fill: new Fill({ color: 'white' }),
-          stroke: selecting
-            ? new Stroke({ color: 'rgba(249, 237, 20, 0.5)', width: 4 })
-            : new Stroke({ color: 'black', width: 4 }),
-          offsetY: -10
-        })
+        text: selecting
+          ? null
+          : new Text({
+              text: labelsToShow.join(' '),
+              fill: new Fill({ color: 'white' }),
+              stroke: new Stroke({ color: 'black', width: 4 }),
+              offsetY: -10
+            })
       });
       if (this.layerType) {
         const stroke = new Stroke({
