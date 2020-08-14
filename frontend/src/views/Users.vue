@@ -216,7 +216,7 @@
                 hidden
               >{{ $i18n.t('users.title.chooseGroupToDelete') }}</option>
               <option
-                v-for="group in groups.filter(g => g !== 'private' && g !== 'default')"
+                v-for="group in groups.filter(g => g !== 'default')"
                 v-text="group"
                 :key="group"
                 :value="group"
