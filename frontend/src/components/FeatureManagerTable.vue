@@ -331,6 +331,28 @@ export default {
       this.$emit('updateSearchCount', _.concat(...result).length);
       return _.concat(...result);
     },
+    setColumnsLengths() {
+      for (let column of this.columns) {
+        if (!column.head) {
+          this.columnsLengths[column.name] = column.name.length * 7.5 + 30;
+        }
+      }
+      for (let item of this.items) {
+        for (let column in item) {
+          if (item[column]) {
+            if (
+              item[column].toString().length * 7.5 >
+              this.columnsLengths[column]
+            ) {
+              this.columnsLengths[column] =
+                item[column].toString().length * 7.5 >= 750
+                  ? 750
+                  : item[column].toString().length * 7.5;
+            }
+          }
+        }
+      }
+    },
     updateSelectedItem(emit) {
       // this._computedWatchers.selectedItem.update();
       this.$recompute('selectedItem');
@@ -510,26 +532,7 @@ export default {
     this.$root.$on('update-column-filters', this.updateColumnFilters);
   },
   mounted() {
-    for (let column of this.columns) {
-      if (!column.head) {
-        this.columnsLengths[column.name] = column.name.length * 7.5 + 30;
-      }
-    }
-    for (let item of this.items) {
-      for (let column in item) {
-        if (item[column]) {
-          if (
-            item[column].toString().length * 7.5 >
-            this.columnsLengths[column]
-          ) {
-            this.columnsLengths[column] =
-              item[column].toString().length * 7.5 >= 750
-                ? 750
-                : item[column].toString().length * 7.5;
-          }
-        }
-      }
-    }
+    this.setColumnsLengths();
     const self = this;
     self.initVirtualTable();
   },

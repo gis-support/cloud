@@ -7,7 +7,10 @@
       <label>{{ key }}:</label>
       <br />
       <template v-if="!editing">
-        <span v-if="value">{{ value | formatDate(featureTypes[key]) }}</span>
+        <span
+          style="word-wrap:break-word"
+          v-if="value"
+        >{{ value | formatDate(featureTypes[key]) }}</span>
         <span
           v-else
           style="color: lightgrey"
