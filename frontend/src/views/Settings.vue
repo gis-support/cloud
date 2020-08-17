@@ -693,7 +693,11 @@ export default {
         this.$alertify.success(this.$i18n.t('dashboard.modal.columnAdded'));
         this.$modal.hide('dicts');
       } else {
+        if (r.obj.error === 'dict value must be 63 characters or less') {
+          this.$alertify.error(this.$i18n.t('default.dictValueToLongError'));
+        } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+        }
       }
     },
     async categorizeFeatures(attr, lid) {
@@ -757,7 +761,11 @@ export default {
         this.$alertify.success(this.$i18n.t('settings.columnEdited'));
         this.checkStyle(r.obj.data);
       } else {
+        if (r.obj.error === 'dict value must be 63 characters or less') {
+          this.$alertify.error(this.$i18n.t('default.dictValueToLongError'));
+        } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+        }
       }
       this.$modal.hide('dicts');
     },

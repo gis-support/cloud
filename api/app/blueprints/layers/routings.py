@@ -359,6 +359,9 @@ def layers_lid_settings_dicts_column_name_get(lid: str, column_name: str):
             values = request.get_json(force=True)["data"]
             current_values = dict_.get_values()
 
+            if not dict_.dict_values_length_valid(values):
+                return jsonify({'error': 'dict value must be 63 characters or less'}), 400
+
             with current_app._db.atomic():
                 dict_.set_values(values)
 

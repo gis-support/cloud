@@ -189,6 +189,9 @@ class Layer(Cloud):
             raise ValueError("column exists")
 
         values = [] or values
+        
+        if not Dict.dict_values_length_valid(values):
+            raise ValueError('dict value must be 63 characters or less')
 
         with self.db.atomic():
             enumerator_name = f"{column_name}_{uuid.uuid4()}"
