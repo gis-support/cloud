@@ -66,3 +66,10 @@ class Dict(BaseModel):
     def update_layer_id(cls, old_layer_id: str, new_layer_id: str):
         cls.update(layer_id=new_layer_id).where(cls.layer_id == old_layer_id).execute()
 
+    @classmethod
+    def dict_values_length_valid(cls, values: List[str]) -> bool:
+        for value in values:
+            if len(value) > 63:
+                return False
+        return True
+
