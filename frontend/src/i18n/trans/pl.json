@@ -84,6 +84,7 @@
     "error": "Wystąpił błąd",
     "errorStyle": "Wystąpił błąd podczas pobierania styli",
     "getDictsValuesError": "Wystąpił błąd pobierania wartości słownikowych",
+    "dictValueToLongError": "Wartość słownikowa nie może przekraczać 63 znaków",
     "goToLayer": "Przejdź do warstwy",
     "group": "Grupa",
     "groupName": "Nazwa grupy",
