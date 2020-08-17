@@ -101,6 +101,18 @@ class TestAuth(BaseTest):
         assert r.json
         assert r.json['error'] == 'permission denied'
 
+    def test_add_user_by_user(self, client):
+        user, password = self.create_user(client)
+        r = client.post(
+            '/api/login', data=json.dumps({'user': user, 'password': password}))
+        assert r.status_code == 200
+        assert r.json
+        token = r.json['token']
+        r = client.post(
+            f'/api/users?token={token}', data=json.dumps({'user': 'major', 'password':'motylek'}))
+        assert r.status_code == 403
+        assert r.json
+        assert r.json['error'] == 'permission denied'
 
 @pytest.mark.auth
 class TestGroups(BaseTest):
