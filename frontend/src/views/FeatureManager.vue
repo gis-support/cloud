@@ -279,11 +279,10 @@
                         name
                         }}
                       </label>
-                      <input
-                        class="form-control col-sm-7"
-                        v-model="newFeatureProperties[name]"
-                        v-if="featureTypes[name] === 'real' || featureTypes[name] === 'integer'"
-                        type="number"
+                      <InputNumber
+                        v-model.number="newFeatureProperties[name]"
+                        v-if="featureTypes[name] === 'integer' || featureTypes[name] === 'real'"
+                        :type="featureTypes[name]"
                       />
                       <input
                         class="form-control col-sm-7"
@@ -1178,6 +1177,7 @@ import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import BufferTable from '@/components/BufferTable.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
+import InputNumber from '@/components/InputNumber';
 import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
 import draggable from 'vuedraggable';
@@ -1189,6 +1189,7 @@ export default {
     BufferTable,
     FeatureManagerTable,
     FiltersPanel,
+    InputNumber,
     Datepicker,
     draggable
   },
