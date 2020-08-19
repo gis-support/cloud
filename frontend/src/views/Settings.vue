@@ -283,7 +283,7 @@
             </div>
             <div
               class="col-md-3 color-picker__container"
-              v-if="layerType !== 'line' || layerType !== 'dotted' || layerType !== 'dashed'"
+              v-if="layerType !== 'line' && layerType !== 'dotted' && layerType !== 'dashed'"
             >
               <label class="control-label">{{ $i18n.t('settings.fill-color') }}</label>
               <br />
