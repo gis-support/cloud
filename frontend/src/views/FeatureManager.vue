@@ -14,13 +14,13 @@
                 class="map-btn"
                 :title="$i18n.t('featureManager.addFeature')"
                 @click="drawNewFeature"
-                v-if="!isDrawing && permission === 'write'"
+                v-if="!isDrawing && permission === 'write' && items.length > 0"
               >
                 <i class="fa fa-plus" />
               </button>
               <span
                 class="navbar-right"
-                v-else
+                v-else-if="items.length > 0"
               >
                 <button
                   type="button"
@@ -1222,6 +1222,7 @@ export default {
     currentFeature: undefined,
     dictValues: [],
     labels: [],
+    layerGeometry: undefined,
     layerType: undefined,
     draw: undefined,
     editing: false,
@@ -1530,6 +1531,9 @@ export default {
         this.layerStyle = r.obj.style;
         if (this.layerStyle.renderer === 'single') {
           this.layerType = r.obj.style.type;
+          this.setLayerGeometry(r.obj.style.type);
+        } else {
+          this.setLayerGeometry(r.obj.style.categories[0].type);
         }
       } else {
         this.$alertify.error(this.$i18n.t('default.errorStyle'));
@@ -1798,7 +1802,7 @@ export default {
         body: {
           geometry: {
             coordinates: coords,
-            type: this.layerType
+            type: this.layerGeometry
           },
           properties: featureCopy,
           type: 'Feature'
@@ -2182,9 +2186,9 @@ export default {
         const vector = new VectorLayer({ source, name: 'newFeature' });
         this.map.addLayer(vector);
         let drawType;
-        if (this.layerType === 'polygon') {
+        if (this.layerGeometry === 'polygon') {
           drawType = 'Polygon';
-        } else if (this.layerType === 'line') {
+        } else if (this.layerGeometry === 'lineString') {
           drawType = 'LineString';
         } else {
           drawType = 'Point';
@@ -2505,6 +2509,15 @@ export default {
         .getSource()
         .addFeature(feature);
       this.indexActiveTab = 1; // change tab in sidepanel
+    },
+    setLayerGeometry(type) {
+      if (['dotted', 'dashed', 'line'].includes(type)) {
+        this.layerGeometry = 'lineString';
+      } else if (['point', 'square', 'triangle'].includes(type)) {
+        this.layerGeometry = 'point';
+      } else if (['polygon', includes(type)]) {
+        this.layerGeometry = 'polygon';
+      }
     },
     setLayersOrder(test) {
       const otherLayersOnMap = this.getLayerByName('otherLayers')
