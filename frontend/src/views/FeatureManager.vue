@@ -279,11 +279,10 @@
                         name
                         }}
                       </label>
-                      <input
-                        class="form-control col-sm-7"
-                        v-model="newFeatureProperties[name]"
-                        v-if="featureTypes[name] === 'real' || featureTypes[name] === 'integer'"
-                        type="number"
+                      <InputNumber
+                        v-model.number="newFeatureProperties[name]"
+                        v-if="featureTypes[name] === 'integer' || featureTypes[name] === 'real'"
+                        :type="featureTypes[name]"
                       />
                       <input
                         class="form-control col-sm-7"
@@ -1178,6 +1177,7 @@ import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import BufferTable from '@/components/BufferTable.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
+import InputNumber from '@/components/InputNumber';
 import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
 import draggable from 'vuedraggable';
@@ -1189,6 +1189,7 @@ export default {
     BufferTable,
     FeatureManagerTable,
     FiltersPanel,
+    InputNumber,
     Datepicker,
     draggable
   },
@@ -2565,14 +2566,14 @@ export default {
         labelsToShow.push(f.getProperties()[el]);
       });
       const featStyle = new Style({
-        text: new Text({
-          text: labelsToShow.join(' '),
-          fill: new Fill({ color: 'white' }),
-          stroke: selecting
-            ? new Stroke({ color: 'rgba(249, 237, 20, 0.5)', width: 4 })
-            : new Stroke({ color: 'black', width: 4 }),
-          offsetY: -10
-        })
+        text: selecting
+          ? null
+          : new Text({
+              text: labelsToShow.join(' '),
+              fill: new Fill({ color: 'white' }),
+              stroke: new Stroke({ color: 'black', width: 4 }),
+              offsetY: -10
+            })
       });
       if (this.layerType) {
         const stroke = new Stroke({

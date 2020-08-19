@@ -83,7 +83,7 @@
               type="button"
               class="btn btn-success"
               @click="saveLayerName"
-              :disabled="!currentEditedLayer.name || currentEditedLayer.name.length > layerMaxNameLength"
+              :disabled="!currentEditedLayer.name.trim() || currentEditedLayer.name.length > layerMaxNameLength"
             >{{ $i18n.t('default.saveName') }}</button>
           </div>
           <div class="pt-10">
@@ -116,7 +116,7 @@
                 type="button"
                 class="btn btn-success"
                 @click="newColumnType==='dict'?openDictionaryModal():addNewColumn()"
-                :disabled="!newColumnType || !newColumnName"
+                :disabled="!newColumnType || !newColumnName.trim()"
               >{{ $i18n.t('default.add') }}</button>
             </div>
           </div>
@@ -283,7 +283,7 @@
             </div>
             <div
               class="col-md-3 color-picker__container"
-              v-if="layerType !== 'line' || layerType !== 'dotted' || layerType !== 'dashed'"
+              v-if="layerType !== 'line' && layerType !== 'dotted' && layerType !== 'dashed'"
             >
               <label class="control-label">{{ $i18n.t('settings.fill-color') }}</label>
               <br />
@@ -693,7 +693,11 @@ export default {
         this.$alertify.success(this.$i18n.t('dashboard.modal.columnAdded'));
         this.$modal.hide('dicts');
       } else {
+        if (r.obj.error === 'dict value must be 63 characters or less') {
+          this.$alertify.error(this.$i18n.t('default.dictValueToLongError'));
+        } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+        }
       }
     },
     async categorizeFeatures(attr, lid) {
@@ -757,7 +761,11 @@ export default {
         this.$alertify.success(this.$i18n.t('settings.columnEdited'));
         this.checkStyle(r.obj.data);
       } else {
+        if (r.obj.error === 'dict value must be 63 characters or less') {
+          this.$alertify.error(this.$i18n.t('default.dictValueToLongError'));
+        } else {
         this.$alertify.error(this.$i18n.t('default.error'));
+        }
       }
       this.$modal.hide('dicts');
     },
@@ -775,6 +783,16 @@ export default {
     async getLayerMaxNameLength() {
       const r = await this.$store.dispatch('getLayerMaxNameLength');
       this.layerMaxNameLength = r.body.data;
+    },
+    async loadColumnsAndLabels() {
+      const r = await this.$store.dispatch(
+        'getLayerColumns',
+        this.currentEditedLayer.id
+      );
+      this.currentLayerSettings = r.body.settings;
+      this.labelsAll = Object.keys(r.body.settings.columns).filter(
+        el => el !== 'id'
+      );
     },
     async loadStyle() {
       const lid = this.currentEditedLayer.id;
@@ -851,6 +869,7 @@ export default {
           'name',
           this.currentEditedLayer.name
         );
+        window.history.pushState(null, '', r.obj.settings);
       } else {
         this.$i18n.t('default.error');
       }
@@ -1050,6 +1069,8 @@ export default {
       this.$modal.show('dicts');
     },
     setActiveTab(tab) {
+      this.loadColumnsAndLabels();
+      this.loadStyle();
       this.activeTab = tab;
     },
     toggleColumnsSection(isVisible) {
