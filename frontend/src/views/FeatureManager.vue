@@ -1851,6 +1851,8 @@ export default {
           this.$alertify.success(this.$i18n.t('featureManager.projectCreated'));
           this.project = payload;
           this.project.id = r.body.data;
+          const newUrl = `../feature_manager?projectId=${r.body.data}`;
+          window.history.pushState(null, '', newUrl);
           this.$modal.hide('saveProject');
         } else {
           this.$alertify.error(this.$i18n.t('default.error'));
