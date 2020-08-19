@@ -41,7 +41,10 @@ export default {
       const allowedKeyCodes = [8, 9, 37, 39];
 
       //Dodanie dopuszczalnych znaków w zależności od typu i wartości
-      if (selectionStart === 0) {
+      if (
+        selectionStart === 0 &&
+        (selectionEnd > 0 || !inputValue.includes('-'))
+      ) {
         allowedKeyCodes.push(173);
       }
       if (this.type === 'real' && !inputValue.includes('.')) {
