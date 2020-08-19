@@ -1765,6 +1765,7 @@ export default {
         this.$refs['table-data'].$recompute('filteredItems'); // update table data
         this.$refs['table-data'].$recompute('searchedItems'); // update table data
         this.$refs['table-data'].$recompute('sortedItems');
+        this.$refs['table-data'].setColumnsLengths(); // update columns lengths in table
         this.$alertify.success(this.$i18n.t('default.editSuccess'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
