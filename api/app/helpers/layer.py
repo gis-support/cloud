@@ -28,7 +28,8 @@ PERMISSIONS = {
 
 RESTRICTED_COLUMNS = (
     "id",
-    "geometry"
+    "geometry",
+    "__attachments"
 )
 
 TYPES = {
