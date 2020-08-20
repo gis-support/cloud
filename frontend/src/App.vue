@@ -64,7 +64,10 @@
                       >{{ $i18n.t('default.dashboard') }}</span>
                     </a>
                   </li>
-                  <li @click="changePage('users')">
+                  <li
+                    v-if="isAdmin"
+                    @click="changePage('users')"
+                  >
                     <a>
                       <i class="fa fa-users" />
                       &nbsp;&nbsp;
@@ -104,6 +107,10 @@
 export default {
   name: 'App',
   computed: {
+    isAdmin() {
+      const jwtDecode = require('jwt-decode');
+      return jwtDecode(this.$store.getters.getToken).admin;
+    },
     user() {
       return this.$store.getters.getUser;
     }

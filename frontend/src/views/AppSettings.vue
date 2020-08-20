@@ -5,7 +5,10 @@
         id="myTab"
         class="nav nav-layout-sidebar nav-stacked"
       >
-        <li class="active">
+        <li
+          v-bind:class="{'active': isAdmin}"
+          v-if="isAdmin"
+        >
           <a
             href="#tabLogo"
             data-toggle="tab"
@@ -16,7 +19,7 @@
             <span>{{ $i18n.t('settings.tabLogo') }}</span>
           </a>
         </li>
-        <li>
+        <li v-if="isAdmin">
           <a
             href="#favicon"
             data-toggle="tab"
@@ -27,7 +30,7 @@
             <span>{{ $i18n.t('settings.tabFavicon') }}</span>
           </a>
         </li>
-        <li>
+        <li v-bind:class="{'active': !isAdmin}">
           <a
             href="#qgisLogo"
             data-toggle="tab"
@@ -192,7 +195,7 @@ import Tags from '@/components/Tags';
 export default {
   name: 'AppSettings',
   data: () => ({
-    activeTab: 'logo',
+    activeTab: '',
     favicon: undefined,
     logo: undefined,
     postLogo: `${vm.$store.getters.getApiUrl}/logo?token=${localStorage.getItem(
@@ -215,6 +218,10 @@ export default {
     },
     port() {
       return process.env.VUE_APP_PROD_DB_PORT;
+    },
+    isAdmin() {
+      const jwtDecode = require('jwt-decode');
+      return jwtDecode(this.$store.getters.getToken).admin;
     }
   },
   methods: {
@@ -247,6 +254,13 @@ export default {
     },
     setActiveTab(tab) {
       this.activeTab = tab;
+    }
+  },
+  mounted() {
+    if (this.isAdmin) {
+      this.setActiveTab('logo');
+    } else {
+      this.setActiveTab('qgis');
     }
   }
 };
