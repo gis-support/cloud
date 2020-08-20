@@ -14,13 +14,13 @@
                 class="map-btn"
                 :title="$i18n.t('featureManager.addFeature')"
                 @click="drawNewFeature"
-                v-if="!isDrawing && permission === 'write'"
+                v-if="!isDrawing && permission === 'write' && items.length > 0"
               >
                 <i class="fa fa-plus" />
               </button>
               <span
                 class="navbar-right"
-                v-else
+                v-else-if="items.length > 0"
               >
                 <button
                   type="button"
@@ -279,11 +279,10 @@
                         name
                         }}
                       </label>
-                      <input
-                        class="form-control col-sm-7"
-                        v-model="newFeatureProperties[name]"
-                        v-if="featureTypes[name] === 'real' || featureTypes[name] === 'integer'"
-                        type="number"
+                      <InputNumber
+                        v-model.number="newFeatureProperties[name]"
+                        v-if="featureTypes[name] === 'integer' || featureTypes[name] === 'real'"
+                        :type="featureTypes[name]"
                       />
                       <input
                         class="form-control col-sm-7"
@@ -1178,6 +1177,7 @@ import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import BufferTable from '@/components/BufferTable.vue';
 import FiltersPanel from '@/components/FiltersPanel.vue';
+import InputNumber from '@/components/InputNumber';
 import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
 import draggable from 'vuedraggable';
@@ -1189,6 +1189,7 @@ export default {
     BufferTable,
     FeatureManagerTable,
     FiltersPanel,
+    InputNumber,
     Datepicker,
     draggable
   },
@@ -1221,6 +1222,7 @@ export default {
     currentFeature: undefined,
     dictValues: [],
     labels: [],
+    layerGeometry: undefined,
     layerType: undefined,
     draw: undefined,
     editing: false,
@@ -1529,6 +1531,9 @@ export default {
         this.layerStyle = r.obj.style;
         if (this.layerStyle.renderer === 'single') {
           this.layerType = r.obj.style.type;
+          this.setLayerGeometry(r.obj.style.type);
+        } else {
+          this.setLayerGeometry(r.obj.style.categories[0].type);
         }
       } else {
         this.$alertify.error(this.$i18n.t('default.errorStyle'));
@@ -1764,6 +1769,7 @@ export default {
         this.$refs['table-data'].$recompute('filteredItems'); // update table data
         this.$refs['table-data'].$recompute('searchedItems'); // update table data
         this.$refs['table-data'].$recompute('sortedItems');
+        this.$refs['table-data'].setColumnsLengths(); // update columns lengths in table
         this.$alertify.success(this.$i18n.t('default.editSuccess'));
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -1796,7 +1802,7 @@ export default {
         body: {
           geometry: {
             coordinates: coords,
-            type: this.layerType
+            type: this.layerGeometry
           },
           properties: featureCopy,
           type: 'Feature'
@@ -1849,6 +1855,8 @@ export default {
           this.$alertify.success(this.$i18n.t('featureManager.projectCreated'));
           this.project = payload;
           this.project.id = r.body.data;
+          const newUrl = `../feature_manager?projectId=${r.body.data}`;
+          window.history.pushState(null, '', newUrl);
           this.$modal.hide('saveProject');
         } else {
           this.$alertify.error(this.$i18n.t('default.error'));
@@ -2178,9 +2186,9 @@ export default {
         const vector = new VectorLayer({ source, name: 'newFeature' });
         this.map.addLayer(vector);
         let drawType;
-        if (this.layerType === 'polygon') {
+        if (this.layerGeometry === 'polygon') {
           drawType = 'Polygon';
-        } else if (this.layerType === 'line') {
+        } else if (this.layerGeometry === 'lineString') {
           drawType = 'LineString';
         } else {
           drawType = 'Point';
@@ -2502,6 +2510,15 @@ export default {
         .addFeature(feature);
       this.indexActiveTab = 1; // change tab in sidepanel
     },
+    setLayerGeometry(type) {
+      if (['dotted', 'dashed', 'line'].includes(type)) {
+        this.layerGeometry = 'lineString';
+      } else if (['point', 'square', 'triangle'].includes(type)) {
+        this.layerGeometry = 'point';
+      } else if (['polygon', includes(type)]) {
+        this.layerGeometry = 'polygon';
+      }
+    },
     setLayersOrder(test) {
       const otherLayersOnMap = this.getLayerByName('otherLayers')
         .getLayers()
@@ -2564,14 +2581,14 @@ export default {
         labelsToShow.push(f.getProperties()[el]);
       });
       const featStyle = new Style({
-        text: new Text({
-          text: labelsToShow.join(' '),
-          fill: new Fill({ color: 'white' }),
-          stroke: selecting
-            ? new Stroke({ color: 'rgba(249, 237, 20, 0.5)', width: 4 })
-            : new Stroke({ color: 'black', width: 4 }),
-          offsetY: -10
-        })
+        text: selecting
+          ? null
+          : new Text({
+              text: labelsToShow.join(' '),
+              fill: new Fill({ color: 'white' }),
+              stroke: new Stroke({ color: 'black', width: 4 }),
+              offsetY: -10
+            })
       });
       if (this.layerType) {
         const stroke = new Stroke({

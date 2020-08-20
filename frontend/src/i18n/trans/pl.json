@@ -251,7 +251,7 @@
       "noEmailOrPassword": "Nie podano adresu email lub hasła",
       "permissionsChanged": "Pomyślnie zmieniono uprawnienia",
       "userCreated": "Utworzono użytkownika",
-      "userExists": "Użytkownik o podanym adresie email istnieje"
+      "userExists": "Użytkownik o podanym loginie już istnieje"
     },
     "title": {
       "addUser": "Dodawanie użytkownika",

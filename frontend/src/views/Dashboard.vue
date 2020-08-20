@@ -45,7 +45,7 @@
                       <span :style="`color: ${option.color}`">{{option.name}}</span>
                     </template>
                     <template v-slot:selected-option="option">
-                      <span :style="`color: ${option.color}`">{{option.name}}</span>
+                      <span :style="`color: ${option.color}`">{{option.name|maxInputTagLength}}</span>
                     </template>
                     <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
                   </vSelect>
@@ -240,6 +240,16 @@
             </div>
             <div
               style="display: flex"
+              v-if="vectorLayerName.length > layerMaxNameLength"
+              class="pt-5"
+            >
+              <label class="control-label col-sm-4 pl-0" />
+              <span
+                style="color:#bd0f0f; width: 100%"
+              >{{`Zbyt długa nazwa (maksymalnie ${layerMaxNameLength} znaków)`}}</span>
+            </div>
+            <div
+              style="display: flex"
               class="pt-10"
             >
               <label class="control-label col-sm-4 pl-0">{{ $i18n.t('dashboard.modal.epsg') }}</label>
@@ -335,7 +345,7 @@
               type="button"
               class="btn btn-success"
               @click="sendVectorLayer"
-              :disabled="!vectorLayerName || isFileSending || vectorLayerName.length > layerMaxNameLength"
+              :disabled="!vectorLayerName || isFileSending || vectorLayerName.length > layerMaxNameLength || files.length <= 0"
             >{{ $i18n.t('default.save') }}</button>
           </div>
         </div>
@@ -595,6 +605,12 @@ export default {
     maxLength: val => {
       if (val.length > 50) {
         return `${val.slice(0, 50)}...`;
+      }
+      return val;
+    },
+    maxInputTagLength: val => {
+      if (val.length > 35) {
+        return `${val.slice(0, 35)}...`;
       }
       return val;
     }

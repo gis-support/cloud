@@ -65,7 +65,11 @@ def users(cloud):
         group = payload.get("group")
         if not cloud.group_exists(group):
             return jsonify({"error": "group not exists"}), 409
-        cloud.assign_user(user, group)
+        old_group = cloud.get_user_group(user)
+        if old_group != group:
+            if old_group != os.environ['DEFAULT_GROUP']:
+                cloud.unassign_user(user, old_group)
+            cloud.assign_user(user, group)
         return jsonify({"users": "user assigned"}), 200
     elif request.method == 'DELETE':
         admin = os.environ.get('DEFAULT_USER')
