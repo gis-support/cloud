@@ -64,7 +64,7 @@ class Cloud:
             WHERE t1.rolcanlogin = true
             AND t1.rolname NOT IN %s
             AND (t2.privilege_type IN %s OR t2.privilege_type IS NULL)
-            AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
+            --AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
             AND (t2.table_name NOT IN %s OR t2.table_name IS NULL)
         """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), self.user, DB_RESTRICTED_TABLES))
         users = {}
@@ -147,6 +147,10 @@ class Cloud:
         self.execute(SQL("""ALTER GROUP {} ADD USER {}""").format(
             Identifier(group), Identifier(user)))
 
+    def unassign_user(self, user, group):
+        self.execute(SQL("""ALTER GROUP {} DROP USER {}""").format(
+            Identifier(group), Identifier(user)))
+
     # Get user groups
     def get_groups(self):
         groups = []
@@ -156,16 +160,21 @@ class Cloud:
             groups.append(row[0])
         return groups
 
-    def get_user_group(self):
+    def get_user_group(self, user=None):
+        if user is None:
+            user = self.user
         cursor = self.execute("""
             SELECT rolname FROM pg_user
             JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
             JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
             WHERE
             pg_user.usename = %s;
-        """, (self.user,))
-        groups = [g[0] for g in cursor.fetchall()]
-        return groups[-1]
+        """, (user,))
+        groups = [g[0] for g in cursor.fetchall() if g[0] != os.environ['DEFAULT_GROUP']]
+        try:         
+            return groups[0]
+        except IndexError:
+            return os.environ['DEFAULT_GROUP']
 
     # Layers list
     def get_layers(self):

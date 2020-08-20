@@ -36,7 +36,7 @@ export default {
     },
     async addService(ctx, payload) {
       try {
-        const response = await swagger.apis.Attachments.post_api_services({
+        const response = await swagger.apis.Services.post_api_services({
           body: payload
         });
         return response;
