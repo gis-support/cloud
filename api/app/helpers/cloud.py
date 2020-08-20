@@ -64,7 +64,7 @@ class Cloud:
             WHERE t1.rolcanlogin = true
             AND t1.rolname NOT IN %s
             AND (t2.privilege_type IN %s OR t2.privilege_type IS NULL)
-            AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
+            --AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
             AND (t2.table_name NOT IN %s OR t2.table_name IS NULL)
         """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), self.user, DB_RESTRICTED_TABLES))
         users = {}
