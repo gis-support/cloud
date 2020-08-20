@@ -156,7 +156,8 @@ class Layer(Cloud):
                     type_ = "dict"
 
             if name == ATTACHMENTS_COLUMN_NAME:
-                type_ = "attachments"
+                continue
+                # type_ = "attachments"
 
             settings['columns'][name] = type_
         return settings
@@ -317,6 +318,11 @@ class Layer(Cloud):
         feature_collection = cursor.fetchone()[0]
         if not feature_collection['features']:
             feature_collection['features'] = []
+        for f in feature_collection['features']:
+            try:
+                f['properties'].pop(ATTACHMENTS_COLUMN_NAME)
+            except:
+                continue
         return feature_collection
 
     # Convert feature to GeoJSON
@@ -328,7 +334,12 @@ class Layer(Cloud):
         feature = cursor.fetchone()
         if not feature:
             raise ValueError("feature not exists")
-        return json.loads(feature[0])
+        feature_json = json.loads(feature[0])
+        try:
+            feature_json['properties'].pop(ATTACHMENTS_COLUMN_NAME)
+        except:
+            pass
+        return feature_json
 
     # Add new feature
     def add_feature(self, columns, values, columns_with_types):
