@@ -62,8 +62,9 @@ def authenticate_user(user, password):
 
 
 def create_token(user):
+    is_admin = user == environ.get('DEFAULT_USER')
     random_uuid = str(uuid.uuid4())
-    token = jwt.encode({"user": user, "uuid": random_uuid},
+    token = jwt.encode({"user": user, "admin": is_admin, "uuid": random_uuid},
                        current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
     current_app._redis.set(random_uuid, user, ex=60*60*8)
     return token
