@@ -84,9 +84,18 @@ class Cloud:
 
     def get_users_with_groups(self):
         cursor = self.execute("""
-            SELECT pg_user.usename, rolname FROM pg_user
-            JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
-            JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
+            WITH users  AS(
+                SELECT distinct usename FROM pg_user
+                JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
+            ),
+            u_groups AS(
+                SELECT distinct rolname, usename from pg_roles 
+                JOIN pg_auth_members ON (pg_roles.oid = pg_auth_members.roleid)
+                JOIN pg_user ON (pg_user.usesysid = pg_auth_members.member)
+                WHERE rolname != 'default'
+            )
+            SELECT users.usename, COALESCE(u_groups.rolname, 'default') FROM users
+            LEFT JOIN u_groups ON (users.usename = u_groups.usename);
         """)
         return dict([i for i in cursor.fetchall()])
 
