@@ -64,9 +64,9 @@ class Cloud:
             WHERE t1.rolcanlogin = true
             AND t1.rolname NOT IN %s
             AND (t2.privilege_type IN %s OR t2.privilege_type IS NULL)
-            --AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
             AND (t2.table_name NOT IN %s OR t2.table_name IS NULL)
-        """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), self.user, DB_RESTRICTED_TABLES))
+            {'--' if grantor else ''}AND (t2.grantor IS NULL OR t2.grantee = %s)
+        """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), DB_RESTRICTED_TABLES, self.user))
         users = {}
         layers = []
         for row in cursor.fetchall():
@@ -84,9 +84,18 @@ class Cloud:
 
     def get_users_with_groups(self):
         cursor = self.execute("""
-            SELECT pg_user.usename, rolname FROM pg_user
-            JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
-            JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
+            WITH users  AS(
+                SELECT distinct usename FROM pg_user
+                JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
+            ),
+            u_groups AS(
+                SELECT distinct rolname, usename from pg_roles 
+                JOIN pg_auth_members ON (pg_roles.oid = pg_auth_members.roleid)
+                JOIN pg_user ON (pg_user.usesysid = pg_auth_members.member)
+                WHERE rolname != 'default'
+            )
+            SELECT users.usename, COALESCE(u_groups.rolname, 'default') FROM users
+            LEFT JOIN u_groups ON (users.usename = u_groups.usename);
         """)
         return dict([i for i in cursor.fetchall()])
 
