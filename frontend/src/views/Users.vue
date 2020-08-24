@@ -1,5 +1,8 @@
 <template>
-  <div class="container align-center">
+  <div
+    v-if="isAdmin"
+    class="container align-center"
+  >
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
@@ -308,6 +311,10 @@ export default {
     userToAssign: undefined
   }),
   computed: {
+    isAdmin() {
+      const jwtDecode = require('jwt-decode');
+      return jwtDecode(this.$store.getters.getToken).admin;
+    },
     defaultGroup() {
       return this.$store.getters.getDefaultGroup;
     },
