@@ -34,17 +34,34 @@
             hidden
           >{{ $i18n.t('default.groupName') }}</option>
           <option
-            v-for="group in groups"
+            v-for="group in groups.filter(g => g !== 'default')"
             v-text="group"
             :key="`${group}_assign_user`"
             :value="group"
+          />
+        </select>
+        <select
+          class="form-control mr-5"
+          style="width: 300px"
+          v-model="newUserType"
+        >
+          <option
+            value="undefined"
+            disabled
+            hidden
+          >{{ $i18n.t('default.userType') }}</option>
+          <option
+            v-for="(userType, key) in userTypes"
+            v-text="$i18n.t(`default.${userType}`)"
+            :key="key"
+            :value="userType"
           />
         </select>
         <button
           type="button"
           class="btn btn-success"
           @click="addNewUser"
-          :disabled="!username || !password"
+          :disabled="!username || !password || !newUserType"
         >{{ $i18n.t('default.add') }}</button>
       </div>
     </div>
@@ -160,7 +177,7 @@
                 hidden
               >{{ $i18n.t('default.groupName') }}</option>
               <option
-                v-for="group in groups"
+                v-for="group in groups.filter(g => g !== 'default')"
                 v-text="group"
                 :key="`${group}_assign`"
                 :value="group"
@@ -300,12 +317,14 @@ export default {
     },
     newGroupName: undefined,
     newUserGroup: undefined,
+    newUserType: undefined,
     password: undefined,
     permissions: undefined,
     users: undefined,
     usersGroup: undefined,
     usersPerm: [],
-    userToAssign: undefined
+    userToAssign: undefined,
+    userTypes: ['admin', 'user']
   }),
   computed: {
     defaultGroup() {
@@ -334,7 +353,8 @@ export default {
       const payload = {
         user: this.username,
         password: this.password,
-        group: this.newUserGroup
+        group: this.newUserGroup,
+        type: this.newUserType
       };
       if (!this.newUserGroup) {
         delete payload.group;
@@ -347,6 +367,7 @@ export default {
         this.username = undefined;
         this.password = undefined;
         this.newUserGroup = undefined;
+        this.newUserType = undefined;
       } else if (r.status === 409) {
         this.$alertify.error(this.$i18n.t('users.responses.userExists'));
       } else {
