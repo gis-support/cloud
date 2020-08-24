@@ -946,7 +946,8 @@ export default {
             );
             let newLayer = {
               id: r.data.layers.id,
-              name: r.data.layers.name
+              name: r.data.layers.name,
+              tags: []
             };
             if (!this.vectorLayersList.find(el => el.id === newLayer.id)) {
               this.vectorLayersList.push(newLayer);

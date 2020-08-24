@@ -1,5 +1,8 @@
 <template>
-  <div class="container align-center">
+  <div
+    v-if="isAdmin"
+    class="container align-center"
+  >
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
@@ -57,28 +60,20 @@
       </h2>
       <div class="section__content heading-block heading-block-main pt-10 d-flex">
         <table
+          style="max-width: 10vw"
           class="table table-striped table-bordered table-hover"
           id="permissions-table"
         >
           <thead>
             <tr role="row">
-              <div id="perms-legend">
+              <div
+                id="perms-legend"
+                style="height: 40vh"
+              >
                 <div class="legend-square legend-edit" />
                 <div class="legend-square legend-read" />
                 <div class="legend-square legend-noaccess" />
               </div>
-              <th
-                v-for="perm of permissions"
-                :key="perm.id"
-              >
-                <p class="text-vertical full-width d-flex align-center">
-                  <i
-                    class="fa fa-map-o fa-lg"
-                    style="transform: rotate(90deg); padding-top: 5px; padding-right: 10px"
-                  />
-                  {{ perm.name }}
-                </p>
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -87,34 +82,67 @@
               v-for="user of usersPerm"
               :key="user"
             >
-              <td class="text-centered">
+              <td class="text-centered user-row">
                 <i
                   :title="$i18n.t('users.title.deleteUser')"
-                  v-if="user != 'admin'"
+                  v-if="user !== 'admin'"
                   class="fa fa-trash handler"
+                  style="margin-right: 5px"
                   @click="deleteUser(user)"
                 />
-                {{ user }}
-              </td>
-              <td
-                class="text-centered"
-                v-for="perm of permissions"
-                :style="{'background': mapPermissionColors[perm.users[user]]}"
-                :key="perm.id"
-              >
-                <i
-                  class="fa handler"
-                  :class="perm.users[user] == 'write' ? 'fa-pencil' :
-                    (perm.users[user] == 'read' ? 'fa-eye' : 'fa-times')"
-                  data-toggle="modal"
-                  data-target="#permissionsModal"
-                  :title="$i18n.t('users.modal.changePermissions')"
-                  @click="saveCurrentPermissions(perm.users[user], perm.id, user)"
-                />
+                <span :title="user">{{user}}</span>
               </td>
             </tr>
           </tbody>
         </table>
+        <div style="overflow-x:auto">
+          <table
+            class="table table-striped table-bordered table-hover"
+            id="permissions-table"
+          >
+            <thead>
+              <tr role="row">
+                <th
+                  style="padding: 0"
+                  v-for="perm of permissions"
+                  :key="perm.id"
+                >
+                  <p class="text-vertical full-width d-flex align-center perm-row">
+                    <i
+                      class="fa fa-map-o fa-lg"
+                      style="transform: rotate(90deg); padding-right: 10px"
+                    />
+                    <span :title="perm.name">{{ perm.name }}</span>
+                  </p>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                role="row"
+                v-for="user of usersPerm"
+                :key="user"
+              >
+                <td
+                  class="text-centered"
+                  v-for="perm of permissions"
+                  :style="{'background': mapPermissionColors[perm.users[user]]}"
+                  :key="perm.id"
+                >
+                  <i
+                    class="fa handler"
+                    :class="perm.users[user] == 'write' ? 'fa-pencil' :
+                    (perm.users[user] == 'read' ? 'fa-eye' : 'fa-times')"
+                    data-toggle="modal"
+                    data-target="#permissionsModal"
+                    :title="$i18n.t('users.modal.changePermissions')"
+                    @click="saveCurrentPermissions(perm.users[user], perm.id, user)"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
     <div class="col-sm-12 pl-0 pr-0 section">
@@ -308,6 +336,10 @@ export default {
     userToAssign: undefined
   }),
   computed: {
+    isAdmin() {
+      const jwtDecode = require('jwt-decode');
+      return jwtDecode(this.$store.getters.getToken).admin;
+    },
     defaultGroup() {
       return this.$store.getters.getDefaultGroup;
     },
@@ -605,6 +637,10 @@ export default {
 .panel-title__tools i:not(:last-child) {
   margin-right: 5px;
 }
+.perm-row {
+  max-height: calc(40vh - 5px);
+  white-space: nowrap;
+}
 #permissions-table {
   max-width: calc(100% - 1px);
 }
@@ -629,5 +665,10 @@ export default {
 }
 .text-left {
   text-align: left;
+}
+.user-row {
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 15vw;
 }
 </style>
