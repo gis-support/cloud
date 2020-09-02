@@ -816,6 +816,9 @@ export default {
               this.vectorLayersList = this.vectorLayersList.filter(
                 lay => lay.id !== el.id
               );
+              this.projects = this.projects.filter(
+                p => p.active_layer_id !== el.id
+              );
               this.$alertify.success(this.$i18n.t('default.deleted'));
             } else if (r.status === 403) {
               if (r.body.error === 'access denied, not an owner') {
