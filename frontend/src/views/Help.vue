@@ -100,6 +100,7 @@ export default {
   mounted() {
     this.helpItems = HELP;
     for (let header of Object.keys(this.helpItems)) {
+      this.helpItems[header].sort((a, b) => a.Tytul.localeCompare(b.Tytul));
       this.headers.push({ name: header, visible: false });
     }
   }
