@@ -1372,8 +1372,8 @@ export default {
           url: layer.url,
           params: {
             LAYERS: layer.layers,
-            TILED: true,
-            SRS: 'EPSG:2180'
+            TILED: true
+            //SRS: 'EPSG:2180'
           }
         })
       });
