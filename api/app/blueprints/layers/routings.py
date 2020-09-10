@@ -202,7 +202,7 @@ def layers_id(lid):
         """
         @layer_decorator(permission="owner")
         def delete(layer, lid=None):
-            Project.update_additional_layers_ids(layer.lid, '')
+            Project.delete_additional_layer_id(layer.lid)
             Project.delete().where(Project.active_layer_id == layer.lid).execute()
             layer.delete()
             return jsonify({"layers": "{} deleted".format(layer.name)})
