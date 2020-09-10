@@ -27,7 +27,7 @@ class Project(BaseModel):
         cls.update(additional_layers_ids=Cast(
             fn.REPLACE(
                 Cast(cls.additional_layers_ids, "text"),
-                old_layer_id,
+                old_layer_id if new_layer_id else f'"{old_layer_id}"',
                 new_layer_id
             ),
             "jsonb")

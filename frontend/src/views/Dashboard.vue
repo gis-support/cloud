@@ -60,7 +60,10 @@
                 </div>
               </span>
             </h2>
-            <div class="section__content heading-block heading-block-main">
+            <div
+              :style="{'padding-bottom': isTagMenuOpen?'30vh':'0'}"
+              class="section__content heading-block heading-block-main"
+            >
               <span class="add-layer">
                 <i
                   class="fa fa-plus-circle fa-lg green pt-10"
@@ -163,6 +166,8 @@
                             :value="val.tags"
                             :v-if="tags.length > 0"
                             @input="updateLayerTags(val, $event)"
+                            @search:focus="isTagMenuOpen=true"
+                            @search:blur="isTagMenuOpen=false"
                           >
                             <template v-slot:option="option">
                               <span
@@ -539,6 +544,7 @@ export default {
     isSendingError: false,
     isServicePublic: false,
     isTagAddings: false,
+    isTagMenuOpen: false,
     layersAll: undefined,
     layerMaxNameLength: 60,
     pickrComponents: {
@@ -815,6 +821,9 @@ export default {
             if (r.status === 200) {
               this.vectorLayersList = this.vectorLayersList.filter(
                 lay => lay.id !== el.id
+              );
+              this.projects = this.projects.filter(
+                p => p.active_layer_id !== el.id
               );
               this.$alertify.success(this.$i18n.t('default.deleted'));
             } else if (r.status === 403) {

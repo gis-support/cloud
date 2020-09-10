@@ -68,7 +68,7 @@
             <tr role="row">
               <div
                 id="perms-legend"
-                style="height: 40vh"
+                :style="permissions.length > 0?'height: 40vh':'height: 15vh'"
               >
                 <div class="legend-square legend-edit" />
                 <div class="legend-square legend-read" />
@@ -100,7 +100,7 @@
             class="table table-striped table-bordered table-hover"
             id="permissions-table"
           >
-            <thead>
+            <thead :style="permissions.length > 0?'height: 40vh':'height: calc(15vh + 7px)'">
               <tr role="row">
                 <th
                   style="padding: 0"
