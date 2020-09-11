@@ -8,7 +8,7 @@ jobs:
     - name: Cloud deploy
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST_CLOUD }}
+        host: ${{ secrets.HOST_CLOUD}}
         username: ${{ secrets.USERNAME_CLOUD }}
         password: ${{ secrets.PASS_CLOUD }}
         port: ${{ secrets.PORT_CLOUD }}
