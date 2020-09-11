@@ -99,6 +99,12 @@ export const HELP = {
       "LINK YOUTUBE": "https://youtu.be/oahB9KW62C8",
       OPIS:
         "W instruktażu zostały omówione następujące procedury:\n- Dodawanie nowego użytkownika\n- Usuwanie użytkownika\n- Zmiana uprawnień użytkownika\n- Przypisywanie użytkownika do grupy użytkowników\n- Dodawanie grupy użytkowników\n- Usuwanie grupy użytkowników"
+    },
+    {
+      Tytul: "Źródła zewnętrzne ",
+      "LINK YOUTUBE": "https://youtu.be/DrgXsMr6PHA",
+      OPIS:
+        "W instruktażu została omówiona funkcjonalność źródeł zewnętrznych: dodawanie, usuwanie, korzystanie ze źródeł zewnętrznych."
     }
   ],
   "OWN Cloud": [
@@ -251,6 +257,12 @@ export const HELP = {
       "LINK YOUTUBE": "https://youtu.be/dV1asjvQEEg",
       OPIS:
         'W instruktażu zostały omówione następujące funkcjonalności:\n- uprawnienia dla użytkowników\n- tworzenie nowego użytkownika\n- usuwanie nowego użytkownika\n- dodawanie WMS/WMTS\n- usuwanie WMS/WMTS\n- krótkie omówienie zakładki "Konfiguracja Lizmap"\n- krótkie omówienie zakładki "Motyw"\n- krótkie omówienie zakładki "Logi"'
+    },
+    {
+      Tytul: "Konfiguracja projektu w QGIS",
+      "LINK YOUTUBE": "https://youtu.be/xvQcf_Igsss",
+      OPIS:
+        'W instruktażu zostały omówione następujące funkcjonalności:\n00:05 - wprowadzenie do publikacji projektu z QGIS\n01:19 - projekt "Dokumentacja historyczna" w Lizmap\n02:18 - zaczynamy przygotowanie projektu w QGIS\n02:30 - instalacja wtyczki Lizmap\n03:47 - połączenie danych z bazy Cloud do QGIS\n05:58 - WMS w projekcie QGIS\n06:45 - właściwości projektu QGIS - zakładka QGIS Server\n09:20 - ustawienia z poziomu wtyczki Lizmap\n25:02 - przeniesienie projektu QGIS (z rozszerzeniem .qgs oraz pliku konfiguracyjnego z rozszerzeniem .cfg) na serwer zdalny\n28:30 - praca z repozytoriami (zbiory projektów)\n31:10 - działanie załączników (dokumentacja historyczna)\n34:40 - załączniki publiczne w OwnCloud\n36:54 - style obiektów publikowanych z wykorzystaniem aplikacji Lizmap\n38:45 - wydruki z wykorzystaniem aplikacji Lizmap'
     }
   ]
 };

@@ -2,6 +2,7 @@ from peewee import AutoField, TextField, IntegerField, fn, Cast
 from playhouse.postgres_ext import BinaryJSONField
 
 from app.db.base_model import BaseModel
+from app.db.database import database
 from app.db.fields import GeometryField
 
 
@@ -32,3 +33,9 @@ class Project(BaseModel):
             ),
             "jsonb")
         ).execute()
+
+    @classmethod
+    def delete_additional_layer_id(cls, layer_id: str):
+        database.execute_sql("""
+        UPDATE system.project SET additional_layers_ids = additional_layers_ids-%s;
+        """, (layer_id, ))

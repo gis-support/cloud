@@ -10,7 +10,7 @@ def does_user_have_permission_to_active_layer(user_name: str, project: Project) 
     try:
         Layer(
             {"app": current_app, "user": user_name, "lid": layer_id})
-    except PermissionError:
+    except (PermissionError, ValueError):
         return False
 
     return True
@@ -23,7 +23,7 @@ def does_user_have_permission_to_each_additional_layer(user_name: str, project: 
         try:
             Layer(
                 {"app": current_app, "user": user_name, "lid": layer_id})
-        except PermissionError:
+        except (PermissionError, ValueError):
             return False
 
     return True
