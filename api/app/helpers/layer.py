@@ -171,7 +171,7 @@ class Layer(Cloud):
             raise ValueError("attribute not exists")
         cursor = self.execute(SQL("""
             SELECT DISTINCT {}
-            FROM {} LIMIT 20
+            FROM {} LIMIT 100
         """).format(Identifier(attr), Identifier(self.name)))
         return generate_categories([c[0] for c in cursor.fetchall()], self.geom_type())
 
