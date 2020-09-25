@@ -11,7 +11,7 @@ from flasgger import swag_from
 from app.blueprints.layers.dicts.dict import Dict
 from app.blueprints.layers.layers_attachments import LayerAttachmentsManager
 from app.blueprints.layers.tags.models import LayerTag
-from app.blueprints.layers.utils import MAX_LAYER_NAME_LENGTH
+from app.blueprints.layers.utils import MAX_LAYER_NAME_LENGTH, ATTACHMENTS_COLUMN_NAME
 from app.blueprints.projects.models import Project
 from app.db.database import database
 from app.docs import path_by
@@ -131,9 +131,11 @@ def layers(cloud):
             })
         with current_app._db.atomic():
             cloud = Cloud({"app": current_app, "user": request.user})
+            columns = list(map(lambda f: f['name'], fields))
+            if ATTACHMENTS_COLUMN_NAME in columns:
+                return jsonify({"error": "layer has attachemnts column"}), 400
             cloud.create_layer(name, fields, geom_type)
             with tempfile.SpooledTemporaryFile(mode='w') as tfile:
-                columns = list(map(lambda f: f['name'], fields))
                 count_features = 0
                 for feature in layer:
                     the_geom = feature.GetGeometryRef()
