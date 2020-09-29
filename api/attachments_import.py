@@ -9,7 +9,7 @@ import requests
 IMPORT_PATH = "/api/import/"
 API_USER = "admin"
 API_PASS = "admin"
-API_URL = "https://cloud.gis.support/api"
+API_URL = "http://localhost:5001/api"
 
 
 def validate_config():
