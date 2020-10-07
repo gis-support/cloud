@@ -22,7 +22,7 @@ export default {
     token: localStorage.getItem("token") || "",
     user: localStorage.getItem("user") || "",
     isRdos:
-      process.env.VUE_APP_PROD_HOST_URL == "rdos-cloud.gis-support.pl" ||
+      process.env.VUE_APP_PROD_HOST_URL == "admin.rdos.lublin.pl" ||
       process.env.VUE_APP_PROD_HOST_URL == "rdos-test.gis-support.pl"
   },
   mutations: {
