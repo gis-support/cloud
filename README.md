@@ -42,6 +42,10 @@ Na potrzeby wdrożenia projektu RDOŚ Lublin została stworzona "wtyczka" do API
 
 - attachments - tabela do przechowywania załączników z Owncloud wraz z adnotacjami, który załącznik do której grupy użytkowników.
 
+## 4. Import danych
+
+Do folderu api/import powinny trafić foldery dane_export + config.json + zalaczniki.json
+
 ---
 
 ## II. Development
