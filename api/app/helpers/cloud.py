@@ -260,6 +260,58 @@ class Cloud:
             """, (name, create_qml(geom_type), json.dumps(create_stylejson(geom_type),)))
             self.execute(SQL("ALTER TABLE {} ADD PRIMARY KEY ({});").format(
                 Identifier(name), Identifier(id_column_name)))
+    
+    # Generate distances to pn/pk
+    def get_distances(self, geometry='', buffer=0):
+        result = {
+            'pn': [],
+            'pk': []
+        }
+        cursor = self.execute(SQL("""
+            SELECT pn, pk FROM settings
+        """))
+        names = cursor.fetchone()
+        if not names:
+            raise ValueError("empty analysis settings settings")
+        try:
+            pn_layer_name = self.unhash_name(names[0])
+        except ValueError:
+            raise ValueError("invalid pn layer in settings")
+        try:
+            pk_layer_name = self.unhash_name(names[1])
+        except ValueError:
+            raise ValueError("invalid pk layer in settings")
+        pn_cursor = self.execute(SQL("""
+            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 2180), ST_Transform(b.geometry, 2180))
+            FROM (SELECT ST_GeomFromGeoJSON(%s) geometry) a, {} b
+            WHERE ST_DWithin(
+                ST_Transform(a.geometry, 2180),
+                ST_Transform(b.geometry, 2180),
+                %s
+            )
+            ORDER BY 1
+        """).format(Identifier(pn_layer_name)), (geometry, buffer,))
+        for row in pn_cursor.fetchall():
+            result['pn'].append({
+                'name': row[0],
+                'distance': row[1]
+            })
+        pk_cursor = self.execute(SQL("""
+            SELECT b.nazwa, ST_Distance(ST_Transform(a.geometry, 2180), ST_Transform(b.geometry, 2180))
+            FROM (SELECT ST_GeomFromGeoJSON(%s) geometry) a, {} b
+            WHERE ST_DWithin(
+                ST_Transform(a.geometry, 2180),
+                ST_Transform(b.geometry, 2180),
+                %s
+            )
+            ORDER BY 1
+        """).format(Identifier(pk_layer_name)), (geometry, buffer,))
+        for row in pk_cursor.fetchall():
+            result['pk'].append({
+                'name': row[0],
+                'distance': row[1]
+            })
+        return result
 
 
 def get_cloud():

@@ -5,12 +5,15 @@ from flask import Blueprint, jsonify, request, send_file
 from flasgger import swag_from
 
 from app.blueprints.layers.utils import ATTACHMENTS_COLUMN_NAME
-from app.blueprints.rdos.analysis.distance_analysis import get_xlsx
+from app.blueprints.rdos.analysis.distance_analysis import get_xlsx, get_xlsx_geojson
 from app.blueprints.rdos.analysis.intersection_analysis import get_intersecting_features_ids
 from app.docs import path_by
 from app.db.general import token_required, layer_decorator, admin_only
 from app.helpers.layer import get_features_as_xlsx
+from app.helpers.cloud import cloud_decorator
 from app.blueprints.rdos.analysis.models import Settings
+
+import json
 
 mod_analysis = Blueprint("analysis", __name__)
 
@@ -78,6 +81,27 @@ def analysis_distance_xlsx(lid, fid):
         return send_file(file.name, as_attachment=True, attachment_filename=file_name)
 
     return post(lid=lid, fid=fid)
+
+@mod_analysis.route('/analysis/distance/xlsx', methods=['POST'])
+@swag_from(path_by(__file__, 'docs.distance.xlsx.geojson.post.yml'), methods=['POST'])
+@token_required
+@cloud_decorator
+def analysis_distance_xlsx_geojson(cloud):
+    data = request.get_json(force=True)
+    try:
+        teryt = data['properties']['teryt']
+        buffer = data['properties']['buffer']
+        geometry = json.dumps(data['geometry'])
+    except:
+        return jsonify({"error": "invalid geojson"}), 400
+    try:
+        file_xlsx = get_xlsx_geojson(cloud, geometry, buffer, teryt)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+    file_name = f"Analiza odległości dla działki {teryt}.xlsx"
+    return send_file(file_xlsx.name, as_attachment=True, attachment_filename=file_name)
 
 @mod_analysis.route("/analysis/intersection/<lid>", methods=["POST"])
 @swag_from(path_by(__file__, 'docs.analysis.intersection.post.yml'), methods=['POST'])

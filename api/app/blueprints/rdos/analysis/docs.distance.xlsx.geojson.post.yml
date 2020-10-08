@@ -1,0 +1,41 @@
+Distance analysis by GeoJSON
+---
+tags:
+  - Analysis
+summary: PN/PK analysis
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        type:
+          type: string
+          required: true
+        properties:
+          type: object
+          required: true
+        geometry:
+          type: object
+          required: true
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+
+responses:
+  200:
+    description: .xlsx file
+
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
