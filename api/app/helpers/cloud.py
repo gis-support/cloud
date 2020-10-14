@@ -26,6 +26,12 @@ DB_RESTRICTED_TABLES = (
     "layer_tag"
 )
 
+PERMISSIONS = {
+    "read": "GRANT SELECT ON {} TO {};",
+    "write": "GRANT SELECT, UPDATE, INSERT ON {} TO {};",
+    "": "REVOKE ALL ON {} FROM {}"
+}
+
 
 class Cloud:
     def __init__(self, options):
@@ -116,6 +122,20 @@ class Cloud:
             'permissions': permissions,
             'users': list(users.keys())
         }
+    
+    def copy_permissions(self, user_from, user_to):
+        users, _ = self.get_users_with_layers(grantor=user_from)
+        permissions = []
+        for layer in users[user_from]:
+            permission = users[user_from][layer]
+            permissions.append({
+                "layer": layer,
+                "permission": permission
+            })
+            self.execute(SQL(PERMISSIONS[""]).format(Identifier(layer), Identifier(user_to)))
+            if permission:
+                self.execute(SQL(PERMISSIONS[permission]).format(Identifier(layer), Identifier(user_to)))
+        return permissions
 
     def group_exists(self, group):
         cursor = self.execute(SQL("""

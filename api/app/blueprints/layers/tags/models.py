@@ -35,7 +35,7 @@ class LayerTag(BaseModel):
 
     id = AutoField(primary_key=True)
     layer_id = TextField()
-    tag = ForeignKeyField(model=Tag, db_column="tag_id")
+    tag = ForeignKeyField(model=Tag, column_name="tag_id")
 
     @classmethod
     def is_layer_already_tagged(cls, layer_id: str, tag: Union[int, Tag]):
