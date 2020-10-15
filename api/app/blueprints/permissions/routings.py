@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, jsonify, request
-from app.db.general import token_required, layer_decorator, user_exists
-from app.helpers.layer import PERMISSIONS
+from app.db.general import token_required, layer_decorator, user_exists, admin_only
+from app.helpers.cloud import PERMISSIONS
 from flasgger import swag_from
 from app.docs import path_by
 from os import environ
@@ -39,3 +39,25 @@ def permissions_by_layer_id(layer, lid):
         return jsonify({"error": "user not exists"}), 400
     layer.grant(user=data['user'], permission=data['permission'])
     return jsonify({"permissions": {"user": data['user'], "permission": data["permission"]}})
+
+
+@mod_permissions.route('/permissions/copy', methods=['PUT'])
+@swag_from(path_by(__file__, 'docs.permissions.copy.put.yml'), methods=['PUT'])
+@token_required
+@admin_only
+@cloud_decorator
+def permissions_copy(cloud):
+    data = request.get_json(force=True)
+    user_from = data.get("user_from")
+    user_to = data.get("user_to")
+
+    if not user_exists(user_from):
+        return jsonify({"error": "user not exists"}), 400
+    if not user_exists(user_to):
+        return jsonify({"error": "user not exists"}), 400
+    if is_admin(user_to):
+        return jsonify({"error": "administrator permissions can not be changed"}), 400
+
+    permissions = cloud.copy_permissions(user_from, user_to)
+
+    return jsonify({"user": user_to, "permissions": permissions})

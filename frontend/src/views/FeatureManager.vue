@@ -1308,9 +1308,6 @@ export default {
       return this.$store.getters.getMapZoom;
     },
     services() {
-      if (this.$store.getters.getServices.length < 1) {
-        this.getServices();
-      }
       return this.$store.getters.getServices;
     },
     showMeasureTitle() {
@@ -2922,6 +2919,9 @@ export default {
     }
   },
   async mounted() {
+    if (this.services.length < 1) {
+      this.getServices();
+    }
     if (this.$route.query.projectId) {
       this.getProject();
     } else {
