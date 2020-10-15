@@ -41,8 +41,8 @@ def permissions_by_layer_id(layer, lid):
     return jsonify({"permissions": {"user": data['user'], "permission": data["permission"]}})
 
 
-@mod_permissions.route('/permissions/copy', methods=['PUT'])
-@swag_from(path_by(__file__, 'docs.permissions.copy.put.yml'), methods=['PUT'])
+@mod_permissions.route('/permissions/copy', methods=['POST'])
+@swag_from(path_by(__file__, 'docs.permissions.copy.post.yml'), methods=['POST'])
 @token_required
 @admin_only
 @cloud_decorator
@@ -52,9 +52,9 @@ def permissions_copy(cloud):
     user_to = data.get("user_to")
 
     if not user_exists(user_from):
-        return jsonify({"error": "user not exists"}), 400
+        return jsonify({"error": "user_from not exists"}), 400
     if not user_exists(user_to):
-        return jsonify({"error": "user not exists"}), 400
+        return jsonify({"error": "user_to not exists"}), 400
     if is_admin(user_to):
         return jsonify({"error": "administrator permissions can not be changed"}), 400
 

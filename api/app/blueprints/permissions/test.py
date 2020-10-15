@@ -337,7 +337,7 @@ class TestPermissionsBatch(BaseTest):
             'user_from': user_1,
             'user_to': user_2
         }
-        client.put(f'/api/permissions/copy?token={token_admin}', data=json.dumps(data))
+        client.post(f'/api/permissions/copy?token={token_admin}', data=json.dumps(data))
         # Check user 2 layers
         token_user_2 = self.get_token(client, user=user_2, password=password_2)
         r = client.get(f'/api/layers?token={token_user_2}')
@@ -367,6 +367,6 @@ class TestPermissionsBatch(BaseTest):
             'user_from': user_1,
             'user_to': self.DEFAULT_USER
         }
-        r = client.put(f'/api/permissions/copy?token={token_admin}', data=json.dumps(data))
+        r = client.post(f'/api/permissions/copy?token={token_admin}', data=json.dumps(data))
         assert r.status_code == 400
         assert r.json['error'] == 'administrator permissions can not be changed'
