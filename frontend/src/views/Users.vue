@@ -144,6 +144,57 @@
           </table>
         </div>
       </div>
+      <div class="section__content heading-block heading-block-main pt-10">
+        <span class="col-sm-12 pl-0">
+          <h4 class="flex-center mb-0">
+            <div class="p-0 container__border--bottom container__border--red section__header">
+              <span>{{ $i18n.t('users.title.permissionsCopy') }}</span>
+            </div>
+          </h4>
+          <span style="display: flex;">
+            <select
+              class="form-control mr-5"
+              style="width: 300px"
+              v-model="userCopyFrom"
+            >
+              <option
+                value="undefined"
+                disabled
+                hidden
+              >{{ $i18n.t('default.usernameFrom') }}</option>
+              <option
+                v-for="user in users"
+                v-text="user"
+                :key="`${user}_assign`"
+                :value="user"
+              />
+            </select>
+            <select
+              class="form-control mr-5"
+              style="width: 300px"
+              v-model="userCopyTo"
+            >
+              <option
+                value="undefined"
+                disabled
+                hidden
+              >{{ $i18n.t('default.usernameTo') }}</option>
+              <option
+                v-for="user in usersCopyTo"
+                v-text="user"
+                :key="`${user}_assign`"
+                :value="user"
+              />
+            </select>
+            <button
+              type="button"
+              class="btn btn-success"
+              :disabled="!userCopyFrom || !userCopyTo"
+              @click="copyUserPermissions"
+            >{{ $i18n.t('users.copyPermissions') }}</button>
+          </span>
+        </span>
+      </div>
     </div>
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey">
@@ -315,7 +366,7 @@
 </template>
 
 <script>
-export default {
+export default { 
   data: () => ({
     currentPermissions: {},
     username: undefined,
@@ -329,11 +380,13 @@ export default {
     newGroupName: undefined,
     newUserGroup: undefined,
     password: undefined,
-    permissions: undefined,
-    users: undefined,
+    permissions: [],
+    users: [],
     usersGroup: undefined,
     usersPerm: [],
-    userToAssign: undefined
+    userToAssign: undefined,
+    userCopyFrom: undefined,
+    userCopyTo: undefined
   }),
   computed: {
     isAdmin() {
@@ -345,6 +398,9 @@ export default {
     },
     usersWithGroups() {
       return this.$store.getters.getUsersWithGroups;
+    },
+    usersCopyTo() {
+      return this.users.filter(user => ['admin', this.userCopyFrom].indexOf(user) < 0)
     }
   },
   methods: {
@@ -545,6 +601,21 @@ export default {
       this.$set(this.currentPermissions, 'permission', permission);
       this.$set(this.currentPermissions, 'layId', layerId);
       this.$set(this.currentPermissions, 'username', username);
+    },
+    async copyUserPermissions() {
+      const payload = {
+        user_from: this.userCopyFrom,
+        user_to: this.userCopyTo
+      };
+      const r = await this.$store.dispatch('copyPermissions', payload);
+      if (r.status === 200) {
+        this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
+        this.userCopyFrom = undefined;
+        this.userCopyTo = undefined;
+        this.getPermissions(); 
+      } else {
+        this.$alertify.error(this.$i18n.t('default.error'));
+      }
     }
   },
   mounted() {
