@@ -609,7 +609,7 @@ export default {
       };
       const r = await this.$store.dispatch('copyPermissions', payload);
       if (r.status === 200) {
-        this.$alertify.success(this.$i18n.t('users.responses.userCreated'));
+        this.$alertify.success(this.$i18n.t('users.responses.permissionsCopied'));
         this.userCopyFrom = undefined;
         this.userCopyTo = undefined;
         this.getPermissions(); 
