@@ -121,7 +121,7 @@ class Cloud:
             permissions.append(perm)
         return {
             'permissions': permissions,
-            'users': list(users.keys())
+            'users': sorted(list(users.keys()))
         }
     
     def copy_permissions(self, user_from, user_to):
