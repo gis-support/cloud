@@ -10,7 +10,7 @@ from psycopg2.extras import RealDictCursor
 from app.blueprints.layers.dicts.dict import Dict
 from app.blueprints.layers.utils import ATTACHMENTS_COLUMN_NAME
 from app.db import enumerators
-from app.helpers.cloud import Cloud
+from app.helpers.cloud import Cloud, PERMISSIONS
 from app.helpers.style import QML_TO_OL, LayerStyle, generate_categories
 from psycopg2.sql import SQL, Identifier, Placeholder, Literal
 from psycopg2.extensions import AsIs
@@ -19,12 +19,6 @@ from datetime import datetime
 from dateutil.parser import parse
 import dateutil
 import json
-
-PERMISSIONS = {
-    "read": "GRANT SELECT ON {} TO {};",
-    "write": "GRANT SELECT, UPDATE, INSERT ON {} TO {};",
-    "": "REVOKE ALL ON {} FROM {}"
-}
 
 RESTRICTED_COLUMNS = (
     "id",

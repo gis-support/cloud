@@ -1,0 +1,48 @@
+Copy permissions
+---
+tags:
+  - Permissions
+summary: Copy permission from user to user
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        user_from:
+          type: string
+          example: "test"
+          required: true
+        user_to:
+          type: string
+          example: "test"
+          required: true
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+responses:
+  200:
+    description: GeoJSON
+    schema:
+      type: object
+  403:
+    description: Token required
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "token required"
+  400:
+    description: User/Permission invalid
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "permission invalid"

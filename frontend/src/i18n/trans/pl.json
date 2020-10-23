@@ -131,6 +131,8 @@
     "square": "Kwadrat",
     "triangle": "Trójkąt",
     "username": "Nazwa użytkownika",
+    "usernameFrom": "Kopiuj uprawnienia z...",
+    "usernameTo": "Kopiuj uprawnienia do...",
     "users": "Użytkownicy",
     "yes": "Tak",
     "value": "Wartość"
@@ -238,6 +240,7 @@
     "acceptPermissionsChange": "Zmiana tych uprawnień uniemożliwi użytkownikowi otwarcie projektu. Czy chcesz kontynuować?",
     "assignUser": "Przypisz użytkownika",
     "assignUserConfirm": "Czy na pewno chcesz przypisać użytkownika do grupy?",
+    "copyPermissions": "Kopiuj uprawnienia",
     "deleteDefaultGroup": "Nie można usunąć domyślnej grupy",
     "deleteGroupConfirm": "Czy na pewno chcesz usunąć wybraną grupę?",
     "modal": {
@@ -251,7 +254,8 @@
       "noEmailOrPassword": "Nie podano adresu email lub hasła",
       "permissionsChanged": "Pomyślnie zmieniono uprawnienia",
       "userCreated": "Utworzono użytkownika",
-      "userExists": "Użytkownik o podanym loginie już istnieje"
+      "userExists": "Użytkownik o podanym loginie już istnieje",
+      "permissionsCopied": "Uprawnienia skopiowano"
     },
     "title": {
       "addUser": "Dodawanie użytkownika",
@@ -263,7 +267,8 @@
       "groupAdd": "Dodawanie grupy użytkowników",
       "groupDelete": "Usuwanie grupy użytkowników",
       "groups": "Grupy użytkowników",
-      "permissions": "Uprawnienia użytkowników"
+      "permissions": "Uprawnienia użytkowników",
+      "permissionsCopy": "Kopiuj uprawnienia użytkownika"
     }
   },
   "settings": {
