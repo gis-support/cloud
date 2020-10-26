@@ -10,7 +10,7 @@ if __name__ == '__main__':
         'Test driven development', 'Uruchamianie wybranych grup testów')
     parser_group_ex = parser_group.add_mutually_exclusive_group()
     parser_group_ex.add_argument(
-        '-g', '--groups', dest="groups", nargs='*', help='Wybrane grupy: auth, layers, layerssettings, styles, features, permissions, export, attachments, services, mvt, analysis')
+        '-g', '--groups', dest="groups", nargs='*', help='Wybrane grupy: auth, layers, layerssettings, styles, features, permissions, permissionsbatch, export, attachments, services, mvt, analysis')
     args = parser.parse_args()
     if args.groups:
         pytest.main(['-s', '-x', '-m', ' or '.join(args.groups)])

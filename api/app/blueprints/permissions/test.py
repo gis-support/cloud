@@ -308,3 +308,99 @@ class TestPermissions(BaseTest):
         r = client.put('/api/layers/{}/features/{}?token={}'.format(lid, 1, new_user_token),
                        data=open(path), follow_redirects=True, content_type='multipart/form-data')
         assert r.status_code == 200
+
+@pytest.mark.permissionsbatch
+class TestPermissionsBatch(BaseTest):
+
+    def test_permissions_copy(self, client):
+        test_user = self.get_token(client)
+        token_admin = self.get_token(client, admin=True)
+        # Add normal user
+        user_1, password_1 = self.create_user(client)
+        # Add layers by admin
+        lid1 = self.add_geojson_prg(client, token_admin)
+        lid2 = self.add_geojson_prg(client, token_admin, name='wojewodztwa2')
+        # Assign user to layers
+        client.put(f'/api/permissions/{lid1}?token={token_admin}',
+                    data=json.dumps({'user': user_1, 'permission': 'read'}))
+        client.put(f'/api/permissions/{lid2}?token={token_admin}',
+                    data=json.dumps({'user': user_1, 'permission': 'read'}))
+        # Check user layers
+        token_user_1 = self.get_token(client, user=user_1, password=password_1)
+        r = client.get(f'/api/layers?token={token_user_1}')
+        layers_user_1 = sorted([i['id'] for i in r.json['layers']])
+        assert len(layers_user_1) == 2
+        # Add other normal user
+        user_2, password_2 = self.create_user(client)
+        # Batch copy permissions
+        data = {
+            'user_from': user_1,
+            'user_to': user_2
+        }
+        client.post(f'/api/permissions/copy?token={token_admin}', data=json.dumps(data))
+        # Check user 2 layers
+        token_user_2 = self.get_token(client, user=user_2, password=password_2)
+        r = client.get(f'/api/layers?token={token_user_2}')
+        layers_user_2 = sorted([i['id'] for i in r.json['layers']])
+        assert layers_user_1 == layers_user_2
+    
+    def test_permissions_copy_for_admin(self, client):
+        test_user = self.get_token(client)
+        token_admin = self.get_token(client, admin=True)
+        # Add other admin user
+        user_1, password_1 = self.create_user(client)
+        # Add layers by admin
+        lid1 = self.add_geojson_prg(client, token_admin)
+        lid2 = self.add_geojson_prg(client, token_admin, name='wojewodztwa2')
+        # Assign user to layers
+        client.put(f'/api/permissions/{lid1}?token={token_admin}',
+                    data=json.dumps({'user': user_1, 'permission': 'read'}))
+        client.put(f'/api/permissions/{lid2}?token={token_admin}',
+                    data=json.dumps({'user': user_1, 'permission': 'read'}))
+        # Check user layers
+        token_user_1 = self.get_token(client, user=user_1, password=password_1)
+        r = client.get(f'/api/layers?token={token_user_1}')
+        layers_user_1 = sorted([i['id'] for i in r.json['layers']])
+        assert len(layers_user_1) == 2
+        # Batch copy permissions for admin
+        data = {
+            'user_from': user_1,
+            'user_to': self.DEFAULT_USER
+        }
+        r = client.post(f'/api/permissions/copy?token={token_admin}', data=json.dumps(data))
+        assert r.status_code == 400
+        assert r.json['error'] == 'administrator permissions can not be changed'
+    
+    def test_permissions_bug_without_permissions_copy(self, client):
+        test_user = self.get_token(client)
+        token_admin = self.get_token(client, admin=True)
+        # Add normal user
+        user_1, password_1 = self.create_user(client)
+        # Add layers by admin
+        lid1 = self.add_geojson_prg(client, token_admin)
+        lid2 = self.add_geojson_prg(client, token_admin, name='wojewodztwa2')
+        # Assign user to layers
+        client.put(f'/api/permissions/{lid1}?token={token_admin}',
+                    data=json.dumps({'user': user_1, 'permission': 'read'}))
+        client.put(f'/api/permissions/{lid2}?token={token_admin}',
+                    data=json.dumps({'user': user_1, 'permission': 'read'}))
+        client.put(f'/api/permissions/{lid2}?token={token_admin}',
+                    data=json.dumps({'user': user_1, 'permission': ''}))
+        # Check user layers
+        token_user_1 = self.get_token(client, user=user_1, password=password_1)
+        r = client.get(f'/api/layers?token={token_user_1}')
+        layers_user_1 = sorted([i['id'] for i in r.json['layers']])
+        assert len(layers_user_1) == 1
+        # Add other normal user
+        user_2, password_2 = self.create_user(client)
+        # Batch copy permissions
+        data = {
+            'user_from': user_1,
+            'user_to': user_2
+        }
+        client.post(f'/api/permissions/copy?token={token_admin}', data=json.dumps(data))
+        # Check user 2 layers
+        token_user_2 = self.get_token(client, user=user_2, password=password_2)
+        r = client.get(f'/api/layers?token={token_user_2}')
+        layers_user_2 = sorted([i['id'] for i in r.json['layers']])
+        assert layers_user_1 == layers_user_2
