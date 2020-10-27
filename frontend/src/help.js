@@ -105,6 +105,12 @@ export const HELP = {
       "LINK YOUTUBE": "https://youtu.be/DrgXsMr6PHA",
       OPIS:
         "W instruktażu została omówiona funkcjonalność źródeł zewnętrznych: dodawanie, usuwanie, korzystanie ze źródeł zewnętrznych."
+    },
+    {
+      Tytul: "Kopiowanie uprawnień użytkowników",
+      "LINK YOUTUBE": "https://youtu.be/FTGorXGUFHo",
+      OPIS: 
+        "W instukrażu omówiono funkcjonalność kopiowania uprawnień użytkowników w aplikacji RDOŚ CLOUD."
     }
   ],
   "OWN Cloud": [
@@ -263,6 +269,12 @@ export const HELP = {
       "LINK YOUTUBE": "https://youtu.be/xvQcf_Igsss",
       OPIS:
         'W instruktażu zostały omówione następujące funkcjonalności:\n00:05 - wprowadzenie do publikacji projektu z QGIS\n01:19 - projekt "Dokumentacja historyczna" w Lizmap\n02:18 - zaczynamy przygotowanie projektu w QGIS\n02:30 - instalacja wtyczki Lizmap\n03:47 - połączenie danych z bazy Cloud do QGIS\n05:58 - WMS w projekcie QGIS\n06:45 - właściwości projektu QGIS - zakładka QGIS Server\n09:20 - ustawienia z poziomu wtyczki Lizmap\n25:02 - przeniesienie projektu QGIS (z rozszerzeniem .qgs oraz pliku konfiguracyjnego z rozszerzeniem .cfg) na serwer zdalny\n28:30 - praca z repozytoriami (zbiory projektów)\n31:10 - działanie załączników (dokumentacja historyczna)\n34:40 - załączniki publiczne w OwnCloud\n36:54 - style obiektów publikowanych z wykorzystaniem aplikacji Lizmap\n38:45 - wydruki z wykorzystaniem aplikacji Lizmap'
+    },
+    {
+      Tytul: "Analiza odległości obiektu od form ochrony przyrody",
+      "LINK YOUTUBE": "https://youtu.be/hHN2yjhECu0",
+      OPIS: 
+        "W instruktażu omówiono wykonanie analizy odległości form ochrony przyrody od wybranego obiektu z dowolnej warstwy wektorowej lub od wybranej działki ULDK."
     }
   ]
 };
