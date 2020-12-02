@@ -2,59 +2,35 @@
   <div class="col-sm-12 pl-0 pr-0 section">
     <h2 class="flex-center container__border--bottom container__border--grey mb-0">
       <div class="p-0 container__border--bottom container__border--red section__header">
-        <span data-i18n="dashboard.title">{{$i18n.t('settings.tagsList')}}</span>
+        <span data-i18n="dashboard.title">{{ $i18n.t('settings.tagsList') }}</span>
       </div>
     </h2>
 
     <div class="col-sm-7 section__content heading-block heading-block-main pt-10 d-flex pl-0 pr-0">
-      <table
-        class="table table-striped table-bordered table-hover"
-        id="permissions-table"
-      >
+      <table id="permissions-table" class="table table-striped table-bordered table-hover">
         <thead>
           <tr role="row">
-            <th
-              class="text-center"
-              v-for="column of columns"
-              :key="column"
-            >
-              <p class="text-vertical align-center">{{ $i18n.t(`settings.tagsTable.${column}`) }}</p>
+            <th v-for="column of columns" :key="column" class="text-center">
+              <p class="text-vertical align-center">
+                {{ $i18n.t(`settings.tagsTable.${column}`) }}
+              </p>
             </th>
           </tr>
         </thead>
         <tbody>
-          <tr
-            role="row"
-            v-for="(tag, index) of tags"
-            :key="tag.id"
-          >
+          <tr v-for="(tag, index) of tags" :key="tag.id" role="row">
             <td
-              style="max-width: 300px;"
-              class="text-center"
               v-for="column of filteredColumns"
               :key="`${tag.id}_${column}`"
-            >
-              <div
-                class="text-overflow"
-                :title="tag[column]"
-                v-text="tag[column]"
-              ></div>
-            </td>
-            <td
-              style="max-width: 100px;"
+              style="max-width: 300px;"
               class="text-center"
-              :key="`${tag.id}_color`"
             >
-              <span
-                class="dot"
-                :title="tag.color"
-                :style="{backgroundColor: tag.color}"
-              ></span>
+              <div class="text-overflow" :title="tag[column]" v-text="tag[column]"></div>
             </td>
-            <td
-              class="text-center"
-              :key="`${tag.id}_actions`"
-            >
+            <td :key="`${tag.id}_color`" style="max-width: 100px;" class="text-center">
+              <span class="dot" :title="tag.color" :style="{ backgroundColor: tag.color }"></span>
+            </td>
+            <td :key="`${tag.id}_actions`" class="text-center">
               <i
                 class="fa fa-pencil fa-lg yellow icon-hover"
                 :title="$i18n.t('default.edit')"
@@ -85,25 +61,23 @@
           <div class="form__row form__row--name row py-5">
             <label class="col-sm-2">{{ $i18n.t('settings.tagName') }}</label>
             <div class="col-sm-10">
-              <input
-                style="width: 100%"
-                class="form-control"
-                v-model="tag.name"
-              />
+              <input v-model="tag.name" style="width: 100%" class="form-control" />
             </div>
           </div>
           <div class="form__row--color form__row row py-5">
             <label class="col-sm-2">{{ $i18n.t('settings.tagColor') }}</label>
             <div class="col-sm-10">
-              <color-picker v-model="tag.color"></color-picker>
+              <ColorPicker v-model="tag.color"></ColorPicker>
             </div>
           </div>
         </div>
         <button
           :disabled="!isValidTagName"
-          @click.prevent="editing ? saveEditing() : saveTag()"
           class="btn btn-default"
-        >{{ $i18n.t('settings.saveTag') }}</button>
+          @click.prevent="editing ? saveEditing() : saveTag()"
+        >
+          {{ $i18n.t('settings.saveTag') }}
+        </button>
       </form>
     </div>
   </div>
@@ -134,13 +108,16 @@ export default {
       return this.tag.name.length > 0;
     }
   },
+  created() {
+    this.getTags();
+  },
   methods: {
     editTag(tag) {
       this.editing = true;
       this.tag = { ...tag };
     },
     async saveEditing() {
-      const r = await this.$store.dispatch('editTag', {
+      await this.$store.dispatch('editTag', {
         body: this.tag,
         tag_id: this.tag.id
       });
@@ -180,9 +157,6 @@ export default {
       const r = await this.$store.dispatch('getTags');
       this.tags = r.body.data;
     }
-  },
-  created() {
-    this.getTags();
   }
 };
 </script>

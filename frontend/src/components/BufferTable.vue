@@ -2,37 +2,30 @@
   <div class="table-content">
     <div>
       <div class="vscroll">
-        <div
-          class="table-data table-responsive"
-          style="margin-right: 30px"
-        >
-          <table
-            class="table table-bordered table-hover table-striped"
-            style="margin-right: 20px"
-          >
+        <div class="table-data table-responsive" style="margin-right: 30px">
+          <table class="table table-bordered table-hover table-striped" style="margin-right: 20px">
             <thead>
               <tr>
                 <template v-for="(column, i) in columns">
-                  <th
-                    v-if="column.head"
-                    class="first"
-                    :key="i"
-                    :style="{'min-width': '50px'}"
-                  >#</th>
+                  <th v-if="column.head" :key="i" class="first" :style="{ 'min-width': '50px' }">
+                    #
+                  </th>
                   <th
                     v-else-if="!column.head"
                     :key="i"
-                    :style="{'min-width': columnsLengths[column.name] + 'px', 'max-width': columnsLengths[column.name] + 'px'}"
+                    :style="{
+                      'min-width': columnsLengths[column.name] + 'px',
+                      'max-width': columnsLengths[column.name] + 'px'
+                    }"
                   >
                     <div>
                       <span v-text="column.name" />
                       <span
                         :class="{
-                            'sorting' : column.sortable &&
-                                (!sortedColumn || sortedColumn != column.key),
-                            'sorting_asc' : sortedColumn == column.key && sortedColumnType == 'asc',
-                            'sorting_desc' : sortedColumn == column.key && sortedColumnType == 'desc',
-                            }"
+                          sorting: column.sortable && (!sortedColumn || sortedColumn != column.key),
+                          sorting_asc: sortedColumn == column.key && sortedColumnType == 'asc',
+                          sorting_desc: sortedColumn == column.key && sortedColumnType == 'desc'
+                        }"
                         @click.capture="column.sortable ? sort($event, column.key) : false"
                       />
                     </div>
@@ -41,40 +34,38 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(item, index) in windowItems"
-                :key="index"
-              >
+              <tr v-for="(item, index) in windowItems" :key="index">
                 <template v-for="(column, idx2) in columns">
                   <th
                     v-if="column.head"
+                    :key="idx2 + 'col'"
                     scope="row"
                     v-text="indexFirstItem + index + 1"
-                    :key="idx2 + 'col'"
                   />
                   <td
                     v-else
-                    v-text="item[column.key]"
                     :key="idx2 + 'item'"
                     :class="{
-                        'overflow-title': columnsLengths[column.name] >= 750
-                        }"
-                    :style="{'min-width': columnsLengths[column.name] + 'px', 'max-width': columnsLengths[column.name] + 'px'}"
-                    :title="item[column.key] != null && item[column.key].toString().length >= 100?item[column.key]:false"
+                      'overflow-title': columnsLengths[column.name] >= 750
+                    }"
+                    :style="{
+                      'min-width': columnsLengths[column.name] + 'px',
+                      'max-width': columnsLengths[column.name] + 'px'
+                    }"
+                    :title="
+                      item[column.key] != null && item[column.key].toString().length >= 100
+                        ? item[column.key]
+                        : false
+                    "
+                    v-text="item[column.key]"
                   />
                 </template>
               </tr>
             </tbody>
           </table>
         </div>
-        <div
-          class="table-scroll-bar-modal"
-          :style="{top: `${itemHeight}px`}"
-        >
-          <div
-            :style="{height : `${items.length * (itemHeight)}px`}"
-            style="width: 1px;"
-          />
+        <div class="table-scroll-bar-modal" :style="{ top: `${itemHeight}px` }">
+          <div :style="{ height: `${items.length * itemHeight}px` }" style="width: 1px" />
         </div>
       </div>
     </div>
@@ -82,6 +73,8 @@
 </template>
 <script>
 import recomputeMixin from '@/components/mixins/recomputeMixin';
+import _ from 'lodash';
+
 export default {
   mixins: [recomputeMixin],
   props: {
@@ -132,12 +125,39 @@ export default {
       if (self.maxItems === 0) {
         return [];
       }
-      return _.slice(
-        self.sortedItems,
-        self.indexFirstItem,
-        self.indexFirstItem + self.maxItems
-      );
+      return _.slice(self.sortedItems, self.indexFirstItem, self.indexFirstItem + self.maxItems);
     }
+  },
+  watch: {
+    items() {
+      this.scrollEl.scrollTop = 0;
+      this.indexFirstItem = 0;
+      this.$recompute('windowItems');
+    },
+    sortedItems() {
+      this.$recompute('windowItems');
+    }
+  },
+  mounted() {
+    for (let column of this.columns) {
+      if (!column.head) {
+        this.columnsLengths[column.name] = column.name.length * 7.5 + 30;
+      }
+    }
+    for (let item of this.items) {
+      for (let column in item) {
+        if (item[column]) {
+          if (item[column].toString().length * 7.5 > this.columnsLengths[column]) {
+            this.columnsLengths[column] =
+              item[column].toString().length * 7.5 >= 750
+                ? 750
+                : item[column].toString().length * 7.5;
+          }
+        }
+      }
+    }
+    const self = this;
+    self.initVirtualTable();
   },
   methods: {
     initVirtualTable() {
@@ -166,9 +186,7 @@ export default {
       }).observe(tableEl);
 
       function checkScrollPosition() {
-        self.indexFirstItem = Math.floor(
-          self.scrollEl.scrollTop / self.itemHeight + 0.78
-        );
+        self.indexFirstItem = Math.floor(self.scrollEl.scrollTop / self.itemHeight + 0.78);
         self.$recompute('windowItems');
       }
       self.scrollEl.addEventListener('scroll', checkScrollPosition);
@@ -183,47 +201,12 @@ export default {
     sort($event, kolumn) {
       const self = this;
       if (self.sortedColumn === kolumn) {
-        self.sortedColumnType =
-          self.sortedColumnType === 'asc' ? 'desc' : 'asc';
+        self.sortedColumnType = self.sortedColumnType === 'asc' ? 'desc' : 'asc';
       } else {
         self.sortedColumn = kolumn;
         self.sortedColumnType = 'asc';
       }
       this.$recompute('sortedItems');
-    }
-  },
-  mounted() {
-    for (let column of this.columns) {
-      if (!column.head) {
-        this.columnsLengths[column.name] = column.name.length * 7.5 + 30;
-      }
-    }
-    for (let item of this.items) {
-      for (let column in item) {
-        if (item[column]) {
-          if (
-            item[column].toString().length * 7.5 >
-            this.columnsLengths[column]
-          ) {
-            this.columnsLengths[column] =
-              item[column].toString().length * 7.5 >= 750
-                ? 750
-                : item[column].toString().length * 7.5;
-          }
-        }
-      }
-    }
-    const self = this;
-    self.initVirtualTable();
-  },
-  watch: {
-    items() {
-      this.scrollEl.scrollTop = 0;
-      this.indexFirstItem = 0;
-      this.$recompute('windowItems');
-    },
-    sortedItems() {
-      this.$recompute('windowItems');
     }
   }
 };

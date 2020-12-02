@@ -1,39 +1,32 @@
 <template>
   <div class="attr-wrapper">
-    <div
-      v-for="(value, key) in fields.properties"
-      :key="key"
-    >
+    <div v-for="(value, key) in fields.properties" :key="key">
       <label>{{ key }}:</label>
       <br />
       <template v-if="!editing">
-        <span
-          style="word-wrap:break-word"
-          v-if="value || value === 0"
-        >{{ value | formatDate(featureTypes[key]) }}</span>
-        <span
-          v-else
-          style="color: lightgrey"
-        >{{ $i18n.t('default.noData') }}</span>
+        <span v-if="value || value === 0" style="word-wrap: break-word">{{
+          value | formatDate(featureTypes[key])
+        }}</span>
+        <span v-else style="color: lightgrey">{{ $i18n.t('default.noData') }}</span>
       </template>
       <template v-else>
         <input
+          v-if="key === 'id' || key === '__attachments'"
+          v-model="attributes.properties[key]"
           class="form-control"
           type="text"
-          v-model="attributes.properties[key]"
           disabled
-          v-if="key === 'id' || key === '__attachments'"
         />
         <span v-else>
           <InputNumber
-            v-model.number="attributes.properties[key]"
             v-if="featureTypes[key] === 'integer' || featureTypes[key] === 'real'"
+            v-model.number="attributes.properties[key]"
             :type="featureTypes[key]"
           />
           <input
-            class="form-control col-sm-7"
-            v-model="attributes.properties[key]"
             v-else-if="featureTypes[key] === 'character varying'"
+            v-model="attributes.properties[key]"
+            class="form-control col-sm-7"
             type="text"
           />
           <Datepicker
@@ -43,15 +36,15 @@
           ></Datepicker>
           <select
             v-else-if="featureTypes[key] === 'dict'"
-            class="form-control"
             v-model="attributes.properties[key]"
+            class="form-control"
           >
             <option :value="null"></option>
             <option
               v-for="(dV, idx) in dictValues.find(d => d.column_name === key).values"
-              v-text="dV"
-              :value="dV"
               :key="idx"
+              :value="dV"
+              v-text="dV"
             />
           </select>
           <!--

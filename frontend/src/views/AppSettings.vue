@@ -1,52 +1,30 @@
 <template>
   <div class="container">
     <div class="col-md-3 layout-sidebar">
-      <ul
-        id="myTab"
-        class="nav nav-layout-sidebar nav-stacked"
-      >
-        <li
-          v-bind:class="{'active': isAdmin}"
-          v-if="isAdmin"
-        >
-          <a
-            href="#tabLogo"
-            data-toggle="tab"
-            @click="setActiveTab('logo')"
-          >
+      <ul id="myTab" class="nav nav-layout-sidebar nav-stacked">
+        <li v-if="isAdmin" :class="{ active: isAdmin }">
+          <a href="#tabLogo" data-toggle="tab" @click="setActiveTab('logo')">
             <i class="fa fa-image" />
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.tabLogo') }}</span>
           </a>
         </li>
         <li v-if="isAdmin">
-          <a
-            href="#favicon"
-            data-toggle="tab"
-            @click="setActiveTab('tabFavicon')"
-          >
+          <a href="#favicon" data-toggle="tab" @click="setActiveTab('tabFavicon')">
             <i class="fa fa-fonticons" />
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.tabFavicon') }}</span>
           </a>
         </li>
-        <li v-bind:class="{'active': !isAdmin}">
-          <a
-            href="#qgisLogo"
-            data-toggle="tab"
-            @click="setActiveTab('qgis')"
-          >
+        <li :class="{ active: !isAdmin }">
+          <a href="#qgisLogo" data-toggle="tab" @click="setActiveTab('qgis')">
             <i class="fa">Q</i>
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.tabQgis') }}</span>
           </a>
         </li>
         <li>
-          <a
-            href="#tags"
-            data-toggle="tab"
-            @click="setActiveTab('tags')"
-          >
+          <a href="#tags" data-toggle="tab" @click="setActiveTab('tags')">
             <i class="fa fa-tumblr" />
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.tags') }}</span>
@@ -55,24 +33,17 @@
       </ul>
     </div>
     <div class="col-md-9 col-sm-8 layout-main">
-      <div
-        id="settings-content"
-        class="tab-content stacked-content"
-      >
+      <div id="settings-content" class="tab-content stacked-content">
         <div class="heading-block">
           <h3>
             <span data-i18n="settings.title">{{ $i18n.t('default.settings') }}:</span>
-            <span class="red">{{ $i18n.t(`settings.${this.activeTab}`) }}</span>
+            <span class="red">{{ $i18n.t(`settings.${activeTab}`) }}</span>
           </h3>
         </div>
-        <div
-          class="tab-pane in active"
-          id="tabLogo"
-          v-if="activeTab === 'logo'"
-        >
+        <div v-if="activeTab === 'logo'" id="tabLogo" class="tab-pane in active">
           <div>
             <h4 class="text-left">{{ $i18n.t('settings.addNewLogo') }}</h4>
-            <file-upload
+            <FileUpload
               ref="uploadLogo"
               v-model="logo"
               accept="image/*"
@@ -83,72 +54,65 @@
               @input-filter="inputFilter"
               @input-file="inputFile"
             >
-              {{this.$i18n.t('upload.uploadLogoMessage')}}
+              {{ this.$i18n.t('upload.uploadLogoMessage') }}
               <ul>
-                <li
-                  style="color:green;list-style-position: inside"
-                  v-if="logo"
-                >{{logo[0].name}}</li>
+                <li v-if="logo" style="color:green;list-style-position: inside">
+                  {{ logo[0].name }}
+                </li>
               </ul>
-            </file-upload>
+            </FileUpload>
           </div>
           <button
             type="button"
             class="btn btn-success"
-            @click="addLogo()"
             :disabled="!logo"
             style="float:right"
-          >{{ $i18n.t('default.add') }}</button>
+            @click="addLogo()"
+          >
+            {{ $i18n.t('default.add') }}
+          </button>
         </div>
-        <div
-          class="tab-pane in active"
-          id="tabQgis"
-          v-if="activeTab === 'qgis'"
-        >
+        <div v-if="activeTab === 'qgis'" id="tabQgis" class="tab-pane in active">
           <div>
             <h4>Twoje dane połączenia się do Cloud przez QGIS</h4>
             <table class="qgis-data-list">
               <tr>
                 <td>
-                  <h5>{{this.$i18n.t('settings.host')}}:</h5>
+                  <h5>{{ this.$i18n.t('settings.host') }}:</h5>
                 </td>
-                <td>{{host}}</td>
+                <td>{{ host }}</td>
               </tr>
               <tr>
                 <td>
-                  <h5>{{this.$i18n.t('settings.database')}}:</h5>
+                  <h5>{{ this.$i18n.t('settings.database') }}:</h5>
                 </td>
                 <td>cloud</td>
               </tr>
               <tr>
                 <td>
-                  <h5>{{this.$i18n.t('settings.port')}}:</h5>
+                  <h5>{{ this.$i18n.t('settings.port') }}:</h5>
                 </td>
-                <td>{{port}}</td>
+                <td>{{ port }}</td>
               </tr>
               <tr>
                 <td>
-                  <h5>{{this.$i18n.t('settings.user')}}:</h5>
+                  <h5>{{ this.$i18n.t('settings.user') }}:</h5>
                 </td>
-                <td>{{user}}</td>
+                <td>{{ user }}</td>
               </tr>
               <tr>
                 <td>
-                  <h5>{{this.$i18n.t('settings.password')}}:</h5>
+                  <h5>{{ this.$i18n.t('settings.password') }}:</h5>
                 </td>
                 <td>******</td>
               </tr>
             </table>
           </div>
         </div>
-        <div
-          class="tab-pane in active"
-          id="tabFavicon"
-          v-if="activeTab === 'tabFavicon'"
-        >
+        <div v-if="activeTab === 'tabFavicon'" id="tabFavicon" class="tab-pane in active">
           <div>
             <h4 class="text-left">{{ $i18n.t('settings.addNewFavicon') }}</h4>
-            <file-upload
+            <FileUpload
               ref="uploadFavicon"
               v-model="favicon"
               accept="image/*"
@@ -159,28 +123,25 @@
               @input-filter="inputFilter"
               @input-file="inputFile"
             >
-              {{this.$i18n.t('upload.uploadLogoMessage')}}
+              {{ this.$i18n.t('upload.uploadLogoMessage') }}
               <ul>
-                <li
-                  style="color:green;list-style-position: inside"
-                  v-if="favicon"
-                >{{favicon[0].name}}</li>
+                <li v-if="favicon" style="color:green;list-style-position: inside">
+                  {{ favicon[0].name }}
+                </li>
               </ul>
-            </file-upload>
+            </FileUpload>
           </div>
           <button
             type="button"
             class="btn btn-success"
-            @click="addFavicon()"
             :disabled="!favicon"
             style="float:right"
-          >{{ $i18n.t('default.add') }}</button>
+            @click="addFavicon()"
+          >
+            {{ $i18n.t('default.add') }}
+          </button>
         </div>
-        <div
-          class="tab-pane in active"
-          id="tabTags"
-          v-if="activeTab === 'tags'"
-        >
+        <div v-if="activeTab === 'tags'" id="tabTags" class="tab-pane in active">
           <Tags />
         </div>
       </div>
@@ -194,21 +155,17 @@ import Tags from '@/components/Tags';
 
 export default {
   name: 'AppSettings',
-  data: () => ({
-    activeTab: '',
-    favicon: undefined,
-    logo: undefined,
-    postLogo: `${vm.$store.getters.getApiUrl}/logo?token=${localStorage.getItem(
-      'token'
-    )}`,
-    postFavicon: `${
-      vm.$store.getters.getApiUrl
-    }/favicon?token=${localStorage.getItem('token')}`
-  }),
   components: {
     FileUpload,
     Tags
   },
+  data: vm => ({
+    activeTab: '',
+    favicon: undefined,
+    logo: undefined,
+    postLogo: `${vm.$store.getters.getApiUrl}/logo?token=${localStorage.getItem('token')}`,
+    postFavicon: `${vm.$store.getters.getApiUrl}/favicon?token=${localStorage.getItem('token')}`
+  }),
   computed: {
     user() {
       return this.$store.getters.getUser;
@@ -222,6 +179,13 @@ export default {
     isAdmin() {
       const jwtDecode = require('jwt-decode');
       return jwtDecode(this.$store.getters.getToken).admin;
+    }
+  },
+  mounted() {
+    if (this.isAdmin) {
+      this.setActiveTab('logo');
+    } else {
+      this.setActiveTab('qgis');
     }
   },
   methods: {
@@ -254,13 +218,6 @@ export default {
     },
     setActiveTab(tab) {
       this.activeTab = tab;
-    }
-  },
-  mounted() {
-    if (this.isAdmin) {
-      this.setActiveTab('logo');
-    } else {
-      this.setActiveTab('qgis');
     }
   }
 };

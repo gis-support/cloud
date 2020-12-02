@@ -6,26 +6,19 @@
         <div class="layout layout-stack-sm layout-main-left">
           <!-- TABELA PROJEKTÓW -->
           <div
+            v-if="projectsGetting"
             style="border-left: 0; box-shadow:none"
             class="col-sm-4 col-sm-push-8 layout-sidebar projects-panel"
-            v-if="projectsGetting"
           >
             <div class="loading-indicator mb-10">
               <h4>{{ $i18n.t('default.loading') }}</h4>
               <i class="fa fa-lg fa-spin fa-spinner" />
             </div>
           </div>
-          <ProjectsPanel
-            v-else
-            :projects="projects"
-            @deleteProject="deleteProject"
-          />
+          <ProjectsPanel v-else :projects="projects" @deleteProject="deleteProject" />
           <!-- KONIEC TABELI PROJEKTÓW -->
           <!-- TABELA WARSTW -->
-          <div
-            style="border-right: 1px solid #ccc"
-            class="col-sm-8 col-sm-pull-4 layout-main"
-          >
+          <div style="border-right: 1px solid #ccc" class="col-sm-8 col-sm-pull-4 layout-main">
             <h2 class="flex-center container__border--bottom container__border--grey mb-0">
               <div class="p-0 container__border--bottom container__border--red section__header">
                 <i class="fa fa-database" />
@@ -34,161 +27,127 @@
               <span class="flex-center">
                 <div class="p-0 mr-5">
                   <vSelect
+                    v-model="searchTag"
                     class="tagFilter"
                     label="name"
                     style="width: 300px"
-                    v-model="searchTag"
                     :placeholder="$i18n.t('dashboard.placeholder.tagsFilter')"
                     :options="tags"
                   >
                     <template v-slot:option="option">
-                      <span :style="`color: ${option.color}`">{{option.name}}</span>
+                      <span :style="`color: ${option.color}`">{{ option.name }}</span>
                     </template>
                     <template v-slot:selected-option="option">
-                      <span :style="`color: ${option.color}`">{{option.name|maxInputTagLength}}</span>
+                      <span :style="`color: ${option.color}`">{{
+                        option.name | maxInputTagLength
+                      }}</span>
                     </template>
-                    <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
+                    <span slot="no-options">{{ $i18n.t('settings.tagNotFound') }}</span>
                   </vSelect>
                 </div>
                 <div class="p-0">
                   <input
+                    v-model="searchLayer"
                     type="text"
                     class="form-control container__input"
-                    v-model="searchLayer"
                     :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
                   />
                 </div>
               </span>
             </h2>
             <div
-              :style="{'padding-bottom': isTagMenuOpen?'30vh':'0'}"
+              :style="{ 'padding-bottom': isTagMenuOpen ? '30vh' : '0' }"
               class="section__content heading-block heading-block-main"
             >
               <span class="add-layer">
-                <i
-                  class="fa fa-plus-circle fa-lg green pt-10"
-                  style="margin-right:5px;"
-                />
+                <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;" />
                 <a
                   data-toggle="modal"
                   data-target="#addLayerModal"
                   data-type="vectorLayer"
                   class="green section__content--add"
-                >{{ $i18n.t('dashboard.list.addLayer') }}</a>
+                  >{{ $i18n.t('dashboard.list.addLayer') }}</a
+                >
               </span>
               <span class="add-layer">
-                <i
-                  class="fa fa-plus-circle fa-lg green pt-10"
-                  style="margin-right:5px;"
-                />
+                <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;" />
                 <a
                   data-toggle="modal"
                   data-target="#addLayerWmsModal"
                   data-type="externalLayer"
                   class="green section__content--add"
-                >{{ $i18n.t('dashboard.list.addService') }}</a>
+                  >{{ $i18n.t('dashboard.list.addService') }}</a
+                >
               </span>
-              <div
-                class="loading-overlay pt-10 pb-10"
-                v-if="!layersAll"
-              >
+              <div v-if="!layersAll" class="loading-overlay pt-10 pb-10">
                 <div class="loading-indicator mb-10">
                   <h4>{{ $i18n.t('default.loading') }}</h4>
                   <i class="fa fa-lg fa-spin fa-spinner" />
                 </div>
               </div>
-              <div
-                v-if="filteredLayersAll.length == 0"
-                class="pt-10 pb-10"
-              >{{ $i18n.t('default.noLayers') }}</div>
-              <template
-                v-else
-                v-for="(val, key) in filteredLayersAll"
-              >
-                <div
-                  class="mb-0"
-                  :key="key"
-                >
-                  <div
-                    style="padding:9px 15px"
-                    class="panel-heading pl-0 pr-0"
-                  >
+              <div v-if="filteredLayersAll.length == 0" class="pt-10 pb-10">
+                {{ $i18n.t('default.noLayers') }}
+              </div>
+              <template v-for="(val, key) in filteredLayersAll" v-else>
+                <div :key="key" class="mb-0">
+                  <div style="padding:9px 15px" class="panel-heading pl-0 pr-0">
                     <h4 class="panel-title flex-center">
                       <span style="display:inherit">
-                        <span
-                          v-if="val.url"
-                          class="panel-title__names"
-                        >
-                          <i
-                            style="margin-right:9px"
-                            class="icon-li fa fa-link fa-lg"
-                          />
+                        <span v-if="val.url" class="panel-title__names">
+                          <i style="margin-right:9px" class="icon-li fa fa-link fa-lg" />
                           <span class="bold panel-title__wms">{{ val.name }}</span>
-                          <span
-                            class="desc-sm"
-                            :title="val.url"
-                          >
+                          <span class="desc-sm" :title="val.url">
                             <strong>URL</strong>
-                            :{{val.url|maxLength}}
+                            :{{ val.url | maxLength }}
                           </span>
-                          <span
-                            class="desc-sm"
-                            :title="val.layers"
-                          >
+                          <span class="desc-sm" :title="val.layers">
                             <strong>{{ $i18n.t('default.layers') }}</strong>
                             : {{ val.layers | maxLength }}
                           </span>
                         </span>
-                        <span
-                          v-else
-                          class="panel-title__names"
-                        >
+                        <span v-else class="panel-title__names">
                           <i class="icon-li fa fa-map-o fa-lg mr-5" />
-                          <span
-                            class="bold"
-                            href="#"
-                            @click="goToManager(val)"
-                          >{{ val.name }}</span>
+                          <span class="bold" href="#" @click="goToManager(val)">{{
+                            val.name
+                          }}</span>
                           <span class="desc-sm">{{ val.team }}</span>
                         </span>
-                        <span
-                          v-if="val.tags"
-                          style="min-width: 100px"
-                        >
+                        <span v-if="val.tags" style="min-width: 100px">
                           <vSelect
                             taggable
                             multiple
                             class="mySelect"
                             label="name"
-                            maxHeight="10px"
+                            max-height="10px"
                             :disabled="isTagAddings"
                             :options="tags.filter(t => !val.tags.find(vT => vT.id === t.id))"
                             :value="val.tags"
                             :v-if="tags.length > 0"
                             @input="updateLayerTags(val, $event)"
-                            @search:focus="isTagMenuOpen=true"
-                            @search:blur="isTagMenuOpen=false"
+                            @search:focus="isTagMenuOpen = true"
+                            @search:blur="isTagMenuOpen = false"
                           >
                             <template v-slot:option="option">
                               <span
                                 :style="`color: ${option.color};width: 50px; overflow:hidden`"
                                 :title="option.name"
-                              >{{option.name}}</span>
+                                >{{ option.name }}</span
+                              >
                             </template>
                             <template v-slot:selected-option="option">
                               <span
-                                :style="`color: ${option.color};max-width: 10vh;overflow:hidden;white-space:nowrap`"
+                                :style="
+                                  `color: ${option.color};max-width: 10vh;overflow:hidden;white-space:nowrap`
+                                "
                                 :title="option.name"
-                              >{{option.name}}</span>
+                                >{{ option.name }}</span
+                              >
                             </template>
-                            <span slot="no-options">{{$i18n.t('settings.tagNotFound')}}</span>
+                            <span slot="no-options">{{ $i18n.t('settings.tagNotFound') }}</span>
                           </vSelect>
                         </span>
                       </span>
-                      <span
-                        id="layers-list-icons"
-                        class="panel-title__tools"
-                      >
+                      <span id="layers-list-icons" class="panel-title__tools">
                         <i
                           v-if="!val.url"
                           class="fa fa-cog fa-lg yellow icon-hover"
@@ -203,7 +162,7 @@
                           data-toggle="tooltip"
                           data-placement="top"
                           :title="$i18n.t('default.delete')"
-                          @click="val.url?deleteService(val.id):deleteLayer(val)"
+                          @click="val.url ? deleteService(val.id) : deleteLayer(val)"
                         />
                       </span>
                     </h4>
@@ -218,90 +177,76 @@
     </div>
     <!--MODAL DODAWANIA WARSTW-->
     <div
+      id="addLayerModal"
+      ref="addLayerModal"
       class="modal fade"
       data-backdrop="static"
-      id="addLayerModal"
       tabindex="-1"
       role="dialog"
       aria-hidden="true"
-      ref="addLayerModal"
     >
-      <div
-        class="modal-dialog modal-dialog-centered"
-        role="document"
-      >
+      <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">{{ $i18n.t('dashboard.modal.addLayer') }}</h4>
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label class="control-label col-sm-4 pl-0">{{ $i18n.t('dashboard.modal.layerName') }}</label>
-              <input
-                type="text"
-                class="form-control"
-                v-model="vectorLayerName"
-              />
+              <label class="control-label col-sm-4 pl-0">{{
+                $i18n.t('dashboard.modal.layerName')
+              }}</label>
+              <input v-model="vectorLayerName" type="text" class="form-control" />
             </div>
             <div
-              style="display: flex"
               v-if="vectorLayerName.length > layerMaxNameLength"
+              style="display: flex"
               class="pt-5"
             >
               <label class="control-label col-sm-4 pl-0" />
-              <span
-                style="color:#bd0f0f; width: 100%"
-              >{{`Zbyt długa nazwa (maksymalnie ${layerMaxNameLength} znaków)`}}</span>
+              <span style="color:#bd0f0f; width: 100%">{{
+                `Zbyt długa nazwa (maksymalnie ${layerMaxNameLength} znaków)`
+              }}</span>
             </div>
-            <div
-              style="display: flex"
-              class="pt-10"
-            >
-              <label class="control-label col-sm-4 pl-0">{{ $i18n.t('dashboard.modal.epsg') }}</label>
+            <div style="display: flex" class="pt-10">
+              <label class="control-label col-sm-4 pl-0">{{
+                $i18n.t('dashboard.modal.epsg')
+              }}</label>
               <input
-                class="form-control"
                 v-model="epsg"
-                @keypress="isNumber($event)"
+                class="form-control"
                 :disabled="isEpsgAutomatic"
                 :title="isEpsgAutomatic ? $i18n.t('upload.automaticEpsg') : null"
+                @keypress="isNumber($event)"
               />
             </div>
-            <div
-              style="display: flex"
-              class="pt-10"
-            >
-              <label class="control-label col-sm-4 pl-0">{{ $i18n.t('dashboard.modal.dataFormat') }}</label>
-              <select
-                class="form-control"
-                v-model="selectedDataExtension"
-              >
+            <div style="display: flex" class="pt-10">
+              <label class="control-label col-sm-4 pl-0">{{
+                $i18n.t('dashboard.modal.dataFormat')
+              }}</label>
+              <select v-model="selectedDataExtension" class="form-control">
                 <option
                   v-for="(dataFormat, idx) of dataFormats"
-                  v-text="dataFormat.text"
                   :key="idx"
                   :value="dataFormat"
+                  v-text="dataFormat.text"
                 />
               </select>
             </div>
-            <div
-              style="display: flex"
-              class="pt-10"
-            >
-              <label class="control-label col-sm-4 pl-0">{{ $i18n.t('dashboard.modal.dataCoding') }}</label>
-              <select
-                class="form-control"
-                v-model="selectedDataCoding"
-              >
+            <div style="display: flex" class="pt-10">
+              <label class="control-label col-sm-4 pl-0">{{
+                $i18n.t('dashboard.modal.dataCoding')
+              }}</label>
+              <select v-model="selectedDataCoding" class="form-control">
                 <option
                   v-for="(dataCoding, idx) of dataCodings"
-                  v-text="dataCoding.text"
                   :key="idx"
                   :value="dataCoding.value"
+                  v-text="dataCoding.text"
                 />
               </select>
             </div>
             <div class="pt-10 flex-center">
-              <file-upload
+              <FileUpload
                 ref="upload"
                 v-model="files"
                 :multiple="true"
@@ -309,49 +254,48 @@
                 :drop-directory="true"
                 @input-filter="fileFilter"
               >
-                {{this.$i18n.t('upload.defaultMessage')}}
+                {{ this.$i18n.t('upload.defaultMessage') }}
                 <ul>
-                  <li
-                    style="list-style-position: inside"
-                    v-for="(file,idx) in files"
-                    :key="idx"
-                  >
-                    {{file.name}}
+                  <li v-for="(file, idx) in files" :key="idx" style="list-style-position: inside">
+                    {{ file.name }}
                     <i
                       class="icon-li fa fa-times fa-lg ml-5 delete-file-icon"
                       @click="removeFile(file)"
                     />
                   </li>
                 </ul>
-              </file-upload>
+              </FileUpload>
             </div>
           </div>
           <div class="modal-footer">
-            <span
-              class="file-sending"
-              v-if="isFileSending"
-            >
-              <button
-                type="button"
-                class="btn"
-              >
+            <span v-if="isFileSending" class="file-sending">
+              <button type="button" class="btn">
                 <i class="fa fa-spin fa-spinner" />
               </button>
               <span>{{ $i18n.t('upload.fileSending') }}</span>
             </span>
             <button
+              ref="closeModalBtn"
               type="button"
               class="btn btn-default"
               data-dismiss="modal"
               @click="clearUploadFiles"
-              ref="closeModalBtn"
-            >{{ $i18n.t('default.cancel') }}</button>
+            >
+              {{ $i18n.t('default.cancel') }}
+            </button>
             <button
               type="button"
               class="btn btn-success"
+              :disabled="
+                !vectorLayerName ||
+                  isFileSending ||
+                  vectorLayerName.length > layerMaxNameLength ||
+                  files.length <= 0
+              "
               @click="sendVectorLayer"
-              :disabled="!vectorLayerName || isFileSending || vectorLayerName.length > layerMaxNameLength || files.length <= 0"
-            >{{ $i18n.t('default.save') }}</button>
+            >
+              {{ $i18n.t('default.save') }}
+            </button>
           </div>
         </div>
       </div>
@@ -360,101 +304,66 @@
 
     <!--MODAL DODAWANIA USŁUG-->
     <div
+      id="addLayerWmsModal"
+      ref="addLayerWmsModal"
       class="modal fade"
       data-backdrop="static"
-      id="addLayerWmsModal"
       tabindex="-2"
       role="dialog"
       aria-hidden="true"
-      ref="addLayerWmsModal"
     >
-      <div
-        class="modal-dialog modal-dialog-centered"
-        role="document"
-        style="max-height: 80%"
-      >
+      <div class="modal-dialog modal-dialog-centered" role="document" style="max-height: 80%">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">{{ $i18n.t('dashboard.modal.addLayerWms') }}</h4>
           </div>
           <div class="modal-body">
             <div style="display: flex">
-              <label
-                class="control-label col-sm-4"
-                style="width: 150px"
-              >{{ $i18n.t('dashboard.modal.serviceName') }}</label>
-              <input
-                type="text"
-                class="form-control"
-                v-model="serviceName"
-              />
+              <label class="control-label col-sm-4" style="width: 150px">{{
+                $i18n.t('dashboard.modal.serviceName')
+              }}</label>
+              <input v-model="serviceName" type="text" class="form-control" />
             </div>
-            <div
-              style="display: flex"
-              class="pt-10"
-            >
-              <label
-                class="control-label col-sm-4"
-                style="width: 150px"
-              >{{ $i18n.t('dashboard.modal.dataFormat') }}</label>
-              <select
-                class="form-control"
-                v-model="selectedMapService"
-              >
+            <div style="display: flex" class="pt-10">
+              <label class="control-label col-sm-4" style="width: 150px">{{
+                $i18n.t('dashboard.modal.dataFormat')
+              }}</label>
+              <select v-model="selectedMapService" class="form-control">
                 <option
                   v-for="(mapService, idx) of mapServices"
-                  v-text="mapService.text"
                   :key="idx"
                   :value="mapService"
+                  v-text="mapService.text"
                 />
               </select>
             </div>
-            <div
-              class="pt-10"
-              style="display: flex;"
-            >
-              <label
-                class="control-label col-sm-4"
-                style="width: 160px"
-              >{{ $i18n.t('dashboard.modal.layerAddress') }}</label>
-              <input
-                type="text"
-                class="form-control"
-                v-model="serviceUrl"
-              />
+            <div class="pt-10" style="display: flex;">
+              <label class="control-label col-sm-4" style="width: 160px">{{
+                $i18n.t('dashboard.modal.layerAddress')
+              }}</label>
+              <input v-model="serviceUrl" type="text" class="form-control" />
               <i
                 class="fa fa-cloud-download fetch-wms-icon"
-                :class="{disabled: serviceUrl.length < 1}"
+                :class="{ disabled: serviceUrl.length < 1 }"
                 :title="$i18n.t('default.downloadAvailableLayers')"
                 aria-hidden="true"
                 @click="fetchWms"
               />
             </div>
-            <div
-              class="pt-10"
-              v-if="fetchedLayers.length > 0"
-            >
+            <div v-if="fetchedLayers.length > 0" class="pt-10">
               <ul class="select-layer-list">
-                <li
-                  v-for="layer in fetchedLayers"
-                  :key="layer"
-                >
+                <li v-for="layer in fetchedLayers" :key="layer">
                   <label class="checkbox-inline">
-                    <input
-                      type="checkbox"
-                      id="checkbox"
-                      :value="layer"
-                      v-model="selectedLayers"
-                    />
+                    <input id="checkbox" v-model="selectedLayers" type="checkbox" :value="layer" />
                     {{ layer }}
                   </label>
                 </li>
               </ul>
             </div>
             <div
+              v-if="fetchedLayers.length === 0 && isFetching"
               class="loading-overlay pt-10 pb-10"
               style="text-align: center;"
-              v-if="fetchedLayers.length === 0 && isFetching"
             >
               <div class="loading-indicator mb-10">
                 <h4>{{ $i18n.t('default.loading') }}</h4>
@@ -462,36 +371,35 @@
               </div>
             </div>
             <hr />
-            <div
-              class="pt-10"
-              v-if="fetchedLayers.length > 0"
-            >
+            <div v-if="fetchedLayers.length > 0" class="pt-10">
               <label class="checkbox-inline">
-                <input
-                  type="checkbox"
-                  id="checkbox"
-                  v-model="isServicePublic"
-                />
+                <input id="checkbox" v-model="isServicePublic" type="checkbox" />
                 {{ $i18n.t('dashboard.modal.servicePublic') }}
               </label>
             </div>
           </div>
           <div class="modal-footer">
             <button
+              ref="closeModalWmsBtn"
               type="button"
               class="btn btn-default"
               data-dismiss="modal"
-              ref="closeModalWmsBtn"
               @click="clearServicesModal"
-            >{{ $i18n.t('default.cancel') }}</button>
+            >
+              {{ $i18n.t('default.cancel') }}
+            </button>
             <button
               type="button"
               class="btn btn-success"
-              :disabled="selectedLayers.length === 0 ||
-                serviceName.length === 0 ||
-                selectedLayers.length === 0"
+              :disabled="
+                selectedLayers.length === 0 ||
+                  serviceName.length === 0 ||
+                  selectedLayers.length === 0
+              "
               @click="addService"
-            >{{ $i18n.t('default.save') }}</button>
+            >
+              {{ $i18n.t('default.save') }}
+            </button>
           </div>
         </div>
       </div>
@@ -508,6 +416,25 @@ import 'vue-select/dist/vue-select.css';
 
 export default {
   name: 'Dashboard',
+  components: {
+    FileUpload,
+    ProjectsPanel: () => import('@/components/ProjectsPanel'),
+    vSelect
+  },
+  filters: {
+    maxLength: val => {
+      if (val.length > 50) {
+        return `${val.slice(0, 50)}...`;
+      }
+      return val;
+    },
+    maxInputTagLength: val => {
+      if (val.length > 35) {
+        return `${val.slice(0, 35)}...`;
+      }
+      return val;
+    }
+  },
   data: vm => ({
     currentEditedLayer: undefined,
     dataCodings: [
@@ -562,9 +489,7 @@ export default {
         save: true
       }
     },
-    postAction: `${
-      vm.$store.getters.getApiUrl
-    }/layers?token=${localStorage.getItem('token')}`,
+    postAction: `${vm.$store.getters.getApiUrl}/layers?token=${localStorage.getItem('token')}`,
     projects: [],
     projectsGetting: true,
     searchLayer: '',
@@ -579,11 +504,6 @@ export default {
     vectorLayerName: '',
     vectorLayersList: undefined
   }),
-  components: {
-    FileUpload,
-    ProjectsPanel: () => import('@/components/ProjectsPanel'),
-    vSelect
-  },
   computed: {
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
@@ -599,26 +519,11 @@ export default {
         return filteredByName;
       }
       return filteredByName.filter(
-        layer =>
-          layer.tags && layer.tags.find(tag => tag.id === this.searchTag.id)
+        layer => layer.tags && layer.tags.find(tag => tag.id === this.searchTag.id)
       );
     },
     servicesList() {
       return this.$store.getters.getServices;
-    }
-  },
-  filters: {
-    maxLength: val => {
-      if (val.length > 50) {
-        return `${val.slice(0, 50)}...`;
-      }
-      return val;
-    },
-    maxInputTagLength: val => {
-      if (val.length > 35) {
-        return `${val.slice(0, 35)}...`;
-      }
-      return val;
     }
   },
   watch: {
@@ -631,6 +536,17 @@ export default {
     servicesList() {
       this.layersAll = this.getLayersAll();
     }
+  },
+  async mounted() {
+    this.selectedMapService = this.mapServices[0];
+    this.selectedDataCoding = this.dataCodings[0].value;
+    this.selectedDataExtension = this.dataFormats[0];
+    this.getLayers();
+    this.getProjects();
+    this.getServices();
+    this.getTags();
+    this.getLayerMaxNameLength();
+    this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
   },
   methods: {
     async updateLayerTags(val, e) {
@@ -682,9 +598,7 @@ export default {
         payload.tid = tag.id;
         const r = await this.$store.dispatch('untagLayer', payload);
         if (r.status === 204) {
-          this.filteredLayersAll.find(
-            l => l.id === val.id
-          ).tags = this.filteredLayersAll
+          this.filteredLayersAll.find(l => l.id === val.id).tags = this.filteredLayersAll
             .find(l => l.id === val.id)
             .tags.filter(t => t.id !== tag.id);
           this.$alertify.success(this.$i18n.t('settings.tagDeleted'));
@@ -768,7 +682,7 @@ export default {
           this.fetchedLayers = result.Capability.Layer.Layer.map(el => el.Name);
           this.isFetching = false;
         })
-        .catch(error => {
+        .catch(() => {
           this.$alertify.error(this.$i18n.t('default.error'));
           this.isFetching = false;
         });
@@ -790,9 +704,7 @@ export default {
       });
     },
     clearServicesModal() {
-      document
-        .querySelector('#addLayerWmsModal button.btn.btn-default')
-        .click();
+      document.querySelector('#addLayerWmsModal button.btn.btn-default').click();
       if (this.isFetching) {
         return;
       }
@@ -819,12 +731,8 @@ export default {
           async () => {
             const r = await this.$store.dispatch('deleteLayer', el.id);
             if (r.status === 200) {
-              this.vectorLayersList = this.vectorLayersList.filter(
-                lay => lay.id !== el.id
-              );
-              this.projects = this.projects.filter(
-                p => p.active_layer_id !== el.id
-              );
+              this.vectorLayersList = this.vectorLayersList.filter(lay => lay.id !== el.id);
+              this.projects = this.projects.filter(p => p.active_layer_id !== el.id);
               this.$alertify.success(this.$i18n.t('default.deleted'));
             } else if (r.status === 403) {
               if (r.body.error === 'access denied, not an owner') {
@@ -856,7 +764,7 @@ export default {
           this.$alertify.error(this.$i18n.t('upload.uploadExtensionError'));
           return prevent();
         }
-        for (file of this.files) {
+        for (const file of this.files) {
           if (newFile.name === file.name && newFile.size === file.size) {
             this.$alertify.error(this.$i18n.t('upload.uploadDuplicate'));
             return prevent();
@@ -867,10 +775,9 @@ export default {
     getLayersAll() {
       let layersAll = [];
       if (this.vectorLayersList && this.servicesList) {
-        layersAll = [
-          ...this.vectorLayersList,
-          ...this.servicesList
-        ].sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
+        layersAll = [...this.vectorLayersList, ...this.servicesList].sort((a, b) =>
+          a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        );
       } else if (this.vectorLayersList) {
         layersAll = this.vectorLayersList;
       } else if (this.servicesList) {
@@ -911,8 +818,7 @@ export default {
       }
       if (file.xhr.status === 400) {
         this.isEpsgAutomatic = false;
-        if (!this.isSendingError)
-          this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
+        if (!this.isSendingError) this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
       }
       // eslint-disable-next-line no-param-reassign
       file.status = 'queued';
@@ -950,9 +856,7 @@ export default {
           this.isFileSending = false;
           this.$refs.closeModalBtn.click();
           if (r.status === 201) {
-            vm.$alertify.success(
-              vm.$i18n.t('upload.uploadSuccess') + ' ' + r.data.layers.name
-            );
+            this.$alertify.success(this.$i18n.t('upload.uploadSuccess') + ' ' + r.data.layers.name);
             let newLayer = {
               id: r.data.layers.id,
               name: r.data.layers.name,
@@ -969,9 +873,7 @@ export default {
             this.isEpsgAutomatic = false;
             this.$alertify.warning(this.$i18n.t('upload.noEpsg'));
           } else {
-            vm.$alertify.error(
-              vm.$i18n.t('upload.uploadError') + ' ' + newFile.name
-            );
+            this.$alertify.error(this.$i18n.t('upload.uploadError') + ' ' /*+ newFile.name*/);
           }
         })
         .catch(err => {
@@ -992,17 +894,6 @@ export default {
         this.$store.commit('setAttachmentsLayer', lid);
       }
     }
-  },
-  async mounted() {
-    this.selectedMapService = this.mapServices[0];
-    this.selectedDataCoding = this.dataCodings[0].value;
-    this.selectedDataExtension = this.dataFormats[0];
-    this.getLayers();
-    this.getProjects();
-    this.getServices();
-    this.getTags();
-    this.getLayerMaxNameLength();
-    this.$store.commit('setDefaultGroup', process.env.VUE_APP_DEFAULT_GROUP);
   }
 };
 </script>

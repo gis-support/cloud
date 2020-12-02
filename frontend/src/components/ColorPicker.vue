@@ -1,17 +1,13 @@
 <template>
   <div class="colorPicker wrapper">
     <div class="dot__wrapper text-center">
-      <span
-        class="dot"
-        :style="{backgroundColor: computedValue}"
-        @click.stop="open"
-      ></span>
+      <span class="dot" :style="{ backgroundColor: computedValue }" @click.stop="open"></span>
     </div>
     <chrome-picker
+      v-if="isPickerVisible"
+      v-model="computedValue"
       v-click-outside="hide"
       class="picker"
-      v-model="computedValue"
-      v-if="isPickerVisible"
     />
   </div>
 </template>
@@ -19,11 +15,6 @@
 <script>
 import { Chrome } from 'vue-color';
 export default {
-  props: {
-    value: {
-      required: true
-    }
-  },
   components: {
     'chrome-picker': Chrome
   },
@@ -42,6 +33,12 @@ export default {
       unbind: function(el) {
         document.body.removeEventListener('click', el.clickOutsideEvent);
       }
+    }
+  },
+  props: {
+    value: {
+      required: true,
+      type: String
     }
   },
   data: () => ({

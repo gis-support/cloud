@@ -3,29 +3,22 @@
     <div id="root">
       <div class="map-table-content">
         <div class="map-content">
-          <div
-            class="map"
-            ref="map"
-            id="map"
-          >
+          <div id="map" ref="map" class="map">
             <div class="add-feature-tool map-tool-left">
               <button
+                v-if="!isDrawing && permission === 'write' && items.length > 0"
                 type="button"
                 class="map-btn"
                 :title="$i18n.t('featureManager.addFeature')"
                 @click="drawNewFeature"
-                v-if="!isDrawing && permission === 'write' && items.length > 0"
               >
                 <i class="fa fa-plus" />
               </button>
-              <span
-                class="navbar-right"
-                v-else-if="items.length > 0"
-              >
+              <span v-else-if="items.length > 0" class="navbar-right">
                 <button
+                  v-if="permission === 'write'"
                   type="button"
                   class="map-btn"
-                  v-if="permission === 'write'"
                   :title="$i18n.t('featureManager.cancelFeatureAdding')"
                   @click="clearFeatureAdding"
                 >
@@ -37,21 +30,12 @@
               <button
                 type="button"
                 class="map-btn"
-                @click.stop="showMeasure"
                 :title="showMeasureTitle"
+                @click.stop="showMeasure"
               >
-                <i
-                  v-if="!isMeasureShow && !isMeasure"
-                  class="fa fa-arrow-right"
-                />
-                <i
-                  v-if="isMeasureShow && !isMeasure"
-                  class="fa fa-arrow-left"
-                />
-                <i
-                  v-if="isMeasure"
-                  class="fa fa-trash"
-                />
+                <i v-if="!isMeasureShow && !isMeasure" class="fa fa-arrow-right" />
+                <i v-if="isMeasureShow && !isMeasure" class="fa fa-arrow-left" />
+                <i v-if="isMeasure" class="fa fa-trash" />
               </button>
               <button
                 v-show="isMeasureShow"
@@ -59,75 +43,76 @@
                 class="map-btn"
                 :title="$i18n.t('featureManager.map.areaMeasure')"
                 @click="startMeasure('Polygon')"
-              >☐</button>
+              >
+                ☐
+              </button>
               <button
                 v-show="isMeasureShow"
                 type="button"
                 class="map-btn"
                 :title="$i18n.t('featureManager.map.distanceMeasure')"
                 @click="startMeasure('LineString')"
-              >\</button>
+              >
+                \
+              </button>
             </div>
             <div class="buffer-tool map-tool-left">
               <button
                 v-show="currentFeature"
                 type="button"
                 class="map-btn"
-                @click="openBufferDialog"
                 :title="$i18n.t('featureManager.map.buffer')"
-              >B</button>
+                @click="openBufferDialog"
+              >
+                B
+              </button>
             </div>
             <div class="distance-tool map-tool-left">
               <button
                 v-show="currentFeature"
                 type="button"
                 class="map-btn"
-                @click="openDistanceDialog"
                 :title="$i18n.t('featureManager.map.distance')"
-              >D</button>
+                @click="openDistanceDialog"
+              >
+                D
+              </button>
             </div>
             <div class="rotation-tool map-tool-right">
               <button
                 type="button"
                 class="map-btn"
-                @click="openRotationDialog"
                 :title="$i18n.t('featureManager.map.rotation')"
-              >A</button>
+                @click="openRotationDialog"
+              >
+                A
+              </button>
             </div>
           </div>
         </div>
-        <div
-          v-if="isTableShow"
-          class="navbar-table-content"
-        >
-          <nav
-            class="navbar navbar-default table-menu"
-            style="margin-bottom: 0px;"
-          >
+        <div v-if="isTableShow" class="navbar-table-content">
+          <nav class="navbar navbar-default table-menu" style="margin-bottom: 0px;">
             <div class="container-fluid">
               <button
                 type="button"
                 class="btn navbar-btn navbar-left btn-default"
-                @click="isTableShow = false"
                 :title="$i18n.t('featureManager.closeTable')"
+                @click="isTableShow = false"
               >
                 <i class="fa fa-times fa-lg" />
               </button>
-              <p
-                class="navbar-text"
-                v-cloak
-              >
-                {{ $i18n.t("featureManager.objectsNumber") }}
+              <p v-cloak class="navbar-text">
+                {{ $i18n.t('featureManager.objectsNumber') }}
                 <span v-text="searchCount" />
               </p>
               <div class="navbar-form navbar-right">
                 <div class="form-group">
                   <input
+                    v-model.trim="searchItemValue"
                     type="text"
                     class="form-control"
                     placeholder="Wyszukaj"
                     :title="$i18n.t('featureManager.localSearch')"
-                    v-model.trim="searchItemValue"
                   />
                 </div>
               </div>
@@ -144,19 +129,19 @@
                 <i class="fa fa-filter" />
               </button>
               <button
+                v-if="selectedRows.length > 0"
                 type="button"
                 class="btn navbar-btn navbar-right btn-default"
-                v-if="selectedRows.length > 0"
                 @click="downloadLayer(selectedRows)"
               >
                 <i class="fa fa-download" />
               </button>
               <button
+                v-if="currentFeature"
                 style="margin-right: 2px"
                 type="button"
                 class="btn navbar-btn navbar-right btn-default"
                 :title="$i18n.t('featureManager.zoomToSelected')"
-                v-if="currentFeature"
                 @click="zoomToSelected"
               >
                 <i class="fa fa-search" />
@@ -178,70 +163,57 @@
             @updateSearchCount="updateSearchCount"
             @updateSelectedRows="updateSelectedRows"
           />
-          <div
-            class="loading-overlay pt-10 pb-10"
-            style="text-align: center"
-            v-else
-          >
+          <div v-else class="loading-overlay pt-10 pb-10" style="text-align: center">
             <div class="loading-indicator mb-10">
-              <h4>{{ $i18n.t("default.loading") }}</h4>
+              <h4>{{ $i18n.t('default.loading') }}</h4>
               <i class="fa fa-lg fa-spin fa-spinner" />
             </div>
           </div>
         </div>
 
-        <div
-          class="modal-mask"
-          v-if="columnFilterDecisionDialogView"
-        >
+        <div v-if="columnFilterDecisionDialogView" class="modal-mask">
           <div class="modal-wrapper">
             <div class="modal-dialog modal-md">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{ $i18n.t("featureManager.objectsFilter") }}</h4>
+                  <h4 class="modal-title">{{ $i18n.t('featureManager.objectsFilter') }}</h4>
                 </div>
                 <div class="modal-body">
                   <FiltersPanel
                     ref="column-filters"
-                    :columns="columns"
                     v-model="selectedColumnFilters"
+                    :columns="columns"
                   />
                 </div>
                 <div class="modal-footer">
-                  <div
-                    class="btn-group btn-group-justified"
-                    role="group"
-                  >
-                    <div
-                      class="btn-group"
-                      role="group"
-                    >
+                  <div class="btn-group btn-group-justified" role="group">
+                    <div class="btn-group" role="group">
                       <button
                         type="button"
                         class="btn btn-success"
-                        @click="$emit('columnFilterDecision', 'accept')"
                         :disabled="!isFiltersValidated(selectedColumnFilters)"
-                      >{{ $i18n.t("default.save") }}</button>
+                        @click="$emit('columnFilterDecision', 'accept')"
+                      >
+                        {{ $i18n.t('default.save') }}
+                      </button>
                     </div>
-                    <div
-                      class="btn-group"
-                      role="group"
-                    >
+                    <div class="btn-group" role="group">
                       <button
                         type="button"
                         class="btn btn-danger"
                         @click="$emit('columnFilterDecision', 'clear')"
-                      >{{ $i18n.t("default.clear") }}</button>
+                      >
+                        {{ $i18n.t('default.clear') }}
+                      </button>
                     </div>
-                    <div
-                      class="btn-group"
-                      role="group"
-                    >
+                    <div class="btn-group" role="group">
                       <button
                         type="button"
                         class="btn btn-default"
                         @click="$emit('columnFilterDecision', 'cancel')"
-                      >{{ $i18n.t("default.cancel") }}</button>
+                      >
+                        {{ $i18n.t('default.cancel') }}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -250,44 +222,28 @@
           </div>
         </div>
 
-        <div
-          class="modal-mask"
-          v-if="addFeatureDialog"
-        >
+        <div v-if="addFeatureDialog" class="modal-mask">
           <div class="modal-wrapper">
             <div class="modal-dialog modal-md modal-new-feature">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h4 class="modal-title">{{ $i18n.t("featureManager.addFeatureTitle") }}</h4>
+                  <h4 class="modal-title">{{ $i18n.t('featureManager.addFeatureTitle') }}</h4>
                 </div>
-                <div
-                  class="modal-body"
-                  v-if="activeLayer"
-                >
+                <div v-if="activeLayer" class="modal-body">
                   <template v-for="name in Object.keys(activeLayer.features[0].properties)">
-                    <div
-                      class="form-group"
-                      style="display: flex;"
-                      :key="name"
-                      v-if="name !== 'id'"
-                    >
-                      <label
-                        class="control-label col-sm-4"
-                        style="position: relative; top: 8px"
-                      >
-                        {{
-                        name
-                        }}
+                    <div v-if="name !== 'id'" :key="name" class="form-group" style="display: flex;">
+                      <label class="control-label col-sm-4" style="position: relative; top: 8px">
+                        {{ name }}
                       </label>
                       <InputNumber
-                        v-model.number="newFeatureProperties[name]"
                         v-if="featureTypes[name] === 'integer' || featureTypes[name] === 'real'"
+                        v-model.number="newFeatureProperties[name]"
                         :type="featureTypes[name]"
                       />
                       <input
-                        class="form-control col-sm-7"
-                        v-model="newFeatureProperties[name]"
                         v-else-if="featureTypes[name] === 'character varying'"
+                        v-model="newFeatureProperties[name]"
+                        class="form-control col-sm-7"
                         type="text"
                       />
                       <Datepicker
@@ -297,43 +253,30 @@
                       ></Datepicker>
                       <select
                         v-else-if="featureTypes[name] === 'dict'"
-                        class="form-control"
                         v-model="newFeatureProperties[name]"
+                        class="form-control"
                       >
                         <option
                           v-for="(dV, idx) in dictValues.find(d => d.column_name === name).values"
-                          v-text="dV"
-                          :value="dV"
                           :key="idx"
+                          :value="dV"
+                          v-text="dV"
                         />
                       </select>
                     </div>
                   </template>
                 </div>
                 <div class="modal-footer">
-                  <div
-                    class="btn-group btn-group-justified"
-                    role="group"
-                  >
-                    <div
-                      class="btn-group"
-                      role="group"
-                    >
-                      <button
-                        type="button"
-                        class="btn btn-success"
-                        @click="saveNewFeature"
-                      >{{ $i18n.t("default.save") }}</button>
+                  <div class="btn-group btn-group-justified" role="group">
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-success" @click="saveNewFeature">
+                        {{ $i18n.t('default.save') }}
+                      </button>
                     </div>
-                    <div
-                      class="btn-group"
-                      role="group"
-                    >
-                      <button
-                        type="button"
-                        class="btn btn-danger"
-                        @click="clearFeatureAdding"
-                      >{{ $i18n.t("default.cancel") }}</button>
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-danger" @click="clearFeatureAdding">
+                        {{ $i18n.t('default.cancel') }}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -342,11 +285,11 @@
           </div>
         </div>
         <button
+          v-if="!isTableShow"
           type="button"
           class="btn btn-default show-table"
-          v-if="!isTableShow"
-          @click="isTableShow = true"
           :title="$i18n.t('featureManager.showTable')"
+          @click="isTableShow = true"
         >
           <i class="fa fa-table" />
         </button>
@@ -359,12 +302,9 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.bufferTable") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t('featureManager.bufferTable') }}</h4>
             </div>
-            <div
-              class="modal-body"
-              style="padding-bottom:0"
-            >
+            <div class="modal-body" style="padding-bottom:0">
               <div style="height: 32vh">
                 <BufferTable
                   v-if="bufferFeatures.length > 0"
@@ -372,42 +312,29 @@
                   :columns="bufferColumns"
                   :items="bufferFeatures"
                 />
-                <div
-                  class="loading-overlay pt-10 pb-10"
-                  style="text-align: center"
-                  v-else
-                >
+                <div v-else class="loading-overlay pt-10 pb-10" style="text-align: center">
                   <div class="loading-indicator">
-                    <h4>{{ "Brak danych" }}</h4>
+                    <h4>{{ 'Brak danych' }}</h4>
                   </div>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <div
-                class="btn-group btn-group-justified"
-                role="group"
-              >
-                <div
-                  class="btn-group"
-                  role="group"
-                >
+              <div class="btn-group btn-group-justified" role="group">
+                <div class="btn-group" role="group">
                   <button
                     :disabled="bufferFeatures.length < 1"
                     type="button"
                     class="btn btn-success"
                     @click="downloadObjectsArray"
-                  >{{ $i18n.t("featureManager.downloadList") }}</button>
+                  >
+                    {{ $i18n.t('featureManager.downloadList') }}
+                  </button>
                 </div>
-                <div
-                  class="btn-group"
-                  role="group"
-                >
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    @click="$modal.hide('bufferTable')"
-                  >{{ $i18n.t("default.close") }}</button>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-danger" @click="$modal.hide('bufferTable')">
+                    {{ $i18n.t('default.close') }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -422,101 +349,71 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.map.buffer") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.buffer') }}</h4>
             </div>
-            <div
-              class="modal-body"
-              v-if="activeLayer"
-            >
+            <div v-if="activeLayer" class="modal-body">
               <div style="margin-bottom: 100px">
-                <h4>{{ $i18n.t("featureManager.bufferAnalysis") }}</h4>
-                <div
-                  class="form-group"
-                  style="display: flex;"
-                >
-                  <label
-                    class="control-label col-sm-4"
-                    style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.bufferValue") + " [m]"
-                    }}
+                <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
+                <div class="form-group" style="display: flex;">
+                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
+                    {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
                   </label>
                   <input
-                    class="form-control col-sm-7"
                     v-model="bufferValue"
+                    class="form-control col-sm-7"
                     type="number"
                     @input="clearBufferDialog"
                   />
                 </div>
-                <div
-                  style="float: right"
-                  class="btn-group"
-                  role="group"
-                >
+                <div style="float: right" class="btn-group" role="group">
                   <button
                     :disabled="!bufferValue || bufferValue <= 0"
                     type="button"
                     class="btn btn-default"
                     @click="generateBuffer"
-                  >{{ $i18n.t("featureManager.bufferGenerate") }}</button>
+                  >
+                    {{ $i18n.t('featureManager.bufferGenerate') }}
+                  </button>
                 </div>
               </div>
               <div>
-                <h4>{{ $i18n.t("featureManager.generateObjectsArray") }}</h4>
-                <div
-                  class="form-group"
-                  style="display: flex;"
-                >
-                  <label
-                    class="control-label col-sm-4"
-                    style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.bufferLayer")
-                    }}
+                <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
+                <div class="form-group" style="display: flex;">
+                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
+                    {{ $i18n.t('featureManager.bufferLayer') }}
                   </label>
                   <select
+                    v-model="selectedLayer"
                     style="max-width: 75%"
                     class="form-control"
                     :disabled="!isBuffer"
-                    v-model="selectedLayer"
                   >
                     <option
                       v-for="(layer, idx) of layers"
-                      v-text="layer.name"
                       :key="idx"
                       :value="layer"
+                      v-text="layer.name"
                     />
                   </select>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <div
-                class="btn-group btn-group-justified"
-                role="group"
-              >
-                <div
-                  class="btn-group"
-                  role="group"
-                >
+              <div class="btn-group btn-group-justified" role="group">
+                <div class="btn-group" role="group">
                   <button
                     :disabled="!selectedLayer"
                     type="button"
                     class="btn btn-success"
                     @click="generateObjectsArray"
-                  >{{ $i18n.t("featureManager.generateList") }}</button>
+                  >
+                    {{ $i18n.t('featureManager.generateList') }}
+                  </button>
                 </div>
-                <div
-                  class="btn-group"
-                  role="group"
-                >
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    @click="$modal.hide('buffer')"
-                  >{{ $i18n.t("default.close") }}</button>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-danger" @click="$modal.hide('buffer')">
+                    {{ $i18n.t('default.close') }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -527,87 +424,55 @@
           :draggable="true"
           width="35%"
           height="auto"
-          @before-close="bufferValue = undefined; selectedFieldName = undefined; bufferFeatureGeometry = undefined"
+          @before-close="
+            bufferValue = undefined;
+            selectedFieldName = undefined;
+            bufferFeatureGeometry = undefined;
+          "
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.distanceAnalysis") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t('featureManager.distanceAnalysis') }}</h4>
             </div>
-            <div
-              class="modal-body"
-              v-if="activeLayer"
-            >
+            <div v-if="activeLayer" class="modal-body">
               <div style="margin-bottom: 50px">
-                <div
-                  class="form-group"
-                  style="display: flex;"
-                >
-                  <label
-                    class="control-label col-sm-4"
-                    style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.bufferValue") + " [m]"
-                    }}
+                <div class="form-group" style="display: flex;">
+                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
+                    {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
                   </label>
-                  <input
-                    class="form-control col-sm-7"
-                    v-model="bufferValue"
-                    type="number"
-                  />
+                  <input v-model="bufferValue" class="form-control col-sm-7" type="number" />
                 </div>
-                <div
-                  class="form-group"
-                  style="display: flex;"
-                >
-                  <label
-                    class="control-label col-sm-4"
-                    style="position: relative; top: 8px"
-                  >
-                    {{
-                    $i18n.t("featureManager.fieldName")
-                    }}
+                <div class="form-group" style="display: flex;">
+                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
+                    {{ $i18n.t('featureManager.fieldName') }}
                   </label>
-                  <select
-                    style="max-width: 75%"
-                    class="form-control"
-                    v-model="selectedFieldName"
-                  >
+                  <select v-model="selectedFieldName" style="max-width: 75%" class="form-control">
                     <option
                       v-for="(prop, idx) of currentFeatureFieldsNames"
-                      v-text="prop"
                       :key="idx"
                       :value="prop"
+                      v-text="prop"
                     />
                   </select>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <div
-                class="btn-group btn-group-justified"
-                role="group"
-              >
-                <div
-                  class="btn-group"
-                  role="group"
-                >
+              <div class="btn-group btn-group-justified" role="group">
+                <div class="btn-group" role="group">
                   <button
                     :disabled="!bufferValue || !selectedFieldName"
                     type="button"
                     class="btn btn-success"
                     @click="generateDistance"
-                  >{{ $i18n.t("featureManager.download") }}</button>
+                  >
+                    {{ $i18n.t('featureManager.download') }}
+                  </button>
                 </div>
-                <div
-                  class="btn-group"
-                  role="group"
-                >
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    @click="$modal.hide('distance')"
-                  >{{ $i18n.t("default.close") }}</button>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-danger" @click="$modal.hide('distance')">
+                    {{ $i18n.t('default.close') }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -622,27 +487,16 @@
         >
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.map.rotation") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t('featureManager.map.rotation') }}</h4>
             </div>
-            <div
-              class="modal-body"
-              v-if="activeLayer"
-            >
-              <div
-                class="form-group"
-                style="display: flex;"
-              >
-                <label
-                  class="control-label col-sm-4"
-                  style="position: relative; top: 8px"
-                >
-                  {{
-                  $i18n.t("featureManager.rotationValue") + ` [ ${String.fromCharCode(176)} ]`
-                  }}
+            <div v-if="activeLayer" class="modal-body">
+              <div class="form-group" style="display: flex;">
+                <label class="control-label col-sm-4" style="position: relative; top: 8px">
+                  {{ $i18n.t('featureManager.rotationValue') + ` [ ${String.fromCharCode(176)} ]` }}
                 </label>
                 <input
-                  class="form-control col-sm-7"
                   v-model="rotationValue"
+                  class="form-control col-sm-7"
                   type="number"
                   :step="45"
                   :max="360"
@@ -651,14 +505,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <div
-                class="btn-group btn-group-justified"
-                role="group"
-              >
-                <div
-                  class="btn-group"
-                  role="group"
-                >
+              <div class="btn-group btn-group-justified" role="group">
+                <div class="btn-group" role="group">
                   <button
                     :disabled="
                       rotationValue > 360 || rotationValue < 0 || !/^\d+$/.test(rotationValue)
@@ -666,84 +514,51 @@
                     type="button"
                     class="btn btn-success"
                     @click="rotateMapByAngle(rotationValue)"
-                  >{{ $i18n.t("featureManager.rotate") }}</button>
+                  >
+                    {{ $i18n.t('featureManager.rotate') }}
+                  </button>
                 </div>
-                <div
-                  class="btn-group"
-                  role="group"
-                >
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    @click="$modal.hide('rotation')"
-                  >{{ $i18n.t("default.close") }}</button>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-danger" @click="$modal.hide('rotation')">
+                    {{ $i18n.t('default.close') }}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </modal>
 
-        <modal
-          name="addLayer"
-          :draggable="true"
-          width="30%"
-          height="70%"
-        >
+        <modal name="addLayer" :draggable="true" width="30%" height="70%">
           <div class="modal-content dragg-content">
             <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t("featureManager.addLayer") }}</h4>
+              <h4 class="modal-title">{{ $i18n.t('featureManager.addLayer') }}</h4>
             </div>
-            <div
-              class="modal-body layer-modal-body"
-              v-if="activeLayer"
-            >
-              <div
-                class="form-group"
-                style="height: 100%"
-              >
+            <div v-if="activeLayer" class="modal-body layer-modal-body">
+              <div class="form-group" style="height: 100%">
                 <div class="pb-10">
                   <input
+                    v-model="searchLayer"
                     type="text"
                     class="form-control container__input"
-                    v-model="searchLayer"
                     :placeholder="$i18n.t('dashboard.placeholder.layersFilter')"
                   />
                 </div>
                 <div class="layers-wrapper">
                   <template v-for="(layer, idx) in layersFilteredByName">
-                    <div
-                      class="mb-0"
-                      :key="idx"
-                    >
+                    <div :key="idx" class="mb-0">
                       <div class="panel-heading pl-0 pr-0">
                         <h4 class="panel-title flex-center">
-                          <span
-                            v-if="layer.url"
-                            class="panel-title__names"
-                          >
-                            <i
-                              style="margin-right:9px"
-                              class="icon-li fa fa-link fa-lg"
-                            />
-                            <span
-                              class="bold"
-                              href="#"
-                            >{{ layer.name }} ({{ layer.layers | maxLength }})</span>
+                          <span v-if="layer.url" class="panel-title__names">
+                            <i style="margin-right:9px" class="icon-li fa fa-link fa-lg" />
+                            <span class="bold" href="#"
+                              >{{ layer.name }} ({{ layer.layers | maxLength }})</span
+                            >
                           </span>
-                          <span
-                            v-else
-                            class="panel-title__names"
-                          >
+                          <span v-else class="panel-title__names">
                             <i class="icon-li fa fa-map-o fa-lg mr-5" />
-                            <span
-                              class="bold"
-                              href="#"
-                            >{{ layer.name }}</span>
+                            <span class="bold" href="#">{{ layer.name }}</span>
                           </span>
-                          <span
-                            id="layers-list-icons"
-                            class="panel-title__tools"
-                          >
+                          <span id="layers-list-icons" class="panel-title__tools">
                             <i
                               class="fa fa-plus-circle fa-lg green"
                               :title="$i18n.t('featureManager.addLayer')"
@@ -758,19 +573,11 @@
               </div>
             </div>
             <div class="modal-footer">
-              <div
-                class="btn-group btn-group-justified"
-                role="group"
-              >
-                <div
-                  class="btn-group"
-                  role="group"
-                >
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    @click="$modal.hide('addLayer')"
-                  >{{ $i18n.t("default.close") }}</button>
+              <div class="btn-group btn-group-justified" role="group">
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-danger" @click="$modal.hide('addLayer')">
+                    {{ $i18n.t('default.close') }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -781,56 +588,47 @@
           :draggable="true"
           width="30%"
           height="auto"
-          @before-close="projectName=''"
+          @before-close="projectName = ''"
         >
           <div class="modal-content dragg-content">
             <div class="modal-content">
               <div class="modal-header">
-                <h4
-                  class="modal-title"
-                >{{ project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`) }}</h4>
+                <h4 class="modal-title">
+                  {{
+                    project
+                      ? $i18n.t(`featureManager.saveProject`)
+                      : $i18n.t(`featureManager.createProject`)
+                  }}
+                </h4>
               </div>
               <div class="modal-body">
-                <div
-                  class="form-group"
-                  style="display: flex;"
-                >
-                  <label
-                    class="control-label col-sm-4"
-                    style="position: relative; top: 8px"
-                  >{{ $i18n.t(`default.name`) }}</label>
-                  <input
-                    class="form-control col-sm-7"
-                    v-model="projectName"
-                    type="text"
-                  />
+                <div class="form-group" style="display: flex;">
+                  <label class="control-label col-sm-4" style="position: relative; top: 8px">{{
+                    $i18n.t(`default.name`)
+                  }}</label>
+                  <input v-model="projectName" class="form-control col-sm-7" type="text" />
                 </div>
               </div>
               <div class="modal-footer">
-                <div
-                  class="btn-group btn-group-justified"
-                  role="group"
-                >
-                  <div
-                    class="btn-group"
-                    role="group"
-                  >
+                <div class="btn-group btn-group-justified" role="group">
+                  <div class="btn-group" role="group">
                     <button
                       :disabled="!projectName"
                       type="button"
                       class="btn btn-success"
                       @click="saveProject"
-                    >{{ $i18n.t("default.save") }}</button>
+                    >
+                      {{ $i18n.t('default.save') }}
+                    </button>
                   </div>
-                  <div
-                    class="btn-group"
-                    role="group"
-                  >
+                  <div class="btn-group" role="group">
                     <button
                       type="button"
                       class="btn btn-danger"
                       @click="$modal.hide('saveProject')"
-                    >{{ $i18n.t("default.close") }}</button>
+                    >
+                      {{ $i18n.t('default.close') }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -855,20 +653,11 @@
           <div style="display: inline-block; width: 100%;">
             <h4 class="col-sm-10 right-panel__title">
               <i class="fa fa-map-o title__icon" />
-              <span
-                class="mvp-red right-panel__name"
-                :title="layerName"
-              >
-                {{
-                layerName ? layerName : "" | maxLength
-                }}
+              <span class="mvp-red right-panel__name" :title="layerName">
+                {{ layerName ? layerName : '' | maxLength }}
               </span>
             </h4>
-            <div
-              class="col-sm-2"
-              style="margin-top: 6px;"
-              v-if="permission === 'write'"
-            >
+            <div v-if="permission === 'write'" class="col-sm-2" style="margin-top: 6px;">
               <div
                 class="btn-group btn-group-sm"
                 role="group"
@@ -876,15 +665,12 @@
               >
                 <a
                   class="btn btn-default"
-                  @click="goToSettings"
                   :title="$i18n.t('default.settings')"
+                  @click="goToSettings"
                 >
                   <i class="fa fa-cog yellow icon-hover" />
                 </a>
-                <div
-                  class="btn-group btn-group-sm"
-                  role="group"
-                >
+                <div class="btn-group btn-group-sm" role="group">
                   <button
                     type="button"
                     class="btn btn-default dropdown-toggle"
@@ -907,10 +693,7 @@
               </div>
             </div>
           </div>
-          <div
-            class="flex-center"
-            style="margin-bottom:30px"
-          >
+          <div class="flex-center" style="margin-bottom:30px">
             <div>
               <h4
                 v-if="project"
@@ -919,21 +702,24 @@
                 :title="project.name"
               >
                 <i class="fa fa-database title__icon" />
-                {{project.name | maxLength}}
+                {{ project.name | maxLength }}
               </h4>
             </div>
-            <div
-              class="btn-group btn-group-sm"
-              role="group"
-              style=" display: flex;"
-            >
+            <div class="btn-group btn-group-sm" role="group" style=" display: flex;">
               <a
                 class="btn btn-default"
-                @click="$modal.show('saveProject');projectName=project?project.name:''"
-                :title="project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`)"
+                :title="
+                  project
+                    ? $i18n.t(`featureManager.saveProject`)
+                    : $i18n.t(`featureManager.createProject`)
+                "
+                @click="
+                  $modal.show('saveProject');
+                  projectName = project ? project.name : '';
+                "
               >
                 <i
-                  v-bind:class="{'fa-plus': !project, 'fa-save': project}"
+                  :class="{ 'fa-plus': !project, 'fa-save': project }"
                   class="fa fa-lg fa-plus icon-hover"
                 />
               </a>
@@ -944,101 +730,88 @@
             class="nav nav-tabs nav-justified"
             style="margin-left: -15px; width: calc(100% + 30px);"
           >
-            <li
-              role="presentation"
-              :class="{ active: indexActiveTab === 0 }"
-            >
-              <a
-                href="#"
-                @click="indexActiveTab = 0"
-              >
+            <li role="presentation" :class="{ active: indexActiveTab === 0 }">
+              <a href="#" @click="indexActiveTab = 0">
                 <i class="fa fa-bars" />
-                {{ $i18n.t("featureManager.legend") }}
+                {{ $i18n.t('featureManager.legend') }}
               </a>
             </li>
             <li
+              v-show="currentFeature"
               role="presentation"
               :class="{ active: indexActiveTab === 1 }"
-              v-show="currentFeature"
             >
-              <a
-                href="#"
-                @click="indexActiveTab = 1"
-              >
+              <a href="#" @click="indexActiveTab = 1">
                 <i class="fa fa-table" />
-                {{ $i18n.t("featureManager.attributes") }}
+                {{ $i18n.t('featureManager.attributes') }}
               </a>
             </li>
             <li
+              v-show="currentFeature"
               role="presentation"
               :class="{ active: indexActiveTab === 2, disabled: !featureAttachments }"
-              v-show="currentFeature"
             >
               <a
                 href="#"
-                @click="indexActiveTab = 2;$refs['attachments-panel'].getAttachmentsMeta()"
+                @click="
+                  indexActiveTab = 2;
+                  $refs['attachments-panel'].getAttachmentsMeta();
+                "
               >
                 <i class="fa fa-info" />
-                {{ $i18n.t("featureManager.informations") }}
+                {{ $i18n.t('featureManager.informations') }}
               </a>
             </li>
           </ul>
           <div>
-            <div
-              v-show="indexActiveTab === 0"
-              class="legend-panel right-sub-panel"
-            >
+            <div v-show="indexActiveTab === 0" class="legend-panel right-sub-panel">
               <div class="scroll-tab">
                 <div class="baseLayers">
-                  <h4>{{ $i18n.t("default.basemaps") }}:</h4>
+                  <h4>{{ $i18n.t('default.basemaps') }}:</h4>
                   <ul class="list-group">
                     <li
-                      class="list-group-item"
                       v-for="name in baseLayers"
                       :key="name"
+                      class="list-group-item"
                       :class="{ activeLayer: currentBaseLayer == name }"
                       @click="changeBaseLayer(name)"
-                    >{{ name }}</li>
+                    >
+                      {{ name }}
+                    </li>
                   </ul>
                 </div>
                 <div class="others">
                   <div class="mb-10">
-                    <h4 class="mb-0">{{ $i18n.t("default.otherLayers") }}:</h4>
+                    <h4 class="mb-0">{{ $i18n.t('default.otherLayers') }}:</h4>
                     <span @click="openAddLayerModal">
-                      <i
-                        class="fa fa-plus-circle fa-lg green pt-10"
-                        style="margin-right:5px;"
-                      />
-                      <a
-                        class="green section__content--add"
-                      >{{ $i18n.t('featureManager.addLayer') }}</a>
+                      <i class="fa fa-plus-circle fa-lg green pt-10" style="margin-right:5px;" />
+                      <a class="green section__content--add">{{
+                        $i18n.t('featureManager.addLayer')
+                      }}</a>
                     </span>
                   </div>
 
                   <draggable
+                    v-if="otherLayers.length > 0"
                     tag="ul"
                     class="list-group"
                     :list="otherLayers"
-                    @start="drag=true"
+                    @start="drag = true"
                     @change="setLayersOrder"
-                    v-if="otherLayers.length > 0"
                   >
                     <li
-                      class="list-group-item"
-                      v-for="{id, name} in otherLayers"
+                      v-for="{ id, name } in otherLayers"
                       :key="name"
+                      class="list-group-item"
                       :class="{ activeLayer: activeOtherLayers.includes(id) }"
                     >
                       <div class="list__element--otherLayer">
-                        <label
-                          class="checkbox-inline mb-0"
-                          :title="name"
-                        >
+                        <label class="checkbox-inline mb-0" :title="name">
                           <input
-                            type="checkbox"
-                            @click="setLayerVisibility(name)"
-                            :value="id"
                             v-model="activeOtherLayers"
+                            type="checkbox"
+                            :value="id"
+                            @click="setLayerVisibility(name)"
                           />
                           <span>{{ name }}</span>
                         </label>
@@ -1053,7 +826,9 @@
                   </draggable>
                   <span v-else>
                     <ul class="list-group">
-                      <li class="list-group-item no-item">{{ $i18n.t("default.noOtherLayers") }}</li>
+                      <li class="list-group-item no-item">
+                        {{ $i18n.t('default.noOtherLayers') }}
+                      </li>
                     </ul>
                   </span>
                 </div>
@@ -1063,47 +838,31 @@
             <div v-show="indexActiveTab === 1">
               <template v-if="permission === 'write'">
                 <template v-if="!editing">
-                  <div
-                    class="btn-group btn-group-edit"
-                    role="group"
-                  >
+                  <div class="btn-group btn-group-edit" role="group">
                     <button
                       type="button"
                       class="btn btn-success btn-group-justified"
                       @click="editAttributes"
-                    >{{ $i18n.t("default.edit") }}</button>
+                    >
+                      {{ $i18n.t('default.edit') }}
+                    </button>
                   </div>
                 </template>
                 <template v-else>
-                  <div
-                    class="btn-group btn-group-action btn-group-edit"
-                    role="group"
-                  >
-                    <button
-                      type="button"
-                      class="btn btn-success"
-                      @click="saveEditing"
-                    >{{ $i18n.t("default.save") }}</button>
+                  <div class="btn-group btn-group-action btn-group-edit" role="group">
+                    <button type="button" class="btn btn-success" @click="saveEditing">
+                      {{ $i18n.t('default.save') }}
+                    </button>
                   </div>
-                  <div
-                    class="btn-group btn-group-action btn-group-edit"
-                    role="group"
-                  >
-                    <button
-                      type="button"
-                      class="btn btn-default"
-                      @click="cancelEditing"
-                    >{{ $i18n.t("default.cancel") }}</button>
+                  <div class="btn-group btn-group-action btn-group-edit" role="group">
+                    <button type="button" class="btn btn-default" @click="cancelEditing">
+                      {{ $i18n.t('default.cancel') }}
+                    </button>
                   </div>
-                  <div
-                    class="btn-group btn-group-action btn-group-edit"
-                    role="group"
-                  >
-                    <button
-                      type="button"
-                      class="btn btn-danger"
-                      @click="deleteFeature"
-                    >{{ $i18n.t("default.delete") }}</button>
+                  <div class="btn-group btn-group-action btn-group-edit" role="group">
+                    <button type="button" class="btn btn-danger" @click="deleteFeature">
+                      {{ $i18n.t('default.delete') }}
+                    </button>
                   </div>
                 </template>
               </template>
@@ -1114,15 +873,15 @@
                   ref="attributes-panel"
                   :editing="editing"
                   :fields="currentFeature"
-                  :dictValues="dictValues"
+                  :dict-values="dictValues"
                 />
               </div>
             </div>
             <div v-show="indexActiveTab === 2">
               <AttachmentsPanel
-                ref="attachments-panel"
                 v-if="currentFeature && Object.keys(featureAttachments).length > 0"
-                :attachmentsIds="currentFeature.properties.__attachments"
+                ref="attachments-panel"
+                :attachments-ids="currentFeature.properties.__attachments"
                 :lid="$route.params.layerId"
                 :fid="currentFeature.properties.id"
                 :permission="permission"
@@ -1160,14 +919,7 @@ import {
   Group as LayerGroup
 } from 'ol/layer';
 import { Circle, Fill, Stroke, Style, RegularShape, Text } from 'ol/style';
-import {
-  LineString,
-  Polygon,
-  Point,
-  MultiPoint,
-  MultiLineString,
-  MultiPolygon
-} from 'ol/geom.js';
+import { LineString, Polygon, Point, MultiPoint, MultiLineString, MultiPolygon } from 'ol/geom.js';
 import { getArea, getLength } from 'ol/sphere.js';
 import { unByKey } from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
@@ -1192,6 +944,14 @@ export default {
     InputNumber,
     Datepicker,
     draggable
+  },
+  filters: {
+    maxLength: val => {
+      if (val.length > 30) {
+        return `${val.slice(0, 30)}...`;
+      }
+      return val;
+    }
   },
   data: () => ({
     activeLayerName: '',
@@ -1267,8 +1027,7 @@ export default {
       }
       const ids = this.otherLayers.map(l => l.id);
       return this.layersAll.filter(
-        layer =>
-          !ids.includes(layer.id) && layer.id !== this.$route.params.layerId
+        layer => !ids.includes(layer.id) && layer.id !== this.$route.params.layerId
       );
     },
     layersFilteredByName() {
@@ -1326,12 +1085,22 @@ export default {
       return this.$store.getters.getUser;
     }
   },
-  filters: {
-    maxLength: val => {
-      if (val.length > 30) {
-        return `${val.slice(0, 30)}...`;
-      }
-      return val;
+  watch: {
+    services() {
+      this.addAdditionalLayers();
+    },
+    allOtherLayers() {
+      this.addAdditionalLayers();
+    }
+  },
+  async mounted() {
+    if (this.services.length < 1) {
+      this.getServices();
+    }
+    if (this.$route.query.projectId) {
+      this.getProject();
+    } else {
+      this.init();
     }
   },
   methods: {
@@ -1354,9 +1123,7 @@ export default {
         source: new VectorTileSource({
           cacheSize: 1,
           format: new MVT(),
-          url: `${
-            this.apiUrl
-          }/mvt/${id}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
+          url: `${this.apiUrl}/mvt/${id}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
         }),
         style: f => this.styleFeatures(f, true)
       });
@@ -1404,12 +1171,9 @@ export default {
           source: new VectorTileSource({
             cacheSize: 1,
             format: new MVT(),
-            url: `${
-              this.apiUrl
-            }/mvt/${id}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
+            url: `${this.apiUrl}/mvt/${id}/{z}/{x}/{y}?token=${localStorage.getItem('token')}`
           }),
           style: feature => {
-            const styles = [];
             const labelsToShow = [];
             otherLabels.forEach(el => {
               labelsToShow.push(feature.getProperties()[el]);
@@ -1438,10 +1202,7 @@ export default {
                     radius: otherLayerStyle.width
                   })
                 );
-              } else if (
-                otherLayerStyle === 'square' ||
-                otherLayerStyle === 'triangle'
-              ) {
+              } else if (otherLayerStyle === 'square' || otherLayerStyle === 'triangle') {
                 featStyle.setImage(
                   new RegularShape({
                     fill,
@@ -1451,26 +1212,17 @@ export default {
                     angle: otherLayerType === 'square' ? Math.PI / 4 : 0
                   })
                 );
-              } else if (
-                otherLayerType === 'polygon' ||
-                otherLayerType === 'line'
-              ) {
+              } else if (otherLayerType === 'polygon' || otherLayerType === 'line') {
                 featStyle.setFill(fill);
                 featStyle.setStroke(stroke);
-              } else if (
-                otherLayerType === 'dashed' ||
-                otherLayerType === 'dotted'
-              ) {
-                const lineDash =
-                  otherLayerType === 'dashed' ? [10, 10] : [1, 10];
+              } else if (otherLayerType === 'dashed' || otherLayerType === 'dotted') {
+                const lineDash = otherLayerType === 'dashed' ? [10, 10] : [1, 10];
                 stroke.setLineDash(lineDash);
                 featStyle.setStroke(stroke);
               }
             } else {
               const attr = feature.get(otherLayerStyle.attribute);
-              const filteredFeat = otherLayerStyle.categories.find(
-                el => el.value == attr
-              );
+              const filteredFeat = otherLayerStyle.categories.find(el => el.value == attr);
               if (filteredFeat) {
                 const stroke = new Stroke({
                   color: `rgba(${filteredFeat['stroke-color']})`,
@@ -1519,10 +1271,7 @@ export default {
       }
     },
     async createStyle() {
-      const r = await this.$store.dispatch(
-        'getLayerStyle',
-        this.$route.params.layerId
-      );
+      const r = await this.$store.dispatch('getLayerStyle', this.$route.params.layerId);
       if (r.status === 200) {
         this.labels = r.obj.style.labels;
         this.layerStyle = r.obj.style;
@@ -1674,9 +1423,7 @@ export default {
           this.activeLayerName = layers.filter(
             layer => layer.id === this.$route.params.layerId
           )[0].name;
-          this.layers = layers.filter(
-            layer => layer.id !== this.$route.params.layerId
-          );
+          this.layers = layers.filter(layer => layer.id !== this.$route.params.layerId);
           this.allOtherLayers = r.body.layers;
         } catch (error) {
           this.$alertify.error(
@@ -1688,9 +1435,7 @@ export default {
     },
     async getPermissions() {
       const r = await this.$store.dispatch('getPermissions');
-      const usersPerms = r.obj.permissions.find(
-        el => el.id === this.$route.params.layerId
-      );
+      const usersPerms = r.obj.permissions.find(el => el.id === this.$route.params.layerId);
       this.permission = usersPerms.users[this.user];
     },
     async getServices() {
@@ -1698,24 +1443,16 @@ export default {
       this.$store.commit('setServices', r.body.services);
     },
     async getProject() {
-      const r = await this.$store.dispatch(
-        'getProject',
-        this.$route.query.projectId
-      );
+      const r = await this.$store.dispatch('getProject', this.$route.query.projectId);
       this.$route.params.layerId = r.obj.data.active_layer_id;
       this.project = r.obj.data;
       if (!this.project.permission_to_each_additional_layer) {
-        this.$alertify.error(
-          this.$i18n.t('default.additionalLayerAccessDenied')
-        );
+        this.$alertify.error(this.$i18n.t('default.additionalLayerAccessDenied'));
       }
       this.init();
     },
     async getSettings() {
-      const res = await this.$store.dispatch(
-        'getCurrentSettings',
-        this.$route.params.layerId
-      );
+      const res = await this.$store.dispatch('getCurrentSettings', this.$route.params.layerId);
       const bbox = new GeoJSON().readFeature(res.obj.settings.bbox, {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326'
@@ -1789,9 +1526,7 @@ export default {
         } else if (this.featureTypes[k[0]] === 'real') {
           featureCopy[k[0]] = parseFloat(this.newFeatureProperties[k[0]]);
         } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
-          featureCopy[k[0]] = parseInt(
-            moment(this.newFeatureProperties[k[0]]).format('X')
-          );
+          featureCopy[k[0]] = parseInt(moment(this.newFeatureProperties[k[0]]).format('X'));
         }
       });
       const r = await this.$store.dispatch('addFeature', {
@@ -1824,9 +1559,7 @@ export default {
       }
       const payload = {
         active_layer_id: this.$route.params.layerId,
-        additional_layers_ids: otherLayersIds.filter(
-          id => !Number.isInteger(id)
-        ),
+        additional_layers_ids: otherLayersIds.filter(id => !Number.isInteger(id)),
         service_layers_ids: otherLayersIds.filter(id => Number.isInteger(id)),
         map_center: {
           coordinates: this.map.getView().getCenter(),
@@ -1876,14 +1609,10 @@ export default {
     addIds(ids) {
       if (this.currentFeature.properties.__attachments) {
         this.currentFeature.properties.__attachments += `;${ids}`;
-        this.items.find(
-          i => i.id === this.currentFeature.properties.id
-        ).__attachments += `;${ids}`;
+        this.items.find(i => i.id === this.currentFeature.properties.id).__attachments += `;${ids}`;
       } else {
         this.currentFeature.properties.__attachments = ids;
-        this.items.find(
-          i => i.id === this.currentFeature.properties.id
-        ).__attachments = ids;
+        this.items.find(i => i.id === this.currentFeature.properties.id).__attachments = ids;
       }
     },
     formatDate(feature) {
@@ -1911,9 +1640,7 @@ export default {
         } else if (this.featureTypes[k[0]] === 'real') {
           featureCopy.properties[k[0]] = parseFloat(feature.properties[k[0]]);
         } else if (this.featureTypes[k[0]] === 'timestamp without time zone') {
-          featureCopy.properties[k[0]] = parseInt(
-            moment.utc(feature.properties[k[0]]).format('X')
-          );
+          featureCopy.properties[k[0]] = parseInt(moment.utc(feature.properties[k[0]]).format('X'));
         }
       });
       return featureCopy;
@@ -2004,17 +1731,11 @@ export default {
 
         listener = this.sketch.getGeometry().on('change', evt => {
           if (evt.target instanceof Polygon) {
-            let result = `${this.formatArea(
-              evt.target
-            )} <br> ${this.formatLength(evt.target)}`;
+            let result = `${this.formatArea(evt.target)} <br> ${this.formatLength(evt.target)}`;
             this.measureTooltipElement.innerHTML = result;
-            this.measureTooltip.setPosition(
-              evt.target.getInteriorPoint().getCoordinates()
-            );
+            this.measureTooltip.setPosition(evt.target.getInteriorPoint().getCoordinates());
           } else if (evt.target instanceof LineString) {
-            this.measureTooltipElement.innerHTML = this.formatLength(
-              evt.target
-            );
+            this.measureTooltipElement.innerHTML = this.formatLength(evt.target);
             this.measureTooltip.setPosition(evt.target.getLastCoordinate());
           }
         });
@@ -2130,14 +1851,10 @@ export default {
         )
           return;
 
-        const feature = this.map.forEachFeatureAtPixel(
-          evt.pixel,
-          feat => feat,
-          {
-            hitTolerance: 5,
-            layerFilter: layer => layer.get('name') === 'features'
-          }
-        );
+        const feature = this.map.forEachFeatureAtPixel(evt.pixel, feat => feat, {
+          hitTolerance: 5,
+          layerFilter: layer => layer.get('name') === 'features'
+        });
         if (!feature) {
           this.selectFeature(feature);
         } else {
@@ -2165,9 +1882,9 @@ export default {
       const ids = this.currentFeature.properties.__attachments.split(';');
       const diff = ids.filter(x => !idsToDelete.includes(x));
       this.currentFeature.properties.__attachments = diff.join(';');
-      this.items.find(
-        i => i.id === this.currentFeature.properties.id
-      ).__attachments = diff.join(';');
+      this.items.find(i => i.id === this.currentFeature.properties.id).__attachments = diff.join(
+        ';'
+      );
     },
     drawFeatureEnd() {
       this.isDrawing = false;
@@ -2244,8 +1961,7 @@ export default {
       var area = getArea(polygon);
       var output;
       if (area > 10000) {
-        output =
-          Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
+        output = Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
       } else {
         output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>';
       }
@@ -2312,15 +2028,11 @@ export default {
           this.getLayerByName('buffer')
             .getSource()
             .addFeature(bufferFeature);
-          this.$alertify.success(
-            this.$i18n.t('featureManager.bufferGenerateSuccess')
-          );
+          this.$alertify.success(this.$i18n.t('featureManager.bufferGenerateSuccess'));
           this.isBuffer = true;
         }
       } else {
-        this.$alertify.error(
-          this.$i18n.t('featureManager.bufferGenerateError')
-        );
+        this.$alertify.error(this.$i18n.t('featureManager.bufferGenerateError'));
       }
     },
     goToSettings() {
@@ -2358,8 +2070,7 @@ export default {
                   group: 'baselayers',
                   zIndex: -1000,
                   source: new WMTS({
-                    url:
-                      'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
+                    url: 'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
                     matrixSet: 'EPSG:4326',
                     format: 'image/png',
                     projection: getProjection('EPSG:4326'),
@@ -2379,8 +2090,7 @@ export default {
     },
     isFiltersValidated(filters) {
       return filters.every(
-        filter =>
-          filter.operation !== '' && filter.column !== '' && filter.value !== ''
+        filter => filter.operation !== '' && filter.column !== '' && filter.value !== ''
       );
     },
     isInteractionActive(interaction) {
@@ -2403,9 +2113,7 @@ export default {
 
       const handle = key => {
         if (key === 'accept') {
-          self.currentColumnFilters = JSON.parse(
-            JSON.stringify(self.selectedColumnFilters)
-          );
+          self.currentColumnFilters = JSON.parse(JSON.stringify(self.selectedColumnFilters));
 
           self.columnFilterDecisionDialogView = false;
           self.$off('columnFilterDecision', handle);
@@ -2413,9 +2121,7 @@ export default {
         } else if (key === 'clear') {
           self.selectedColumnFilters = [];
         } else {
-          self.selectedColumnFilters = JSON.parse(
-            JSON.stringify(self.currentColumnFilters)
-          );
+          self.selectedColumnFilters = JSON.parse(JSON.stringify(self.currentColumnFilters));
 
           self.columnFilterDecisionDialogView = false;
           self.$off('columnFilterDecision', handle);
@@ -2450,23 +2156,7 @@ export default {
       a.download = `${this.$route.params.layerId}.geojson`;
       a.href = window.URL.createObjectURL(blob);
       a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      e.initEvent(
-        'click',
-        true,
-        false,
-        window,
-        0,
-        0,
-        0,
-        0,
-        0,
-        false,
-        false,
-        false,
-        false,
-        0,
-        null
-      );
+      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
       a.dispatchEvent(e);
     },
     selectFeature(feature) {
@@ -2476,9 +2166,7 @@ export default {
         this.selectFeatureById(fid);
         this.$refs['table-data'].getAttachments(fid); // get attachments for feature
         if ('table-data' in this.$refs) {
-          this.$refs['table-data'].selectItem(
-            this.items.find(item => item.id === fid)
-          );
+          this.$refs['table-data'].selectItem(this.items.find(item => item.id === fid));
         }
       } else {
         if (this.$refs['table-data']) {
@@ -2492,9 +2180,7 @@ export default {
       }
     },
     selectFeatureById(fid) {
-      this.currentFeature = this.activeLayer.features.find(
-        el => el.properties.id === fid
-      );
+      this.currentFeature = this.activeLayer.features.find(el => el.properties.id === fid);
       const feature = new GeoJSON().readFeature(this.currentFeature, {
         featureProjection: 'EPSG:3857',
         dataProjection: 'EPSG:4326'
@@ -2512,18 +2198,16 @@ export default {
         this.layerGeometry = 'lineString';
       } else if (['point', 'square', 'triangle'].includes(type)) {
         this.layerGeometry = 'point';
-      } else if (['polygon', includes(type)]) {
+      } else if (['polygon'].includes(type)) {
         this.layerGeometry = 'polygon';
       }
     },
-    setLayersOrder(test) {
+    setLayersOrder() {
       const otherLayersOnMap = this.getLayerByName('otherLayers')
         .getLayers()
         .getArray();
       [...this.otherLayers].reverse().forEach((layer, index) => {
-        otherLayersOnMap
-          .find(l => l.get('name') === layer.name)
-          .setZIndex(index);
+        otherLayersOnMap.find(l => l.get('name') === layer.name).setZIndex(index);
       });
       this.map.updateSize();
     },
@@ -2544,9 +2228,7 @@ export default {
           .getSource()
           .clear();
 
-        this.measureTooltipElement.parentNode.removeChild(
-          this.measureTooltipElement
-        );
+        this.measureTooltipElement.parentNode.removeChild(this.measureTooltipElement);
       } else {
         if (this.isMeasureShow) {
           this.isMeasureShow = false;
@@ -2589,15 +2271,11 @@ export default {
       });
       if (this.layerType) {
         const stroke = new Stroke({
-          color: selecting
-            ? 'rgba(249, 237, 20, 0.8)'
-            : `rgba(${this.layerStyle['stroke-color']})`,
+          color: selecting ? 'rgba(249, 237, 20, 0.8)' : `rgba(${this.layerStyle['stroke-color']})`,
           width: selecting ? 4 : `${this.layerStyle['stroke-width']}`
         });
         const fill = new Fill({
-          color: selecting
-            ? 'rgba(249, 237, 20, 0.5)'
-            : `rgba(${this.layerStyle['fill-color']})`
+          color: selecting ? 'rgba(249, 237, 20, 0.5)' : `rgba(${this.layerStyle['fill-color']})`
         });
         if (this.layerType === 'point') {
           featStyle.setImage(
@@ -2607,10 +2285,7 @@ export default {
               radius: this.layerStyle.width
             })
           );
-        } else if (
-          this.layerType === 'square' ||
-          this.layerType === 'triangle'
-        ) {
+        } else if (this.layerType === 'square' || this.layerType === 'triangle') {
           featStyle.setImage(
             new RegularShape({
               fill,
@@ -2630,20 +2305,14 @@ export default {
         }
       } else {
         const attr = f.get(this.layerStyle.attribute);
-        const filteredFeat = this.layerStyle.categories.find(
-          el => el.value == attr
-        );
+        const filteredFeat = this.layerStyle.categories.find(el => el.value == attr);
         if (filteredFeat) {
           const stroke = new Stroke({
-            color: selecting
-              ? 'rgba(249, 237, 20, 0.5)'
-              : `rgba(${filteredFeat['stroke-color']})`,
+            color: selecting ? 'rgba(249, 237, 20, 0.5)' : `rgba(${filteredFeat['stroke-color']})`,
             width: selecting ? 4 : `${filteredFeat['stroke-width']}`
           });
           const fill = new Fill({
-            color: selecting
-              ? 'rgba(249, 237, 20, 0.5)'
-              : `rgba(${filteredFeat['fill-color']})`
+            color: selecting ? 'rgba(249, 237, 20, 0.5)' : `rgba(${filteredFeat['fill-color']})`
           });
           // TODO - add triangle/square/dashed/dotted
           if (filteredFeat.type === 'point') {
@@ -2665,9 +2334,7 @@ export default {
                 color: [250, 250, 250, 0.4]
               }),
               stroke: new Stroke({
-                color: selecting
-                  ? 'rgba(249, 237, 20, 0.5)'
-                  : [51, 153, 204, 1],
+                color: selecting ? 'rgba(249, 237, 20, 0.5)' : [51, 153, 204, 1],
                 width: selecting ? 3 : 1
               }),
               radius: 2
@@ -2675,11 +2342,7 @@ export default {
           );
         }
       }
-      if (
-        mvt == true &&
-        this.editing == true &&
-        f.get('id') == this.currentFeature.properties.id
-      ) {
+      if (mvt == true && this.editing == true && f.get('id') == this.currentFeature.properties.id) {
         return null;
       }
       return featStyle;
@@ -2730,9 +2393,7 @@ export default {
 
       await this.createStyle();
 
-      this.map.addLayer(
-        this.createMVTLayer(this.$route.params.layerId, 'features')
-      );
+      this.map.addLayer(this.createMVTLayer(this.$route.params.layerId, 'features'));
       this.map.addLayer(
         new VectorLayer({
           name: 'featuresVector',
@@ -2760,10 +2421,7 @@ export default {
                 })
               })
             ];
-            if (
-              !(geometry instanceof Point) &&
-              !(geometry instanceof MultiPoint)
-            ) {
+            if (!(geometry instanceof Point) && !(geometry instanceof MultiPoint)) {
               styles.push(
                 new Style({
                   image: new Circle({
@@ -2777,10 +2435,7 @@ export default {
                   }),
                   geometry: () => {
                     let coordinates = geometry.getCoordinates();
-                    if (
-                      geometry instanceof Polygon ||
-                      geometry instanceof MultiLineString
-                    ) {
+                    if (geometry instanceof Polygon || geometry instanceof MultiLineString) {
                       coordinates = coordinates.flat();
                     } else if (geometry instanceof MultiPolygon) {
                       coordinates = coordinates.flat(2);
@@ -2874,19 +2529,13 @@ export default {
 
       this.createSelectInteraction();
 
-      const lDV = await this.$store.dispatch(
-        'getLayerDictsValues',
-        this.$route.params.layerId
-      );
+      const lDV = await this.$store.dispatch('getLayerDictsValues', this.$route.params.layerId);
       if (lDV.status === 200) {
         this.dictValues = lDV.obj.data;
       } else {
         this.$alertify.error(this.$i18n.t('default.getDictsValuesError'));
       }
-      const r = await this.$store.dispatch(
-        'getLayer',
-        this.$route.params.layerId
-      );
+      const r = await this.$store.dispatch('getLayer', this.$route.params.layerId);
       if (r.status === 200) {
         this.$store.commit('setActiveLayer', r.obj);
         Object.keys(r.obj.features[0].properties).forEach(el => {
@@ -2916,24 +2565,6 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
       this.searchCount = this.items.length;
-    }
-  },
-  async mounted() {
-    if (this.services.length < 1) {
-      this.getServices();
-    }
-    if (this.$route.query.projectId) {
-      this.getProject();
-    } else {
-      this.init();
-    }
-  },
-  watch: {
-    services() {
-      this.addAdditionalLayers();
-    },
-    allOtherLayers() {
-      this.addAdditionalLayers();
     }
   }
 };

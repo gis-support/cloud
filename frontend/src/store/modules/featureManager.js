@@ -1,18 +1,18 @@
-import Vue from "vue";
-import Swagger from "swagger-client";
-import api from "@/docs/api.json";
+import Vue from 'vue';
+import Swagger from 'swagger-client';
+import api from '@/docs/api.json';
 
 const swagger = new Swagger({
   spec: api,
   requestInterceptor: r => {
     const request = r;
-    if (!request.url.includes("https") && process.env.VUE_APP_PROD_HOST_URL != "localhost") {
-      request.url = request.url.replace("http", "https");
+    if (!request.url.includes('https') && process.env.VUE_APP_PROD_HOST_URL != 'localhost') {
+      request.url = request.url.replace('http', 'https');
     }
-    if (request.url.includes("/login") || request.url.includes("/register")) {
+    if (request.url.includes('/login') || request.url.includes('/register')) {
       return request;
     }
-    request.headers.Authorization = localStorage.getItem("token");
+    request.headers.Authorization = localStorage.getItem('token');
     return request;
   }
 }).client;
@@ -109,7 +109,7 @@ export default {
     },
     async deleteFileAttachments(ctx, payload) {
       try {
-        const response = await swagger.apis["QGIS Attachments"].delete_api_attachments_qgis({
+        const response = await swagger.apis['QGIS Attachments'].delete_api_attachments_qgis({
           ids: payload.ids,
           layer_id: payload.lid,
           feature_id: payload.fid
@@ -121,7 +121,7 @@ export default {
     },
     async downloadFileAttachments(ctx, ids) {
       try {
-        const response = await swagger.apis["QGIS Attachments"].get_api_attachments_qgis_files({
+        const response = await swagger.apis['QGIS Attachments'].get_api_attachments_qgis_files({
           ids: ids
         });
         return response;
@@ -160,7 +160,7 @@ export default {
           lid: payload.lid,
           fid: payload.fid
         });
-        ctx.commit("editFeatureInActiveLayer", payload);
+        ctx.commit('editFeatureInActiveLayer', payload);
         return response;
       } catch (err) {
         return err.response;
@@ -168,7 +168,7 @@ export default {
     },
     async getAttachmentsMeta(ctx, ids) {
       try {
-        const response = await swagger.apis["QGIS Attachments"].get_api_attachments_qgis_metadata({
+        const response = await swagger.apis['QGIS Attachments'].get_api_attachments_qgis_metadata({
           ids: ids
         });
         return response;
@@ -258,7 +258,7 @@ export default {
       return state.featureAttachments;
     },
     getLayerName(state) {
-      return state.layerName || localStorage.getItem("layerName");
+      return state.layerName || localStorage.getItem('layerName');
     },
     getMapCenter(state) {
       return state.mapCenter;
@@ -272,7 +272,7 @@ export default {
       const groups = Object.keys(params.attachments);
       groups.forEach(el => {
         if (!Object.keys(state.featureAttachments).includes(params.lid)) {
-          Vue.set(state, "featureAttachments", params.lid);
+          Vue.set(state, 'featureAttachments', params.lid);
         }
         const ids = state.featureAttachments[params.lid][params.fid][el].map(att => att.id);
         const attachArr = [
@@ -317,7 +317,7 @@ export default {
     },
     setLayerName(state, name) {
       state.layerName = name;
-      localStorage.setItem("layerName", name);
+      localStorage.setItem('layerName', name);
     }
   }
 };

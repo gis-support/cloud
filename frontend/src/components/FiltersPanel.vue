@@ -1,23 +1,14 @@
 <template>
   <div class="filters-panel">
     <template v-if="!value || value.length == 0">
-      <button
-        class="btn btn-link"
-        @click="toAddNew"
-      >
-        <i
-          class="fa fa-plus-circle"
-          aria-hidden="true"
-        />
+      <button class="btn btn-link" @click="toAddNew">
+        <i class="fa fa-plus-circle" aria-hidden="true" />
         Dodaj filtr
       </button>
     </template>
     <template v-else>
       <div>
-        <div
-          v-for="(filter, index) in value"
-          :key="index"
-        >
+        <div v-for="(filter, index) in value" :key="index">
           <SingleFilterPanel
             ref="filter"
             :value="filter"
@@ -30,20 +21,17 @@
               <label class="control-label col-sm-4">Następny warunek:</label>
               <div class="col-sm-8">
                 <select
-                  class="form-control"
                   v-model="filter.condition"
+                  class="form-control"
                   :value="filter.condition"
                   @input="updateNext(filter, $event.target.value)"
                 >
-                  <option
-                    value
-                    v-if="filter.condition == ''"
-                  />
+                  <option v-if="filter.condition == ''" value />
                   <option
                     v-for="(operation, idx) in filterMergeOperations"
-                    v-text="operation"
-                    :value="operation"
                     :key="operation + idx"
+                    :value="operation"
+                    v-text="operation"
                   />
                 </select>
               </div>
@@ -59,8 +47,8 @@
           <ul>
             <template v-for="(filter, idx) in value">
               <span
-                :key="filter.column+idx"
                 v-if="filter.operation != '' && filter.column != '' && filter.value != ''"
+                :key="filter.column + idx"
               >
                 <li>
                   atrybut
@@ -68,8 +56,8 @@
                   <span v-text="filterOperationsText[filter.operation]" />&nbsp;
                   <b v-text="filter.value" />&nbsp;
                   <span
-                    v-text="filterMergeOperationsText[filter.condition]"
                     v-if="filter.condition != ''"
+                    v-text="filterMergeOperationsText[filter.condition]"
                   />&nbsp;
                 </li>
               </span>
@@ -121,6 +109,12 @@ export default {
       OR: 'lub'
     }
   }),
+  created() {
+    this.fields = _(this.$root.fields)
+      .keyBy(field => field.key)
+      .mapValues(field => field.name)
+      .value();
+  },
   methods: {
     toAddNew() {
       this.value.push({
@@ -159,12 +153,6 @@ export default {
     emitUpdateValue() {
       this.$emit('input', this.value);
     }
-  },
-  created() {
-    this.fields = _(this.$root.fields)
-      .keyBy(field => field.key)
-      .mapValues(field => field.name)
-      .value();
   }
 };
 </script>

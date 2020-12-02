@@ -1,38 +1,23 @@
 <template>
   <div class="container">
     <div class="col-md-3 layout-sidebar">
-      <ul
-        id="myTab"
-        class="nav nav-layout-sidebar nav-stacked"
-      >
+      <ul id="myTab" class="nav nav-layout-sidebar nav-stacked">
         <li class="active">
-          <a
-            href="#info-tab"
-            data-toggle="tab"
-            @click="setActiveTab('info-tab')"
-          >
+          <a href="#info-tab" data-toggle="tab" @click="setActiveTab('info-tab')">
             <i class="fa fa-info-circle" />
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.layerInfo') }}</span>
           </a>
         </li>
         <li>
-          <a
-            href="#style-tab"
-            data-toggle="tab"
-            @click="setActiveTab('style-tab')"
-          >
+          <a href="#style-tab" data-toggle="tab" @click="setActiveTab('style-tab')">
             <i class="fa fa-map-pin" />
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.symbolization') }}</span>
           </a>
         </li>
         <li>
-          <a
-            href="#labels-tab"
-            data-toggle="tab"
-            @click="setActiveTab('labels-tab')"
-          >
+          <a href="#labels-tab" data-toggle="tab" @click="setActiveTab('labels-tab')">
             <i class="fa fa-tags" />
             &nbsp;&nbsp;
             <span>{{ $i18n.t('settings.labels') }}</span>
@@ -41,109 +26,90 @@
       </ul>
     </div>
     <div class="col-md-9 col-sm-8 layout-main">
-      <div
-        class="loading-overlay pt-10 pb-10 text-centered"
-        v-if="!isMounted"
-      >
+      <div v-if="!isMounted" class="loading-overlay pt-10 pb-10 text-centered">
         <div class="loading-indicator mb-10">
           <h4>{{ $i18n.t('default.loading') }}</h4>
           <i class="fa fa-lg fa-spin fa-spinner" />
         </div>
       </div>
-      <div
-        id="settings-content"
-        class="tab-content stacked-content"
-        v-else
-      >
+      <div v-else id="settings-content" class="tab-content stacked-content">
         <div class="heading-block">
           <h3>
             <span data-i18n="layerSettings.title">{{ $i18n.t('default.layerSettings') }}:</span>
             <span class="red">{{ currentEditedLayer.name }}</span>
-            <a
-              @click="goToLayer"
-              :title="$i18n.t('default.goToLayer')"
-            >
+            <a :title="$i18n.t('default.goToLayer')" @click="goToLayer">
               <i class="fa fa-chevron-circle-right red icon-hover" />
             </a>
           </h3>
         </div>
-        <div
-          class="tab-pane in active"
-          id="info-tab"
-          v-if="activeTab === 'info-tab'"
-        >
+        <div v-if="activeTab === 'info-tab'" id="info-tab" class="tab-pane in active">
           <h4 class="text-left">{{ $i18n.t('dashboard.modal.layerName') }}</h4>
           <div style="display: flex">
-            <input
-              type="text"
-              class="form-control mr-5"
-              v-model="currentEditedLayer.name"
-            />
+            <input v-model="currentEditedLayer.name" type="text" class="form-control mr-5" />
             <button
               type="button"
               class="btn btn-success"
+              :disabled="
+                !currentEditedLayer.name.trim() ||
+                  currentEditedLayer.name.length > layerMaxNameLength
+              "
               @click="saveLayerName"
-              :disabled="!currentEditedLayer.name.trim() || currentEditedLayer.name.length > layerMaxNameLength"
-            >{{ $i18n.t('default.saveName') }}</button>
+            >
+              {{ $i18n.t('default.saveName') }}
+            </button>
           </div>
           <div class="pt-10">
             <h4 class="text-left">{{ $i18n.t('dashboard.modal.addColumn') }}</h4>
             <div style="display: flex">
               <input
+                v-model="newColumnName"
                 type="text"
                 class="form-control mr-5"
                 placeholder="Nazwa kolumny"
-                v-model="newColumnName"
               />
-              <select
-                class="form-control mr-5"
-                name="column-types-select"
-                v-model="newColumnType"
-              >
-                <option
-                  :value="undefined"
-                  selected
-                  disabled
-                >{{ $i18n.t('dashboard.modal.chooseColumnType') }}</option>
+              <select v-model="newColumnType" class="form-control mr-5" name="column-types-select">
+                <option :value="undefined" selected disabled>{{
+                  $i18n.t('dashboard.modal.chooseColumnType')
+                }}</option>
                 <option
                   v-for="colType in columnTypes"
                   :key="colType"
                   :value="colType"
                   v-text="$i18n.t(`default.columnsTypes.${colType}`)"
-                >{{ colType }}</option>
+                  >{{ colType }}</option
+                >
               </select>
               <button
                 type="button"
                 class="btn btn-success"
-                @click="newColumnType==='dict'?openDictionaryModal():addNewColumn()"
                 :disabled="!newColumnType || !newColumnName.trim()"
-              >{{ $i18n.t('default.add') }}</button>
+                @click="newColumnType === 'dict' ? openDictionaryModal() : addNewColumn()"
+              >
+                {{ $i18n.t('default.add') }}
+              </button>
             </div>
           </div>
           <div class="pt-10">
             <h4 class="text-left">
               {{ $i18n.t('dashboard.modal.layerColumns') }}
               <i
-                class="fa fa-chevron-up"
-                @click="toggleColumnsSection(false)"
                 v-if="isColumnsVisible"
+                class="fa fa-chevron-up"
                 aria-hidden="true"
                 style="cursor: pointer;"
                 :title="$i18n.t('dashboard.modal.hideColumns')"
+                @click="toggleColumnsSection(false)"
               />
               <i
-                class="fa fa-chevron-down"
-                @click="toggleColumnsSection(true)"
                 v-if="!isColumnsVisible"
+                class="fa fa-chevron-down"
                 aria-hidden="true"
                 style="cursor: pointer;"
                 :title="$i18n.t('dashboard.modal.showColumns')"
+                @click="toggleColumnsSection(true)"
               />
             </h4>
-            <table
-              v-if="isColumnsVisible"
-              class="table table-striped table-bordered table-hover"
-            >
+            <table v-if="isColumnsVisible" class="table table-striped table-bordered table-hover">
               <thead>
                 <tr role="row">
                   <th class="text-centered">{{ $i18n.t('default.name') }}</th>
@@ -152,10 +118,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="(value, name, index) in currentLayerSettings.columns"
-                  :key="index"
-                >
+                <tr v-for="(value, name, index) in currentLayerSettings.columns" :key="index">
                   <td class="text-centered">{{ name }}</td>
                   <td class="text-centered">{{ $i18n.t(`default.columnsTypes.${value}`) }}</td>
                   <td class="text-centered">
@@ -177,178 +140,110 @@
             </table>
           </div>
         </div>
-        <div
-          class="tab-pane in active"
-          id="style-tab"
-          v-if="activeTab === 'style-tab'"
-        >
-          <div
-            class="col-md-12 pb-10"
-            style="display: flex;"
-          >
+        <div v-if="activeTab === 'style-tab'" id="style-tab" class="tab-pane in active">
+          <div class="col-md-12 pb-10" style="display: flex;">
             <div class="col-md-6 pl-0">
               <label class="control-label col-sm-6 pl-0">{{ $i18n.t('settings.visType') }}</label>
-              <select
-                class="form-control col-sm-4 mt-15"
-                v-model="symbolizationType"
-              >
-                <option
-                  disabled
-                  value
-                >{{ $i18n.t('settings.chooseVisualizationType') }}</option>
+              <select v-model="symbolizationType" class="form-control col-sm-4 mt-15">
+                <option disabled value>{{ $i18n.t('settings.chooseVisualizationType') }}</option>
                 <option value="single">{{ $i18n.t('default.single') }}</option>
                 <option value="categorized">{{ $i18n.t('default.categorized') }}</option>
               </select>
             </div>
-            <div
-              class="col-md-6 pl-0"
-              v-if="symbolizationType === 'single'"
-            >
+            <div v-if="symbolizationType === 'single'" class="col-md-6 pl-0">
               <label class="control-label col-sm-6 pl-0">{{ $i18n.t('settings.objStyle') }}</label>
               <select
-                class="form-control col-sm-4 mt-15"
-                v-model="layerType"
                 v-if="layerType === 'point' || layerType === 'square' || layerType === 'triangle'"
+                v-model="layerType"
+                class="form-control col-sm-4 mt-15"
               >
-                <option
-                  disabled
-                  value
-                >{{ $i18n.t('settings.chooseObjectStyle') }}</option>
+                <option disabled value>{{ $i18n.t('settings.chooseObjectStyle') }}</option>
                 <option value="point">{{ $i18n.t('default.point') }}</option>
                 <option value="square">{{ $i18n.t('default.square') }}</option>
                 <option value="triangle">{{ $i18n.t('default.triangle') }}</option>
               </select>
               <select
+                v-else-if="layerType === 'polygon'"
+                v-model="layerType"
                 class="form-control col-sm-4 mt-15"
                 disabled
-                v-model="layerType"
-                v-else-if="layerType === 'polygon'"
               >
-                <option
-                  disabled
-                  value
-                >{{ $i18n.t('default.polygon') }}</option>
-                <option
-                  disabled
-                  value="polygon"
-                >{{ $i18n.t('default.polygon') }}</option>
+                <option disabled value>{{ $i18n.t('default.polygon') }}</option>
+                <option disabled value="polygon">{{ $i18n.t('default.polygon') }}</option>
               </select>
-              <select
-                class="form-control col-sm-4 mt-15"
-                v-model="layerType"
-                v-else
-              >
-                <option
-                  disabled
-                  value
-                >{{ $i18n.t('settings.chooseObjectStyle') }}</option>
+              <select v-else v-model="layerType" class="form-control col-sm-4 mt-15">
+                <option disabled value>{{ $i18n.t('settings.chooseObjectStyle') }}</option>
                 <option value="line">{{ $i18n.t('default.line') }}</option>
                 <option value="dotted">{{ $i18n.t('default.dotted') }}</option>
                 <option value="dashed">{{ $i18n.t('default.dashed') }}</option>
               </select>
             </div>
           </div>
-          <div
-            class="form-group"
-            v-if="symbolizationType === 'single'"
-          >
-            <div
-              class="col-md-3 color-picker__container"
-              style="left: -30px;"
-            >
+          <div v-if="symbolizationType === 'single'" class="form-group">
+            <div class="col-md-3 color-picker__container" style="left: -30px;">
               <label class="control-label">{{ $i18n.t('settings.stroke-color') }}</label>
               <br />
-              <color-picker
-                model="rgb"
-                v-model="strokeColor"
-              />
+              <ColorPicker v-model="strokeColor" model="rgb" />
             </div>
             <div class="col-md-3 color-picker__container">
               <label class="control-label">
                 {{ $i18n.t('settings.stroke-width') }}
-                <i
-                  class="fa fa-question-circle icon-hover"
-                  :title="$i18n.t('settings.sizeInfo')"
-                />
+                <i class="fa fa-question-circle icon-hover" :title="$i18n.t('settings.sizeInfo')" />
               </label>
               <input
+                v-model="strokeWidth"
                 type="number"
                 min="1"
                 max="10"
-                @keyup="checkValue($event, 'strokeWidth')"
                 class="form-control mt-15"
                 style="width:50px"
-                v-model="strokeWidth"
+                @keyup="checkValue($event, 'strokeWidth')"
               />
             </div>
             <div
-              class="col-md-3 color-picker__container"
               v-if="layerType !== 'line' && layerType !== 'dotted' && layerType !== 'dashed'"
+              class="col-md-3 color-picker__container"
             >
               <label class="control-label">{{ $i18n.t('settings.fill-color') }}</label>
               <br />
-              <color-picker
-                model="rgb"
-                v-model="fillColor"
-              />
+              <ColorPicker v-model="fillColor" model="rgb" />
             </div>
             <div
+              v-if="layerType === 'point' || layerType === 'triangle' || layerType === 'square'"
               class="col-md-3 color-picker__container"
               style="right: -20px"
-              v-if="layerType === 'point' || layerType === 'triangle' || layerType === 'square'"
             >
               <label class="control-label">
                 {{ $i18n.t('settings.width') }}
-                <i
-                  class="fa fa-question-circle icon-hover"
-                  :title="$i18n.t('settings.sizeInfo')"
-                />
+                <i class="fa fa-question-circle icon-hover" :title="$i18n.t('settings.sizeInfo')" />
               </label>
               <input
+                v-model="width"
                 type="number"
                 min="1"
                 step="1"
                 max="10"
-                @keyup="checkValue($event, 'width')"
                 class="form-control mt-15"
                 style="width:50px"
-                v-model="width"
+                @keyup="checkValue($event, 'width')"
               />
             </div>
-            <div
-              class="col-md-12 pr-30"
-              style="display:flex; justify-content:flex-end;"
-            >
-              <button
-                type="button"
-                class="btn btn-success mt-15"
-                @click="saveStyle"
-              >{{ $i18n.t('default.saveStyle') }}</button>
+            <div class="col-md-12 pr-30" style="display:flex; justify-content:flex-end;">
+              <button type="button" class="btn btn-success mt-15" @click="saveStyle">
+                {{ $i18n.t('default.saveStyle') }}
+              </button>
             </div>
           </div>
-          <div
-            class="form-group"
-            v-else
-          >
-            <div
-              class="col-md-12 pb-10"
-              style="display: flex;"
-            >
+          <div v-else class="form-group">
+            <div class="col-md-12 pb-10" style="display: flex;">
               <div class="col-md-6 pl-0">
-                <label class="control-label col-sm-6 pl-0">{{ $i18n.t('settings.attribute') }}</label>
-                <select
-                  class="form-control col-sm-4 mt-15"
-                  v-model="categorizedAttr"
-                >
-                  <option
-                    disabled
-                    value
-                  >{{ $i18n.t('settings.chooseAttr') }}</option>
+                <label class="control-label col-sm-6 pl-0">{{
+                  $i18n.t('settings.attribute')
+                }}</label>
+                <select v-model="categorizedAttr" class="form-control col-sm-4 mt-15">
+                  <option disabled value>{{ $i18n.t('settings.chooseAttr') }}</option>
                   <template v-for="attr in Object.keys(currentLayerSettings.columns)">
-                    <option
-                      :key="attr"
-                      :value="attr"
-                    >{{ attr }}</option>
+                    <option :key="attr" :value="attr">{{ attr }}</option>
                   </template>
                 </select>
               </div>
@@ -359,14 +254,18 @@
                   style="margin-top: 38px"
                   :disabled="!categorizedAttr"
                   @click="categorizeFeatures(categorizedAttr, currentEditedLayer.id)"
-                >{{ $i18n.t('settings.classify') }}</button>
+                >
+                  {{ $i18n.t('settings.classify') }}
+                </button>
                 <button
+                  v-if="categories.length > 0"
                   type="button"
                   class="btn btn-success ml-10"
                   style="margin-top: 38px"
-                  v-if="categories.length > 0"
                   @click="saveCategorizedStyles"
-                >{{ $i18n.t('default.saveStyle') }}</button>
+                >
+                  {{ $i18n.t('default.saveStyle') }}
+                </button>
               </div>
             </div>
             <div class="col-md-12 pb-10">
@@ -376,32 +275,23 @@
               >
                 <thead>
                   <tr role="row">
-                    <th
-                      v-if="headers.includes('value')"
-                      class="text-centered"
-                    >{{ $i18n.t('settings.value') }}</th>
-                    <th
-                      v-if="headers.includes('fill-color')"
-                      class="text-centered"
-                    >{{ $i18n.t('settings.fill-color') }}</th>
-                    <th
-                      v-if="headers.includes('stroke-color')"
-                      class="text-centered"
-                    >{{ $i18n.t('settings.stroke-color') }}</th>
-                    <th
-                      v-if="headers.includes('stroke-width')"
-                      class="text-centered"
-                    >
+                    <th v-if="headers.includes('value')" class="text-centered">
+                      {{ $i18n.t('settings.value') }}
+                    </th>
+                    <th v-if="headers.includes('fill-color')" class="text-centered">
+                      {{ $i18n.t('settings.fill-color') }}
+                    </th>
+                    <th v-if="headers.includes('stroke-color')" class="text-centered">
+                      {{ $i18n.t('settings.stroke-color') }}
+                    </th>
+                    <th v-if="headers.includes('stroke-width')" class="text-centered">
                       {{ $i18n.t('settings.stroke-width') }}
                       <i
                         class="fa fa-question-circle icon-hover"
                         :title="$i18n.t('settings.sizeInfo')"
                       />
                     </th>
-                    <th
-                      v-if="headers.includes('width')"
-                      class="text-centered"
-                    >
+                    <th v-if="headers.includes('width')" class="text-centered">
                       {{ $i18n.t('settings.width') }}
                       <i
                         class="fa fa-question-circle icon-hover"
@@ -411,54 +301,36 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr
-                    v-for="(feat, index) in categories"
-                    :key="index"
-                  >
-                    <td
-                      v-if="feat.hasOwnProperty('value')"
-                      class="text-centered"
-                    >
+                  <tr v-for="(feat, index) in categories" :key="index">
+                    <td v-if="feat.hasOwnProperty('value')" class="text-centered">
                       <p style="position: relative; top: 5px;">{{ feat.value }}</p>
                     </td>
-                    <td
-                      v-if="feat.hasOwnProperty('fill-color')"
-                      class="text-centered"
-                    >
-                      <color-picker v-model="feat['fill-color-rgba']" />
+                    <td v-if="feat.hasOwnProperty('fill-color')" class="text-centered">
+                      <ColorPicker v-model="feat['fill-color-rgba']" />
                     </td>
-                    <td
-                      v-if="feat.hasOwnProperty('stroke-color')"
-                      class="text-centered"
-                    >
-                      <color-picker v-model="feat['stroke-color-rgba']" />
+                    <td v-if="feat.hasOwnProperty('stroke-color')" class="text-centered">
+                      <ColorPicker v-model="feat['stroke-color-rgba']" />
                     </td>
-                    <td
-                      v-if="feat.hasOwnProperty('stroke-width')"
-                      class="text-centered"
-                    >
+                    <td v-if="feat.hasOwnProperty('stroke-width')" class="text-centered">
                       <input
+                        v-model="feat['stroke-width']"
                         type="number"
                         min="1"
                         max="10"
-                        @keyup="checkValue($event, 'stroke-width', index, 'categories')"
                         class="form-control"
                         style="width:50px; margin:0 auto;"
-                        v-model="feat['stroke-width']"
+                        @keyup="checkValue($event, 'stroke-width', index, 'categories')"
                       />
                     </td>
-                    <td
-                      v-if="feat.hasOwnProperty('width')"
-                      class="text-centered"
-                    >
+                    <td v-if="feat.hasOwnProperty('width')" class="text-centered">
                       <input
+                        v-model="feat['width']"
                         type="number"
                         min="1"
                         max="10"
-                        @keyup="checkValue($event, 'width', index, 'categories')"
                         class="form-control"
                         style="width:50px; margin:0 auto;"
-                        v-model="feat['width']"
+                        @keyup="checkValue($event, 'width', index, 'categories')"
                       />
                     </td>
                   </tr>
@@ -467,11 +339,7 @@
             </div>
           </div>
         </div>
-        <div
-          class="tab-pane in active"
-          id="labels-tab"
-          v-if="activeTab === 'labels-tab'"
-        >
+        <div v-if="activeTab === 'labels-tab'" id="labels-tab" class="tab-pane in active">
           <span class="d-flex">
             <h4>{{ $i18n.t('settings.labelsTitle') }}</h4>
             <i
@@ -484,7 +352,9 @@
             style="float: right"
             class="btn btn-success mb-10"
             @click="saveLabels(labelsAll.filter(el => activeLabels.includes(el)))"
-          >{{ $i18n.t('default.saveLabels') }}</button>
+          >
+            {{ $i18n.t('default.saveLabels') }}
+          </button>
           <table class="table table-striped table-bordered table-hover">
             <thead>
               <tr role="row">
@@ -492,26 +362,10 @@
                 <th class="text-centered">{{ $i18n.t('default.attribute') }}</th>
               </tr>
             </thead>
-            <draggable
-              tag="tbody"
-              :list="labelsAll"
-              @start="drag=true"
-              @end="drag=false"
-            >
-              <tr
-                v-for="(el, index) in labelsAll"
-                :key="index"
-              >
-                <td
-                  class="text-centered"
-                  style="width: 50px"
-                >
-                  <input
-                    type="checkbox"
-                    :id="el"
-                    :value="el"
-                    v-model="activeLabels"
-                  />
+            <draggable tag="tbody" :list="labelsAll" @start="drag = true" @end="drag = false">
+              <tr v-for="(el, index) in labelsAll" :key="index">
+                <td class="text-centered" style="width: 50px">
+                  <input :id="el" v-model="activeLabels" type="checkbox" :value="el" />
                 </td>
                 <td class="text-centered">{{ el }}</td>
               </tr>
@@ -520,37 +374,29 @@
         </div>
       </div>
     </div>
-    <modal
-      name="dicts"
-      :draggable="false"
-      width="30%"
-      height="auto"
-      @before-close="closeDictModal"
-    >
+    <modal name="dicts" :draggable="false" width="30%" height="auto" @before-close="closeDictModal">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">{{ $i18n.t('settings.dictField') + ": " + currentDictName }}</h4>
+          <h4 class="modal-title">{{ $i18n.t('settings.dictField') + ': ' + currentDictName }}</h4>
         </div>
         <div class="modal-body">
           <div>
             <h4>{{ $i18n.t('settings.newValue') }}</h4>
-            <div
-              class="form-group"
-              style="display: flex;"
-            >
-              <label
-                class="control-label col-sm-4"
-                style="position: relative; top: 8px"
-              >{{ $i18n.t('settings.value') }}</label>
-              <input
-                v-model="currentDictValue"
-                class="form-control col-sm-7 mr-5"
-              />
+            <div class="form-group" style="display: flex;">
+              <label class="control-label col-sm-4" style="position: relative; top: 8px">{{
+                $i18n.t('settings.value')
+              }}</label>
+              <input v-model="currentDictValue" class="form-control col-sm-7 mr-5" />
               <button
                 type="button"
                 class="btn btn-default"
                 :title="$i18n.t('default.add')"
-                @click="currentDictValues.includes(currentDictValue)?$alertify.error($i18n.t('settings.valueExists')):currentDictValues.push(currentDictValue);currentDictValue=''"
+                @click="
+                  currentDictValues.includes(currentDictValue)
+                    ? $alertify.error($i18n.t('settings.valueExists'))
+                    : currentDictValues.push(currentDictValue);
+                  currentDictValue = '';
+                "
               >
                 <i class="fa fa-plus" />
               </button>
@@ -567,21 +413,18 @@
                 <draggable
                   tag="tbody"
                   :list="currentDictValues"
-                  @start="drag=true"
-                  @end="drag=false"
+                  @start="drag = true"
+                  @end="drag = false"
                 >
-                  <tr
-                    v-for="(dV, idx) in currentDictValues"
-                    :key="idx"
-                  >
-                    <td class="text-centered">{{ idx+1 }}</td>
+                  <tr v-for="(dV, idx) in currentDictValues" :key="idx">
+                    <td class="text-centered">{{ idx + 1 }}</td>
                     <td class="text-centered">{{ dV }}</td>
                     <td class="text-centered">
                       <i
-                        @click="currentDictValues.splice(idx,1)"
                         style="cursor: pointer"
                         :title="$i18n.t('settings.deleteValue')"
                         class="fa fa-trash"
+                        @click="currentDictValues.splice(idx, 1)"
                       />
                     </td>
                   </tr>
@@ -591,29 +434,20 @@
           </div>
         </div>
         <div class="modal-footer">
-          <div
-            class="btn-group btn-group-justified"
-            role="group"
-          >
-            <div
-              class="btn-group"
-              role="group"
-            >
+          <div class="btn-group btn-group-justified" role="group">
+            <div class="btn-group" role="group">
               <button
                 type="button"
                 class="btn btn-success"
-                @click="isDictNew?addNewColumn():editColumn()"
-              >{{ $i18n.t("default.save") }}</button>
+                @click="isDictNew ? addNewColumn() : editColumn()"
+              >
+                {{ $i18n.t('default.save') }}
+              </button>
             </div>
-            <div
-              class="btn-group"
-              role="group"
-            >
-              <button
-                type="button"
-                class="btn btn-danger"
-                @click="$modal.hide('dicts')"
-              >{{ $i18n.t("default.cancel") }}</button>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-danger" @click="$modal.hide('dicts')">
+                {{ $i18n.t('default.cancel') }}
+              </button>
             </div>
           </div>
         </div>
@@ -668,6 +502,42 @@ export default {
       return this.$store.getters.getFeatureAttachments;
     }
   },
+  watch: {
+    symbolizationType(newValue, oldValue) {
+      // set default style
+      if (
+        newValue === 'single' &&
+        oldValue === 'categorized' &&
+        this.symbolizationType === 'single'
+      ) {
+        this.fillColor = 'rgba(255,255,254,0.4)';
+        this.strokeColor = 'rgba(51,153,204,1)';
+        this.strokeWidth = 1;
+        this.width = 1;
+      }
+    }
+  },
+  async mounted() {
+    this.currentEditedLayer = this.$route.params.layer;
+    this.vectorLayersList = this.$route.params.vectorLayersList;
+    if (!this.vectorLayersList) {
+      const r = await this.$store.dispatch('getLayers');
+      this.vectorLayersList = r.body.layers;
+    }
+    if (!this.currentEditedLayer) {
+      this.currentEditedLayer = this.vectorLayersList.find(
+        el => el.id === this.$route.params.layerId
+      );
+    }
+
+    const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
+    this.currentLayerSettings = r.body.settings;
+    this.labelsAll = Object.keys(r.body.settings.columns).filter(el => el !== 'id');
+
+    this.loadStyle();
+    this.getLayerMaxNameLength();
+    this.isMounted = true;
+  },
   methods: {
     async addNewColumn() {
       if (!this.newColumnName || !this.newColumnType) {
@@ -678,16 +548,13 @@ export default {
         body: {
           column_name: this.newColumnName,
           column_type: this.newColumnType,
-          values:
-            this.newColumnType === 'dict' ? this.currentDictValues : undefined
+          values: this.newColumnType === 'dict' ? this.currentDictValues : undefined
         },
         lid: this.currentLayerSettings.id
       };
       const r = await this.$store.dispatch('changeLayer', payload);
       if (r.status === 200) {
-        this.currentLayerSettings.columns[
-          this.newColumnName
-        ] = this.newColumnType;
+        this.currentLayerSettings.columns[this.newColumnName] = this.newColumnType;
         this.newColumnName = undefined;
         this.newColumnType = '';
         this.$alertify.success(this.$i18n.t('dashboard.modal.columnAdded'));
@@ -696,7 +563,7 @@ export default {
         if (r.obj.error === 'dict value must be 63 characters or less') {
           this.$alertify.error(this.$i18n.t('default.dictValueToLongError'));
         } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
+          this.$alertify.error(this.$i18n.t('default.error'));
         }
       }
     },
@@ -743,15 +610,14 @@ export default {
         });
     },
     async editColumn() {
-      const payload = {
-        body: {
-          column_name: this.newColumnName,
-          column_type: this.newColumnType,
-          values:
-            this.newColumnType === 'dict' ? this.currentDictValues : undefined
-        },
-        lid: this.currentLayerSettings.id
-      };
+      // const payload = {
+      //   body: {
+      //     column_name: this.newColumnName,
+      //     column_type: this.newColumnType,
+      //     values: this.newColumnType === 'dict' ? this.currentDictValues : undefined
+      //   },
+      //   lid: this.currentLayerSettings.id
+      // };
       const r = await this.$store.dispatch('putDictsValues', {
         lid: this.currentEditedLayer.id,
         column_name: this.currentDictName,
@@ -764,7 +630,7 @@ export default {
         if (r.obj.error === 'dict value must be 63 characters or less') {
           this.$alertify.error(this.$i18n.t('default.dictValueToLongError'));
         } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
+          this.$alertify.error(this.$i18n.t('default.error'));
         }
       }
       this.$modal.hide('dicts');
@@ -785,26 +651,14 @@ export default {
       this.layerMaxNameLength = r.body.data;
     },
     async loadColumnsAndLabels() {
-      const r = await this.$store.dispatch(
-        'getLayerColumns',
-        this.currentEditedLayer.id
-      );
+      const r = await this.$store.dispatch('getLayerColumns', this.currentEditedLayer.id);
       this.currentLayerSettings = r.body.settings;
-      this.labelsAll = Object.keys(r.body.settings.columns).filter(
-        el => el !== 'id'
-      );
+      this.labelsAll = Object.keys(r.body.settings.columns).filter(el => el !== 'id');
     },
     async loadStyle() {
       const lid = this.currentEditedLayer.id;
-      const styleResponse = await this.$store.dispatch(
-        'getLayerStyle',
-        this.currentEditedLayer.id
-      );
-      this.$set(
-        this.styles,
-        this.currentEditedLayer.id,
-        styleResponse.body.style
-      );
+      const styleResponse = await this.$store.dispatch('getLayerStyle', this.currentEditedLayer.id);
+      this.$set(this.styles, this.currentEditedLayer.id, styleResponse.body.style);
       this.activeLabels = styleResponse.body.style.labels;
       this.labelsAll = _.union(
         this.activeLabels.filter(v => this.labelsAll.includes(v)),
@@ -840,9 +694,7 @@ export default {
       }
     },
     async saveLayerName() {
-      const layIndex = this.vectorLayersList.findIndex(
-        el => el.id === this.currentEditedLayer.id
-      );
+      const layIndex = this.vectorLayersList.findIndex(el => el.id === this.currentEditedLayer.id);
       const payload = {
         body: {
           layer_name: this.currentEditedLayer.name
@@ -852,23 +704,13 @@ export default {
 
       const r = await this.$store.dispatch('changeLayer', payload);
       if (r.status === 200) {
-        this.$alertify.success(
-          this.$i18n.t('dashboard.modal.layerNameChanged')
-        );
+        this.$alertify.success(this.$i18n.t('dashboard.modal.layerNameChanged'));
         // zmiana id
         this.$set(this.vectorLayersList[layIndex], 'id', r.obj.settings);
         this.$set(this.currentLayerSettings, 'id', r.obj.settings);
         // zmiana nazwy
-        this.$set(
-          this.vectorLayersList[layIndex],
-          'name',
-          this.currentEditedLayer.name
-        );
-        this.$set(
-          this.currentLayerSettings,
-          'name',
-          this.currentEditedLayer.name
-        );
+        this.$set(this.vectorLayersList[layIndex], 'name', this.currentEditedLayer.name);
+        this.$set(this.currentLayerSettings, 'name', this.currentEditedLayer.name);
         window.history.pushState(null, '', r.obj.settings);
       } else {
         this.$i18n.t('default.error');
@@ -887,9 +729,7 @@ export default {
         this.$set(feat, 'fill-color', fillRgb);
         this.$set(feat, 'stroke-color', strokeRgb);
       });
-      const labelsToSave = this.labelsAll.filter(el =>
-        this.activeLabels.includes(el)
-      );
+      const labelsToSave = this.labelsAll.filter(el => this.activeLabels.includes(el));
       const r = await this.$store.dispatch('saveStyle', {
         lid: this.currentEditedLayer.id,
         body: {
@@ -925,9 +765,7 @@ export default {
             stroke = `${stroke},1`;
           }
         }
-        const labelsToSave = this.labelsAll.filter(el =>
-          this.activeLabels.includes(el)
-        );
+        const labelsToSave = this.labelsAll.filter(el => this.activeLabels.includes(el));
         const r = await this.$store.dispatch('saveStyle', {
           lid: this.currentEditedLayer.id,
           body: {
@@ -966,9 +804,7 @@ export default {
         }
       }
 
-      const labelsToSave = this.labelsAll.filter(el =>
-        this.activeLabels.includes(el)
-      );
+      const labelsToSave = this.labelsAll.filter(el => this.activeLabels.includes(el));
       const r = await this.$store.dispatch('saveStyle', {
         lid: this.currentEditedLayer.id,
         body: {
@@ -1026,9 +862,7 @@ export default {
       } else {
         if (!e.srcElement.valueAsNumber) {
           this.$alertify.warning(this.$i18n.t('settings.invalidValue'));
-          typeof idx === 'number' && arr
-            ? (this[arr][idx][model] = 1)
-            : (this[model] = 1);
+          typeof idx === 'number' && arr ? (this[arr][idx][model] = 1) : (this[model] = 1);
         }
       }
     },
@@ -1076,47 +910,6 @@ export default {
     toggleColumnsSection(isVisible) {
       this.isColumnsVisible = isVisible;
     }
-  },
-  watch: {
-    symbolizationType(newValue, oldValue) {
-      // set default style
-      if (
-        newValue === 'single' &&
-        oldValue === 'categorized' &&
-        this.symbolizationType === 'single'
-      ) {
-        this.fillColor = 'rgba(255,255,254,0.4)';
-        this.strokeColor = 'rgba(51,153,204,1)';
-        this.strokeWidth = 1;
-        this.width = 1;
-      }
-    }
-  },
-  async mounted() {
-    this.currentEditedLayer = this.$route.params.layer;
-    this.vectorLayersList = this.$route.params.vectorLayersList;
-    if (!this.vectorLayersList) {
-      const r = await this.$store.dispatch('getLayers');
-      this.vectorLayersList = r.body.layers;
-    }
-    if (!this.currentEditedLayer) {
-      this.currentEditedLayer = this.vectorLayersList.find(
-        el => el.id === this.$route.params.layerId
-      );
-    }
-
-    const r = await this.$store.dispatch(
-      'getLayerColumns',
-      this.currentEditedLayer.id
-    );
-    this.currentLayerSettings = r.body.settings;
-    this.labelsAll = Object.keys(r.body.settings.columns).filter(
-      el => el !== 'id'
-    );
-
-    this.loadStyle();
-    this.getLayerMaxNameLength();
-    this.isMounted = true;
   }
 };
 </script>

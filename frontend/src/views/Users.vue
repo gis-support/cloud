@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="isAdmin"
-    class="container align-center"
-  >
+  <div v-if="isAdmin" class="container align-center">
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
@@ -10,45 +7,36 @@
           <span data-i18n="dashboard.title">{{ $i18n.t('users.title.addUser') }}</span>
         </div>
       </h2>
-      <div
-        class="section__content heading-block heading-block-main pt-10"
-        style="display: flex;"
-      >
+      <div class="section__content heading-block heading-block-main pt-10" style="display: flex;">
         <input
+          v-model="username"
           type="text"
           class="form-control container__input mr-5"
-          v-model="username"
           :placeholder="$i18n.t('default.username')"
         />
         <input
+          v-model="password"
           type="password"
           class="form-control container__input mr-5"
-          v-model="password"
           :placeholder="$i18n.t('default.password')"
         />
-        <select
-          class="form-control mr-5"
-          style="width: 300px"
-          v-model="newUserGroup"
-        >
-          <option
-            value="undefined"
-            disabled
-            hidden
-          >{{ $i18n.t('default.groupName') }}</option>
+        <select v-model="newUserGroup" class="form-control mr-5" style="width: 300px">
+          <option value="undefined" disabled hidden>{{ $i18n.t('default.groupName') }}</option>
           <option
             v-for="group in groups"
-            v-text="group"
             :key="`${group}_assign_user`"
             :value="group"
+            v-text="group"
           />
         </select>
         <button
           type="button"
           class="btn btn-success"
-          @click="addNewUser"
           :disabled="!username || !password"
-        >{{ $i18n.t('default.add') }}</button>
+          @click="addNewUser"
+        >
+          {{ $i18n.t('default.add') }}
+        </button>
       </div>
     </div>
     <div class="col-sm-12 pl-0 pr-0 section">
@@ -60,15 +48,15 @@
       </h2>
       <div class="section__content heading-block heading-block-main pt-10 d-flex">
         <table
+          id="permissions-table"
           style="max-width: 10vw"
           class="table table-striped table-bordered table-hover"
-          id="permissions-table"
         >
           <thead>
             <tr role="row">
               <div
                 id="perms-legend"
-                :style="permissions.length > 0?'height: 40vh':'height: 15vh'"
+                :style="permissions.length > 0 ? 'height: 40vh' : 'height: 15vh'"
               >
                 <div class="legend-square legend-edit" />
                 <div class="legend-square legend-read" />
@@ -77,36 +65,25 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              role="row"
-              v-for="user of usersPerm"
-              :key="user"
-            >
+            <tr v-for="user of usersPerm" :key="user" role="row">
               <td class="text-centered user-row">
                 <i
-                  :title="$i18n.t('users.title.deleteUser')"
                   v-if="user !== 'admin'"
+                  :title="$i18n.t('users.title.deleteUser')"
                   class="fa fa-trash handler"
                   style="margin-right: 5px"
                   @click="deleteUser(user)"
                 />
-                <span :title="user">{{user}}</span>
+                <span :title="user">{{ user }}</span>
               </td>
             </tr>
           </tbody>
         </table>
         <div style="overflow-x:auto">
-          <table
-            class="table table-striped table-bordered table-hover"
-            id="permissions-table"
-          >
-            <thead :style="permissions.length > 0?'height: 40vh':'height: calc(15vh + 7px)'">
+          <table id="permissions-table" class="table table-striped table-bordered table-hover">
+            <thead :style="permissions.length > 0 ? 'height: 40vh' : 'height: calc(15vh + 7px)'">
               <tr role="row">
-                <th
-                  style="padding: 0"
-                  v-for="perm of permissions"
-                  :key="perm.id"
-                >
+                <th v-for="perm of permissions" :key="perm.id" style="padding: 0">
                   <p class="text-vertical full-width d-flex align-center perm-row">
                     <i
                       class="fa fa-map-o fa-lg"
@@ -118,21 +95,22 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                role="row"
-                v-for="user of usersPerm"
-                :key="user"
-              >
+              <tr v-for="user of usersPerm" :key="user" role="row">
                 <td
-                  class="text-centered"
                   v-for="perm of permissions"
-                  :style="{'background': mapPermissionColors[perm.users[user]]}"
                   :key="perm.id"
+                  class="text-centered"
+                  :style="{ background: mapPermissionColors[perm.users[user]] }"
                 >
                   <i
                     class="fa handler"
-                    :class="perm.users[user] == 'write' ? 'fa-pencil' :
-                    (perm.users[user] == 'read' ? 'fa-eye' : 'fa-times')"
+                    :class="
+                      perm.users[user] == 'write'
+                        ? 'fa-pencil'
+                        : perm.users[user] == 'read'
+                        ? 'fa-eye'
+                        : 'fa-times'
+                    "
                     data-toggle="modal"
                     data-target="#permissionsModal"
                     :title="$i18n.t('users.modal.changePermissions')"
@@ -152,38 +130,19 @@
             </div>
           </h4>
           <span style="display: flex;">
-            <select
-              class="form-control mr-5"
-              style="width: 300px"
-              v-model="userCopyFrom"
-            >
-              <option
-                value="undefined"
-                disabled
-                hidden
-              >{{ $i18n.t('default.usernameFrom') }}</option>
-              <option
-                v-for="user in users"
-                v-text="user"
-                :key="`${user}_assign`"
-                :value="user"
-              />
+            <select v-model="userCopyFrom" class="form-control mr-5" style="width: 300px">
+              <option value="undefined" disabled hidden>{{
+                $i18n.t('default.usernameFrom')
+              }}</option>
+              <option v-for="user in users" :key="`${user}_assign`" :value="user" v-text="user" />
             </select>
-            <select
-              class="form-control mr-5"
-              style="width: 300px"
-              v-model="userCopyTo"
-            >
-              <option
-                value="undefined"
-                disabled
-                hidden
-              >{{ $i18n.t('default.usernameTo') }}</option>
+            <select v-model="userCopyTo" class="form-control mr-5" style="width: 300px">
+              <option value="undefined" disabled hidden>{{ $i18n.t('default.usernameTo') }}</option>
               <option
                 v-for="user in usersCopyTo"
-                v-text="user"
                 :key="`${user}_assign`"
                 :value="user"
+                v-text="user"
               />
             </select>
             <button
@@ -191,7 +150,9 @@
               class="btn btn-success"
               :disabled="!userCopyFrom || !userCopyTo"
               @click="copyUserPermissions"
-            >{{ $i18n.t('users.copyPermissions') }}</button>
+            >
+              {{ $i18n.t('users.copyPermissions') }}
+            </button>
           </span>
         </span>
       </div>
@@ -211,38 +172,17 @@
             </div>
           </h4>
           <span style="display: flex;">
-            <select
-              class="form-control mr-5"
-              style="width: 300px"
-              v-model="userToAssign"
-            >
-              <option
-                value="undefined"
-                disabled
-                hidden
-              >{{ $i18n.t('default.username') }}</option>
-              <option
-                v-for="user in users"
-                v-text="user"
-                :key="`${user}_assign`"
-                :value="user"
-              />
+            <select v-model="userToAssign" class="form-control mr-5" style="width: 300px">
+              <option value="undefined" disabled hidden>{{ $i18n.t('default.username') }}</option>
+              <option v-for="user in users" :key="`${user}_assign`" :value="user" v-text="user" />
             </select>
-            <select
-              class="form-control mr-5"
-              style="width: 300px"
-              v-model="groupToAssign"
-            >
-              <option
-                value="undefined"
-                disabled
-                hidden
-              >{{ $i18n.t('default.groupName') }}</option>
+            <select v-model="groupToAssign" class="form-control mr-5" style="width: 300px">
+              <option value="undefined" disabled hidden>{{ $i18n.t('default.groupName') }}</option>
               <option
                 v-for="group in groups"
-                v-text="group"
                 :key="`${group}_assign`"
                 :value="group"
+                v-text="group"
               />
             </select>
             <button
@@ -250,7 +190,9 @@
               class="btn btn-success"
               :disabled="!groupToAssign || !userToAssign"
               @click="assignUser"
-            >{{ $i18n.t('users.assignUser') }}</button>
+            >
+              {{ $i18n.t('users.assignUser') }}
+            </button>
           </span>
           <p v-if="userToAssign">Obecna grupa: {{ usersWithGroups[userToAssign] }}</p>
         </span>
@@ -264,17 +206,19 @@
           </h4>
           <span style="display: flex;">
             <input
+              v-model="newGroupName"
               type="text"
               class="form-control container__input mr-5"
               :placeholder="$i18n.t('default.groupName')"
-              v-model="newGroupName"
             />
             <button
               type="button"
               class="btn btn-success"
-              @click="addGroup"
               :disabled="!newGroupName"
-            >{{ $i18n.t('default.add') }}</button>
+              @click="addGroup"
+            >
+              {{ $i18n.t('default.add') }}
+            </button>
           </span>
         </span>
         <span class="col-sm-6 pl-0">
@@ -284,21 +228,15 @@
             </div>
           </h4>
           <span style="display: flex;">
-            <select
-              class="form-control mr-5"
-              style="width: 300px"
-              v-model="usersGroup"
-            >
-              <option
-                value="undefined"
-                disabled
-                hidden
-              >{{ $i18n.t('users.title.chooseGroupToDelete') }}</option>
+            <select v-model="usersGroup" class="form-control mr-5" style="width: 300px">
+              <option value="undefined" disabled hidden>{{
+                $i18n.t('users.title.chooseGroupToDelete')
+              }}</option>
               <option
                 v-for="group in groups.filter(g => g !== 'default')"
-                v-text="group"
                 :key="group"
                 :value="group"
+                v-text="group"
               />
             </select>
             <button
@@ -306,7 +244,9 @@
               class="btn btn-primary"
               :disabled="!usersGroup"
               @click="deleteGroup"
-            >{{ $i18n.t('default.delete') }}</button>
+            >
+              {{ $i18n.t('default.delete') }}
+            </button>
           </span>
         </span>
       </div>
@@ -314,31 +254,27 @@
 
     <!--MODAL UPRAWNIEŃ-->
     <div
+      id="permissionsModal"
+      ref="permissionsModal"
       class="modal fade"
       data-backdrop="static"
-      id="permissionsModal"
       tabindex="-1"
       role="dialog"
       aria-hidden="true"
-      ref="permissionsModal"
     >
-      <div
-        class="modal-dialog modal-dialog-centered"
-        role="document"
-      >
+      <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">{{ $i18n.t('users.modal.changePermissions') }}</h4>
           </div>
-          <div
-            class="modal-body"
-            style="display: flex"
-          >
-            <label class="control-label col-sm-4">{{ $i18n.t('users.modal.permissionType') }}</label>
+          <div class="modal-body" style="display: flex">
+            <label class="control-label col-sm-4">{{
+              $i18n.t('users.modal.permissionType')
+            }}</label>
             <select
+              v-model="currentPermissions.permission"
               class="form-control mr-5"
               name="column-types-select"
-              v-model="currentPermissions.permission"
             >
               <option value="write">{{ $i18n.t('default.edit') }}</option>
               <option value="read">{{ $i18n.t('default.read') }}</option>
@@ -346,17 +282,12 @@
             </select>
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-default"
-              ref="closeModalBtn"
-              data-dismiss="modal"
-            >{{ $i18n.t('default.cancel') }}</button>
-            <button
-              type="button"
-              class="btn btn-success"
-              @click="editPermissions"
-            >{{ $i18n.t('default.save') }}</button>
+            <button ref="closeModalBtn" type="button" class="btn btn-default" data-dismiss="modal">
+              {{ $i18n.t('default.cancel') }}
+            </button>
+            <button type="button" class="btn btn-success" @click="editPermissions">
+              {{ $i18n.t('default.save') }}
+            </button>
           </div>
         </div>
       </div>
@@ -366,7 +297,7 @@
 </template>
 
 <script>
-export default { 
+export default {
   data: () => ({
     currentPermissions: {},
     username: undefined,
@@ -400,8 +331,13 @@ export default {
       return this.$store.getters.getUsersWithGroups;
     },
     usersCopyTo() {
-      return this.users.filter(user => ['admin', this.userCopyFrom].indexOf(user) < 0)
+      return this.users.filter(user => ['admin', this.userCopyFrom].indexOf(user) < 0);
     }
+  },
+  mounted() {
+    this.getPermissions();
+    this.getGroups();
+    this.getUsers();
   },
   methods: {
     async addGroup() {
@@ -478,9 +414,7 @@ export default {
             if (r.status === 200) {
               this.$alertify.success(this.$i18n.t('default.deleted'));
               this.usersGroup = undefined;
-              const groupIdx = this.groups.findIndex(
-                el => el === this.usersGroup
-              );
+              const groupIdx = this.groups.findIndex(el => el === this.usersGroup);
               this.groups.splice(groupIdx, 1);
             } else if (r.status === 400) {
               this.$alertify.error(this.$i18n.t('users.deleteDefaultGroup'));
@@ -507,17 +441,9 @@ export default {
 
       const r = await this.$store.dispatch('editPermissions', payload);
       if (r.status === 200) {
-        this.$alertify.success(
-          this.$i18n.t('users.responses.permissionsChanged')
-        );
-        const layer = this.permissions.find(
-          el => el.id === this.currentPermissions.layId
-        );
-        this.$set(
-          layer.users,
-          r.obj.permissions.user,
-          r.obj.permissions.permission
-        );
+        this.$alertify.success(this.$i18n.t('users.responses.permissionsChanged'));
+        const layer = this.permissions.find(el => el.id === this.currentPermissions.layId);
+        this.$set(layer.users, r.obj.permissions.user, r.obj.permissions.permission);
         this.$refs.closeModalBtn.click();
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -612,16 +538,11 @@ export default {
         this.$alertify.success(this.$i18n.t('users.responses.permissionsCopied'));
         this.userCopyFrom = undefined;
         this.userCopyTo = undefined;
-        this.getPermissions(); 
+        this.getPermissions();
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     }
-  },
-  mounted() {
-    this.getPermissions();
-    this.getGroups();
-    this.getUsers();
   }
 };
 </script>

@@ -6,29 +6,29 @@
         <span data-i18n="dashboard.title">{{ $i18n.t('dashboard.title.projectsList') }}</span>
       </div>
     </h2>
+    <div v-if="projects.length < 1" style="font-weight: 600">{{ 'Brak projektów' }}</div>
     <div
-      v-if="projects.length < 1"
-      style="font-weight: 600"
-    >{{"Brak projektów"}}</div>
-    <div
-      v-bind:class="{'project-disabled':!project.permission_to_active_layer, 'project-enabled':project.permission_to_active_layer}"
-      v-else
       v-for="(project, idx) in projects"
+      v-else
       :key="idx"
-      :title="project.permission_to_active_layer?project.name:$i18n.t('default.mainLayerAccessDenied')"
+      :class="{
+        'project-disabled': !project.permission_to_active_layer,
+        'project-enabled': project.permission_to_active_layer
+      }"
+      :title="
+        project.permission_to_active_layer ? project.name : $i18n.t('default.mainLayerAccessDenied')
+      "
       class="well well-sm project-element flex-center"
-      @click="project.permission_to_active_layer?openProject(project):''"
+      @click="project.permission_to_active_layer ? openProject(project) : ''"
     >
       <span
         style="overflow:hidden"
         class="project-text"
-        v-bind:class="{'project-title-disabled':!project.permission_to_active_layer}"
-        @click="project.permission_to_active_layer?openProject(project):''"
-      >{{project.name}}</span>
-      <span
-        id="layers-list-icons"
-        class="panel-title__tools"
+        :class="{ 'project-title-disabled': !project.permission_to_active_layer }"
+        @click="project.permission_to_active_layer ? openProject(project) : ''"
+        >{{ project.name }}</span
       >
+      <span id="layers-list-icons" class="panel-title__tools">
         <i
           class="fa fa-trash fa-lg red icon-hover"
           :title="$i18n.t('default.delete')"
@@ -109,4 +109,4 @@ export default {
 .project-enabled {
   cursor: pointer;
 }
-</style> 
+</style>
