@@ -16,7 +16,7 @@
                 @click="drawNewFeature"
                 v-if="!isDrawing && permission === 'write' && items.length > 0"
               >
-                <i class="fa fa-plus" />
+                <i class="fa fa-plus"/>
               </button>
               <span
                 class="navbar-right"
@@ -29,7 +29,7 @@
                   :title="$i18n.t('featureManager.cancelFeatureAdding')"
                   @click="clearFeatureAdding"
                 >
-                  <i class="fa fa-times-circle" />
+                  <i class="fa fa-times-circle"/>
                 </button>
               </span>
             </div>
@@ -59,14 +59,16 @@
                 class="map-btn"
                 :title="$i18n.t('featureManager.map.areaMeasure')"
                 @click="startMeasure('Polygon')"
-              >☐</button>
+              >☐
+              </button>
               <button
                 v-show="isMeasureShow"
                 type="button"
                 class="map-btn"
                 :title="$i18n.t('featureManager.map.distanceMeasure')"
                 @click="startMeasure('LineString')"
-              >\</button>
+              >\
+              </button>
             </div>
             <div class="buffer-tool map-tool-left">
               <button
@@ -75,7 +77,8 @@
                 class="map-btn"
                 @click="openBufferDialog"
                 :title="$i18n.t('featureManager.map.buffer')"
-              >B</button>
+              >B
+              </button>
             </div>
             <div class="distance-tool map-tool-left">
               <button
@@ -84,7 +87,8 @@
                 class="map-btn"
                 @click="openDistanceDialog"
                 :title="$i18n.t('featureManager.map.distance')"
-              >D</button>
+              >D
+              </button>
             </div>
             <div class="rotation-tool map-tool-right">
               <button
@@ -92,9 +96,16 @@
                 class="map-btn"
                 @click="openRotationDialog"
                 :title="$i18n.t('featureManager.map.rotation')"
-              >A</button>
+              >A
+              </button>
             </div>
+
           </div>
+          <div
+            class="scale-line"
+            id="scale-line"
+            :style="isTableShow ?'position: absolute; bottom: 40%;':'position: absolute; bottom: 1em; left: 3.5em;'"
+          ></div>
         </div>
         <div
           v-if="isTableShow"
@@ -111,14 +122,14 @@
                 @click="isTableShow = false"
                 :title="$i18n.t('featureManager.closeTable')"
               >
-                <i class="fa fa-times fa-lg" />
+                <i class="fa fa-times fa-lg"/>
               </button>
               <p
                 class="navbar-text"
                 v-cloak
               >
                 {{ $i18n.t("featureManager.objectsNumber") }}
-                <span v-text="searchCount" />
+                <span v-text="searchCount"/>
               </p>
               <div class="navbar-form navbar-right">
                 <div class="form-group">
@@ -141,7 +152,7 @@
                 :title="$i18n.t('featureManager.objectsFilter')"
                 @click="openColumnFilterDecision"
               >
-                <i class="fa fa-filter" />
+                <i class="fa fa-filter"/>
               </button>
               <button
                 type="button"
@@ -149,7 +160,7 @@
                 v-if="selectedRows.length > 0"
                 @click="downloadLayer(selectedRows)"
               >
-                <i class="fa fa-download" />
+                <i class="fa fa-download"/>
               </button>
               <button
                 style="margin-right: 2px"
@@ -159,7 +170,7 @@
                 v-if="currentFeature"
                 @click="zoomToSelected"
               >
-                <i class="fa fa-search" />
+                <i class="fa fa-search"/>
               </button>
             </div>
           </nav>
@@ -185,7 +196,7 @@
           >
             <div class="loading-indicator mb-10">
               <h4>{{ $i18n.t("default.loading") }}</h4>
-              <i class="fa fa-lg fa-spin fa-spinner" />
+              <i class="fa fa-lg fa-spin fa-spinner"/>
             </div>
           </div>
         </div>
@@ -221,7 +232,8 @@
                         class="btn btn-success"
                         @click="$emit('columnFilterDecision', 'accept')"
                         :disabled="!isFiltersValidated(selectedColumnFilters)"
-                      >{{ $i18n.t("default.save") }}</button>
+                      >{{ $i18n.t("default.save") }}
+                      </button>
                     </div>
                     <div
                       class="btn-group"
@@ -231,7 +243,8 @@
                         type="button"
                         class="btn btn-danger"
                         @click="$emit('columnFilterDecision', 'clear')"
-                      >{{ $i18n.t("default.clear") }}</button>
+                      >{{ $i18n.t("default.clear") }}
+                      </button>
                     </div>
                     <div
                       class="btn-group"
@@ -241,7 +254,8 @@
                         type="button"
                         class="btn btn-default"
                         @click="$emit('columnFilterDecision', 'cancel')"
-                      >{{ $i18n.t("default.cancel") }}</button>
+                      >{{ $i18n.t("default.cancel") }}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -276,7 +290,7 @@
                         style="position: relative; top: 8px"
                       >
                         {{
-                        name
+                          name
                         }}
                       </label>
                       <InputNumber
@@ -323,7 +337,8 @@
                         type="button"
                         class="btn btn-success"
                         @click="saveNewFeature"
-                      >{{ $i18n.t("default.save") }}</button>
+                      >{{ $i18n.t("default.save") }}
+                      </button>
                     </div>
                     <div
                       class="btn-group"
@@ -333,7 +348,8 @@
                         type="button"
                         class="btn btn-danger"
                         @click="clearFeatureAdding"
-                      >{{ $i18n.t("default.cancel") }}</button>
+                      >{{ $i18n.t("default.cancel") }}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -348,7 +364,7 @@
           @click="isTableShow = true"
           :title="$i18n.t('featureManager.showTable')"
         >
-          <i class="fa fa-table" />
+          <i class="fa fa-table"/>
         </button>
         <modal
           name="bufferTable"
@@ -397,7 +413,8 @@
                     type="button"
                     class="btn btn-success"
                     @click="downloadObjectsArray"
-                  >{{ $i18n.t("featureManager.downloadList") }}</button>
+                  >{{ $i18n.t("featureManager.downloadList") }}
+                  </button>
                 </div>
                 <div
                   class="btn-group"
@@ -407,7 +424,8 @@
                     type="button"
                     class="btn btn-danger"
                     @click="$modal.hide('bufferTable')"
-                  >{{ $i18n.t("default.close") }}</button>
+                  >{{ $i18n.t("default.close") }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -439,7 +457,7 @@
                     style="position: relative; top: 8px"
                   >
                     {{
-                    $i18n.t("featureManager.bufferValue") + " [m]"
+                      $i18n.t("featureManager.bufferValue") + " [m]"
                     }}
                   </label>
                   <input
@@ -459,7 +477,8 @@
                     type="button"
                     class="btn btn-default"
                     @click="generateBuffer"
-                  >{{ $i18n.t("featureManager.bufferGenerate") }}</button>
+                  >{{ $i18n.t("featureManager.bufferGenerate") }}
+                  </button>
                 </div>
               </div>
               <div>
@@ -473,7 +492,7 @@
                     style="position: relative; top: 8px"
                   >
                     {{
-                    $i18n.t("featureManager.bufferLayer")
+                      $i18n.t("featureManager.bufferLayer")
                     }}
                   </label>
                   <select
@@ -506,7 +525,8 @@
                     type="button"
                     class="btn btn-success"
                     @click="generateObjectsArray"
-                  >{{ $i18n.t("featureManager.generateList") }}</button>
+                  >{{ $i18n.t("featureManager.generateList") }}
+                  </button>
                 </div>
                 <div
                   class="btn-group"
@@ -516,7 +536,8 @@
                     type="button"
                     class="btn btn-danger"
                     @click="$modal.hide('buffer')"
-                  >{{ $i18n.t("default.close") }}</button>
+                  >{{ $i18n.t("default.close") }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -547,7 +568,7 @@
                     style="position: relative; top: 8px"
                   >
                     {{
-                    $i18n.t("featureManager.bufferValue") + " [m]"
+                      $i18n.t("featureManager.bufferValue") + " [m]"
                     }}
                   </label>
                   <input
@@ -565,7 +586,7 @@
                     style="position: relative; top: 8px"
                   >
                     {{
-                    $i18n.t("featureManager.fieldName")
+                      $i18n.t("featureManager.fieldName")
                     }}
                   </label>
                   <select
@@ -597,7 +618,8 @@
                     type="button"
                     class="btn btn-success"
                     @click="generateDistance"
-                  >{{ $i18n.t("featureManager.download") }}</button>
+                  >{{ $i18n.t("featureManager.download") }}
+                  </button>
                 </div>
                 <div
                   class="btn-group"
@@ -607,7 +629,8 @@
                     type="button"
                     class="btn btn-danger"
                     @click="$modal.hide('distance')"
-                  >{{ $i18n.t("default.close") }}</button>
+                  >{{ $i18n.t("default.close") }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -637,7 +660,7 @@
                   style="position: relative; top: 8px"
                 >
                   {{
-                  $i18n.t("featureManager.rotationValue") + ` [ ${String.fromCharCode(176)} ]`
+                    $i18n.t("featureManager.rotationValue") + ` [ ${String.fromCharCode(176)} ]`
                   }}
                 </label>
                 <input
@@ -666,7 +689,8 @@
                     type="button"
                     class="btn btn-success"
                     @click="rotateMapByAngle(rotationValue)"
-                  >{{ $i18n.t("featureManager.rotate") }}</button>
+                  >{{ $i18n.t("featureManager.rotate") }}
+                  </button>
                 </div>
                 <div
                   class="btn-group"
@@ -676,7 +700,8 @@
                     type="button"
                     class="btn btn-danger"
                     @click="$modal.hide('rotation')"
-                  >{{ $i18n.t("default.close") }}</button>
+                  >{{ $i18n.t("default.close") }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -734,7 +759,7 @@
                             v-else
                             class="panel-title__names"
                           >
-                            <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                            <i class="icon-li fa fa-map-o fa-lg mr-5"/>
                             <span
                               class="bold"
                               href="#"
@@ -770,7 +795,8 @@
                     type="button"
                     class="btn btn-danger"
                     @click="$modal.hide('addLayer')"
-                  >{{ $i18n.t("default.close") }}</button>
+                  >{{ $i18n.t("default.close") }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -788,7 +814,7 @@
               <div class="modal-header">
                 <h4
                   class="modal-title"
-                >{{ project?$i18n.t(`featureManager.saveProject`):$i18n.t(`featureManager.createProject`) }}</h4>
+                >{{ project ? $i18n.t(`featureManager.saveProject`) : $i18n.t(`featureManager.createProject`) }}</h4>
               </div>
               <div class="modal-body">
                 <div
@@ -820,7 +846,8 @@
                       type="button"
                       class="btn btn-success"
                       @click="saveProject"
-                    >{{ $i18n.t("default.save") }}</button>
+                    >{{ $i18n.t("default.save") }}
+                    </button>
                   </div>
                   <div
                     class="btn-group"
@@ -830,7 +857,8 @@
                       type="button"
                       class="btn btn-danger"
                       @click="$modal.hide('saveProject')"
-                    >{{ $i18n.t("default.close") }}</button>
+                    >{{ $i18n.t("default.close") }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -854,13 +882,13 @@
         <div class="col-sm-12">
           <div style="display: inline-block; width: 100%;">
             <h4 class="col-sm-10 right-panel__title">
-              <i class="fa fa-map-o title__icon" />
+              <i class="fa fa-map-o title__icon"/>
               <span
                 class="mvp-red right-panel__name"
                 :title="layerName"
               >
                 {{
-                layerName ? layerName : "" | maxLength
+                  layerName ? layerName : "" | maxLength
                 }}
               </span>
             </h4>
@@ -879,7 +907,7 @@
                   @click="goToSettings"
                   :title="$i18n.t('default.settings')"
                 >
-                  <i class="fa fa-cog yellow icon-hover" />
+                  <i class="fa fa-cog yellow icon-hover"/>
                 </a>
                 <div
                   class="btn-group btn-group-sm"
@@ -893,8 +921,8 @@
                     aria-expanded="false"
                     :title="$i18n.t('featureManager.download')"
                   >
-                    <i class="fa fa-download green icon-hover" />
-                    <span class="caret" />
+                    <i class="fa fa-download green icon-hover"/>
+                    <span class="caret"/>
                   </button>
                   <ul class="dropdown-menu">
                     <!-- <li><a>SHP</a></li> -->
@@ -918,8 +946,8 @@
                 class="col-sm-20"
                 :title="project.name"
               >
-                <i class="fa fa-database title__icon" />
-                {{project.name | maxLength}}
+                <i class="fa fa-database title__icon"/>
+                {{ project.name | maxLength }}
               </h4>
             </div>
             <div
@@ -952,7 +980,7 @@
                 href="#"
                 @click="indexActiveTab = 0"
               >
-                <i class="fa fa-bars" />
+                <i class="fa fa-bars"/>
                 {{ $i18n.t("featureManager.legend") }}
               </a>
             </li>
@@ -965,7 +993,7 @@
                 href="#"
                 @click="indexActiveTab = 1"
               >
-                <i class="fa fa-table" />
+                <i class="fa fa-table"/>
                 {{ $i18n.t("featureManager.attributes") }}
               </a>
             </li>
@@ -978,7 +1006,7 @@
                 href="#"
                 @click="indexActiveTab = 2;$refs['attachments-panel'].getAttachmentsMeta()"
               >
-                <i class="fa fa-info" />
+                <i class="fa fa-info"/>
                 {{ $i18n.t("featureManager.informations") }}
               </a>
             </li>
@@ -998,7 +1026,8 @@
                       :key="name"
                       :class="{ activeLayer: currentBaseLayer == name }"
                       @click="changeBaseLayer(name)"
-                    >{{ name }}</li>
+                    >{{ name }}
+                    </li>
                   </ul>
                 </div>
                 <div class="others">
@@ -1071,7 +1100,8 @@
                       type="button"
                       class="btn btn-success btn-group-justified"
                       @click="editAttributes"
-                    >{{ $i18n.t("default.edit") }}</button>
+                    >{{ $i18n.t("default.edit") }}
+                    </button>
                   </div>
                 </template>
                 <template v-else>
@@ -1083,7 +1113,8 @@
                       type="button"
                       class="btn btn-success"
                       @click="saveEditing"
-                    >{{ $i18n.t("default.save") }}</button>
+                    >{{ $i18n.t("default.save") }}
+                    </button>
                   </div>
                   <div
                     class="btn-group btn-group-action btn-group-edit"
@@ -1093,7 +1124,8 @@
                       type="button"
                       class="btn btn-default"
                       @click="cancelEditing"
-                    >{{ $i18n.t("default.cancel") }}</button>
+                    >{{ $i18n.t("default.cancel") }}
+                    </button>
                   </div>
                   <div
                     class="btn-group btn-group-action btn-group-edit"
@@ -1103,7 +1135,8 @@
                       type="button"
                       class="btn btn-danger"
                       @click="deleteFeature"
-                    >{{ $i18n.t("default.delete") }}</button>
+                    >{{ $i18n.t("default.delete") }}
+                    </button>
                   </div>
                 </template>
               </template>
@@ -1143,9 +1176,10 @@ import turfBuffer from '@turf/buffer';
 import moment from 'moment';
 import Map from 'ol/Map';
 import View from 'ol/View';
-import { fromLonLat, get as getProjection } from 'ol/proj';
-import { Draw, Modify } from 'ol/interaction';
-import { MVT, WMTSCapabilities, GeoJSON } from 'ol/format';
+import {ScaleLine, defaults as defaultControls} from 'ol/control'
+import {fromLonLat, get as getProjection} from 'ol/proj';
+import {Draw, Modify} from 'ol/interaction';
+import {MVT, WMTSCapabilities, GeoJSON} from 'ol/format';
 import {
   VectorTile as VectorTileSource,
   Vector as VectorSource,
@@ -1159,7 +1193,7 @@ import {
   Tile as TileLayer,
   Group as LayerGroup
 } from 'ol/layer';
-import { Circle, Fill, Stroke, Style, RegularShape, Text } from 'ol/style';
+import {Circle, Fill, Stroke, Style, RegularShape, Text} from 'ol/style';
 import {
   LineString,
   Polygon,
@@ -1168,10 +1202,10 @@ import {
   MultiLineString,
   MultiPolygon
 } from 'ol/geom.js';
-import { getArea, getLength } from 'ol/sphere.js';
-import { unByKey } from 'ol/Observable.js';
+import {getArea, getLength} from 'ol/sphere.js';
+import {unByKey} from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
-import { optionsFromCapabilities } from 'ol/source/WMTS';
+import {optionsFromCapabilities} from 'ol/source/WMTS';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
@@ -1339,7 +1373,7 @@ export default {
       if (!layer) {
         return;
       }
-      this.otherLayers.push({ id: layer.id, name: layer.name });
+      this.otherLayers.push({id: layer.id, name: layer.name});
       this.activeOtherLayers.push(layer.id);
       if (Number.isInteger(layer.id)) {
         this.createServiceLayer(layer);
@@ -1417,8 +1451,8 @@ export default {
             const featStyle = new Style({
               text: new Text({
                 text: labelsToShow.join(' '),
-                fill: new Fill({ color: 'white' }),
-                stroke: new Stroke({ color: 'black', width: 4 }),
+                fill: new Fill({color: 'white'}),
+                stroke: new Stroke({color: 'black', width: 4}),
                 offsetY: -10
               })
             });
@@ -1560,9 +1594,10 @@ export default {
               this.selectFeature(undefined);
             }
           },
-          () => {}
+          () => {
+          }
         )
-        .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
+        .set({title: this.$i18n.t('featureManager.deleteFeatureHeader')})
         .set({
           labels: {
             ok: this.$i18n.t('default.delete'),
@@ -1630,8 +1665,8 @@ export default {
               if (this.featureTypes[k] === 'timestamp without time zone') {
                 tempItem[k] = moment(v).isValid()
                   ? moment(v)
-                      .locale('pl')
-                      .format('L')
+                    .locale('pl')
+                    .format('L')
                   : '';
               } else {
                 tempItem[k] = v;
@@ -1836,7 +1871,7 @@ export default {
         name: this.projectName
       };
       if (this.project) {
-        const data = { pid: this.project.id, payload: payload };
+        const data = {pid: this.project.id, payload: payload};
         const r = await this.$store.dispatch('putProject', data);
         if (r.status === 204) {
           this.$alertify.success(this.$i18n.t('featureManager.projectSaved'));
@@ -1892,8 +1927,8 @@ export default {
         if (this.featureTypes[k] === 'timestamp without time zone') {
           copy.properties[k] = moment(v).isValid()
             ? moment(v)
-                .locale('pl')
-                .format('L')
+              .locale('pl')
+              .format('L')
             : '';
         } else {
           copy.properties[k] = v;
@@ -1944,7 +1979,7 @@ export default {
                   text: new Text({
                     text: this.formatLength(line),
                     font: '15px sans-serif',
-                    fill: new Fill({ color: 'black' }),
+                    fill: new Fill({color: 'black'}),
                     placement: 'line',
                     stroke: new Stroke({
                       color: 'rgba(30, 42, 53, 0.3)',
@@ -2179,8 +2214,8 @@ export default {
       this.selectFeature(undefined);
       this.isDrawing = true;
       if (!this.getInteractionByName('drawInteraction')) {
-        const source = new VectorSource({ wrapX: false });
-        const vector = new VectorLayer({ source, name: 'newFeature' });
+        const source = new VectorSource({wrapX: false});
+        const vector = new VectorLayer({source, name: 'newFeature'});
         this.map.addLayer(vector);
         let drawType;
         if (this.layerGeometry === 'polygon') {
@@ -2275,12 +2310,12 @@ export default {
       return layer
         ? layer
         : this.map
-            .getLayers()
-            .getArray()
-            .find(l => l.get('name') === 'otherLayers')
-            .getLayers()
-            .getArray()
-            .find(l => l.get('name') === name);
+          .getLayers()
+          .getArray()
+          .find(l => l.get('name') === 'otherLayers')
+          .getLayers()
+          .getArray()
+          .find(l => l.get('name') === name);
     },
     getLayersAll() {
       let layersAll = [];
@@ -2303,7 +2338,7 @@ export default {
         units: 'kilometers'
       });
       if (buffer) {
-        this.bufferFeatureGeometry = { geometry: buffer.geometry };
+        this.bufferFeatureGeometry = {geometry: buffer.geometry};
         let bufferFeature = new GeoJSON().readFeature(buffer, {
           featureProjection: 'EPSG:3857',
           dataProjection: 'EPSG:4326'
@@ -2444,7 +2479,7 @@ export default {
     },
     saveFile(r) {
       const data = JSON.stringify(r.body);
-      const blob = new Blob([data], { type: 'text/plain' });
+      const blob = new Blob([data], {type: 'text/plain'});
       const e = document.createEvent('MouseEvents');
       const a = document.createElement('a');
       a.download = `${this.$route.params.layerId}.geojson`;
@@ -2581,11 +2616,11 @@ export default {
         text: selecting
           ? null
           : new Text({
-              text: labelsToShow.join(' '),
-              fill: new Fill({ color: 'white' }),
-              stroke: new Stroke({ color: 'black', width: 4 }),
-              offsetY: -10
-            })
+            text: labelsToShow.join(' '),
+            fill: new Fill({color: 'white'}),
+            stroke: new Stroke({color: 'black', width: 4}),
+            offsetY: -10
+          })
       });
       if (this.layerType) {
         const stroke = new Stroke({
@@ -2704,6 +2739,12 @@ export default {
       this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
       this.getLayers();
       this.map = new Map({
+        controls: defaultControls().extend([
+          new ScaleLine({
+            units: 'metric',
+            target: document.getElementById('scale-line')
+          })]
+        ),
         target: 'map',
         layers: [
           new TileLayer({
@@ -2833,7 +2874,7 @@ export default {
                     text: new Text({
                       text: this.formatLength(line),
                       font: '15px sans-serif',
-                      fill: new Fill({ color: 'black' }),
+                      fill: new Fill({color: 'black'}),
                       placement: 'line',
                       stroke: new Stroke({
                         color: 'rgba(37, 81, 122, 0.3)',
@@ -2903,8 +2944,8 @@ export default {
             if (this.featureTypes[k] === 'timestamp without time zone') {
               tempItem[k] = moment(v).isValid()
                 ? moment(v)
-                    .locale('pl')
-                    .format('L')
+                  .locale('pl')
+                  .format('L')
                 : '';
             } else {
               tempItem[k] = v;
@@ -2940,10 +2981,20 @@ export default {
 </script>
 
 <style scoped>
+
+.scale-line >>> .ol-scale-line{
+  position: absolute;
+  z-index: 1;
+  background: rgba(0,60,136,0.5);
+  bottom: .5em;
+  left: .5em;
+}
+
 .dragg-content {
   width: 100%;
   height: 100%;
 }
+
 .map-btn {
   position: relative;
   margin: 1px;
@@ -2960,46 +3011,58 @@ export default {
   border: none;
   border-radius: 4px;
 }
+
 .map-btn:hover {
   background-color: rgba(0, 60, 136, 0.7);
 }
+
 .add-feature-tool {
   top: 59px;
 }
+
 .buffer-tool {
   top: 101px;
 }
+
 .distance-tool {
   top: 122px;
 }
+
 .map-tool-left {
   padding: 2px;
   z-index: 1;
   position: absolute;
   left: 0.5em;
 }
+
 .map-tool-right {
   padding: 2px;
   z-index: 1;
   position: absolute;
   right: 0.5em;
 }
+
 .measure-tool {
   top: 80px;
 }
+
 .rotation-tool {
   top: 28px;
 }
+
 .dropdown-menu {
   left: -110px;
 }
+
 .modal-new-feature .modal-body {
   height: 70vh;
   overflow-y: auto;
 }
+
 .list-group-item:not(.no-item):hover {
   cursor: pointer;
 }
+
 .popup {
   position: relative;
   background: rgba(0, 0, 0, 0.5);
@@ -3009,20 +3072,31 @@ export default {
   opacity: 0.7;
   white-space: nowrap;
 }
+
 .popup-measure {
   opacity: 1;
   font-weight: bold;
 }
+
 .layer-modal-body {
   height: calc(100% - 120px);
 }
+
 .layers-wrapper {
   overflow: auto;
   height: calc(100% - 40px);
 }
+
 .list__element--otherLayer {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 </style>
+
+<!--<style>
+/* global styles */
+.ol-scale-line{
+  background: rgba(0,60,136,0.5);
+}
+</style>-->
