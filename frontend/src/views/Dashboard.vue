@@ -255,15 +255,17 @@
                 @input-filter="fileFilter"
               >
                 {{ this.$i18n.t('upload.defaultMessage') }}
-                <ul>
-                  <li v-for="(file, idx) in files" :key="idx" style="list-style-position: inside">
-                    {{ file.name }}
-                    <i
-                      class="icon-li fa fa-times fa-lg ml-5 delete-file-icon"
-                      @click="removeFile(file)"
-                    />
-                  </li>
-                </ul>
+                <div id="upload_list">
+                  <ul>
+                    <li v-for="(file, idx) in files" :key="idx" style="list-style-position: inside">
+                      {{ file.name }}
+                      <i
+                        class="icon-li fa fa-times fa-lg ml-5 delete-file-icon"
+                        @click="removeFile(file)"
+                      />
+                    </li>
+                  </ul>
+                </div>
               </FileUpload>
             </div>
           </div>
@@ -337,7 +339,7 @@
                 />
               </select>
             </div>
-            <div class="pt-10" style="display: flex;">
+            <div style="display: flex;" class="pt-10">
               <label class="control-label col-sm-4" style="width: 160px">{{
                 $i18n.t('dashboard.modal.layerAddress')
               }}</label>
@@ -1031,7 +1033,6 @@ export default {
   margin: auto;
   overflow: hidden;
   position: relative;
-  text-align: center;
   display: inline-block;
   min-height: 100px;
   width: 80%;
@@ -1098,5 +1099,10 @@ export default {
   text-decoration: none;
   max-height: 50vh;
   overflow-y: auto;
+}
+#upload_list {
+  text-align: left;
+  display: flex;
+  justify-content: center;
 }
 </style>
