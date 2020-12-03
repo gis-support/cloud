@@ -2373,7 +2373,8 @@ export default {
             name: 'OpenStreetMap',
             group: 'baselayers',
             source: new XYZ({
-              url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+              url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              maxZoom: 19
             })
           }),
           new LayerGroup({
