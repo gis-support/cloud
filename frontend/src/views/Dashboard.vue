@@ -884,6 +884,8 @@ export default {
             this.epsg = 2180;
           } else if (err.response.data.error === 'layer already exists') {
             this.$alertify.error(this.$i18n.t('upload.nameExistsError'));
+          } else if (err.response.data.error === 'layer has attachemnts column') {
+            this.$alertify.error(this.$i18n.t('upload.uploadAttachmentExistsError'));
           } else {
             this.$alertify.error(this.$i18n.t('upload.uploadError'));
           }
