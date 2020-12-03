@@ -1,0 +1,19 @@
+Get app name
+---
+tags:
+  - App name
+
+summary: Get app name
+
+produces:
+  - application/json
+  
+responses:
+  200:
+    description: App name
+    schema:
+      type: object
+      properties:
+        app_name:
+          type: string
+          example: "cloud2"

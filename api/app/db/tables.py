@@ -4,6 +4,7 @@ from app.blueprints.attachments.models import Attachment
 from app.blueprints.layers.dicts.dict import Dict
 from app.blueprints.layers.tags.models import Tag, LayerTag
 from app.blueprints.projects.models import Project
+from app.blueprints.settings.models import Setting
 from app.db.migrations.migration import Migration
 
 
@@ -14,6 +15,7 @@ def create_tables(database: PostgresqlExtDatabase):
         Dict,
         Attachment,
         Project,
+        Setting,
     ]
 
     for model in models:
