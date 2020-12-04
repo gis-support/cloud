@@ -91,10 +91,11 @@
             <div class="location-tool">
               <button
                 type="button"
+                class="map-btn"
                 :title="$i18n.t('featureManager.setGeoLocalization')"
-                @click="setGeolocation"
+                @click="toggleGeolocation"
               >
-                <i class="fas fa-search-location" />
+                <i class="fa fa-plus" />
               </button>
             </div>
           </div>
@@ -1030,9 +1031,7 @@ export default {
     allOtherLayers: [],
     otherLayers: [],
     searchLayer: '',
-    isLocationOn: false,
-    geolocation: undefined,
-    positionFeature: undefined
+    geolocation: undefined
   }),
   computed: {
     layersOutOfProject() {
@@ -2377,51 +2376,12 @@ export default {
         duration: 500
       });
     },
-    setGeolocation() {
-      this.isLocationOn = !this.isLocationOn;
-      this.geolocation.setTracking(this.isLocationOn);
-      if (this.isLocationOn) {
-        console.log('GEOLOCALIZATION ON');
-      } else {
-        console.log('GEOLOCALIZATION OFF');
-      }
-    },
-    initPositionFeature() {
-      this.positionFeature = new Feature();
-      this.positionFeature.setStyle(
-        new Style({
-          image: new Circle({
-            radius: 6,
-            fill: new Fill({
-              color: '#3399CC'
-            }),
-            stroke: new Stroke({
-              color: '#fff',
-              width: 2
-            })
-          })
-        })
-      );
-    },
-    initGeolocation() {
-      this.geolocation = new Geolocation({
-        trackingOptions: {
-          enableHighAccuracy: true
-        },
-        projection: this.map.getView().getProjection()
-      });
-      this.geolocation.on('error', error => {
-        console.log(error);
-      });
-      this.geolocation.on('change', function() {
-        let coordinates = this.geolocation.getPosition();
-        this.positionFeature.setGeometry(coordinates ? new Point(coordinates) : null);
-      });
+    toggleGeolocation() {
+      this.geolocation.setTracking(!this.geolocation.getTracking());
     },
     async init() {
       this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
       this.getLayers();
-      this.initPositionFeature();
       this.map = new Map({
         target: 'map',
         layers: [
@@ -2430,12 +2390,6 @@ export default {
             group: 'baselayers',
             source: new XYZ({
               url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-            })
-          }),
-          new VectorLayer({
-            name: 'Geolocation',
-            source: new VectorSource({
-              features: [this.positionFeature]
             })
           }),
           new LayerGroup({
@@ -2448,7 +2402,42 @@ export default {
           constrainResolution: true
         })
       });
-      this.initGeolocation();
+      this.geolocation = new Geolocation({
+        trackingOptions: {
+          enableHighAccuracy: true
+        },
+        projection: this.map.getView().getProjection()
+      });
+      this.geolocation.on('error', error => {
+        console.log(error);
+      });
+      this.geolocation.on('change:position', function() {
+        let coordinates = this.geolocation.getPosition();
+        let positionFeature = new Feature();
+        positionFeature.setGeometry(coordinates ? new Point(coordinates) : null);
+        positionFeature.setStyle(
+          new Style({
+            image: new Circle({
+              radius: 6,
+              fill: new Fill({
+                color: '#3399CC'
+              }),
+              stroke: new Stroke({
+                color: '#fff',
+                width: 2
+              })
+            })
+          })
+        );
+        let locationLayer = new VectorLayer({
+          source: new VectorSource({
+            name: 'geolocation',
+            features: [positionFeature]
+          })
+        });
+        this.addLayer(locationLayer);
+      });
+
       this.initOrtofoto();
       this.getPermissions();
       await Promise.all([this.getUsers(), this.getSettings()]);
