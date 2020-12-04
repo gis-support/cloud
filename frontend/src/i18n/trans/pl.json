@@ -208,7 +208,8 @@
       "hideMeasurements": "Ukryj pomiary",
       "rotation": "Obrót mapy",
       "showMeasurements": "Pomiary"
-    }
+    },
+    "setGeoLocalization": "Włącz / wyłącz geolokalizację"
   },
   "login": {
     "loginTitle": "Logowanie",

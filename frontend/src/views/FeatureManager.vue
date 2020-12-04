@@ -88,6 +88,15 @@
                 A
               </button>
             </div>
+            <div class="location-tool">
+              <button
+                type="button"
+                :title="$i18n.t('featureManager.setGeoLocalization')"
+                @click="setGeolocation"
+              >
+                <i class="fas fa-search-location" />
+              </button>
+            </div>
           </div>
         </div>
         <div v-if="isTableShow" class="navbar-table-content">
@@ -900,6 +909,7 @@
 <script>
 import turfBuffer from '@turf/buffer';
 import moment from 'moment';
+import Geolocation from 'ol/Geolocation';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import { fromLonLat, get as getProjection } from 'ol/proj';
@@ -933,6 +943,7 @@ import InputNumber from '@/components/InputNumber';
 import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
 import draggable from 'vuedraggable';
+import { Feature } from 'ol';
 
 export default {
   components: {
@@ -1018,7 +1029,10 @@ export default {
     activeOtherLayers: [],
     allOtherLayers: [],
     otherLayers: [],
-    searchLayer: ''
+    searchLayer: '',
+    isLocationOn: false,
+    geolocation: undefined,
+    positionFeature: undefined
   }),
   computed: {
     layersOutOfProject() {
@@ -2363,9 +2377,51 @@ export default {
         duration: 500
       });
     },
+    setGeolocation() {
+      this.isLocationOn = !this.isLocationOn;
+      this.geolocation.setTracking(this.isLocationOn);
+      if (this.isLocationOn) {
+        console.log('GEOLOCALIZATION ON');
+      } else {
+        console.log('GEOLOCALIZATION OFF');
+      }
+    },
+    initPositionFeature() {
+      this.positionFeature = new Feature();
+      this.positionFeature.setStyle(
+        new Style({
+          image: new Circle({
+            radius: 6,
+            fill: new Fill({
+              color: '#3399CC'
+            }),
+            stroke: new Stroke({
+              color: '#fff',
+              width: 2
+            })
+          })
+        })
+      );
+    },
+    initGeolocation() {
+      this.geolocation = new Geolocation({
+        trackingOptions: {
+          enableHighAccuracy: true
+        },
+        projection: this.map.getView().getProjection()
+      });
+      this.geolocation.on('error', error => {
+        console.log(error);
+      });
+      this.geolocation.on('change', function() {
+        let coordinates = this.geolocation.getPosition();
+        this.positionFeature.setGeometry(coordinates ? new Point(coordinates) : null);
+      });
+    },
     async init() {
       this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
       this.getLayers();
+      this.initPositionFeature();
       this.map = new Map({
         target: 'map',
         layers: [
@@ -2374,6 +2430,12 @@ export default {
             group: 'baselayers',
             source: new XYZ({
               url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            })
+          }),
+          new VectorLayer({
+            name: 'Geolocation',
+            source: new VectorSource({
+              features: [this.positionFeature]
             })
           }),
           new LayerGroup({
@@ -2386,7 +2448,7 @@ export default {
           constrainResolution: true
         })
       });
-
+      this.initGeolocation();
       this.initOrtofoto();
       this.getPermissions();
       await Promise.all([this.getUsers(), this.getSettings()]);
@@ -2427,7 +2489,7 @@ export default {
                   image: new Circle({
                     radius: 5,
                     stroke: new Stroke({
-                      color: 'rgba(255, 0, 0, 1)'
+                      color: 'rgb(255,0,0)'
                     }),
                     fill: new Fill({
                       color: 'rgba(255, 77, 77, 1)'
@@ -2655,5 +2717,12 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.location-tool {
+  padding: 2px;
+  z-index: 1;
+  position: absolute;
+  right: 0.5em;
+  top: 4em;
 }
 </style>
