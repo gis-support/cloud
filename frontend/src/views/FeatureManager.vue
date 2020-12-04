@@ -95,7 +95,7 @@
                 :title="$i18n.t('featureManager.setGeoLocalization')"
                 @click="toggleGeolocation"
               >
-                <i class="fa fa-plus" />
+                <i class="fa fa-arrow-down"></i>
               </button>
             </div>
           </div>
@@ -2411,7 +2411,7 @@ export default {
       this.geolocation.on('error', error => {
         console.log(error);
       });
-      this.geolocation.on('change:position', function() {
+      this.geolocation.on('change:position', () => {
         let coordinates = this.geolocation.getPosition();
         let positionFeature = new Feature();
         positionFeature.setGeometry(coordinates ? new Point(coordinates) : null);
@@ -2435,7 +2435,7 @@ export default {
             features: [positionFeature]
           })
         });
-        this.addLayer(locationLayer);
+        this.map.addLayer(locationLayer);
       });
 
       this.initOrtofoto();
