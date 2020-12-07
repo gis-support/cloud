@@ -3,7 +3,7 @@
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
-          <i class="fa fa-user-plus" />
+          <i class="fa fa-user-plus"/>
           <span data-i18n="dashboard.title">{{ $i18n.t('users.title.addUser') }}</span>
         </div>
       </h2>
@@ -21,7 +21,8 @@
           :placeholder="$i18n.t('default.password')"
         />
         <select v-model="newUserGroup" class="form-control mr-5" style="width: 300px">
-          <option value="undefined" disabled hidden>{{ $i18n.t('default.groupName') }}</option>
+          <option value="undefined" disabled hidden>{{ $i18n.t('default.groupName') }}
+          </option>
           <option
             v-for="group in groups"
             :key="`${group}_assign_user`"
@@ -42,27 +43,28 @@
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey mb-0">
         <div class="p-0 container__border--bottom container__border--red section__header">
-          <i class="fa fa-lock" />
+          <i class="fa fa-lock"/>
           <span data-i18n="dashboard.title">{{ $i18n.t('users.title.permissions') }}</span>
         </div>
       </h2>
       <div class="section__content heading-block heading-block-main pt-10 d-flex">
         <table
-          id="permissions-table"
-          style="max-width: 10vw"
+          style="max-width: max-content"
           class="table table-striped table-bordered table-hover"
+          id="permissions-table-left"
         >
           <thead>
-            <tr role="row">
-              <div
-                id="perms-legend"
-                :style="permissions.length > 0 ? 'height: 40vh' : 'height: 15vh'"
-              >
-                <div class="legend-square legend-edit" />
-                <div class="legend-square legend-read" />
-                <div class="legend-square legend-noaccess" />
-              </div>
-            </tr>
+          <tr
+            :style="permissions.length > 0 ? 'height: 42vh' : 'height: 15vh'">
+            <div
+              id="perms-legend"
+
+            >
+              <div class="legend-square legend-edit"/>
+              <div class="legend-square legend-read"/>
+              <div class="legend-square legend-noaccess"/>
+            </div>
+          </tr>
           </thead>
           <tbody>
             <tr v-for="user of usersPerm" :key="user" role="row">
@@ -79,48 +81,55 @@
             </tr>
           </tbody>
         </table>
-        <div style="overflow-x:auto">
-          <table id="permissions-table" class="table table-striped table-bordered table-hover">
-            <thead :style="permissions.length > 0 ? 'height: 40vh' : 'height: calc(15vh + 7px)'">
-              <tr role="row">
-                <th v-for="perm of permissions" :key="perm.id" style="padding: 0">
-                  <p class="text-vertical full-width d-flex align-center perm-row">
-                    <i
-                      class="fa fa-map-o fa-lg"
-                      style="transform: rotate(90deg); padding-right: 10px"
-                    />
-                    <span :title="perm.name">{{ perm.name }}</span>
-                  </p>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="user of usersPerm" :key="user" role="row">
-                <td
-                  v-for="perm of permissions"
-                  :key="perm.id"
-                  class="text-centered"
-                  :style="{ background: mapPermissionColors[perm.users[user]] }"
-                >
-                  <i
-                    class="fa handler"
-                    :class="
-                      perm.users[user] == 'write'
-                        ? 'fa-pencil'
-                        : perm.users[user] == 'read'
-                        ? 'fa-eye'
-                        : 'fa-times'
-                    "
-                    data-toggle="modal"
-                    data-target="#permissionsModal"
-                    :title="$i18n.t('users.modal.changePermissions')"
-                    @click="saveCurrentPermissions(perm.users[user], perm.id, user)"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <table
+          class="table table-striped table-bordered table-hover"
+          id="permissions-table-right"
+        >
+          <thead
+          >
+          <tr
+            role="row"
+            :style="permissions.length > 0?'height: 42vh':'height: 15vh'">
+            <th
+              v-for="perm of permissions"
+              :key="perm.id"
+            >
+              <p class="text-vertical full-width d-flex align-center perm-row">
+                <i
+                  class="fa fa-map-o fa-lg"
+                  style="transform: rotate(90deg); padding-right: 10px"
+                />
+                <span :title="perm.name">{{ perm.name }}</span>
+              </p>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr
+            role="row"
+            v-for="user of usersPerm"
+            :key="user"
+          >
+            <td
+              class="text-centered"
+              v-for="perm of permissions"
+              :style="{'background': mapPermissionColors[perm.users[user]]}"
+              :key="perm.id"
+            >
+              <i
+                class="fa handler"
+                :class="perm.users[user] == 'write' ? 'fa-pencil' :
+                    (perm.users[user] == 'read' ? 'fa-eye' : 'fa-times')"
+                data-toggle="modal"
+                data-target="#permissionsModal"
+                :title="$i18n.t('users.modal.changePermissions')"
+                @click="saveCurrentPermissions(perm.users[user], perm.id, user)"
+              />
+            </td>
+          </tr>
+          </tbody>
+        </table>
+
       </div>
       <div class="section__content heading-block heading-block-main pt-10">
         <span class="col-sm-12 pl-0">
@@ -160,7 +169,7 @@
     <div class="col-sm-12 pl-0 pr-0 section">
       <h2 class="flex-center container__border--bottom container__border--grey">
         <div class="p-0 container__border--bottom container__border--red section__header">
-          <i class="fa fa-group" />
+          <i class="fa fa-group"/>
           <span>{{ $i18n.t('users.title.groups') }}</span>
         </div>
       </h2>
@@ -393,9 +402,10 @@ export default {
               this.userToAssign = undefined;
             }
           },
-          () => {}
+          () => {
+          }
         )
-        .set({ title: this.$i18n.t('users.title.assignUserTitle') })
+        .set({title: this.$i18n.t('users.title.assignUserTitle')})
         .set({
           labels: {
             ok: this.$i18n.t('default.yes'),
@@ -420,9 +430,10 @@ export default {
               this.$alertify.error(this.$i18n.t('users.deleteDefaultGroup'));
             }
           },
-          () => {}
+          () => {
+          }
         )
-        .set({ title: this.$i18n.t('users.title.deleteGroupTitle') })
+        .set({title: this.$i18n.t('users.title.deleteGroupTitle')})
         .set({
           labels: {
             ok: this.$i18n.t('default.delete'),
@@ -462,9 +473,10 @@ export default {
                 () => {
                   this.changePermissions();
                 },
-                () => {}
+                () => {
+                }
               )
-              .set({ title: this.$i18n.t('users.modal.changePermissions') })
+              .set({title: this.$i18n.t('users.modal.changePermissions')})
               .set({
                 labels: {
                   ok: this.$i18n.t('default.yes'),
@@ -497,9 +509,10 @@ export default {
               this.$alertify.error(this.$i18n.t('default.error'));
             }
           },
-          () => {}
+          () => {
+          }
         )
-        .set({ title: this.$i18n.t('users.modal.deleteUserTitle') })
+        .set({title: this.$i18n.t('users.modal.deleteUserTitle')})
         .set({
           labels: {
             ok: this.$i18n.t('default.delete'),
@@ -551,21 +564,26 @@ export default {
 .btn-upload {
   margin-right: 20px;
 }
+
 .container {
   top: 20px;
 }
+
 .container__input {
   width: 300px;
 }
+
 .control-label {
   line-height: 29px;
   font-size: 12px;
 }
+
 .container {
   height: calc(100% - 76px);
   padding-left: 0px;
   padding-right: 0px;
 }
+
 .desc-sm {
   color: #b5b5b5;
   font-family: 'Open Sans', 'Trebuchet MS', arial, sans-serif;
@@ -574,90 +592,116 @@ export default {
   line-height: 1.75em;
   margin-left: 5px;
 }
+
 .files-list li {
   width: 120px;
   list-style: none;
 }
+
 .handler:hover {
   cursor: pointer;
 }
+
 .heading-block:after,
 .heading-block:before {
   display: none;
 }
+
 .legend-edit {
   background: #48b343;
   margin: 5px;
 }
+
 .legend-edit::after {
   content: '- Edycja';
   display: block;
   margin-left: 25px;
   width: 200px;
 }
+
 .legend-noaccess {
   background: #ec3c36;
   margin: 5px;
 }
+
 .legend-noaccess::after {
   content: '- Brak dostępu';
   display: block;
   margin-left: 25px;
   width: 200px;
 }
+
 .legend-read {
   background: #f9a122;
   margin: 5px;
 }
+
 .legend-read::after {
   content: '- Podgląd';
   display: block;
   margin-left: 25px;
   width: 200px;
 }
+
 .legend-square {
   height: 20px;
   width: 20px;
 }
+
 .loading-overlay {
   width: 100%;
   text-align: center;
 }
+
 .panel-title__names {
   font-size: 14px;
 }
+
 .panel-title__tools i:not(:last-child) {
   margin-right: 5px;
 }
+
 .perm-row {
   max-height: calc(40vh - 5px);
   white-space: nowrap;
 }
-#permissions-table {
+
+#permissions-table-left {
   max-width: calc(100% - 1px);
 }
+
+#permissions-table-right {
+  overflow-x: auto;
+}
+
 #perms-legend {
   min-width: 125px;
 }
+
 .section__content.heading-block.heading-block-main {
   overflow-y: auto;
   max-height: calc(100% - 50px);
 }
+
 .section__header {
   padding-bottom: 15px;
   margin-bottom: -1px;
 }
+
 .text-centered {
   text-align: center;
 }
+
 .text-vertical {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
 }
+
 .text-left {
   text-align: left;
 }
+
 .user-row {
   white-space: nowrap;
   overflow: hidden;

@@ -153,6 +153,9 @@ export default {
 }
 .d-flex {
   display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  max-width: max-content;
 }
 .dropdown-menu:hover {
   cursor: default;
