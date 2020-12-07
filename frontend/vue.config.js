@@ -6,5 +6,8 @@ module.exports = {
       localeDir: 'i18n',
       enableInSFC: false
     }
+  },
+  devServer: {
+    https: true
   }
 };

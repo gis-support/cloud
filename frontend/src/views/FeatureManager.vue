@@ -88,6 +88,16 @@
                 A
               </button>
             </div>
+            <div class="location-tool">
+              <button
+                type="button"
+                class="map-btn"
+                :title="$i18n.t('featureManager.setGeoLocalization')"
+                @click="toggleGeolocation"
+              >
+                <i class="fa fa-arrow-down"></i>
+              </button>
+            </div>
 
           </div>
           <div
@@ -906,6 +916,7 @@
 <script>
 import turfBuffer from '@turf/buffer';
 import moment from 'moment';
+import Geolocation from 'ol/Geolocation';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import {ScaleLine, defaults as defaultControls} from 'ol/control'
@@ -940,6 +951,7 @@ import InputNumber from '@/components/InputNumber';
 import Datepicker from 'vuejs-datepicker';
 import '@/assets/css/feature-manager.css';
 import draggable from 'vuedraggable';
+import { Feature } from 'ol';
 
 export default {
   components: {
@@ -1025,7 +1037,8 @@ export default {
     activeOtherLayers: [],
     allOtherLayers: [],
     otherLayers: [],
-    searchLayer: ''
+    searchLayer: '',
+    geolocation: undefined
   }),
   computed: {
     layersOutOfProject() {
@@ -2371,6 +2384,9 @@ export default {
         duration: 500
       });
     },
+    toggleGeolocation() {
+      this.geolocation.setTracking(!this.geolocation.getTracking());
+    },
     async init() {
       this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
       this.getLayers();
@@ -2400,6 +2416,41 @@ export default {
           zoom: this.mapZoom,
           constrainResolution: true
         })
+      });
+      this.geolocation = new Geolocation({
+        trackingOptions: {
+          enableHighAccuracy: true
+        },
+        projection: this.map.getView().getProjection()
+      });
+      this.geolocation.on('error', error => {
+        console.log(error);
+      });
+      this.geolocation.on('change:position', () => {
+        let coordinates = this.geolocation.getPosition();
+        let positionFeature = new Feature();
+        positionFeature.setGeometry(coordinates ? new Point(coordinates) : null);
+        positionFeature.setStyle(
+          new Style({
+            image: new Circle({
+              radius: 6,
+              fill: new Fill({
+                color: '#3399CC'
+              }),
+              stroke: new Stroke({
+                color: '#fff',
+                width: 2
+              })
+            })
+          })
+        );
+        let locationLayer = new VectorLayer({
+          source: new VectorSource({
+            name: 'geolocation',
+            features: [positionFeature]
+          })
+        });
+        this.map.addLayer(locationLayer);
       });
 
       this.initOrtofoto();
@@ -2442,7 +2493,7 @@ export default {
                   image: new Circle({
                     radius: 5,
                     stroke: new Stroke({
-                      color: 'rgba(255, 0, 0, 1)'
+                      color: 'rgb(255,0,0)'
                     }),
                     fill: new Fill({
                       color: 'rgba(255, 77, 77, 1)'
@@ -2696,6 +2747,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.location-tool {
+  padding: 2px;
+  z-index: 1;
+  position: absolute;
+  right: 0.5em;
+  top: 4em;
 }
 </style>
 
