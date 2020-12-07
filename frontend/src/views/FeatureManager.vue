@@ -12,7 +12,7 @@
                 :title="$i18n.t('featureManager.addFeature')"
                 @click="drawNewFeature"
               >
-                <i class="fa fa-plus" />
+                <i class="fa fa-plus"/>
               </button>
               <span v-else-if="items.length > 0" class="navbar-right">
                 <button
@@ -22,7 +22,7 @@
                   :title="$i18n.t('featureManager.cancelFeatureAdding')"
                   @click="clearFeatureAdding"
                 >
-                  <i class="fa fa-times-circle" />
+                  <i class="fa fa-times-circle"/>
                 </button>
               </span>
             </div>
@@ -88,7 +88,13 @@
                 A
               </button>
             </div>
+
           </div>
+          <div
+            class="scale-line"
+            id="scale-line"
+            :style="isTableShow ?'position: absolute; bottom: 40%;':'position: absolute; bottom: 1em; left: 3.5em;'"
+          ></div>
         </div>
         <div v-if="isTableShow" class="navbar-table-content">
           <nav class="navbar navbar-default table-menu" style="margin-bottom: 0px;">
@@ -99,11 +105,11 @@
                 :title="$i18n.t('featureManager.closeTable')"
                 @click="isTableShow = false"
               >
-                <i class="fa fa-times fa-lg" />
+                <i class="fa fa-times fa-lg"/>
               </button>
               <p v-cloak class="navbar-text">
                 {{ $i18n.t('featureManager.objectsNumber') }}
-                <span v-text="searchCount" />
+                <span v-text="searchCount"/>
               </p>
               <div class="navbar-form navbar-right">
                 <div class="form-group">
@@ -126,7 +132,7 @@
                 :title="$i18n.t('featureManager.objectsFilter')"
                 @click="openColumnFilterDecision"
               >
-                <i class="fa fa-filter" />
+                <i class="fa fa-filter"/>
               </button>
               <button
                 v-if="selectedRows.length > 0"
@@ -134,7 +140,7 @@
                 class="btn navbar-btn navbar-right btn-default"
                 @click="downloadLayer(selectedRows)"
               >
-                <i class="fa fa-download" />
+                <i class="fa fa-download"/>
               </button>
               <button
                 v-if="currentFeature"
@@ -144,7 +150,7 @@
                 :title="$i18n.t('featureManager.zoomToSelected')"
                 @click="zoomToSelected"
               >
-                <i class="fa fa-search" />
+                <i class="fa fa-search"/>
               </button>
             </div>
           </nav>
@@ -166,7 +172,7 @@
           <div v-else class="loading-overlay pt-10 pb-10" style="text-align: center">
             <div class="loading-indicator mb-10">
               <h4>{{ $i18n.t('default.loading') }}</h4>
-              <i class="fa fa-lg fa-spin fa-spinner" />
+              <i class="fa fa-lg fa-spin fa-spinner"/>
             </div>
           </div>
         </div>
@@ -291,7 +297,7 @@
           :title="$i18n.t('featureManager.showTable')"
           @click="isTableShow = true"
         >
-          <i class="fa fa-table" />
+          <i class="fa fa-table"/>
         </button>
         <modal
           name="bufferTable"
@@ -356,7 +362,7 @@
                 <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
                 <div class="form-group" style="display: flex;">
                   <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
+                      {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
                   </label>
                   <input
                     v-model="bufferValue"
@@ -380,7 +386,7 @@
                 <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
                 <div class="form-group" style="display: flex;">
                   <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.bufferLayer') }}
+                      {{ $i18n.t('featureManager.bufferLayer') }}
                   </label>
                   <select
                     v-model="selectedLayer"
@@ -438,13 +444,13 @@
               <div style="margin-bottom: 50px">
                 <div class="form-group" style="display: flex;">
                   <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
+                      {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
                   </label>
                   <input v-model="bufferValue" class="form-control col-sm-7" type="number" />
                 </div>
                 <div class="form-group" style="display: flex;">
                   <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.fieldName') }}
+                      {{ $i18n.t('featureManager.fieldName') }}
                   </label>
                   <select v-model="selectedFieldName" style="max-width: 75%" class="form-control">
                     <option
@@ -492,7 +498,7 @@
             <div v-if="activeLayer" class="modal-body">
               <div class="form-group" style="display: flex;">
                 <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                  {{ $i18n.t('featureManager.rotationValue') + ` [ ${String.fromCharCode(176)} ]` }}
+                    {{ $i18n.t('featureManager.rotationValue') + ` [ ${String.fromCharCode(176)} ]` }}
                 </label>
                 <input
                   v-model="rotationValue"
@@ -555,7 +561,7 @@
                             >
                           </span>
                           <span v-else class="panel-title__names">
-                            <i class="icon-li fa fa-map-o fa-lg mr-5" />
+                            <i class="icon-li fa fa-map-o fa-lg mr-5"/>
                             <span class="bold" href="#">{{ layer.name }}</span>
                           </span>
                           <span id="layers-list-icons" class="panel-title__tools">
@@ -668,7 +674,7 @@
                   :title="$i18n.t('default.settings')"
                   @click="goToSettings"
                 >
-                  <i class="fa fa-cog yellow icon-hover" />
+                  <i class="fa fa-cog yellow icon-hover"/>
                 </a>
                 <div class="btn-group btn-group-sm" role="group">
                   <button
@@ -679,8 +685,8 @@
                     aria-expanded="false"
                     :title="$i18n.t('featureManager.download')"
                   >
-                    <i class="fa fa-download green icon-hover" />
-                    <span class="caret" />
+                    <i class="fa fa-download green icon-hover"/>
+                    <span class="caret"/>
                   </button>
                   <ul class="dropdown-menu">
                     <!-- <li><a>SHP</a></li> -->
@@ -701,7 +707,7 @@
                 class="col-sm-20"
                 :title="project.name"
               >
-                <i class="fa fa-database title__icon" />
+                <i class="fa fa-database title__icon"/>
                 {{ project.name | maxLength }}
               </h4>
             </div>
@@ -732,7 +738,7 @@
           >
             <li role="presentation" :class="{ active: indexActiveTab === 0 }">
               <a href="#" @click="indexActiveTab = 0">
-                <i class="fa fa-bars" />
+                <i class="fa fa-bars"/>
                 {{ $i18n.t('featureManager.legend') }}
               </a>
             </li>
@@ -742,7 +748,7 @@
               :class="{ active: indexActiveTab === 1 }"
             >
               <a href="#" @click="indexActiveTab = 1">
-                <i class="fa fa-table" />
+                <i class="fa fa-table"/>
                 {{ $i18n.t('featureManager.attributes') }}
               </a>
             </li>
@@ -758,7 +764,7 @@
                   $refs['attachments-panel'].getAttachmentsMeta();
                 "
               >
-                <i class="fa fa-info" />
+                <i class="fa fa-info"/>
                 {{ $i18n.t('featureManager.informations') }}
               </a>
             </li>
@@ -902,9 +908,10 @@ import turfBuffer from '@turf/buffer';
 import moment from 'moment';
 import Map from 'ol/Map';
 import View from 'ol/View';
-import { fromLonLat, get as getProjection } from 'ol/proj';
-import { Draw, Modify } from 'ol/interaction';
-import { MVT, WMTSCapabilities, GeoJSON } from 'ol/format';
+import {ScaleLine, defaults as defaultControls} from 'ol/control'
+import {fromLonLat, get as getProjection} from 'ol/proj';
+import {Draw, Modify} from 'ol/interaction';
+import {MVT, WMTSCapabilities, GeoJSON} from 'ol/format';
 import {
   VectorTile as VectorTileSource,
   Vector as VectorSource,
@@ -918,12 +925,12 @@ import {
   Tile as TileLayer,
   Group as LayerGroup
 } from 'ol/layer';
-import { Circle, Fill, Stroke, Style, RegularShape, Text } from 'ol/style';
+import {Circle, Fill, Stroke, Style, RegularShape, Text} from 'ol/style';
 import { LineString, Polygon, Point, MultiPoint, MultiLineString, MultiPolygon } from 'ol/geom.js';
-import { getArea, getLength } from 'ol/sphere.js';
-import { unByKey } from 'ol/Observable.js';
+import {getArea, getLength} from 'ol/sphere.js';
+import {unByKey} from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
-import { optionsFromCapabilities } from 'ol/source/WMTS';
+import {optionsFromCapabilities} from 'ol/source/WMTS';
 import FeatureManagerTable from '@/components/FeatureManagerTable.vue';
 import AttributesPanel from '@/components/AttributesPanel.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
@@ -1108,7 +1115,7 @@ export default {
       if (!layer) {
         return;
       }
-      this.otherLayers.push({ id: layer.id, name: layer.name });
+      this.otherLayers.push({id: layer.id, name: layer.name});
       this.activeOtherLayers.push(layer.id);
       if (Number.isInteger(layer.id)) {
         this.createServiceLayer(layer);
@@ -1181,8 +1188,8 @@ export default {
             const featStyle = new Style({
               text: new Text({
                 text: labelsToShow.join(' '),
-                fill: new Fill({ color: 'white' }),
-                stroke: new Stroke({ color: 'black', width: 4 }),
+                fill: new Fill({color: 'white'}),
+                stroke: new Stroke({color: 'black', width: 4}),
                 offsetY: -10
               })
             });
@@ -1309,9 +1316,10 @@ export default {
               this.selectFeature(undefined);
             }
           },
-          () => {}
+          () => {
+          }
         )
-        .set({ title: this.$i18n.t('featureManager.deleteFeatureHeader') })
+        .set({title: this.$i18n.t('featureManager.deleteFeatureHeader')})
         .set({
           labels: {
             ok: this.$i18n.t('default.delete'),
@@ -1379,8 +1387,8 @@ export default {
               if (this.featureTypes[k] === 'timestamp without time zone') {
                 tempItem[k] = moment(v).isValid()
                   ? moment(v)
-                      .locale('pl')
-                      .format('L')
+                    .locale('pl')
+                    .format('L')
                   : '';
               } else {
                 tempItem[k] = v;
@@ -1569,7 +1577,7 @@ export default {
         name: this.projectName
       };
       if (this.project) {
-        const data = { pid: this.project.id, payload: payload };
+        const data = {pid: this.project.id, payload: payload};
         const r = await this.$store.dispatch('putProject', data);
         if (r.status === 204) {
           this.$alertify.success(this.$i18n.t('featureManager.projectSaved'));
@@ -1621,8 +1629,8 @@ export default {
         if (this.featureTypes[k] === 'timestamp without time zone') {
           copy.properties[k] = moment(v).isValid()
             ? moment(v)
-                .locale('pl')
-                .format('L')
+              .locale('pl')
+              .format('L')
             : '';
         } else {
           copy.properties[k] = v;
@@ -1671,7 +1679,7 @@ export default {
                   text: new Text({
                     text: this.formatLength(line),
                     font: '15px sans-serif',
-                    fill: new Fill({ color: 'black' }),
+                    fill: new Fill({color: 'black'}),
                     placement: 'line',
                     stroke: new Stroke({
                       color: 'rgba(30, 42, 53, 0.3)',
@@ -1896,8 +1904,8 @@ export default {
       this.selectFeature(undefined);
       this.isDrawing = true;
       if (!this.getInteractionByName('drawInteraction')) {
-        const source = new VectorSource({ wrapX: false });
-        const vector = new VectorLayer({ source, name: 'newFeature' });
+        const source = new VectorSource({wrapX: false});
+        const vector = new VectorLayer({source, name: 'newFeature'});
         this.map.addLayer(vector);
         let drawType;
         if (this.layerGeometry === 'polygon') {
@@ -1991,12 +1999,12 @@ export default {
       return layer
         ? layer
         : this.map
-            .getLayers()
-            .getArray()
-            .find(l => l.get('name') === 'otherLayers')
-            .getLayers()
-            .getArray()
-            .find(l => l.get('name') === name);
+          .getLayers()
+          .getArray()
+          .find(l => l.get('name') === 'otherLayers')
+          .getLayers()
+          .getArray()
+          .find(l => l.get('name') === name);
     },
     getLayersAll() {
       let layersAll = [];
@@ -2019,7 +2027,7 @@ export default {
         units: 'kilometers'
       });
       if (buffer) {
-        this.bufferFeatureGeometry = { geometry: buffer.geometry };
+        this.bufferFeatureGeometry = {geometry: buffer.geometry};
         let bufferFeature = new GeoJSON().readFeature(buffer, {
           featureProjection: 'EPSG:3857',
           dataProjection: 'EPSG:4326'
@@ -2150,7 +2158,7 @@ export default {
     },
     saveFile(r) {
       const data = JSON.stringify(r.body);
-      const blob = new Blob([data], { type: 'text/plain' });
+      const blob = new Blob([data], {type: 'text/plain'});
       const e = document.createEvent('MouseEvents');
       const a = document.createElement('a');
       a.download = `${this.$route.params.layerId}.geojson`;
@@ -2263,11 +2271,11 @@ export default {
         text: selecting
           ? null
           : new Text({
-              text: labelsToShow.join(' '),
-              fill: new Fill({ color: 'white' }),
-              stroke: new Stroke({ color: 'black', width: 4 }),
-              offsetY: -10
-            })
+            text: labelsToShow.join(' '),
+            fill: new Fill({color: 'white'}),
+            stroke: new Stroke({color: 'black', width: 4}),
+            offsetY: -10
+          })
       });
       if (this.layerType) {
         const stroke = new Stroke({
@@ -2367,6 +2375,12 @@ export default {
       this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
       this.getLayers();
       this.map = new Map({
+        controls: defaultControls().extend([
+          new ScaleLine({
+            units: 'metric',
+            target: document.getElementById('scale-line')
+          })]
+        ),
         target: 'map',
         layers: [
           new TileLayer({
@@ -2488,7 +2502,7 @@ export default {
                     text: new Text({
                       text: this.formatLength(line),
                       font: '15px sans-serif',
-                      fill: new Fill({ color: 'black' }),
+                      fill: new Fill({color: 'black'}),
                       placement: 'line',
                       stroke: new Stroke({
                         color: 'rgba(37, 81, 122, 0.3)',
@@ -2552,8 +2566,8 @@ export default {
             if (this.featureTypes[k] === 'timestamp without time zone') {
               tempItem[k] = moment(v).isValid()
                 ? moment(v)
-                    .locale('pl')
-                    .format('L')
+                  .locale('pl')
+                  .format('L')
                 : '';
             } else {
               tempItem[k] = v;
@@ -2571,10 +2585,20 @@ export default {
 </script>
 
 <style scoped>
+
+.scale-line >>> .ol-scale-line{
+  position: absolute;
+  z-index: 1;
+  background: rgba(0,60,136,0.5);
+  bottom: .5em;
+  left: .5em;
+}
+
 .dragg-content {
   width: 100%;
   height: 100%;
 }
+
 .map-btn {
   position: relative;
   margin: 1px;
@@ -2591,46 +2615,58 @@ export default {
   border: none;
   border-radius: 4px;
 }
+
 .map-btn:hover {
   background-color: rgba(0, 60, 136, 0.7);
 }
+
 .add-feature-tool {
   top: 59px;
 }
+
 .buffer-tool {
   top: 101px;
 }
+
 .distance-tool {
   top: 122px;
 }
+
 .map-tool-left {
   padding: 2px;
   z-index: 1;
   position: absolute;
   left: 0.5em;
 }
+
 .map-tool-right {
   padding: 2px;
   z-index: 1;
   position: absolute;
   right: 0.5em;
 }
+
 .measure-tool {
   top: 80px;
 }
+
 .rotation-tool {
   top: 28px;
 }
+
 .dropdown-menu {
   left: -110px;
 }
+
 .modal-new-feature .modal-body {
   height: 70vh;
   overflow-y: auto;
 }
+
 .list-group-item:not(.no-item):hover {
   cursor: pointer;
 }
+
 .popup {
   position: relative;
   background: rgba(0, 0, 0, 0.5);
@@ -2640,20 +2676,31 @@ export default {
   opacity: 0.7;
   white-space: nowrap;
 }
+
 .popup-measure {
   opacity: 1;
   font-weight: bold;
 }
+
 .layer-modal-body {
   height: calc(100% - 120px);
 }
+
 .layers-wrapper {
   overflow: auto;
   height: calc(100% - 40px);
 }
+
 .list__element--otherLayer {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 </style>
+
+<!--<style>
+/* global styles */
+.ol-scale-line{
+  background: rgba(0,60,136,0.5);
+}
+</style>-->
