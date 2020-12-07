@@ -2757,10 +2757,3 @@ export default {
   top: 4em;
 }
 </style>
-
-<!--<style>
-/* global styles */
-.ol-scale-line{
-  background: rgba(0,60,136,0.5);
-}
-</style>-->
