@@ -52,6 +52,7 @@
   "default": {
     "actions": "Akcje",
     "additionalLayerAccessDenied": "Brak uprawnień do części z warstw",
+    "admin": "Administrator",
     "active": "Aktywny",
     "attribute": "Atrybut",
     "add": "Dodaj",
@@ -129,10 +130,12 @@
     "success": "Sukces",
     "square": "Kwadrat",
     "triangle": "Trójkąt",
+    "user": "Użytkownik",
     "username": "Nazwa użytkownika",
     "usernameFrom": "Kopiuj uprawnienia z...",
     "usernameTo": "Kopiuj uprawnienia do...",
     "users": "Użytkownicy",
+    "userType": "Typ użytkownika",
     "yes": "Tak",
     "value": "Wartość"
   },
