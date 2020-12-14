@@ -12,27 +12,20 @@
             >
               <option
                 v-for="(field, idx) in fields"
-                v-text="field"
-                :key="field+idx"
+                :key="field + idx"
                 :value="field"
+                v-text="field"
               />
             </select>
             <span class="input-group-btn">
-              <button
-                class="btn btn-danger"
-                type="button"
-                title="Usuń filtr"
-                @click="deleteFilter"
-              >
-                <i class="fa fa-times" /></button>
+              <button class="btn btn-danger" type="button" title="Usuń filtr" @click="deleteFilter">
+                <i class="fa fa-times" />
+              </button>
             </span>
           </div>
         </div>
       </div>
-      <div
-        class="form-group"
-        v-if="value.column != ''"
-      >
+      <div v-if="value.column != ''" class="form-group">
         <label class="control-label col-sm-4">Wartość:</label>
         <div class="col-sm-8">
           <div class="input-group">
@@ -57,19 +50,16 @@
                 <span class="caret" />
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li
-                  v-for="(operation, idx) in getOperations(value.column)"
-                  :key="operation+idx"
-                >
+                <li v-for="(operation, idx) in getOperations(value.column)" :key="operation + idx">
                   <a
-                    href="#"
                     v-if="featureTypes[value.column] === 'character varying'"
+                    href="#"
                     @click="updateValue('operation', operation)"
                     v-text="filterMap[operation]"
                   />
                   <a
-                    href="#"
                     v-else
+                    href="#"
                     @click="updateValue('operation', operation)"
                     v-text="operation"
                   />
@@ -80,9 +70,9 @@
               type="text"
               class="form-control"
               :value="value.value"
-              @input="updateValue('value', $event.target.value)"
               placeholder="Wpisz wartość"
-            >
+              @input="updateValue('value', $event.target.value)"
+            />
           </div>
         </div>
       </div>
@@ -97,19 +87,28 @@ export default {
   props: {
     columns: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     value: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   data: () => ({
     filterOperations: {
-      'character varying': ['=', '!=', 'startwith', '!startwith', '!endwith', 'endwith', 'contains', '!contains'],
+      'character varying': [
+        '=',
+        '!=',
+        'startwith',
+        '!startwith',
+        '!endwith',
+        'endwith',
+        'contains',
+        '!contains'
+      ],
       integer: ['=', '<', '=<', '=>', '>', '!='],
       real: ['=', '<', '=<', '=>', '>', '!='],
-      'timestamp without time zone': ['=', '<', '=<', '=>', '>', '!='],
+      'timestamp without time zone': ['=', '<', '=<', '=>', '>', '!=']
     },
     filterMap: {
       '=': 'Równa się',
@@ -119,8 +118,8 @@ export default {
       endwith: 'Kończy się na',
       '!endwith': 'Nie kończy się na',
       contains: 'Zawiera',
-      '!contains': 'Nie zawiera',
-    },
+      '!contains': 'Nie zawiera'
+    }
   }),
   computed: {
     featureTypes() {
@@ -132,8 +131,11 @@ export default {
       },
       set(newFields) {
         return newFields;
-      },
-    },
+      }
+    }
+  },
+  created() {
+    this.fields = this.$root.fields;
   },
   methods: {
     deleteFilter() {
@@ -150,7 +152,7 @@ export default {
       const data = {
         column: self.value.column,
         operation: self.value.operation,
-        value: self.value.value,
+        value: self.value.value
       };
       data[type] = _new;
 
@@ -163,10 +165,7 @@ export default {
       }
 
       self.$emit('input', data);
-    },
-  },
-  created() {
-    this.fields = this.$root.fields;
-  },
+    }
+  }
 };
 </script>

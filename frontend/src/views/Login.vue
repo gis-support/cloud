@@ -1,39 +1,36 @@
 <template>
-  <div
-    class="content content-login"
-    @keyup.enter="loginRequest"
-  >
+  <div class="content content-login" @keyup.enter="loginRequest">
     <div class="container">
       <div class="account-wrapper">
         <div class="account-body">
           <h3 class="text-center">{{ $i18n.t('login.loginTitle') }}</h3>
           <div class="form-group">
             <input
+              id="login-username"
+              ref="login-username"
+              v-model="email"
               type="text"
               name="email"
               class="form-control"
-              id="login-username"
               :placeholder="$i18n.t('default.login')"
               tabindex="1"
-              v-model="email"
-              ref="login-username"
             />
           </div>
           <div class="form-group">
             <input
+              id="login-password"
+              v-model="password"
               type="password"
               name="password"
               class="form-control"
-              id="login-password"
               :placeholder="$i18n.t('default.password')"
               tabindex="2"
-              v-model="password"
             />
           </div>
           <div class="form-group">
             <button
-              type="submit"
               id="loginButton"
+              type="submit"
               class="btn btn-primary btn-block btn-lg"
               tabindex="4"
               @click="loginRequest"
@@ -53,6 +50,9 @@ export default {
     email: '',
     password: ''
   }),
+  mounted() {
+    this.$refs['login-username'].focus();
+  },
   methods: {
     async loginRequest() {
       const payload = { user: this.email, password: this.password };
@@ -66,9 +66,6 @@ export default {
         this.$alertify.error(this.$i18n.t('default.error'));
       }
     }
-  },
-  mounted() {
-    this.$refs['login-username'].focus();
   }
 };
 </script>

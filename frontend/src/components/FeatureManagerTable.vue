@@ -1,35 +1,28 @@
 <template>
   <div class="table-content">
     <div>
-      <div
-        class="loading-overlay pt-10 pb-10"
-        style="text-align: center;"
-        v-if="items.length < 1"
-      >
+      <div v-if="items.length < 1" class="loading-overlay pt-10 pb-10" style="text-align: center;">
         <div class="loading-indicator mb-10">
           <h4>{{ $i18n.t('default.loading') }}</h4>
           <i class="fa fa-lg fa-spin fa-spinner" />
         </div>
       </div>
-      <div
-        class="vscroll"
-        v-else
-      >
+      <div v-else class="vscroll">
         <div class="table-data table-responsive">
           <table class="table table-bordered table-hover table-striped">
             <thead>
               <tr>
                 <template v-for="(column, i) in columns">
-                  <th
-                    v-if="column.head"
-                    class="first"
-                    :key="i"
-                    :style="{'min-width': '50px'}"
-                  >#</th>
+                  <th v-if="column.head" :key="i" class="first" :style="{ 'min-width': '50px' }">
+                    #
+                  </th>
                   <th
                     v-else-if="!column.head"
                     :key="i"
-                    :style="{'min-width': columnsLengths[column.name] + 'px', 'max-width': columnsLengths[column.name] + 'px'}"
+                    :style="{
+                      'min-width': columnsLengths[column.name] + 'px',
+                      'max-width': columnsLengths[column.name] + 'px'
+                    }"
                   >
                     <div>
                       <span v-text="column.name" />
@@ -37,17 +30,16 @@
                         v-show="!editing && isFiltredColumn(column)"
                         :title="$i18n.t('default.isFiltered')"
                         :class="{
-                          'filter' : column.filter,
-                          'filtered' : isFiltredColumn(column),
+                          filter: column.filter,
+                          filtered: isFiltredColumn(column)
                         }"
                       />
                       <span
                         v-show="!editing"
                         :class="{
-                          'sorting' : column.sortable &&
-                            (!sortedColumn || sortedColumn != column.key),
-                          'sorting_asc' : sortedColumn == column.key && sortedColumnType == 'asc',
-                          'sorting_desc' : sortedColumn == column.key && sortedColumnType == 'desc',
+                          sorting: column.sortable && (!sortedColumn || sortedColumn != column.key),
+                          sorting_asc: sortedColumn == column.key && sortedColumnType == 'asc',
+                          sorting_desc: sortedColumn == column.key && sortedColumnType == 'desc'
                         }"
                         @click.capture="column.sortable ? sort($event, column.key) : false"
                       />
@@ -57,31 +49,35 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(item, index) in windowItems"
-                :key="index"
-              >
+              <tr v-for="(item, index) in windowItems" :key="index">
                 <template v-for="(column, idx2) in columns">
                   <th
                     v-if="column.head"
+                    :key="idx2 + 'col'"
                     scope="row"
                     v-text="indexFirstItem + index + 1"
-                    :key="idx2 + 'col'"
                   />
                   <td
                     v-else
-                    v-text="item[column.key]"
                     :key="idx2 + 'item'"
                     :class="{
-                      'active-cell' : selectedIndex == indexFirstItem + index,
-                      'cell-to-download' : rowsToDownloadCopy.map(el => el.id).includes(item.id),
+                      'active-cell': selectedIndex == indexFirstItem + index,
+                      'cell-to-download': rowsToDownloadCopy.map(el => el.id).includes(item.id),
                       'overflow-title': columnsLengths[column.name] >= 750
                     }"
-                    :style="{'min-width': columnsLengths[column.name] + 'px', 'max-width': columnsLengths[column.name] + 'px'}"
-                    :title="item[column.key] != null && item[column.key].toString().length >= 100?item[column.key]:false"
+                    :style="{
+                      'min-width': columnsLengths[column.name] + 'px',
+                      'max-width': columnsLengths[column.name] + 'px'
+                    }"
+                    :title="
+                      item[column.key] != null && item[column.key].toString().length >= 100
+                        ? item[column.key]
+                        : false
+                    "
                     @click.exact="selectItemIndex(indexFirstItem + index, item)"
                     @click.ctrl="selectToDownloadCtrl(index, item)"
                     @click.shift="selectToDownloadShift(index, item)"
+                    v-text="item[column.key]"
                   />
                 </template>
               </tr>
@@ -89,14 +85,11 @@
           </table>
         </div>
         <div
-          class="table-scroll-bar"
-          :style="{top: `${itemHeight}px`}"
           v-show="filteredItems.length > windowItems.length"
+          class="table-scroll-bar"
+          :style="{ top: `${itemHeight}px` }"
         >
-          <div
-            :style="{height : `${filteredItems.length * (itemHeight)}px`}"
-            style="width: 1px;"
-          />
+          <div :style="{ height: `${filteredItems.length * itemHeight}px` }" style="width: 1px;" />
         </div>
       </div>
     </div>
@@ -199,11 +192,7 @@ export default {
       if (self.maxItems === 0) {
         return [];
       }
-      return _.slice(
-        self.sortedItems,
-        self.indexFirstItem,
-        self.indexFirstItem + self.maxItems
-      );
+      return _.slice(self.sortedItems, self.indexFirstItem, self.indexFirstItem + self.maxItems);
     },
 
     filteredColumns() {
@@ -221,9 +210,7 @@ export default {
         .value();
     },
     selectedItem() {
-      return this.selectedIndex === -1
-        ? null
-        : this.sortedItems[this.selectedIndex];
+      return this.selectedIndex === -1 ? null : this.sortedItems[this.selectedIndex];
     },
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
@@ -260,6 +247,22 @@ export default {
       this.$recompute('filteredItems');
     }
   },
+  beforeCreate() {},
+  created() {
+    this.$root.$on('update-column-filters', this.updateColumnFilters);
+  },
+  mounted() {
+    this.setColumnsLengths();
+    const self = this;
+    self.initVirtualTable();
+  },
+  updated() {},
+  activated() {},
+  deactivated() {},
+  beforeDestroy() {
+    this.$root.$off('update-column-filters', this.updateColumnFilters);
+  },
+  destroyed() {},
   methods: {
     async getAttachments(fid) {
       const payload = { lid: this.layId, fid };
@@ -268,9 +271,7 @@ export default {
       if (r.status === 200) {
         if (
           this.featureAttachments[this.layId] &&
-          !Object.keys(this.featureAttachments[this.layId]).includes(
-            fid.toString()
-          )
+          !Object.keys(this.featureAttachments[this.layId]).includes(fid.toString())
         ) {
           this.$store.commit('setAttachmentsFeature', {
             lid: this.layId,
@@ -284,9 +285,7 @@ export default {
           attachments: r.obj.attachments
         });
       } else {
-        this.$alertify.error(
-          this.$i18n.t('featureManager.errorAttachmentsFetch')
-        );
+        this.$alertify.error(this.$i18n.t('featureManager.errorAttachmentsFetch'));
       }
     },
     filtrowanie(items) {
@@ -316,9 +315,7 @@ export default {
         _.each(filters, filter => {
           items2 = _.filter(items2, item =>
             ValueFilterMap[filter.operation](
-              typeof filter.value === 'string'
-                ? filter.value.toLowerCase()
-                : filter.value
+              typeof filter.value === 'string' ? filter.value.toLowerCase() : filter.value
             ).isFiltered(
               typeof item[filter.column] === 'string'
                 ? item[filter.column].toLowerCase()
@@ -340,10 +337,7 @@ export default {
       for (let item of this.items) {
         for (let column in item) {
           if (item[column]) {
-            if (
-              item[column].toString().length * 7.5 >
-              this.columnsLengths[column]
-            ) {
+            if (item[column].toString().length * 7.5 > this.columnsLengths[column]) {
               this.columnsLengths[column] =
                 item[column].toString().length * 7.5 >= 750
                   ? 750
@@ -397,9 +391,7 @@ export default {
     selectToDownloadCtrl(idx, item) {
       const isFound = this.rowsToDownloadCopy.some(el => el.id === item.id);
       if (isFound) {
-        const delIdx = this.rowsToDownloadCopy.findIndex(
-          el => el.id === item.id
-        );
+        const delIdx = this.rowsToDownloadCopy.findIndex(el => el.id === item.id);
         this.rowsToDownloadCopy.splice(delIdx, 1);
       } else {
         this.rowsToDownloadCopy.push(item);
@@ -410,15 +402,9 @@ export default {
       document.getSelection().removeAllRanges();
       const tableIndex = this.filteredItems.findIndex(el => el.id === item.id);
       if (this.selectedIndex < tableIndex + 1) {
-        this.rowsToDownloadCopy = this.filteredItems.slice(
-          this.selectedIndex,
-          tableIndex + 1
-        );
+        this.rowsToDownloadCopy = this.filteredItems.slice(this.selectedIndex, tableIndex + 1);
       } else {
-        this.rowsToDownloadCopy = this.filteredItems.slice(
-          tableIndex,
-          this.selectedIndex + 1
-        );
+        this.rowsToDownloadCopy = this.filteredItems.slice(tableIndex, this.selectedIndex + 1);
       }
       this.$emit('updateSelectedRows', this.rowsToDownloadCopy);
     },
@@ -433,8 +419,7 @@ export default {
       }
 
       let indexScroll = index;
-      const y =
-        self.selectedIndex + self.maxItems - (self.sortedItems.length - 1);
+      const y = self.selectedIndex + self.maxItems - (self.sortedItems.length - 1);
       if (y > 0) {
         indexScroll = index - y;
       }
@@ -486,9 +471,7 @@ export default {
       }).observe(tableEl);
 
       function checkScrollPosition() {
-        self.indexFirstItem = Math.floor(
-          self.scrollEl.scrollTop / self.itemHeight + 0.78
-        );
+        self.indexFirstItem = Math.floor(self.scrollEl.scrollTop / self.itemHeight + 0.78);
         // self._computedWatchers.windowItems.update();
         self.$recompute('windowItems');
       }
@@ -505,8 +488,7 @@ export default {
     sort($event, kolumn) {
       const self = this;
       if (self.sortedColumn === kolumn) {
-        self.sortedColumnType =
-          self.sortedColumnType === 'asc' ? 'desc' : 'asc';
+        self.sortedColumnType = self.sortedColumnType === 'asc' ? 'desc' : 'asc';
       } else {
         self.sortedColumn = kolumn;
         self.sortedColumnType = 'asc';
@@ -515,9 +497,7 @@ export default {
       this.$recompute('sortedItems');
     },
     isFiltredColumn(column) {
-      return (
-        column.key in this.filteredColumns && this.filteredColumns[column.key]
-      );
+      return column.key in this.filteredColumns && this.filteredColumns[column.key];
     },
 
     updateColumnFilters() {
@@ -526,23 +506,7 @@ export default {
       // this._computedWatchers.filteredItems.update();
       this.$recompute('filteredItems');
     }
-  },
-  beforeCreate() {},
-  created() {
-    this.$root.$on('update-column-filters', this.updateColumnFilters);
-  },
-  mounted() {
-    this.setColumnsLengths();
-    const self = this;
-    self.initVirtualTable();
-  },
-  updated() {},
-  activated() {},
-  deactivated() {},
-  beforeDestroy() {
-    this.$root.$off('update-column-filters', this.updateColumnFilters);
-  },
-  destroyed() {}
+  }
 };
 </script>
 <style>

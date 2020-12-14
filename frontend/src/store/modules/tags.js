@@ -1,17 +1,17 @@
-import Swagger from "swagger-client";
-import api from "@/docs/api.json";
+import Swagger from 'swagger-client';
+import api from '@/docs/api.json';
 
 const swagger = new Swagger({
   spec: api,
   requestInterceptor: r => {
     const request = r;
-    if (!request.url.includes("https") && process.env.VUE_APP_PROD_HOST_URL != "localhost") {
-      request.url = request.url.replace("http", "https");
+    if (!request.url.includes('https') && process.env.VUE_APP_PROD_HOST_URL != 'localhost') {
+      request.url = request.url.replace('http', 'https');
     }
-    if (request.url.includes("/login") || request.url.includes("/register")) {
+    if (request.url.includes('/login') || request.url.includes('/register')) {
       return request;
     }
-    request.headers.Authorization = localStorage.getItem("token");
+    request.headers.Authorization = localStorage.getItem('token');
     return request;
   }
 }).client;
@@ -23,7 +23,7 @@ export default {
   actions: {
     async addTag(ctx, payload) {
       try {
-        const response = await swagger.apis["Layers tags"].post_api_tags({
+        const response = await swagger.apis['Layers tags'].post_api_tags({
           body: payload
         });
         return response;
@@ -34,7 +34,7 @@ export default {
     async editTag(ctx, payload) {
       try {
         const { body, tag_id } = payload;
-        const response = await swagger.apis["Layers tags"].put_api_tags__tag_id_({
+        const response = await swagger.apis['Layers tags'].put_api_tags__tag_id_({
           body,
           tag_id
         });
@@ -43,9 +43,9 @@ export default {
         return err;
       }
     },
-    async getTags(ctx) {
+    async getTags() {
       try {
-        const response = await swagger.apis["Layers tags"].get_api_tags();
+        const response = await swagger.apis['Layers tags'].get_api_tags();
         return response;
       } catch (err) {
         return err;
@@ -53,7 +53,7 @@ export default {
     },
     async deleteTag(ctx, id) {
       try {
-        const response = await swagger.apis["Layers tags"].delete_api_tags__tag_id_({
+        const response = await swagger.apis['Layers tags'].delete_api_tags__tag_id_({
           tag_id: id
         });
         return response;
@@ -63,7 +63,7 @@ export default {
     },
     async tagLayer(ctx, payload) {
       try {
-        const response = await swagger.apis["Layers tags"].post_api_tags_layers({
+        const response = await swagger.apis['Layers tags'].post_api_tags_layers({
           layer_id: payload.lid,
           tag_id: payload.tid
         });
@@ -74,7 +74,7 @@ export default {
     },
     async untagLayer(ctx, payload) {
       try {
-        const response = await swagger.apis["Layers tags"].delete_api_tags_layers({
+        const response = await swagger.apis['Layers tags'].delete_api_tags_layers({
           layer_id: payload.lid,
           tag_id: payload.tid
         });
@@ -86,12 +86,12 @@ export default {
   },
   getters: {
     getTags(state) {
-      return state["Layers tags"];
+      return state['Layers tags'];
     }
   },
   mutations: {
     setTags(state, value) {
-      state["Layers tags"] = value;
+      state['Layers tags'] = value;
     }
   }
 };

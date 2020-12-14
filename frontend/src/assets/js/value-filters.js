@@ -142,7 +142,7 @@ const ValueFilterMap = {
   '=<': value => new ValueFilterGte(value),
   '<': value => new ValueFilterGt(value),
   between: (value1, value2) => new ValueFilterBetween(value1, value2),
-  '!between': (value1, value2) => new ValueFilterNot(new ValueFilterBetween(value1, value2)),
+  '!between': (value1, value2) => new ValueFilterNot(new ValueFilterBetween(value1, value2))
 };
 
 export default ValueFilterMap;
