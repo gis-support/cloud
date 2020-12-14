@@ -917,6 +917,9 @@
 </template>
 
 <script>
+import { register } from 'ol/proj/proj4.js';
+import proj4 from 'proj4';
+import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
 import turfBuffer from '@turf/buffer';
 import moment from 'moment';
 import Geolocation from 'ol/Geolocation';
@@ -2082,7 +2085,7 @@ export default {
             const result = parser.read(text);
             const options = optionsFromCapabilities(result, {
               layer: 'ORTOFOTOMAPA',
-              matrixSet: 'EPSG:4326'
+              matrixSet: 'EPSG:2180'
             });
             resolve(
               this.map.addLayer(
@@ -2094,10 +2097,15 @@ export default {
                   zIndex: -1000,
                   source: new WMTS({
                     url: 'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
-                    matrixSet: 'EPSG:4326',
+                    matrixSet: 'EPSG:2180',
                     format: 'image/png',
-                    projection: getProjection('EPSG:4326'),
-                    tileGrid: options.tileGrid,
+                    projection: getProjection('EPSG:2180'),
+                    tileGrid: new WMTSTileGrid({
+                      origin: [100000, 850000],
+                      matrixIds: options.tileGrid.matrixIds_,
+                      resolutions: options.tileGrid.resolutions_,
+                      tileSize: 512
+                    }),
                     style: 'default',
                     wrapX: true
                   })
@@ -2390,6 +2398,11 @@ export default {
       this.geolocation.setTracking(!this.geolocation.getTracking());
     },
     async init() {
+      proj4.defs(
+        'EPSG:2180',
+        '+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +units=m +no_defs +axis=enu'
+      );
+      register(proj4);
       this.$store.commit('setAttachmentsLayer', this.$route.params.layerId);
       this.getLayers();
       this.map = new Map({
