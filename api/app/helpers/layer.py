@@ -484,6 +484,25 @@ class Layer(Cloud):
             })
         return result
 
+    def create_transform_index(self, geometry_column_name: str = 'geometry', output_srid: int = 3857):
+        index_name = f"{self.name}_{geometry_column_name}_{output_srid}_idx"
+
+        sql = SQL("""
+        CREATE INDEX {index_name}
+        ON {schema_name}.{table_name}
+        USING gist
+        (ST_Transform({geometry_column_name}, {output_srid}))
+        WHERE {geometry_column_name} IS NOT NULL;
+        """).format(
+            index_name=Identifier(index_name),
+            schema_name=Identifier('public'),
+            table_name=Identifier(self.name),
+            geometry_column_name=Identifier(geometry_column_name),
+            output_srid=Literal(output_srid)
+        )
+
+        self.execute(sql)
+
 
 def get_features_as_xlsx(layer: Layer, features_ids: List[int]) -> NamedTemporaryFile:
     columns = layer.columns()
