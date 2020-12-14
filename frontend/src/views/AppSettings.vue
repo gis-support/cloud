@@ -126,18 +126,6 @@
                 </td>
                 <td>{{port}}</td>
               </tr>
-              <tr>
-                <td>
-                  <h5>{{this.$i18n.t('settings.user')}}:</h5>
-                </td>
-                <td>{{user}}</td>
-              </tr>
-              <tr>
-                <td>
-                  <h5>{{this.$i18n.t('settings.password')}}:</h5>
-                </td>
-                <td>******</td>
-              </tr>
             </table>
           </div>
         </div>
@@ -210,9 +198,6 @@ export default {
     Tags
   },
   computed: {
-    user() {
-      return this.$store.getters.getUser;
-    },
     host() {
       return process.env.VUE_APP_PROD_HOST_URL;
     },

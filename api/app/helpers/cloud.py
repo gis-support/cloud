@@ -72,6 +72,7 @@ class Cloud:
             AND (t2.privilege_type IN %s OR t2.privilege_type IS NULL)
             AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
             AND (t2.table_name NOT IN %s OR t2.table_name IS NULL)
+            ORDER BY 2
         """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), self.user, DB_RESTRICTED_TABLES))
         users = {}
         layers = []
@@ -120,14 +121,14 @@ class Cloud:
             permissions.append(perm)
         return {
             'permissions': permissions,
-            'users': list(users.keys())
+            'users': sorted(list(users.keys()))
         }
     
     def copy_permissions(self, user_from, user_to):
-        users, _ = self.get_users_with_layers(grantor=user_from)
+        users, layers = self.get_users_with_layers(grantor=user_from)
         permissions = []
-        for layer in users[user_from]:
-            permission = users[user_from][layer]
+        for layer in layers:
+            permission = users[user_from].get(layer, "")
             permissions.append({
                 "layer": layer,
                 "permission": permission
