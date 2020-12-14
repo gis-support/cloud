@@ -1200,7 +1200,7 @@ export default {
     activeLayerName: '',
     activeServices: [],
     addFeatureDialog: false,
-    baseLayers: ['OpenStreetMap', 'Ortofotomapa', 'OrtofotomapaDwa'],
+    baseLayers: ['OpenStreetMap', 'Ortofotomapa'],
     bufferColumns: [
       {
         head: true,
@@ -2339,7 +2339,7 @@ export default {
         }
       });
     },
-    initOrtofotoDwa() {
+    initOrtofoto() {
       return new Promise((resolve, reject) => {
         const parser = new WMTSCapabilities();
         fetch(
@@ -2357,7 +2357,7 @@ export default {
                 new TileLayer({
                   opacity: 1,
                   visible: false,
-                  name: 'OrtofotomapaDwa',
+                  name: 'Ortofotomapa',
                   group: 'baselayers',
                   zIndex: -1000,
                   source: new WMTS({
@@ -2372,47 +2372,6 @@ export default {
                       resolutions: options.tileGrid.resolutions_,
                       tileSize: 512
                     }),
-                    style: 'default',
-                    wrapX: true
-                  })
-                })
-              )
-            );
-          })
-          .catch(err => {
-            this.$alertify.error(this.$i18n.t('featureManager.ortoError'));
-            reject(err);
-          });
-      });
-    },
-    initOrtofoto() {
-      return new Promise((resolve, reject) => {
-        const parser = new WMTSCapabilities();
-        fetch(
-          'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO?SERVICE=WMTS&REQUEST=GetCapabilities'
-        )
-          .then(response => response.text())
-          .then(text => {
-            const result = parser.read(text);
-            const options = optionsFromCapabilities(result, {
-              layer: 'ORTOFOTOMAPA',
-              matrixSet: 'EPSG:4326'
-            });
-            resolve(
-              this.map.addLayer(
-                new TileLayer({
-                  opacity: 1,
-                  visible: false,
-                  name: 'Ortofotomapa',
-                  group: 'baselayers',
-                  zIndex: -1000,
-                  source: new WMTS({
-                    url:
-                      'https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO',
-                    matrixSet: 'EPSG:4326',
-                    format: 'image/png',
-                    projection: getProjection('EPSG:4326'),
-                    tileGrid: options.tileGrid,
                     style: 'default',
                     wrapX: true
                   })
@@ -2779,7 +2738,6 @@ export default {
       });
 
       this.initOrtofoto();
-      this.initOrtofotoDwa();
       this.getPermissions();
       await Promise.all([this.getUsers(), this.getSettings()]);
 
