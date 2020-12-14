@@ -1,11 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import uuid
 
-import jwt
-import psycopg2
-
-from flask import Blueprint, jsonify, request, current_app, make_response, Response, send_file
+from flask import Blueprint, jsonify, request, current_app, make_response, send_file
 from flasgger import swag_from
 
 from app.blueprints.layers.dicts.dict import Dict
@@ -19,7 +15,7 @@ from app.db.general import token_required, layer_decorator
 from app.helpers.cloud import Cloud, cloud_decorator
 from app.helpers.layer import Layer
 from shapely.geometry import shape
-from psycopg2.sql import SQL, Identifier, Placeholder
+from psycopg2.sql import SQL, Identifier, Literal
 from osgeo import osr
 from osgeo import ogr
 # Layer id sync
@@ -178,6 +174,7 @@ def layers(cloud):
 
             layer = Layer({"app": current_app, "user": request.user, "name": name})
             LayerAttachmentsManager.create_attachments_column(layer)
+            layer.create_transform_index()
 
         return jsonify({"layers": {"name": layer.name, "features": layer.count(), "id": layer.lid}}), 201
 
@@ -411,32 +408,69 @@ def layer_categories(lid, attr):
 @token_required
 @layer_decorator(permission="read")
 def lid(layer, lid, z=0, x=0, y=0):
-    tile = create_mvt_tile(z, x, y, layer.name)
+    tile = as_tile(z, x, y, layer.name)
     if not tile:
         return ('', 204)
     response = make_response(tile)
     response.headers['Content-Type'] = "application/octet-stream"
     return response
 
+# def create_mvt_tile(z, x, y, name):
+#     cur = current_app._db.cursor()
+#     #TODO: hotfix
+#     '''
+#     SELECT ST_AsMVT(tile) FROM (SELECT UNNEST(SELECT string_agg(column_name, ',') FROM information_schema.columns WHERE table_name = %s AND column_name NOT IN ('geometry')),
+#         ST_AsMVTGeom(ST_Buffer(ST_transform(geometry, 3857), 0),tilebbox(%s, %s, %s, 3857),4096,256,true) AS geom FROM {}) AS tile
+#     '''
+#     query = '''
+#         SELECT column_name from information_schema.columns WHERE table_name = %s
+#     '''
+#     cur.execute(query, (name,))
+#     columns = [f'"{row[0]}"' for row in cur.fetchall() if row[0] not in [
+#         'geometry']]
+#     query = SQL('''
+#         SELECT ST_AsMVT(tile) FROM (SELECT %s,
+#         ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,50,true) AS geom FROM {}) AS tile
+#     ''').format(Identifier(name))
+#     cur.execute(query, (AsIs(",".join(columns)), z, x, y))
+#     tile = cur.fetchone()[0]
+#     return tile.tobytes()
 
-def create_mvt_tile(z, x, y, name):
+def as_tile(z, x, y, table_name):
+
     cur = current_app._db.cursor()
-    #TODO: hotfix
-    '''
-    SELECT ST_AsMVT(tile) FROM (SELECT UNNEST(SELECT string_agg(column_name, ',') FROM information_schema.columns WHERE table_name = %s AND column_name NOT IN ('geometry')),
-        ST_AsMVTGeom(ST_Buffer(ST_transform(geometry, 3857), 0),tilebbox(%s, %s, %s, 3857),4096,256,true) AS geom FROM {}) AS tile
-    '''
+
     query = '''
         SELECT column_name from information_schema.columns WHERE table_name = %s
     '''
-    cur.execute(query, (name,))
+    cur.execute(query, (table_name,))
     columns = [f'"{row[0]}"' for row in cur.fetchall() if row[0] not in [
         'geometry']]
+
     query = SQL('''
-        SELECT ST_AsMVT(tile) FROM (SELECT %s,
-        ST_AsMVTGeom(ST_transform(geometry, 3857),tilebbox(%s, %s, %s, 3857),4096,50,true) AS geom FROM {}) AS tile
-    ''').format(Identifier(name))
-    cur.execute(query, (AsIs(",".join(columns)), z, x, y))
+    select
+        ST_AsMVT(tile)
+    from
+        (
+        select
+            {columns},
+            ST_AsMVTGeom( ST_transform({geometry}, {srid}), tilebbox({z}, {x}, {y}, {srid}), 4096, 50, true ) as geom
+        from
+            {schema_name}.{table_name}
+        where ST_transform({geometry}, {srid}) && tilebbox({z}, {x}, {y}, {srid})
+        ) as tile
+        
+    ''').format(
+        geometry=SQL('geometry'),
+        srid=Literal(3857),
+        z=Literal(z),
+        x=Literal(x),
+        y=Literal(y),
+        schema_name=Identifier('public'),
+        table_name=Identifier(table_name),
+        columns=Literal(",".join(columns))
+    )
+    cur.execute(query, ())
     tile = cur.fetchone()[0]
     return tile.tobytes()
 
