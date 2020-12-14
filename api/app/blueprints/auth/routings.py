@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
 
 from flask import Blueprint, jsonify, request, current_app, send_from_directory
 from flasgger import swag_from
 from app.docs import path_by
 from app.db.general import user_exists, create_user, authenticate_user, create_token, token_required, delete_user, admin_only
-import os
 from app.helpers.cloud import cloud_decorator
+from app.helpers.users import is_admin
 
 
 mod_auth = Blueprint("auth", __name__)
@@ -72,9 +73,8 @@ def users(cloud):
             cloud.assign_user(user, group)
         return jsonify({"users": "user assigned"}), 200
     elif request.method == 'DELETE':
-        admin = os.environ.get('DEFAULT_USER')
-        if request.user != admin or user == admin:
-            return jsonify({"error": "permission denied"}), 403
+        if is_admin(user):
+            return jsonify({"error": "permission denied, can't delete another admin"}), 403
         delete_user(user)
         return jsonify({"users": "user deleted"}), 200
 

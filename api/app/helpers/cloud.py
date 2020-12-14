@@ -80,8 +80,6 @@ class Cloud:
         users = {}
         layers = []
         for row in cursor.fetchall():
-            if self.is_user_admin(row[0]):
-                continue
             if not users.get(row[0]):
                 users[row[0]] = {}
             if row[1] == None:
@@ -114,6 +112,7 @@ class Cloud:
     # Get permissions for layers
     def get_permissions(self, grantor):
         users, layers = self.get_users_with_layers(grantor=grantor)
+        users_wo_admins = [user for user in users if not self.is_user_admin(user)]
         permissions = []
         for layer in layers:
             perm = {
@@ -121,12 +120,12 @@ class Cloud:
                 "id": self.hash_name(layer),
                 "users": {}
             }
-            for user in users:
+            for user in users_wo_admins:
                 perm['users'][user] = users[user].get(layer, "")
             permissions.append(perm)
         return {
             'permissions': permissions,
-            'users': sorted(list(users.keys()))
+            'users': sorted(users_wo_admins)
         }
     
     def copy_permissions(self, user_from, user_to):
