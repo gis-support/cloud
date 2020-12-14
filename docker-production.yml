@@ -18,6 +18,7 @@ services:
       - CONTAINER_BASENAME
       - APP_PROD_API_PORT
       - VUE_APP_PROD_HOST_URL=${APP_PROD_HOST_URL}
+      - VUE_APP_PROD_DB_PORT=${APP_PROD_DB_PORT}
     command: bash -c "./prod_start.sh"
     healthcheck:
       test: ["CMD", "service", "nginx", "status"]
