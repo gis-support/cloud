@@ -60,7 +60,7 @@ class Layer(Cloud):
     def check_owner(self):
         cursor = self.execute(
             "SELECT tableowner FROM pg_tables WHERE tablename = %s", (self.name,))
-        if cursor.fetchone()[0] != self.user:
+        if not self.is_user_admin() and cursor.fetchone()[0] != self.user:
             raise PermissionError("access denied, not an owner")
 
     # Check write permission

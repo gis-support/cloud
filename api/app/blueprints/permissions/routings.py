@@ -18,8 +18,7 @@ mod_permissions = Blueprint("permissions", __name__)
 @token_required
 @cloud_decorator
 def permissions(cloud):
-    admin = True if request.user == environ.get('DEFAULT_USER') else False
-    return jsonify(cloud.get_permissions(grantor=admin))
+    return jsonify(cloud.get_permissions(grantor=is_admin(request.user)))
 
 
 @mod_permissions.route('/permissions/<lid>', methods=['PUT'])

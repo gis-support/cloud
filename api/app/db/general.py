@@ -8,7 +8,7 @@ from psycopg2.sql import SQL, Identifier, Placeholder
 from psycopg2.extensions import AsIs
 from peewee import Model
 from functools import wraps, partial
-from app.helpers.cloud import Cloud
+from app.helpers.cloud import Cloud, get_cloud
 from app.helpers.layer import Layer
 from shapely.geometry import shape
 from os import path as op
@@ -20,6 +20,7 @@ import uuid
 import math
 import json
 import click
+import os
 
 
 def user_exists(user):
@@ -62,9 +63,9 @@ def authenticate_user(user, password):
 
 
 def create_token(user):
-    is_admin = user == environ.get('DEFAULT_USER')
+    cloud = Cloud({"app": current_app, "user": os.environ.get('DEFAULT_USER')})
     random_uuid = str(uuid.uuid4())
-    token = jwt.encode({"user": user, "admin": is_admin, "uuid": random_uuid},
+    token = jwt.encode({"user": user, "admin": cloud.is_user_admin(user), "uuid": random_uuid},
                        current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
     current_app._redis.set(random_uuid, user, ex=60*60*8)
     return token
@@ -100,7 +101,8 @@ def token_required(f):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kws):
-        if request.user != environ.get('DEFAULT_USER'):
+        cloud = get_cloud()
+        if not cloud.is_user_admin(request.user):
             return jsonify({"error": "permission denied"}), 403
         return f(*args, **kws)
     return decorated_function

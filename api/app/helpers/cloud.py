@@ -13,6 +13,9 @@ import os
 import json
 
 
+ADMIN_GROUP = os.environ.get('ADMIN_GROUP')
+
+
 DB_RESTRICTED_USERS = (
     'docker',  # Superadmin from docker-compose.yml
     'replicator',  # Docker Kartoza user for slave
@@ -77,6 +80,8 @@ class Cloud:
         users = {}
         layers = []
         for row in cursor.fetchall():
+            if self.is_user_admin(row[0]):
+                continue
             if not users.get(row[0]):
                 users[row[0]] = {}
             if row[1] == None:
@@ -197,13 +202,33 @@ class Cloud:
         except IndexError:
             return os.environ['DEFAULT_GROUP']
 
+    def is_user_admin(self, user = None):
+        if not user:
+            user = self.user
+        cursor = self.execute("""
+            SELECT rolname FROM pg_user
+            JOIN pg_auth_members ON (pg_user.usesysid = pg_auth_members.member)
+            JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
+            WHERE
+            pg_user.usename = %s and rolname = %s;
+        """, (user, ADMIN_GROUP,))
+
+        return bool([group for group in cursor.fetchall()])
+
     # Layers list
     def get_layers(self):
-        cursor = self.execute("""
-            SELECT DISTINCT table_name FROM information_schema.role_table_grants
-            WHERE grantee = %s
-            AND table_name NOT IN %s
-        """, (self.user, DB_RESTRICTED_TABLES))
+        if self.is_user_admin():
+            cursor = self.execute("""
+                SELECT DISTINCT table_name FROM information_schema.role_table_grants
+                WHERE grantee = %s
+                AND table_name NOT IN %s
+            """, (ADMIN_GROUP, DB_RESTRICTED_TABLES))
+        else:
+            cursor = self.execute("""
+                SELECT DISTINCT table_name FROM information_schema.role_table_grants
+                WHERE grantee = %s
+                AND table_name NOT IN %s
+            """, (self.user, DB_RESTRICTED_TABLES))
 
         tags_by_layer_id = LayerTag.get_tags_by_layer_id()
 
@@ -245,6 +270,9 @@ class Cloud:
             self.execute(SQL("""
                 GRANT ALL PRIVILEGES ON TABLE {} TO {};
             """).format(Identifier(name), Identifier(self.user)))
+            self.execute(SQL("""
+                GRANT ALL PRIVILEGES ON TABLE {} TO {};
+            """).format(Identifier(name), Identifier(ADMIN_GROUP)))
             self.execute(SQL("""
                 ALTER TABLE {} OWNER TO {};
             """).format(Identifier(name), Identifier(self.user)))
