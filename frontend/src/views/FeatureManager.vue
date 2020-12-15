@@ -2395,24 +2395,20 @@ export default {
       });
     },
     async toggleGeolocation() {
-      this.geolocation.setTracking(!this.geolocation.getTracking());
+      this.geolocation.setTracking(true);
       await this.zoomToPosition();
     },
-    waitForLocation() {
+    zoomToPosition() {
       if (typeof this.geolocation.getPosition() !== 'undefined' && this.geolocation.getTracking()) {
-        return this.geolocation.getPosition();
+        let coords = this.geolocation.getPosition();
+        this.map.getView().animate({
+          center: coords,
+          duration: 1000,
+          zoom: 11
+        });
       } else {
-        setTimeout(() => this.waitForLocation(), 3000);
+        setTimeout(() => this.zoomToPosition(), 3000);
       }
-    },
-    async zoomToPosition() {
-      let coords = await this.waitForLocation();
-      console.log(coords);
-      this.map.getView().animate({
-        center: coords,
-        duration: 1000,
-        zoom: 11
-      });
     },
     async init() {
       proj4.defs(
@@ -2480,7 +2476,8 @@ export default {
           source: new VectorSource({
             name: 'geolocation',
             features: [positionFeature]
-          })
+          }),
+          name: 'locationLayer'
         });
         this.map.addLayer(locationLayer);
       });
