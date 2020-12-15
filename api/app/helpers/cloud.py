@@ -73,10 +73,10 @@ class Cloud:
             WHERE t1.rolcanlogin = true
             AND t1.rolname NOT IN %s
             AND (t2.privilege_type IN %s OR t2.privilege_type IS NULL)
-            AND (t2.{'grantor' if grantor else 'grantee'} = %s OR t2.grantor IS NULL)
             AND (t2.table_name NOT IN %s OR t2.table_name IS NULL)
+            {'--' if grantor else ''}AND (t2.grantor IS NULL OR t2.grantee = %s)
             ORDER BY 2
-        """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), self.user, DB_RESTRICTED_TABLES))
+        """, (DB_RESTRICTED_USERS, ('SELECT', 'INSERT'), DB_RESTRICTED_TABLES, self.user))
         users = {}
         layers = []
         for row in cursor.fetchall():
@@ -120,12 +120,15 @@ class Cloud:
                 "id": self.hash_name(layer),
                 "users": {}
             }
-            for user in users_wo_admins:
-                perm['users'][user] = users[user].get(layer, "")
+            for user in users:
+                if self.is_user_admin(user):
+                    perm['users'][user] = 'write'
+                else:
+                    perm['users'][user] = users[user].get(layer, "")
             permissions.append(perm)
         return {
             'permissions': permissions,
-            'users': sorted(users_wo_admins)
+            'users': sorted(users)
         }
     
     def copy_permissions(self, user_from, user_to):
