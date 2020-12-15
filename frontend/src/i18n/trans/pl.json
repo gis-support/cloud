@@ -235,7 +235,7 @@
     "uploadSuccess": "Pomyślnie przesłano plik",
     "uploadExtensionError": "Nieodpowiednie rozszerzenie pliku",
     "uploadDuplicate": "Ten plik został już dodany",
-    "uploadAttachmentExistsError": "Dodana warstwa zawiera już kolumnę '__attachments'"
+    "uploadAttachmentExistsError": "Warstwa zawiera niedozwoloną kolumnę __attachments"
   },
   "users": {
     "acceptPermissionsChange": "Zmiana tych uprawnień uniemożliwi użytkownikowi otwarcie projektu. Czy chcesz kontynuować?",
