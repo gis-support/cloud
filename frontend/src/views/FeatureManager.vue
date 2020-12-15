@@ -2394,8 +2394,25 @@ export default {
         duration: 500
       });
     },
-    toggleGeolocation() {
+    async toggleGeolocation() {
       this.geolocation.setTracking(!this.geolocation.getTracking());
+      await this.zoomToPosition();
+    },
+    waitForLocation() {
+      if (typeof this.geolocation.getPosition() !== 'undefined' && this.geolocation.getTracking()) {
+        return this.geolocation.getPosition();
+      } else {
+        setTimeout(() => this.waitForLocation(), 3000);
+      }
+    },
+    async zoomToPosition() {
+      let coords = await this.waitForLocation();
+      console.log(coords);
+      this.map.getView().animate({
+        center: coords,
+        duration: 1000,
+        zoom: 11
+      });
     },
     async init() {
       proj4.defs(
