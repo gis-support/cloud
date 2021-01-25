@@ -681,7 +681,9 @@ export default {
         .then(response => response.text())
         .then(text => {
           const result = parser.read(text);
-          this.fetchedLayers = result.Capability.Layer.Layer.map(el => el.Name);
+          this.fetchedLayers = this.getWmsLayersNames(result.Capability.Layer.Layer).map(
+            el => el.Name
+          );
           this.isFetching = false;
         })
         .catch(() => {
@@ -786,6 +788,18 @@ export default {
         layersAll = this.servicesList;
       }
       return layersAll;
+    },
+    getWmsLayersNames(layers) {
+      const recursiveFunction = layers => {
+        return layers.reduce((total, current) => {
+          if (current.Layer) {
+            return recursiveFunction(current.Layer);
+          } else {
+            return [...total, current];
+          }
+        }, []);
+      };
+      return recursiveFunction(layers);
     },
     goToManager(val) {
       this.$router.push({
