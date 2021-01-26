@@ -444,7 +444,7 @@ def as_tile(z, x, y, table_name):
         SELECT column_name from information_schema.columns WHERE table_name = %s
     '''
     cur.execute(query, (table_name,))
-    columns = [f'"{row[0]}"' for row in cur.fetchall() if row[0] not in [
+    columns = [Identifier(row[0]) for row in cur.fetchall() if row[0] not in [
         'geometry']]
 
     query = SQL('''
@@ -468,7 +468,7 @@ def as_tile(z, x, y, table_name):
         y=Literal(y),
         schema_name=Identifier('public'),
         table_name=Identifier(table_name),
-        columns=Literal(",".join(columns))
+        columns=SQL(',').join(columns)
     )
     cur.execute(query, ())
     tile = cur.fetchone()[0]
