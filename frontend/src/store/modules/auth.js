@@ -20,10 +20,7 @@ export default {
   state: {
     defaultGroup: '',
     token: localStorage.getItem('token') || '',
-    user: localStorage.getItem('user') || '',
-    isRdos:
-      process.env.VUE_APP_PROD_HOST_URL == 'rdos-cloud.gis-support.pl' ||
-      process.env.VUE_APP_PROD_HOST_URL == 'rdos-test.gis-support.pl'
+    user: localStorage.getItem('user') || ''
   },
   mutations: {
     setToken(state, token) {
@@ -98,9 +95,6 @@ export default {
     },
     getUser(state) {
       return state.user;
-    },
-    getIsRdos(state) {
-      return state.isRdos;
     }
   }
 };
