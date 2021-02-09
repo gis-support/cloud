@@ -56,28 +56,6 @@
                 \
               </button>
             </div>
-            <div class="buffer-tool map-tool-left">
-              <button
-                v-show="currentFeature"
-                type="button"
-                class="map-btn"
-                :title="$i18n.t('featureManager.map.buffer')"
-                @click="openBufferDialog"
-              >
-                B
-              </button>
-            </div>
-            <div class="distance-tool map-tool-left">
-              <button
-                v-show="currentFeature"
-                type="button"
-                class="map-btn"
-                :title="$i18n.t('featureManager.map.distance')"
-                @click="openDistanceDialog"
-              >
-                D
-              </button>
-            </div>
             <div class="rotation-tool map-tool-right">
               <button
                 type="button"
@@ -352,144 +330,6 @@
                 </div>
                 <div class="btn-group" role="group">
                   <button type="button" class="btn btn-danger" @click="$modal.hide('bufferTable')">
-                    {{ $i18n.t('default.close') }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </modal>
-        <modal
-          name="buffer"
-          :draggable="true"
-          width="35%"
-          height="auto"
-          @before-close="closeBufferDialog()"
-        >
-          <div class="modal-content dragg-content">
-            <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t('featureManager.map.buffer') }}</h4>
-            </div>
-            <div v-if="activeLayer" class="modal-body">
-              <div style="margin-bottom: 100px">
-                <h4>{{ $i18n.t('featureManager.bufferAnalysis') }}</h4>
-                <div class="form-group" style="display: flex;">
-                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
-                  </label>
-                  <input
-                    v-model="bufferValue"
-                    class="form-control col-sm-7"
-                    type="number"
-                    @input="clearBufferDialog"
-                  />
-                </div>
-                <div style="float: right" class="btn-group" role="group">
-                  <button
-                    :disabled="!bufferValue || bufferValue <= 0"
-                    type="button"
-                    class="btn btn-default"
-                    @click="generateBuffer"
-                  >
-                    {{ $i18n.t('featureManager.bufferGenerate') }}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <h4>{{ $i18n.t('featureManager.generateObjectsArray') }}</h4>
-                <div class="form-group" style="display: flex;">
-                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.bufferLayer') }}
-                  </label>
-                  <select
-                    v-model="selectedLayer"
-                    style="max-width: 75%"
-                    class="form-control"
-                    :disabled="!isBuffer"
-                  >
-                    <option
-                      v-for="(layer, idx) of layers"
-                      :key="idx"
-                      :value="layer"
-                      v-text="layer.name"
-                    />
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <div class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                  <button
-                    :disabled="!selectedLayer"
-                    type="button"
-                    class="btn btn-success"
-                    @click="generateObjectsArray"
-                  >
-                    {{ $i18n.t('featureManager.generateList') }}
-                  </button>
-                </div>
-                <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-danger" @click="$modal.hide('buffer')">
-                    {{ $i18n.t('default.close') }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </modal>
-        <modal
-          name="distance"
-          :draggable="true"
-          width="35%"
-          height="auto"
-          @before-close="
-            bufferValue = undefined;
-            selectedFieldName = undefined;
-            bufferFeatureGeometry = undefined;
-          "
-        >
-          <div class="modal-content dragg-content">
-            <div class="modal-header">
-              <h4 class="modal-title">{{ $i18n.t('featureManager.distanceAnalysis') }}</h4>
-            </div>
-            <div v-if="activeLayer" class="modal-body">
-              <div style="margin-bottom: 50px">
-                <div class="form-group" style="display: flex;">
-                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.bufferValue') + ' [m]' }}
-                  </label>
-                  <input v-model="bufferValue" class="form-control col-sm-7" type="number" />
-                </div>
-                <div class="form-group" style="display: flex;">
-                  <label class="control-label col-sm-4" style="position: relative; top: 8px">
-                    {{ $i18n.t('featureManager.fieldName') }}
-                  </label>
-                  <select v-model="selectedFieldName" style="max-width: 75%" class="form-control">
-                    <option
-                      v-for="(prop, idx) of currentFeatureFieldsNames"
-                      :key="idx"
-                      :value="prop"
-                      v-text="prop"
-                    />
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <div class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                  <button
-                    :disabled="!bufferValue || !selectedFieldName"
-                    type="button"
-                    class="btn btn-success"
-                    @click="generateDistance"
-                  >
-                    {{ $i18n.t('featureManager.download') }}
-                  </button>
-                </div>
-                <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-danger" @click="$modal.hide('distance')">
                     {{ $i18n.t('default.close') }}
                   </button>
                 </div>
@@ -920,7 +760,6 @@
 import { register } from 'ol/proj/proj4.js';
 import proj4 from 'proj4';
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
-import turfBuffer from '@turf/buffer';
 import moment from 'moment';
 import Geolocation from 'ol/Geolocation';
 import Map from 'ol/Map';
@@ -1036,7 +875,6 @@ export default {
     searchCount: 0,
     searchItemValue: '',
     selectedColumnFilters: [],
-    selectedFieldName: undefined,
     selectedLayer: undefined,
     selectedRows: [],
     usersGroup: undefined,
@@ -1069,13 +907,6 @@ export default {
     },
     apiUrl() {
       return this.$store.getters.getApiUrl;
-    },
-    currentFeatureFieldsNames() {
-      if (this.currentFeature) {
-        return Object.keys(this.currentFeature.properties);
-      } else {
-        return [];
-      }
     },
     featureAttachments() {
       return this.$store.getters.getFeatureAttachments;
@@ -1377,65 +1208,6 @@ export default {
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
         link.setAttribute('download', `${this.selectedLayer.name}_bufor.xlsx`);
-        link.click();
-      } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
-      }
-    },
-    async generateObjectsArray() {
-      const r = await this.$store.dispatch('bufferAnalysis', {
-        lid: this.selectedLayer.id,
-        body: this.bufferFeatureGeometry,
-        responseType: 'json'
-      });
-      if (r.status === 200) {
-        this.isBufferTableShowing = true;
-        if (r.body.data.length > 0) {
-          Object.keys(r.body.data[0]).forEach(el => {
-            this.bufferColumns.push({
-              key: el,
-              name: el,
-              sortable: true,
-              filter: true
-            });
-          });
-          r.body.data.forEach(feat => {
-            const tempItem = {};
-            Object.entries(feat).forEach(([k, v]) => {
-              if (this.featureTypes[k] === 'timestamp without time zone') {
-                tempItem[k] = moment(v).isValid()
-                  ? moment(v)
-                      .locale('pl')
-                      .format('L')
-                  : '';
-              } else {
-                tempItem[k] = v;
-              }
-            });
-            this.bufferFeatures.push(tempItem);
-          });
-        }
-        this.$modal.hide('buffer');
-        this.$modal.show('bufferTable');
-      } else {
-        this.$alertify.error(this.$i18n.t('default.error'));
-      }
-    },
-    async generateDistance() {
-      const r = await this.$store.dispatch('distanceAnalysisXlsx', {
-        lid: this.$route.params.layerId,
-        fid: this.currentFeature.properties.id,
-        body: {
-          buffer: parseFloat(this.bufferValue),
-          name: this.selectedFieldName
-        }
-      });
-      if (r.status === 200) {
-        this.$modal.hide('distance');
-        const blob = new Blob([r.data]);
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.setAttribute('download', `${this.layerName}_dystans.xlsx`);
         link.click();
       } else {
         this.$alertify.error(this.$i18n.t('default.error'));
@@ -1777,13 +1549,6 @@ export default {
       this.currentFeature = this.editingDataCopy;
       this.editingEndOperations();
     },
-    clearBufferDialog() {
-      this.getLayerByName('buffer')
-        .getSource()
-        .clear();
-      this.selectedLayer = undefined;
-      this.isBuffer = false;
-    },
     clearFeatureAdding() {
       this.isDrawing = false;
       this.addFeatureDialog = false;
@@ -1792,16 +1557,6 @@ export default {
         .clear();
       this.getInteractionByName('drawInteraction').setActive(false);
       this.newFeatureProperties = {};
-    },
-    closeBufferDialog() {
-      if (!this.isBufferTableShowing) {
-        this.getLayerByName('buffer')
-          .getSource()
-          .clear();
-        this.bufferValue = undefined;
-        this.isBuffer = false;
-        this.selectedLayer = undefined;
-      }
     },
     closeBufferTableDialog() {
       this.getLayerByName('buffer')
@@ -2037,30 +1792,6 @@ export default {
       }
       return layersAll;
     },
-    generateBuffer() {
-      this.getLayerByName('buffer')
-        .getSource()
-        .clear();
-      let buffer = turfBuffer(this.currentFeature, this.bufferValue / 1000, {
-        units: 'kilometers'
-      });
-      if (buffer) {
-        this.bufferFeatureGeometry = { geometry: buffer.geometry };
-        let bufferFeature = new GeoJSON().readFeature(buffer, {
-          featureProjection: 'EPSG:3857',
-          dataProjection: 'EPSG:4326'
-        });
-        if (bufferFeature) {
-          this.getLayerByName('buffer')
-            .getSource()
-            .addFeature(bufferFeature);
-          this.$alertify.success(this.$i18n.t('featureManager.bufferGenerateSuccess'));
-          this.isBuffer = true;
-        }
-      } else {
-        this.$alertify.error(this.$i18n.t('featureManager.bufferGenerateError'));
-      }
-    },
     goToSettings() {
       this.$router.push({
         name: 'settings',
@@ -2133,9 +1864,6 @@ export default {
       }
       return false;
     },
-    openBufferDialog() {
-      this.$modal.show('buffer');
-    },
     openAddLayerModal() {
       this.$modal.show('addLayer');
     },
@@ -2161,9 +1889,6 @@ export default {
 
       self.$on('columnFilterDecision', handle);
       self.columnFilterDecisionDialogView = true;
-    },
-    openDistanceDialog() {
-      this.$modal.show('distance');
     },
     openRotationDialog() {
       this.$modal.show('rotation');
