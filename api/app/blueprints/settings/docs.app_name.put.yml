@@ -1,0 +1,53 @@
+Edit app name
+---
+tags: 
+  - App name
+
+summary: Edit app name
+
+parameters:
+  - name: token
+    in: query
+    description: Token
+    required: false
+    type: string
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        app_name:
+          type: string
+          description: App name
+          example: "cloud3"
+          required: true
+
+produces:
+  - application/json
+
+responses:
+  200:
+    description: OK
+    schema:
+      type: object
+      properties:
+        settings:
+          type: string
+          example: "app name changed"
+  400:
+    description: Invalid payload
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "app name is required"
+  403:
+    description: Invalid token
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "invalid token"

@@ -13,6 +13,7 @@ from app.blueprints.projects.routings import mod_projects
 from app.db.connection import create_db
 from app.docs import create_swagger
 from app.db.tables import create_tables
+from app.blueprints.settings.routings import mod_settings
 from app.blueprints.auth.routings import mod_auth
 from app.blueprints.layers.routings import mod_layers
 from app.blueprints.features.routings import mod_features
@@ -42,6 +43,7 @@ def create_app(config='development'):
     app.register_blueprint(mod_permissions, url_prefix='/api')
     app.register_blueprint(mod_attachments_qgis, url_prefix="/api")
     app.register_blueprint(mod_projects, url_prefix="/api")
+    app.register_blueprint(mod_settings, url_prefix='/api')
     init_rdos(app)
     # CLI
     # app.cli.add_command(fill_data)
